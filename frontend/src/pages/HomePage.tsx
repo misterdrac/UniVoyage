@@ -1,90 +1,200 @@
 import { Button } from "@/components/ui/button";
-import { Facebook, Twitter, Mail } from "lucide-react";
+import { Plane, MapPin, Calendar, Sun, Moon } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useTheme } from "@/contexts/ThemeContext";
+import { AnimatedCounter } from "@/components/AnimatedCounter";
 
 export default function HomePage() {
+  const { theme, toggleTheme } = useTheme();
+
   return (
-    <div className="min-h-screen bg-gradient-to-r from-blue-600 via-purple-600 to-purple-500 relative overflow-hidden">
+    <div className="min-h-screen bg-background">
       {/* Navigation */}
-      <nav className="absolute top-0 right-0 p-8 z-10">
-        <div className="flex space-x-8 text-white">
-          <Link to="/" className="hover:text-blue-200 transition-colors">Home</Link>
-          <Link to="/about" className="hover:text-blue-200 transition-colors">About</Link>
-          <Link to="/tour" className="hover:text-blue-200 transition-colors">Tour</Link>
-          <Link to="/contact" className="hover:text-blue-200 transition-colors">Contact</Link>
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            {/* Logo */}
+            <Link to="/" className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                <Plane className="w-5 h-5 text-primary-foreground" />
+              </div>
+              <span className="text-xl font-bold text-foreground">UniVoyage</span>
+            </Link>
+
+            {/* Nav Links */}
+            <div className="flex items-center space-x-8">
+              <Link to="/" className="text-foreground hover:text-primary transition-colors font-medium">
+                Home
+              </Link>
+              <Link to="/about" className="text-foreground hover:text-primary transition-colors font-medium">
+                About
+              </Link>
+              <Link to="/tour" className="text-foreground hover:text-primary transition-colors font-medium">
+                Tours
+              </Link>
+              <Link to="/contact" className="text-foreground hover:text-primary transition-colors font-medium">
+                Contact
+              </Link>
+              
+              {/* Theme Toggle Button */}
+              <button
+                onClick={toggleTheme}
+                className="w-9 h-9 bg-muted hover:bg-muted/80 rounded-lg flex items-center justify-center transition-colors"
+                aria-label="Toggle theme"
+              >
+                {theme === 'light' ? (
+                  <Moon className="w-5 h-5 text-foreground" />
+                ) : (
+                  <Sun className="w-5 h-5 text-foreground" />
+                )}
+              </button>
+            </div>
+          </div>
         </div>
       </nav>
 
-      {/* Main Content */}
-      <div className="flex items-center min-h-screen px-8 py-16">
-        {/* Left Section - Text Content */}
-        <div className="flex-1 max-w-2xl z-10">
-          {/* Logo */}
-          <div className="mb-8">
-            <span className="text-white text-xl font-semibold">Logo Here</span>
-          </div>
+      {/* Hero Section */}
+      <section className="pt-24 pb-16">
+        <div className="container mx-auto px-6">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left Content */}
+            <div className="space-y-8">
+              <div className="inline-block">
+                <span className="px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-semibold">
+                  Student Travel Made Easy
+                </span>
+              </div>
+              
+              <h1 className="text-5xl lg:text-6xl font-bold text-foreground leading-tight">
+                Discover Your Next
+                <span className="text-primary"> Adventure</span>
+              </h1>
+              
+              <p className="text-lg text-muted-foreground leading-relaxed">
+                Plan unforgettable trips with fellow students. From city breaks to cultural exchanges, 
+                UniVoyage connects you with amazing travel experiences designed for students.
+              </p>
 
-          {/* Main Heading */}
-          <h1 className="text-6xl md:text-7xl font-bold text-white leading-tight mb-6">
-            Travel Apps
-            <br />
-            Reservation
-          </h1>
+              {/* CTA Buttons */}
+              <div className="flex flex-wrap gap-4">
+                <Button size="lg" className="text-base px-8">
+                  Explore Destinations
+                  <MapPin className="w-5 h-5 ml-2" />
+                </Button>
+                <Button size="lg" variant="destructive" className="text-base px-8">
+                  View Tours
+                </Button>
+              </div>
 
-          {/* Description */}
-          <p className="text-white/90 text-lg mb-8 leading-relaxed">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor 
-            incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud 
-            exercitation ullamco laboris.
-          </p>
-
-          {/* CTA Button */}
-          <Button 
-            size="lg" 
-            className="bg-white text-purple-600 hover:bg-white/90 text-lg px-8 py-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
-          >
-            View More
-          </Button>
-
-          {/* Social Media Icons */}
-          <div className="flex space-x-4 mt-12">
-            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors cursor-pointer">
-              <Facebook className="w-6 h-6 text-white" />
-            </div>
-            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors cursor-pointer">
-              <Twitter className="w-6 h-6 text-white" />
-            </div>
-            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors cursor-pointer">
-              <Mail className="w-6 h-6 text-white" />
-            </div>
-          </div>
-        </div>
-
-        {/* Right Section - Simple Illustration */}
-        <div className="flex-1 flex justify-center items-center relative z-10">
-          <div className="relative">
-            {/* Large Phone Mockup */}
-            <div className="w-80 h-96 bg-white rounded-3xl shadow-2xl p-4 relative">
-              {/* Phone Screen Content */}
-              <div className="w-full h-full bg-gray-50 rounded-2xl p-4 space-y-3">
-                {/* App Header */}
-                <div className="bg-blue-500 h-8 rounded-lg flex items-center justify-center">
-                  <span className="text-white text-sm font-medium">Travel App</span>
+              {/* Stats */}
+              <div className="flex gap-8 pt-4">
+                <div>
+                  <AnimatedCounter 
+                    end={50} 
+                    suffix="+"
+                    className="text-3xl font-bold text-primary"
+                  />
+                  <div className="text-sm text-muted-foreground">Destinations</div>
                 </div>
-                
-                {/* Reservation Items */}
-                <div className="space-y-2">
-                  <div className="bg-blue-100 h-6 rounded"></div>
-                  <div className="bg-orange-100 h-6 rounded"></div>
-                  <div className="bg-blue-100 h-6 rounded"></div>
-                  <div className="bg-orange-100 h-6 rounded"></div>
+                <div>
+                  <AnimatedCounter 
+                    end={1000} 
+                    suffix="+"
+                    className="text-3xl font-bold text-primary"
+                  />
+                  <div className="text-sm text-muted-foreground">Happy Students</div>
+                </div>
+                <div>
+                  <AnimatedCounter 
+                    end={25} 
+                    suffix="+"
+                    className="text-3xl font-bold text-primary"
+                  />
+                  <div className="text-sm text-muted-foreground">Countries</div>
                 </div>
               </div>
             </div>
 
+            {/* Right Image - Placeholder for uploaded hero */}
+            <div className="relative">
+              <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+                {/* Hero Image Placeholder */}
+                <img 
+                  src="/src/assets/images/hero.jpeg" 
+                  alt="Students planning travel" 
+                  className="w-full h-full object-cover"
+                />
+                
+                {/* Floating Card */}
+                <div className="absolute bottom-6 left-6 right-6 bg-card border border-border rounded-xl p-4 shadow-xl">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                        <Calendar className="w-5 h-5 text-primary" />
+                      </div>
+                      <div>
+                        <div className="text-sm font-semibold text-card-foreground">Next Trip</div>
+                        <div className="text-xs text-muted-foreground">Barcelona, Spain</div>
+                      </div>
+                    </div>
+                    <Button size="sm" className="text-xs">
+                      Book Now
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Decorative Elements */}
+              <div className="absolute -top-4 -right-4 w-24 h-24 bg-primary/10 rounded-full blur-2xl"></div>
+              <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-accent/10 rounded-full blur-2xl"></div>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-16 bg-muted/30">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-foreground mb-4">Why Choose UniVoyage?</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              We make student travel affordable, safe, and unforgettable
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="bg-card border border-border rounded-xl p-6 hover:shadow-lg transition-shadow">
+              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                <MapPin className="w-6 h-6 text-primary" />
+              </div>
+              <h3 className="text-xl font-semibold text-card-foreground mb-2">Curated Destinations</h3>
+              <p className="text-muted-foreground">
+                Handpicked locations perfect for student travelers on any budget
+              </p>
+            </div>
+
+            <div className="bg-card border border-border rounded-xl p-6 hover:shadow-lg transition-shadow">
+              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                <Calendar className="w-6 h-6 text-primary" />
+              </div>
+              <h3 className="text-xl font-semibold text-card-foreground mb-2">Flexible Booking</h3>
+              <p className="text-muted-foreground">
+                Easy scheduling that works around your academic calendar
+              </p>
+            </div>
+
+            <div className="bg-card border border-border rounded-xl p-6 hover:shadow-lg transition-shadow">
+              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                <Plane className="w-6 h-6 text-primary" />
+              </div>
+              <h3 className="text-xl font-semibold text-card-foreground mb-2">Group Travel</h3>
+              <p className="text-muted-foreground">
+                Connect with other students and travel together for better experiences
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
