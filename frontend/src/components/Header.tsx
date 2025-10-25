@@ -19,8 +19,8 @@ import {
 
 const destinations: { title: string; href: string; description: string }[] = [
   {
-    title: "Popular",
-    href: "/destinations/popular",
+    title: "Popular Destinations",
+    href: "/destinations",
     description: "Explore the most popular destinations for students.",
   },
   {
@@ -79,6 +79,23 @@ export function Header() {
                   <Link to="/">Home</Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
+              
+              {/* Authenticated user navigation */}
+                    {user && (
+                <>
+                  <NavigationMenuItem>
+                    <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+                      <Link to="/my-trips">My Trips</Link>
+                    </NavigationMenuLink>
+                  </NavigationMenuItem>
+
+                  <NavigationMenuItem>
+                    <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+                      <Link to="/trip-planner">Trip Planner</Link>
+                    </NavigationMenuLink>
+                  </NavigationMenuItem>
+                </>
+              )}
               
               <NavigationMenuItem>
                 <NavigationMenuTrigger>Destinations</NavigationMenuTrigger>

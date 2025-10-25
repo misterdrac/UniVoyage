@@ -1,4 +1,7 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
 
 :root {
   --background: oklch(0.9730 0.0133 286.1503);
@@ -53,6 +56,33 @@
   --shadow-2xl: 0px 4px 10px 0px hsl(240 30% 25% / 0.30);
   --tracking-normal: 0em;
   --spacing: 0.25rem;
+  --context-card-border: hsla(0, 0%, 92%, 1);
+  --ds-contrast-fg: #ffffff;
+  --geist-background: #fff;
+  --ds-shadow-menu: var(--ds-shadow-border), 0px 1px 1px rgba(0, 0, 0, 0.02), 0px 4px 8px -4px rgba(0, 0, 0, 0.04), 0px 16px 24px -8px rgba(0, 0, 0, 0.06);
+  --ds-red-800: oklch(58.19% 0.2482 25.15);
+  --ds-red-900: oklch(54.99% 0.232 25.29);
+  --ds-blue-700: oklch(57.61% 0.2508 258.23);
+  --ds-amber-800: oklch(77.21% 0.1991 64.28);
+  --ds-amber-850: hsl(33, 96%, 42%);
+  --ds-gray-100: hsla(0, 0%, 95%, 1);
+  --ds-gray-400: hsla(0, 0%, 92%, 1);
+  --ds-gray-700: hsla(0, 0%, 56%, 1);
+  --ds-gray-1000: hsla(0, 0%, 9%, 1);
+  --ds-gray-1000-h: hsl(0, 0%, 22%);
+  --ds-gray-alpha-200: hsla(0, 0%, 0%, 0.08);
+  --ds-gray-alpha-400: hsla(0, 0%, 0%, 0.08);
+  --ds-background-100: hsla(0, 0%, 100%, 1);
+  --ds-focus-color: var(--ds-blue-700);
+  --ds-focus-ring: 0 0 0 2px var(--ds-background-100), 0 0 0 4px var(--ds-focus-color);
+  --ds-shadow-border: 0 0 0 1px rgba(0, 0, 0, 0.08);
+  --ds-shadow-small: 0px 2px 2px rgba(0, 0, 0, 0.04);
+  --ds-shadow-border-small: var(--ds-shadow-border), var(--ds-shadow-small);
+  --ds-blue-100: oklch(97.32% 0.0141 251.56);
+  --ds-blue-900: oklch(53.18% 0.2399 256.9900584162342);
+  --ds-red-100: oklch(96.5% 0.0223 13.09);
+  --ds-amber-100: oklch(97.48% 0.0331 85.79);
+  --ds-amber-900: oklch(52.79% 0.1496 54.65);
 }
 
 .dark {
@@ -106,6 +136,29 @@
   --shadow-lg: 0px 4px 10px 0px hsl(240 30% 25% / 0.12), 0px 4px 6px -1px hsl(240 30% 25% / 0.12);
   --shadow-xl: 0px 4px 10px 0px hsl(240 30% 25% / 0.12), 0px 8px 10px -1px hsl(240 30% 25% / 0.12);
   --shadow-2xl: 0px 4px 10px 0px hsl(240 30% 25% / 0.30);
+  --context-card-border: hsla(0, 0%, 18%, 1);
+  --geist-background: #000;
+  --ds-shadow-menu: var(--ds-shadow-border), 0px 1px 1px rgba(0, 0, 0, 0.02), 0px 4px 8px -4px rgba(0, 0, 0, 0.04), 0px 16px 24px -8px rgba(0, 0, 0, 0.06);
+  --ds-red-800: oklch(58.01% 0.227 25.12);
+  --ds-red-900: oklch(69.96% 0.2136 22.03);
+  --ds-blue-700: oklch(57.61% 0.2321 258.23);
+  --ds-amber-800: oklch(77.21% 0.1991 64.28);
+  --ds-gray-100: hsla(0, 0%, 10%, 1);
+  --ds-gray-400: hsla(0, 0%, 18%, 1);
+  --ds-gray-700: hsla(0, 0%, 56%, 1);
+  --ds-gray-1000: hsla(0, 0%, 93%, 1);
+  --ds-gray-1000-h: hsl(0, 0%, 80%);
+  --ds-gray-alpha-200: hsla(0, 0%, 100%, 0.09);
+  --ds-gray-alpha-400: hsla(0, 0%, 100%, 0.14);
+  --ds-background-100: hsla(0, 0%, 4%, 1);
+  --ds-shadow-border: 0 0 0 1px rgba(255, 255, 255, 0.145);
+  --ds-shadow-small: 0px 1px 2px rgba(0, 0, 0, 0.16);
+  --ds-shadow-border-small: var(--ds-shadow-border), 0px 1px 2px rgba(0, 0, 0, 0.16);
+  --ds-blue-100: oklch(22.17% 0.069 259.89);
+  --ds-blue-900: oklch(71.7% 0.1648 250.79360374054167);
+  --ds-red-100: oklch(22.1% 0.0657 15.11);
+  --ds-amber-100: oklch(22.46% 0.0538 76.04);
+  --ds-amber-900: oklch(77.21% 0.1991 64.28);
 }
 
 @theme inline {
@@ -159,4 +212,74 @@
   --shadow-lg: var(--shadow-lg);
   --shadow-xl: var(--shadow-xl);
   --shadow-2xl: var(--shadow-2xl);
+  --color-context-card-border: var(--context-card-border);
+  --color-red-800: var(--ds-red-800);
+  --color-red-900: var(--ds-red-900);
+  --color-blue-700: var(--ds-blue-700);
+  --color-amber-800: var(--ds-amber-800);
+  --color-amber-850: var(--ds-amber-850);
+  --color-gray-100: var(--ds-gray-100);
+  --color-gray-400: var(--ds-gray-400);
+  --color-gray-700: var(--ds-gray-700);
+  --color-gray-1000: var(--ds-gray-1000);
+  --color-gray-1000-h: var(--ds-gray-1000-h);
+  --color-gray-alpha-200: var(--ds-gray-alpha-200);
+  --color-gray-alpha-400: var(--ds-gray-alpha-400);
+  --color-background-100: var(--ds-background-100);
+  --color-contrast-fg: var(--ds-contrast-fg);
+  --color-geist-background: var(--geist-background);
+  --shadow-focus-ring: var(--ds-focus-ring);
+  --shadow-border-small: var(--ds-shadow-border-small);
+  --shadow-menu: var(--ds-shadow-menu);
+  --animate-fade-spin: fade-spin 1.2s linear infinite;
+  --color-ds-amber-900: var(----ds-amber-900);
+  --color-ds-amber-100: var(----ds-amber-100);
+  --color-ds-red-100: var(----ds-red-100);
+  --color-ds-blue-900: var(----ds-blue-900);
+  --color-ds-blue-100: var(----ds-blue-100);
+  --ds-shadow-border-small: var(----ds-shadow-border-small);
+  --ds-shadow-small: var(----ds-shadow-small);
+  --ds-shadow-border: var(----ds-shadow-border);
+  --ds-focus-ring: var(----ds-focus-ring);
+  --ds-focus-color: var(----ds-focus-color);
+  --color-ds-background-100: var(----ds-background-100);
+  --color-ds-gray-alpha-400: var(----ds-gray-alpha-400);
+  --color-ds-gray-alpha-200: var(----ds-gray-alpha-200);
+  --color-ds-gray-1000-h: var(----ds-gray-1000-h);
+  --color-ds-gray-1000: var(----ds-gray-1000);
+  --color-ds-gray-700: var(----ds-gray-700);
+  --color-ds-gray-400: var(----ds-gray-400);
+  --color-ds-gray-100: var(----ds-gray-100);
+  --color-ds-amber-850: var(----ds-amber-850);
+  --color-ds-amber-800: var(----ds-amber-800);
+  --color-ds-blue-700: var(----ds-blue-700);
+  --color-ds-red-900: var(----ds-red-900);
+  --color-ds-red-800: var(----ds-red-800);
+  --ds-shadow-menu: var(----ds-shadow-menu);
+  --color-ds-contrast-fg: var(----ds-contrast-fg);
+  @keyframes fade-spin {
+  0% {
+    opacity: 0.15;
+    }
+  100% {
+    opacity: 1;
+    }
+  }
+  @keyframes fade-spin {
+  0% {
+    opacity: 0.15;
+    }
+  100% {
+    opacity: 1;
+    }
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }

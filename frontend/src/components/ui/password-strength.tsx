@@ -5,12 +5,10 @@ import { useId, useMemo } from "react";
 
 interface PasswordStrengthProps {
   password: string;
-  showPassword?: boolean;
-  onToggleVisibility?: () => void;
   className?: string;
 }
 
-function PasswordStrength({ password, showPassword = false, onToggleVisibility, className }: PasswordStrengthProps) {
+function PasswordStrength({ password, className }: PasswordStrengthProps) {
   const id = useId();
 
   const checkStrength = (pass: string) => {
