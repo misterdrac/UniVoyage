@@ -1,10 +1,10 @@
 import { Link, useNavigate } from "react-router-dom"
-import { Plane, Sun, Moon, User } from "lucide-react"
+import { Plane, Sun, Moon, User, Menu, X } from "lucide-react"
 import { useTheme } from "@/contexts/ThemeContext"
 import { useAuth } from "@/contexts/AuthContext"
 import { Button } from "@/components/ui/button"
 import { LoginDialog, SignUpDialog } from "@/components/auth"
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { UI_CONSTANTS } from "@/lib/constants"
 
 import {
@@ -53,11 +53,29 @@ export function Header() {
   const navigate = useNavigate()
   const [isLoginOpen, setIsLoginOpen] = useState(false)
   const [isSignUpOpen, setIsSignUpOpen] = useState(false)
-
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const mobileMenuRef = useRef<HTMLDivElement>(null)
 
   const handleProfileClick = () => {
     navigate('/profile')
   }
+
+  // Close mobile menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
+        setIsMobileMenuOpen(false)
+      }
+    }
+
+    if (isMobileMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isMobileMenuOpen])
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
@@ -71,66 +89,82 @@ export function Header() {
             <span className="text-xl font-bold text-foreground">UniVoyage</span>
           </Link>
 
-          {/* Navigation Menu */}
-          <NavigationMenu>
-            <NavigationMenuList>
-              <NavigationMenuItem>
-                <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-                  <Link to="/">Home</Link>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-              
-              {/* Authenticated user navigation */}
-                    {user && (
-                <>
-                  <NavigationMenuItem>
-                    <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-                      <Link to="/my-trips">My Trips</Link>
-                    </NavigationMenuLink>
-                  </NavigationMenuItem>
+          {/* Desktop Navigation Menu */}
+          <div className="hidden lg:block">
+            <NavigationMenu>
+              <NavigationMenuList>
+                <NavigationMenuItem>
+                  <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+                    <Link to="/">Home</Link>
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+                
+                {/* Authenticated user navigation */}
+                {user && (
+                  <>
+                    <NavigationMenuItem>
+                      <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+                        <Link to="/my-trips">My Trips</Link>
+                      </NavigationMenuLink>
+                    </NavigationMenuItem>
 
-                  <NavigationMenuItem>
-                    <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-                      <Link to="/trip-planner">Trip Planner</Link>
-                    </NavigationMenuLink>
-                  </NavigationMenuItem>
-                </>
-              )}
-              
-              <NavigationMenuItem>
-                <NavigationMenuTrigger>Destinations</NavigationMenuTrigger>
-                <NavigationMenuContent>
-                  <ul className="grid sm:w-[400px] md:w-[500px] md:grid-cols-1 lg:w-[600px] rounded-b-lg">
-                    {destinations.map((destination) => (
-                      <ListItem
-                        key={destination.title}
-                        title={destination.title}
-                        href={destination.href}
-                      >
-                        {destination.description}
-                      </ListItem>
-                    ))}
-                  </ul>
-                </NavigationMenuContent>
-              </NavigationMenuItem>
+                    <NavigationMenuItem>
+                      <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+                        <Link to="/trip-planner">Trip Planner</Link>
+                      </NavigationMenuLink>
+                    </NavigationMenuItem>
+                  </>
+                )}
+                
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger>Destinations</NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <ul className="grid sm:w-[400px] md:w-[500px] md:grid-cols-1 lg:w-[600px] rounded-b-lg">
+                      {destinations.map((destination) => (
+                        <ListItem
+                          key={destination.title}
+                          title={destination.title}
+                          href={destination.href}
+                        >
+                          {destination.description}
+                        </ListItem>
+                      ))}
+                    </ul>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
 
+                <NavigationMenuItem>
+                  <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+                    <Link to="/about">About</Link>
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
 
-              <NavigationMenuItem>
-                <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-                  <Link to="/about">About</Link>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-
-              <NavigationMenuItem>
-                <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-                  <Link to="/contact">Contact</Link>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-            </NavigationMenuList>
-          </NavigationMenu>
+                <NavigationMenuItem>
+                  <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+                    <Link to="/contact">Contact</Link>
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
+          </div>
 
           {/* Right side buttons */}
           <div className="flex items-center gap-2">
+            {/* Mobile Menu Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="lg:hidden"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              aria-label="Toggle mobile menu"
+            >
+              {isMobileMenuOpen ? (
+                <X className="w-6 h-6" />
+              ) : (
+                <Menu className="w-6 h-6" />
+              )}
+            </Button>
+
             {user ? (
               /* User is logged in */
               <>
@@ -138,7 +172,7 @@ export function Header() {
                   variant="ghost" 
                   size="sm"
                   onClick={handleProfileClick}
-                  className="flex items-center gap-2"
+                  className="hidden sm:flex items-center gap-2"
                 >
                   {user.profile.profilePicture ? (
                     <img
@@ -161,6 +195,7 @@ export function Header() {
                 variant="secondary" 
                 size="sm"
                 onClick={() => setIsLoginOpen(true)}
+                className="hidden sm:block"
               >
                 Login
               </Button>
@@ -182,6 +217,114 @@ export function Header() {
             </Button>
           </div>
         </div>
+
+        {/* Mobile Navigation Menu */}
+        {isMobileMenuOpen && (
+          <div ref={mobileMenuRef} className="lg:hidden mt-4 pb-4 border-t border-border pt-4 animate-in slide-in-from-top-2 duration-200">
+            <div className="flex flex-col space-y-2">
+              <Link
+                to="/"
+                className="px-3 py-2 text-sm font-medium text-foreground hover:bg-accent hover:text-accent-foreground rounded-md transition-colors"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Home
+              </Link>
+              
+              {user && (
+                <>
+                  <Link
+                    to="/my-trips"
+                    className="px-3 py-2 text-sm font-medium text-foreground hover:bg-accent hover:text-accent-foreground rounded-md transition-colors"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    My Trips
+                  </Link>
+                  <Link
+                    to="/trip-planner"
+                    className="px-3 py-2 text-sm font-medium text-foreground hover:bg-accent hover:text-accent-foreground rounded-md transition-colors"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Trip Planner
+                  </Link>
+                </>
+              )}
+
+              {/* Mobile Destinations Dropdown */}
+              <div className="px-3 py-2">
+                <div className="text-sm font-medium text-foreground mb-2">Destinations</div>
+                <div className="ml-4 space-y-1">
+                  {destinations.map((destination) => (
+                    <Link
+                      key={destination.title}
+                      to={destination.href}
+                      className="block px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-md transition-colors"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <div className="font-medium">{destination.title}</div>
+                      <div className="text-xs text-muted-foreground/70">{destination.description}</div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
+              <Link
+                to="/about"
+                className="px-3 py-2 text-sm font-medium text-foreground hover:bg-accent hover:text-accent-foreground rounded-md transition-colors"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                About
+              </Link>
+              <Link
+                to="/contact"
+                className="px-3 py-2 text-sm font-medium text-foreground hover:bg-accent hover:text-accent-foreground rounded-md transition-colors"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Contact
+              </Link>
+
+              {/* Mobile Auth Section */}
+              <div className="pt-4 border-t border-border">
+                {user ? (
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => {
+                      handleProfileClick()
+                      setIsMobileMenuOpen(false)
+                    }}
+                    className="w-full justify-start"
+                  >
+                    {user.profile.profilePicture ? (
+                      <img
+                        src={user.profile.profilePicture}
+                        alt={`${user.profile.firstName} ${user.profile.lastName}`}
+                        className="w-6 h-6 rounded-full object-cover mr-2"
+                        style={{ width: UI_CONSTANTS.PROFILE_PICTURE_SIZE.SMALL, height: UI_CONSTANTS.PROFILE_PICTURE_SIZE.SMALL }}
+                      />
+                    ) : (
+                      <User className="w-4 h-4 mr-2" />
+                    )}
+                    <span className="font-medium">
+                      {user.profile.firstName || user.email}
+                    </span>
+                  </Button>
+                ) : (
+                  <Button 
+                    variant="secondary" 
+                    size="sm"
+                    onClick={() => {
+                      setIsLoginOpen(true)
+                      setIsMobileMenuOpen(false)
+                    }}
+                    className="w-full"
+                  >
+                    Login
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
       
       {/* Login Dialog */}
