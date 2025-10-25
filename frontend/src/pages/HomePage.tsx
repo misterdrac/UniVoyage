@@ -1,57 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { Plane, MapPin, Calendar, Sun, Moon } from "lucide-react";
-import { Link } from "react-router-dom";
-import { useTheme } from "@/contexts/ThemeContext";
-import { AnimatedCounter } from "@/components/AnimatedCounter";
+import { Plane, MapPin, Calendar } from "lucide-react";
+import { AnimatedCounter } from "@/components/animations";
 
 export default function HomePage() {
-  const { theme, toggleTheme } = useTheme();
-
   return (
     <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            {/* Logo */}
-            <Link to="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <Plane className="w-5 h-5 text-primary-foreground" />
-              </div>
-              <span className="text-xl font-bold text-foreground">UniVoyage</span>
-            </Link>
-
-            {/* Nav Links */}
-            <div className="flex items-center space-x-8">
-              <Link to="/" className="text-foreground hover:text-primary transition-colors font-medium">
-                Home
-              </Link>
-              <Link to="/about" className="text-foreground hover:text-primary transition-colors font-medium">
-                About
-              </Link>
-              <Link to="/tour" className="text-foreground hover:text-primary transition-colors font-medium">
-                Tours
-              </Link>
-              <Link to="/contact" className="text-foreground hover:text-primary transition-colors font-medium">
-                Contact
-              </Link>
-              
-              {/* Theme Toggle Button */}
-              <button
-                onClick={toggleTheme}
-                className="w-9 h-9 bg-muted hover:bg-muted/80 rounded-lg flex items-center justify-center transition-colors"
-                aria-label="Toggle theme"
-              >
-                {theme === 'light' ? (
-                  <Moon className="w-5 h-5 text-foreground" />
-                ) : (
-                  <Sun className="w-5 h-5 text-foreground" />
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
 
       {/* Hero Section */}
       <section className="pt-24 pb-16">
@@ -81,7 +34,7 @@ export default function HomePage() {
                   Explore Destinations
                   <MapPin className="w-5 h-5 ml-2" />
                 </Button>
-                <Button size="lg" variant="destructive" className="text-base px-8">
+                <Button size="lg" variant="secondary" className="text-base px-8">
                   View Tours
                 </Button>
               </div>
