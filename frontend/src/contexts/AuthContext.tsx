@@ -3,10 +3,19 @@ import type { User } from '@/data/mockUsers';
 import { apiService } from '@/services/api';
 import { API_CONSTANTS } from '@/lib/constants';
 
+interface SignupData {
+  email: string;
+  password: string;
+  name?: string;
+  hobbies?: string[];
+  languages?: string[];
+  country?: string;
+}
+
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  signup: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  signup: (data: SignupData) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   isLoading: boolean;
 }
@@ -80,15 +89,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const signup = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+  const signup = async (data: SignupData): Promise<{ success: boolean; error?: string }> => {
     try {
       setIsLoading(true);
       
-      if (!email || !password) {
+      if (!data.email || !data.password) {
         return { success: false, error: 'Email and password are required' };
       }
 
-      const result = await apiService.register(email, password);
+      const result = await apiService.register(data);
       
       if (result.success && result.user) {
         setUser(result.user);

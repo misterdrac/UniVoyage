@@ -109,10 +109,16 @@ class ApiService {
     return response.data || response;
   }
 
-  async register(email: string, password: string): Promise<AuthResponse> {
+  async register(data: { email: string; password: string; name?: string; hobbies?: string[]; languages?: string[]; country?: string }): Promise<AuthResponse> {
     if (this.useMock) {
       try {
-        const user = createUser(email, password);
+        const user = createUser(data.email, data.password, data.name, data.hobbies, data.languages);
+        
+        // Set country if provided
+        if (data.country) {
+          user.country = data.country;
+        }
+        
         const token = `mock_token_${Date.now()}`;
         this.setAuthToken(token);
         return { success: true, user, token };
@@ -128,7 +134,7 @@ class ApiService {
       API_CONFIG.ENDPOINTS.AUTH.REGISTER,
       {
         method: 'POST',
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify(data),
       }
     );
 

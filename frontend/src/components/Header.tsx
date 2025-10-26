@@ -7,6 +7,8 @@ import { LoginDialog, SignUpDialog } from "@/components/auth"
 import { useState, useEffect, useRef } from "react"
 import { UI_CONSTANTS } from "@/lib/constants"
 
+//todo refactor this file
+
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -174,10 +176,10 @@ export function Header() {
                   onClick={handleProfileClick}
                   className="hidden sm:flex items-center gap-2"
                 >
-                  {user.profile.profilePicture ? (
+                  {user.profileImage ? (
                     <img
-                      src={user.profile.profilePicture}
-                      alt={`${user.profile.firstName} ${user.profile.lastName}`}
+                      src={user.profileImage}
+                      alt={user.name}
                       className="w-6 h-6 rounded-full object-cover"
                       style={{ width: UI_CONSTANTS.PROFILE_PICTURE_SIZE.SMALL, height: UI_CONSTANTS.PROFILE_PICTURE_SIZE.SMALL }}
                     />
@@ -185,7 +187,7 @@ export function Header() {
                     <User className="w-4 h-4" />
                   )}
                   <span className="hidden sm:inline font-medium">
-                    {user.profile.firstName || user.email}
+                    {user.name || user.email}
                   </span>
                 </Button>
               </>
@@ -294,10 +296,10 @@ export function Header() {
                     }}
                     className="w-full justify-start"
                   >
-                    {user.profile.profilePicture ? (
+                    {user.profileImage ? (
                       <img
-                        src={user.profile.profilePicture}
-                        alt={`${user.profile.firstName} ${user.profile.lastName}`}
+                        src={user.profileImage}
+                        alt={user.name}
                         className="w-6 h-6 rounded-full object-cover mr-2"
                         style={{ width: UI_CONSTANTS.PROFILE_PICTURE_SIZE.SMALL, height: UI_CONSTANTS.PROFILE_PICTURE_SIZE.SMALL }}
                       />
@@ -305,7 +307,7 @@ export function Header() {
                       <User className="w-4 h-4 mr-2" />
                     )}
                     <span className="font-medium">
-                      {user.profile.firstName || user.email}
+                      {user.name || user.email}
                     </span>
                   </Button>
                 ) : (
