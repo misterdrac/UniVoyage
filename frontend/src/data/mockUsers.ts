@@ -108,8 +108,9 @@ export const getUserByEmail = (email: string): User | null => {
 export const updateUserProfile = (userId: string, profileData: Partial<User['profile']>): User | null => {
   const user = mockUsers.find(u => u.id === userId);
   if (user) {
-    user.profile = { ...user.profile, ...profileData };
+    user.profile = { ...user.profile, ...profileData }; // <- ispravno spajanje
     return user;
   }
   return null;
 };
+;
