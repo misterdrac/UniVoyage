@@ -6,4 +6,6 @@ export { default as ContactPage } from './ContactPage';
 export { default as ProfilePage } from './ProfilePage';
 export { default as MyTripsPage } from './MyTripsPage';
 export { default as TripPlannerPage } from './TripPlannerPage';
-export { default as PopularDestinationsPage } from './PopularDestinationsPage';
+
+// Destination pages
+export * from './destinations';

@@ -3,7 +3,7 @@ import { ThemeProvider, AuthProvider } from '@/contexts';
 import { Header } from '@/components';
 import { Toaster } from '@/components/ui/sonner';
 import { ProtectedRoute } from '@/guards';
-import { HomePage, AboutPage, TourPage, ContactPage, ProfilePage, MyTripsPage, TripPlannerPage, PopularDestinationsPage } from '@/pages';
+import { HomePage, AboutPage, TourPage, ContactPage, ProfilePage, MyTripsPage, TripPlannerPage, PopularDestinationsPage, EuropeDestinationsPage, AmericasDestinationsPage, AsiaDestinationsPage, AfricaDestinationsPage } from '@/pages';
 
 function App() {
   return (
@@ -17,6 +17,10 @@ function App() {
             <Route path="/tour" element={<TourPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/destinations" element={<PopularDestinationsPage />} />
+            <Route path="/destinations/europe" element={<EuropeDestinationsPage />} />
+            <Route path="/destinations/americas" element={<AmericasDestinationsPage />} />
+            <Route path="/destinations/asia" element={<AsiaDestinationsPage />} />
+            <Route path="/destinations/africa" element={<AfricaDestinationsPage />} />
             <Route 
               path="/profile" 
               element={

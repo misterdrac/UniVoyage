@@ -1,8 +1,9 @@
 import React from 'react';
 import { DestinationCard } from '@/components/ui/destination-card';
-import { destinations } from '@/data/destinations';
+import { getDestinationsByContinent } from '@/data/destinations';
 
-const PopularDestinationsPage: React.FC = () => {
+const AfricaDestinationsPage: React.FC = () => {
+  const africaDestinations = getDestinationsByContinent('Africa');
 
   const handlePlanTrip = (destination: string) => {
     console.log(`Plan trip clicked for ${destination}`);
@@ -13,15 +14,17 @@ const PopularDestinationsPage: React.FC = () => {
     <div className="min-h-screen bg-background pt-20 sm:pt-24 pb-8 px-4 sm:px-6 lg:px-8">
       <div className="container mx-auto">
         <div className="text-center mb-12 sm:mb-16">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4">Popular Destinations</h1>
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4">Experience Africa</h1>
           <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
-            Discover the world's most amazing destinations, perfect for student travelers. 
-            Each location offers unique experiences, rich culture, and student-friendly perks.
+            Where the world began. Witness the Great Migration in Tanzania's Serengeti, wander 
+            Marrakech's labyrinthine souks, and summit Table Mountain in Cape Town. Africa isn't 
+            just a destination—it's where epic adventures meet incredible value, where culture runs 
+            deep, and where every moment becomes a memory you'll chase forever.
           </p>
         </div>
 
         <div className="space-y-16 sm:space-y-20 lg:space-y-24">
-          {destinations.map((destination, index) => (
+          {africaDestinations.map((destination, index) => (
             <div key={destination.id} className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-center">
               {index % 2 === 0 ? (
                 // Card first, then text
@@ -98,7 +101,7 @@ const PopularDestinationsPage: React.FC = () => {
 
         <div className="text-center mt-12 sm:mt-16 px-4">
           <p className="text-sm sm:text-base text-muted-foreground">
-            Ready to start your adventure? Use our Trip Planner to create your perfect itinerary!
+            Turn your African dream into reality—start planning your epic adventure today.
           </p>
         </div>
       </div>
@@ -106,4 +109,5 @@ const PopularDestinationsPage: React.FC = () => {
   );
 };
 
-export default PopularDestinationsPage;
+export default AfricaDestinationsPage;
+
