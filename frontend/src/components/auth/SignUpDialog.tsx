@@ -1,13 +1,16 @@
 import React, { useState } from "react"
-import { Eye, EyeOff, Mail, Lock } from "lucide-react"
+import { Eye, EyeOff, Mail, Lock, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { PasswordStrength, getPasswordStrength } from "@/components/ui/password-strength"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { ChipSelect } from "@/components/ui/chip-select"
+import { AutoComplete, type Option } from "@/components/ui/autocomplete"
 import { useAuth } from "@/contexts/AuthContext"
 import { apiService } from "@/services/api"
 import { toast } from "sonner"
-import { VALIDATION } from "@/lib/constants"
+import { VALIDATION, TRAVEL_INTERESTS, LANGUAGES, COUNTRIES } from "@/lib/constants"
+import { BrandGoogle } from "@mynaui/icons-react";
 
 interface SignUpDialogProps {
   open: boolean
@@ -18,9 +21,13 @@ interface SignUpDialogProps {
 export function SignUpDialog({ open, onOpenChange, onLoginClick }: SignUpDialogProps) {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
+  const [hobbies, setHobbies] = useState<string[]>([])
+  const [languages, setLanguages] = useState<string[]>([])
+  const [country, setCountry] = useState<Option | undefined>(undefined)
   const [showPasswordError, setShowPasswordError] = useState(false)
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -38,14 +45,25 @@ export function SignUpDialog({ open, onOpenChange, onLoginClick }: SignUpDialogP
     
     setIsLoading(true)
     
-    const result = await signup(email, password)
+    const result = await signup({
+      email,
+      password,
+      name,
+      hobbies,
+      languages,
+      country: country?.value
+    })
     
     if (result.success) {
       toast.success("Account created successfully! Welcome to UniVoyage!")
       onOpenChange(false)
+      setName("")
       setEmail("")
       setPassword("")
       setConfirmPassword("")
+      setHobbies([])
+      setLanguages([])
+      setCountry(undefined)
       setShowPasswordError(false)
     } else {
       setError(result.error || "Sign up failed")
@@ -68,7 +86,9 @@ export function SignUpDialog({ open, onOpenChange, onLoginClick }: SignUpDialogP
   const passwordsMatch = password === confirmPassword
   const passwordStrength = getPasswordStrength(password)
   const isFormValid = 
+    name.trim().length >= 2 &&
     email.trim() !== "" && 
+    country !== undefined &&
     password.trim().length >= VALIDATION.MIN_PASSWORD_LENGTH && 
     confirmPassword.trim().length >= VALIDATION.MIN_PASSWORD_LENGTH &&
     VALIDATION.EMAIL_REGEX.test(email) && 
@@ -78,16 +98,20 @@ export function SignUpDialog({ open, onOpenChange, onLoginClick }: SignUpDialogP
     onOpenChange(newOpen)
     if (!newOpen) {
       // Reset form when dialog closes
+      setName("")
       setEmail("")
       setPassword("")
       setConfirmPassword("")
+      setHobbies([])
+      setLanguages([])
+      setCountry(undefined)
       setShowPasswordError(false)
     }
   }
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-4xl lg:max-w-5xl max-h-[98vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-center text-2xl font-bold">
             Create Account
@@ -95,21 +119,86 @@ export function SignUpDialog({ open, onOpenChange, onLoginClick }: SignUpDialogP
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Email Input */}
+          {/* Name and Email in a row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Name Input */}
+            <div className="space-y-2">
+              <label htmlFor="signup-name" className="text-sm font-medium text-foreground">
+                Name <span className="text-destructive">*</span>
+              </label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="signup-name"
+                  type="text"
+                  placeholder="Enter your name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="pl-10"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Email Input */}
+            <div className="space-y-2">
+              <label htmlFor="signup-email" className="text-sm font-medium text-foreground">
+                Email <span className="text-destructive">*</span>
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="signup-email"
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="pl-10"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Country */}
           <div className="space-y-2">
-            <label htmlFor="signup-email" className="text-sm font-medium text-foreground">
-              Email
+            <label className="text-sm font-medium text-foreground">
+              Country of Origin <span className="text-destructive">*</span>
             </label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="signup-email"
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="pl-10"
-                required
+            <AutoComplete
+              options={COUNTRIES}
+              placeholder="Select your country..."
+              emptyMessage="No countries found"
+              value={country}
+              onValueChange={setCountry}
+            />
+          </div>
+
+          {/* Interests and Languages in a row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Interests/Hobbies */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">
+                Interests (e.g., history, hiking)
+              </label>
+              <ChipSelect
+                options={TRAVEL_INTERESTS}
+                value={hobbies}
+                onChange={setHobbies}
+                placeholder="Add things you like"
+              />
+            </div>
+
+            {/* Languages */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">
+                Languages
+              </label>
+              <ChipSelect
+                options={LANGUAGES}
+                value={languages}
+                onChange={setLanguages}
+                placeholder="Add languages you know"
               />
             </div>
           </div>
@@ -117,7 +206,7 @@ export function SignUpDialog({ open, onOpenChange, onLoginClick }: SignUpDialogP
           {/* Password Input */}
           <div className="space-y-2">
             <label htmlFor="signup-password" className="text-sm font-medium text-foreground">
-              Password
+              Password <span className="text-destructive">*</span>
             </label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -150,7 +239,7 @@ export function SignUpDialog({ open, onOpenChange, onLoginClick }: SignUpDialogP
           {/* Confirm Password Input */}
           <div className="space-y-2">
             <label htmlFor="signup-confirm-password" className="text-sm font-medium text-foreground">
-              Confirm Password
+              Confirm Password <span className="text-destructive">*</span>
             </label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -211,33 +300,16 @@ export function SignUpDialog({ open, onOpenChange, onLoginClick }: SignUpDialogP
             </div>
           </div>
 
-          {/* Google Sign Up */}
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleGoogleSignUp}
-            className="w-full"
-          >
-            <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
-              <path
-                fill="currentColor"
-                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-              />
-              <path
-                fill="currentColor"
-                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-              />
-              <path
-                fill="currentColor"
-                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-              />
-              <path
-                fill="currentColor"
-                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-              />
-            </svg>
-            Continue with Google
-          </Button>
+            {/* Google Sign Up */}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleGoogleSignUp}
+              className="w-full"
+            >
+              <BrandGoogle className="mr-2 h-4 w-4" />
+              Continue with Google
+            </Button>
 
           {/* Login Link */}
           <div className="text-center text-sm">
