@@ -4,30 +4,44 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
+*.log
+*.tmp
+*.bak
+*.swp
+*.class
+*.jar
+*.war
+*.ear
 
-### IntelliJ IDEA ###
-.idea
+.env
+application-local.properties
+application-secret.properties
+flyway.user.toml
+
+.idea/
 *.iws
 *.iml
 *.ipr
+copilot.data.migration.*.xml
+modules.xml
+misc.xml
+vcs.xml
 
-### NetBeans ###
 /nbproject/private/
 /nbbuild/
 /dist/
 /nbdist/
 /.nb-gradle/
-build/
+/build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
-### VS Code ###
 .vscode/
+
+.DS_Store
+Thumbs.db
+
+flyway.conf
+flyway.toml.bak
+flyway.user.toml
+flyway.log
