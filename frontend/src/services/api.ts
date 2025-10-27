@@ -109,41 +109,65 @@ class ApiService {
     return response.data || response;
   }
 
-  async register(data: { email: string; password: string; name?: string; hobbies?: string[]; languages?: string[]; country?: string }): Promise<AuthResponse> {
+  async register(data: {
+    email: string;
+    password: string;
+    name?: string;
+    hobbies?: string[];
+    languages?: string[];
+    country?: string;
+  }): Promise<AuthResponse> {
+    // ---- MOCK PATH ----
     if (this.useMock) {
       try {
         const user = createUser(data.email, data.password, data.name, data.hobbies, data.languages);
-        
-        // Set country if provided
-        if (data.country) {
-          user.country = data.country;
-        }
-        
+        if (data.country) user.country = data.country;
         const token = `mock_token_${Date.now()}`;
         this.setAuthToken(token);
         return { success: true, user, token };
-      } catch (error) {
-        return { 
-          success: false, 
-          error: error instanceof Error ? error.message : 'Registration failed' 
-        };
+      } catch (err: any) {
+        return { success: false, error: err?.message ?? "Registration failed" };
       }
     }
 
-    const response = await this.request<AuthResponse>(
-      API_CONFIG.ENDPOINTS.AUTH.REGISTER,
-      {
-        method: 'POST',
-        body: JSON.stringify(data),
+    // ---- REAL API PATH ----
+    try {
+      const res = await this.request<AuthResponse>(
+        API_CONFIG.ENDPOINTS.AUTH.REGISTER,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          // send only the fields backend understands (avoid undefineds)
+          body: JSON.stringify({
+            email: data.email,
+            password: data.password,
+            name: data.name ?? null,
+            hobbies: data.hobbies ?? [],
+            languages: data.languages ?? [],
+            country: data.country ?? null, // if your backend @NotBlank, make sure UI passes it
+          }),
+        }
+      );
+
+      // Your request() returns ApiResponse<T>. The backend returns {success,user,token}.
+      // So res.success is transport-level, res.data is the backend payload.
+      if (!res.success) {
+        return { success: false, error: res.error ?? "Registration failed" };
       }
-    );
 
-    if (response.success && response.data?.token) {
-      this.setAuthToken(response.data.token);
+      const payload = res.data as AuthResponse | undefined;
+      if (!payload || !payload.success) {
+        return { success: false, error: payload?.error ?? "Registration failed" };
+      }
+
+      if (payload.token) this.setAuthToken(payload.token);
+      return payload;
+    } catch (err: any) {
+      // Normalize common backend errors: 400/409, etc.
+      return { success: false, error: err?.message ?? "Registration failed" };
     }
-
-    return response.data || response;
   }
+
 
   async logout(): Promise<{ success: boolean }> {
     if (this.useMock) {
