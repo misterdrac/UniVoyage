@@ -35,7 +35,7 @@ const DestinationCard = React.forwardRef<HTMLDivElement, DestinationCardProps>(
       <div
         ref={ref}
         className={cn(
-          "group relative w-full max-w-sm sm:max-w-md lg:max-w-none overflow-hidden rounded-xl border border-border bg-card shadow-lg",
+          "group relative z-0 w-full max-w-sm sm:max-w-md lg:max-w-none overflow-hidden rounded-xl border border-border bg-card shadow-lg",
           "transition-all duration-300 ease-in-out hover:shadow-2xl hover:-translate-y-2",
           "active:scale-95 sm:active:scale-100", // Mobile tap feedback
           className

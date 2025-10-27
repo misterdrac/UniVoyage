@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react"
 import { X } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { Input } from "./input"
 import type { Option } from "./autocomplete"
 
 interface ChipSelectProps {
@@ -74,9 +75,9 @@ export function ChipSelect({
   }
 
   return (
-    <div className={cn("space-y-2", className)}>
+    <div className={cn("space-y-0", className)}>
       {/* Selected Chips */}
-      <div className="flex flex-wrap gap-2 min-h-10 p-2 border border-input rounded-md bg-background">
+      <div className="flex flex-wrap gap-2 min-h-10 p-2 border border-input rounded-xl bg-background">
         {value.map((val) => {
           const option = options.find((opt) => opt.value === val)
           const label = option?.label || val
@@ -99,7 +100,7 @@ export function ChipSelect({
         })}
         
         {/* Input */}
-        <input
+        <Input
           ref={inputRef}
           type="text"
           value={inputValue}
@@ -118,13 +119,13 @@ export function ChipSelect({
           }}
           placeholder={value.length === 0 ? placeholder : ""}
           disabled={disabled}
-          className="flex-1 min-w-[120px] bg-transparent outline-none text-sm placeholder:text-muted-foreground"
+          className="flex-1 min-w-[120px] h-8 border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
         />
       </div>
 
       {/* Dropdown */}
-      {isOpen && !disabled && filteredOptions.length > 0 && (
-        <div className="relative">
+      <div className="relative">
+        {isOpen && !disabled && filteredOptions.length > 0 && (
           <div className="absolute top-0 z-10 w-full rounded-md border bg-popover shadow-md animate-in fade-in-0 zoom-in-95 max-h-[200px] overflow-y-auto">
             <div className="p-1">
               {filteredOptions.map((option) => (
@@ -141,8 +142,8 @@ export function ChipSelect({
               ))}
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }

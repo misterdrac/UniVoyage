@@ -1,8 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Plane, MapPin, Calendar } from "lucide-react";
 import { AnimatedCounter } from "@/components/animations";
+import { useNavigate } from "react-router-dom";
 
 export default function HomePage() {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-background">
 
@@ -30,7 +33,7 @@ export default function HomePage() {
 
               {/* CTA Buttons */}
               <div className="flex flex-wrap gap-4">
-                <Button size="lg" className="text-base px-8">
+                <Button size="lg" className="text-base px-8" onClick={() => navigate('/destinations')}>
                   Explore Destinations
                   <MapPin className="w-5 h-5 ml-2" />
                 </Button>

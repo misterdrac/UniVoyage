@@ -1,26 +1,32 @@
-import React from 'react';
 import { DestinationCard } from '@/components/ui/destination-card';
+import { DestinationPicker } from '@/components';
 import { getDestinationsByContinent } from '@/data/destinations';
+import { useDestinationPicker } from '@/hooks/useDestinationPicker';
 
-const EuropeDestinationsPage: React.FC = () => {
+const EuropeDestinationsPage = () => {
+  const { pickerRef, selectDestination } = useDestinationPicker();
   const europeDestinations = getDestinationsByContinent('Europe');
-
-  const handlePlanTrip = (destination: string) => {
-    console.log(`Plan trip clicked for ${destination}`);
-    // TODO: Implement trip planning functionality
-  };
 
   return (
     <div className="min-h-screen bg-background pt-20 sm:pt-24 pb-8 px-4 sm:px-6 lg:px-8">
       <div className="container mx-auto">
-        <div className="text-center mb-12 sm:mb-16">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4">Explore Europe</h1>
-          <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
-            Where culture begins and history lives. From the charming streets of Paris to the 
-            fairytale architecture of Prague, Europe offers an unparalleled journey through 
-            centuries of art, culture, and discovery. Experience the continent where every 
-            cobblestone tells a story and every city boasts its own unique character.
-          </p>
+        {/* Hero Text and Destination Picker in one card */}
+        <div className="relative z-40 bg-card/50 backdrop-blur rounded-xl border border-border/50 p-6 sm:p-8 mb-12 sm:mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-6">
+            <div className="flex items-center">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground">Explore Europe</h1>
+            </div>
+            <div className="flex items-center">
+              <p className="text-center text-lg sm:text-xl text-muted-foreground">
+                Where culture begins and history lives. From the charming streets of Paris to the 
+                fairytale architecture of Prague, Europe offers an unparalleled journey through 
+                centuries of art, culture, and discovery. Experience the continent where every 
+                cobblestone tells a story and every city boasts its own unique character.
+              </p>
+            </div>
+          </div>
+          
+          <DestinationPicker ref={pickerRef} />
         </div>
 
         <div className="space-y-16 sm:space-y-20 lg:space-y-24">
@@ -37,7 +43,7 @@ const EuropeDestinationsPage: React.FC = () => {
                       location={destination.location}
                       overview={destination.overview}
                       budgetPerDay={destination.budgetPerDay}
-                      onPlanTrip={() => handlePlanTrip(destination.title)}
+                      onPlanTrip={() => selectDestination(destination)}
                     />
                   </div>
                   <div className="space-y-4 sm:space-y-6 px-4 sm:px-0">
@@ -90,7 +96,7 @@ const EuropeDestinationsPage: React.FC = () => {
                       location={destination.location}
                       overview={destination.overview}
                       budgetPerDay={destination.budgetPerDay}
-                      onPlanTrip={() => handlePlanTrip(destination.title)}
+                      onPlanTrip={() => selectDestination(destination)}
                     />
                   </div>
                 </>
@@ -110,4 +116,5 @@ const EuropeDestinationsPage: React.FC = () => {
 };
 
 export default EuropeDestinationsPage;
+
 
