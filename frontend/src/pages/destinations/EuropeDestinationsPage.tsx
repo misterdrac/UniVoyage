@@ -1,11 +1,59 @@
 import { DestinationCard } from '@/components/ui/destination-card';
 import { DestinationPicker } from '@/components';
 import { getDestinationsByContinent } from '@/data/destinations';
-import { useDestinationPicker } from '@/hooks/useDestinationPicker';
+import { useDestination } from '@/contexts/DestinationContext';
+import { useState, useMemo, useEffect } from 'react';
+import type { Option } from '@/components/ui/autocomplete';
+import { Plane } from 'lucide-react';
+import { Spinner } from '@/components/ui/spinner';
 
 const EuropeDestinationsPage = () => {
-  const { pickerRef, selectDestination } = useDestinationPicker();
+  const { selectedCountry, setDestination, setCountry, scrollToTop, setDateRange } = useDestination();
   const europeDestinations = getDestinationsByContinent('Europe');
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingCountry, setLoadingCountry] = useState<string>('');
+  const [previousCountry, setPreviousCountry] = useState<string>('');
+
+  // Reset all fields when page loads
+  useEffect(() => {
+    setCountry(undefined);
+    setDestination(undefined);
+    setDateRange(undefined);
+  }, []);
+
+  // Function to get random destinations from continent
+  const getRandomDestinations = (count: number) => {
+    const shuffled = [...europeDestinations].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
+  };
+
+  // Filter destinations based on selected country or show random 6
+  const filteredDestinations = useMemo(() => {
+    if (selectedCountry) {
+      return europeDestinations.filter(dest => dest.location === selectedCountry.label);
+    }
+    return getRandomDestinations(6);
+  }, [selectedCountry, europeDestinations]);
+
+  //todo since repeated move somewhere
+  // Watch for country changes and trigger loading animation only when country actually changes
+  useEffect(() => {
+    if (selectedCountry && selectedCountry.label !== previousCountry) {
+      setLoadingCountry(selectedCountry.label);
+      setIsLoading(true);
+      setPreviousCountry(selectedCountry.label);
+      // Simulate flight time - show spinner for 2 seconds
+      setTimeout(() => {
+        setIsLoading(false);
+        setLoadingCountry('');
+      }, 2000);
+    } else if (!selectedCountry) {
+      setIsLoading(false);
+      setLoadingCountry('');
+      setPreviousCountry('');
+    }
+  }, [selectedCountry, previousCountry]);
 
   return (
     <div className="min-h-screen bg-background pt-20 sm:pt-24 pb-8 px-4 sm:px-6 lg:px-8">
@@ -26,11 +74,29 @@ const EuropeDestinationsPage = () => {
             </div>
           </div>
           
-          <DestinationPicker ref={pickerRef} />
+          <div className={isAnimating ? "animate-pulse" : ""}>
+            <DestinationPicker continent="Europe" />
+          </div>
         </div>
 
-        <div className="space-y-16 sm:space-y-20 lg:space-y-24">
-          {europeDestinations.map((destination, index) => (
+        {/* Loading Spinner */}
+        {isLoading && (
+          <div className="flex flex-col items-center justify-center py-32 space-y-8">
+            <div className="text-center space-y-6">
+              <Plane className="size-16 text-primary animate-bounce mx-auto" />
+              <h3 className="text-2xl font-semibold text-foreground">Flying to {loadingCountry}</h3>
+              <div className="flex justify-center">
+                <Spinner className="size-16 text-primary" />
+              </div>
+              <p className="text-muted-foreground">Discovering amazing destinations...</p>
+            </div>
+          </div>
+        )}
+
+        {/* Destination Cards */}
+        {!isLoading && (
+          <div className="space-y-16 sm:space-y-20 lg:space-y-24">
+            {filteredDestinations.map((destination, index) => (
             <div key={destination.id} className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-center">
               {index % 2 === 0 ? (
                 // Card first, then text
@@ -43,7 +109,26 @@ const EuropeDestinationsPage = () => {
                       location={destination.location}
                       overview={destination.overview}
                       budgetPerDay={destination.budgetPerDay}
-                      onPlanTrip={() => selectDestination(destination)}
+                      onPlanTrip={() => {
+                        const option = {
+                          value: destination.id.toString(),
+                          label: destination.title,
+                          location: destination.location
+                        };
+                        const countryOption: Option = {
+                          value: destination.location,
+                          label: destination.location,
+                          location: destination.location
+                        };
+                        // Only set country if it's different from current selection
+                        if (!selectedCountry || selectedCountry.label !== destination.location) {
+                          setCountry(countryOption);
+                        }
+                        setDestination(option);
+                        setIsAnimating(true);
+                        scrollToTop();
+                        setTimeout(() => setIsAnimating(false), 1000);
+                      }}
                     />
                   </div>
                   <div className="space-y-4 sm:space-y-6 px-4 sm:px-0">
@@ -96,14 +181,34 @@ const EuropeDestinationsPage = () => {
                       location={destination.location}
                       overview={destination.overview}
                       budgetPerDay={destination.budgetPerDay}
-                      onPlanTrip={() => selectDestination(destination)}
+                      onPlanTrip={() => {
+                        const option = {
+                          value: destination.id.toString(),
+                          label: destination.title,
+                          location: destination.location
+                        };
+                        const countryOption: Option = {
+                          value: destination.location,
+                          label: destination.location,
+                          location: destination.location
+                        };
+                        // Only set country if it's different from current selection
+                        if (!selectedCountry || selectedCountry.label !== destination.location) {
+                          setCountry(countryOption);
+                        }
+                        setDestination(option);
+                        setIsAnimating(true);
+                        scrollToTop();
+                        setTimeout(() => setIsAnimating(false), 1000);
+                      }}
                     />
                   </div>
                 </>
               )}
             </div>
           ))}
-        </div>
+          </div>
+        )}
 
         <div className="text-center mt-12 sm:mt-16 px-4">
           <p className="text-sm sm:text-base text-muted-foreground">

@@ -1,6 +1,6 @@
-CREATE DATABASE univoyage;
+-- CREATE DATABASE univoyage;
 
-\c univoyage
+-- \c univoyage
 
 CREATE TABLE users (
     id                 BIGSERIAL PRIMARY KEY,
@@ -21,5 +21,5 @@ CREATE TABLE users (
     CONSTRAINT email_format CHECK (position('@' IN email) > 1)
 );
 
-COMMENT ON users.email IS 'User email address is unique, has to contain @ sign, that is define with unique constraint';
-COMMENT ON users.email IS 'Password must be atleast 8 characters long, contain numbers, lowercase, uppercase letters';
+-- COMMENT ON users.email IS 'User email address is unique, has to contain @ sign, that is define with unique constraint';
+-- COMMENT ON users.email IS 'Password must be atleast 8 characters long, contain numbers, lowercase, uppercase letters';

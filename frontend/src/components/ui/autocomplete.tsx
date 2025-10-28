@@ -95,10 +95,24 @@ export const AutoComplete = ({
     [onValueChange],
   )
 
-  // Filter options based on input value
-  const filteredOptions = options.filter((option) =>
-    option.label.toLowerCase().includes(inputValue.toLowerCase())
-  )
+  // Filter options based on input value and limit to 6 items
+  const filteredOptions = options
+    .filter((option) =>
+      option.label.toLowerCase().includes(inputValue.toLowerCase())
+    )
+    .sort((a, b) => {
+      // Prioritize exact matches, then starts with, then contains
+      const aLower = a.label.toLowerCase()
+      const bLower = b.label.toLowerCase()
+      const inputLower = inputValue.toLowerCase()
+      
+      if (aLower === inputLower && bLower !== inputLower) return -1
+      if (bLower === inputLower && aLower !== inputLower) return 1
+      if (aLower.startsWith(inputLower) && !bLower.startsWith(inputLower)) return -1
+      if (bLower.startsWith(inputLower) && !aLower.startsWith(inputLower)) return 1
+      return 0
+    })
+    .slice(0, 6)
 
   return (
     <CommandPrimitive>
@@ -126,7 +140,7 @@ export const AutoComplete = ({
             isOpen && filteredOptions.length > 0 ? "block" : "hidden",
           )}
         >
-          <CommandList className="rounded-lg">
+          <CommandList className="rounded-lg max-h-[300px] overflow-hidden">
             {isLoading ? (
               <CommandPrimitive.Loading>
                 <div className="p-1">
@@ -155,7 +169,7 @@ export const AutoComplete = ({
                       {isSelected ? <Check className="w-4" /> : null}
                       <div className="flex flex-col">
                         <span className="font-medium">{option.label}</span>
-                        {option.location && (
+                        {option.location && option.location !== option.label && (
                           <span className="text-xs text-muted-foreground">{option.location}</span>
                         )}
                       </div>
