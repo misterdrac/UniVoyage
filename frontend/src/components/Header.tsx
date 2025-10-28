@@ -109,12 +109,6 @@ export function Header() {
                         <Link to="/my-trips">My Trips</Link>
                       </NavigationMenuLink>
                     </NavigationMenuItem>
-
-                    <NavigationMenuItem>
-                      <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-                        <Link to="/trip-planner">Trip Planner</Link>
-                      </NavigationMenuLink>
-                    </NavigationMenuItem>
                   </>
                 )}
                 
@@ -239,13 +233,6 @@ export function Header() {
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     My Trips
-                  </Link>
-                  <Link
-                    to="/trip-planner"
-                    className="px-3 py-2 text-sm font-medium text-foreground hover:bg-accent hover:text-accent-foreground rounded-md transition-colors"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Trip Planner
                   </Link>
                 </>
               )}

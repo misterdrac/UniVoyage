@@ -13,7 +13,7 @@ export interface Destination {
 }
 
 export const destinations: Destination[] = [
-  // Europe destinations
+  // Europe - Major Cities (Lower IDs = Bigger Cities)
   {
     id: 1,
     imageUrl: "https://images.unsplash.com/photo-1550340499-a6c60fc8287c?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170",
@@ -122,7 +122,6 @@ export const destinations: Destination[] = [
       "Affordable public transport"
     ]
   },
-  // Asia destinations
   {
     id: 7,
     imageUrl: "https://plus.unsplash.com/premium_photo-1661914240950-b0124f20a5c1?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170",
@@ -141,116 +140,6 @@ export const destinations: Destination[] = [
       "Budget-friendly ramen and street food"
     ]
   },
-  {
-    id: 14,
-    imageUrl: "https://images.unsplash.com/photo-1513568720563-6a5b8c6caab3?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1144",
-    imageAlt: "Bangkok, Thailand",
-    title: "Bangkok",
-    location: "Thailand",
-    continent: "Asia",
-    overview: "A vibrant city where ancient temples meet modern life. Discover golden palaces, floating markets, and incredible street food for unbeatable prices.",
-    budgetPerDay: 25,
-    whyVisit: "Bangkok offers incredible value with its rich culture, amazing food, and affordable prices. Perfect for budget-conscious students seeking adventure.",
-    studentPerks: [
-      "Extremely affordable accommodations and food",
-      "Very cheap public transport and tuk-tuks",
-      "Budget-friendly street food everywhere",
-      "Affordable temple visits and cultural sites",
-      "Student-friendly nightlife and markets"
-    ]
-  },
-  {
-    id: 15,
-    imageUrl: "https://images.unsplash.com/photo-1604999333679-b86d54738315?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1025",
-    imageAlt: "Bali, Indonesia",
-    title: "Bali",
-    location: "Indonesia",
-    continent: "Asia",
-    overview: "Tropical paradise with stunning beaches, lush rice terraces, and spiritual culture. Experience yoga, surfing, and incredible nature on a student budget.",
-    budgetPerDay: 20,
-    whyVisit: "Bali offers paradise-level experiences at incredibly affordable prices. Perfect for students who love nature, culture, and adventure.",
-    studentPerks: [
-      "Very affordable accommodations and hostels",
-      "Cheap local food and warungs",
-      "Free beach access everywhere",
-      "Affordable surf rentals and lessons",
-      "Budget-friendly temple visits and activities"
-    ]
-  },
-  {
-    id: 16,
-    imageUrl: "https://plus.unsplash.com/premium_photo-1661948404806-391a240d6d40?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1172",
-    imageAlt: "Seoul, South Korea",
-    title: "Seoul",
-    location: "South Korea",
-    continent: "Asia",
-    overview: "Where ancient palaces meet K-pop culture. Experience incredible food, cutting-edge technology, and vibrant student neighborhoods.",
-    budgetPerDay: 35,
-    whyVisit: "Seoul perfectly combines tradition and modernity with amazing food, affordable prices, and vibrant youth culture.",
-    studentPerks: [
-      "Affordable student accommodations",
-      "Very cheap and delicious Korean BBQ",
-      "Budget-friendly public transport",
-      "Free cultural experiences and temples",
-      "Student discounts at major attractions"
-    ]
-  },
-  // Africa destinations
-  {
-    id: 17,
-    imageUrl: "https://images.unsplash.com/photo-1576485290814-1c72aa4bbb8e?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170",
-    imageAlt: "Cape Town, South Africa",
-    title: "Cape Town",
-    location: "South Africa",
-    continent: "Africa",
-    overview: "Stunning natural beauty, vibrant culture, and incredible wildlife. From Table Mountain to penguin beaches, Cape Town offers unique experiences.",
-    budgetPerDay: 30,
-    whyVisit: "Cape Town provides incredible value with its stunning landscapes, diverse culture, and affordable prices. Perfect for adventurous students.",
-    studentPerks: [
-      "Affordable accommodations in great locations",
-      "Student-friendly food and markets",
-      "Budget-friendly public transport",
-      "Free or cheap hiking and outdoor activities",
-      "Affordable wildlife and cultural tours"
-    ]
-  },
-  {
-    id: 18,
-    imageUrl: "https://images.unsplash.com/photo-1587974928442-77dc3e0dba72?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1524",
-    imageAlt: "Marrakech, Morocco",
-    title: "Marrakech",
-    location: "Morocco",
-    continent: "Africa",
-    overview: "A sensory explosion of colors, sounds, and aromas. Explore bustling souks, stunning palaces, and nearby desert adventures.",
-    budgetPerDay: 25,
-    whyVisit: "Marrakech offers rich culture, incredible food, and amazing value. Perfect for students seeking exotic experiences on a budget.",
-    studentPerks: [
-      "Very affordable accommodations in riads",
-      "Budget-friendly local cuisine and tea",
-      "Affordable souk shopping and markets",
-      "Student discounts at historical sites",
-      "Cheap desert tours and activities"
-    ]
-  },
-  {
-    id: 19,
-    imageUrl: "https://plus.unsplash.com/premium_photo-1661936361131-c421746dcd0d?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=2159",
-    imageAlt: "Serengeti National Park, Tanzania",
-    title: "Serengeti National Park",
-    location: "Tanzania",
-    continent: "Africa",
-    overview: "Witness the Great Migration, Big Five, and endless savannas. Experience the raw beauty of African wildlife in their natural habitat.",
-    budgetPerDay: 45,
-    whyVisit: "Tanzania offers one of the world's greatest wildlife experiences at an unforgettable price. Perfect for students passionate about nature and wildlife.",
-    studentPerks: [
-      "Budget-friendly camping safaris",
-      "Student group discounts for tours",
-      "Affordable park entrance fees",
-      "Shared accommodation options available",
-      "Camping and budget lodge packages"
-    ]
-  },
-  // Americas destinations
   {
     id: 8,
     imageUrl: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170",
@@ -357,6 +246,316 @@ export const destinations: Destination[] = [
       "Free beach access and public spaces",
       "Budget-friendly local food and drinks",
       "Student discounts on tours and excursions"
+    ]
+  },
+  {
+    id: 14,
+    imageUrl: "https://images.unsplash.com/photo-1513568720563-6a5b8c6caab3?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1144",
+    imageAlt: "Bangkok, Thailand",
+    title: "Bangkok",
+    location: "Thailand",
+    continent: "Asia",
+    overview: "A vibrant city where ancient temples meet modern life. Discover golden palaces, floating markets, and incredible street food for unbeatable prices.",
+    budgetPerDay: 25,
+    whyVisit: "Bangkok offers incredible value with its rich culture, amazing food, and affordable prices. Perfect for budget-conscious students seeking adventure.",
+    studentPerks: [
+      "Extremely affordable accommodations and food",
+      "Very cheap public transport and tuk-tuks",
+      "Budget-friendly street food everywhere",
+      "Affordable temple visits and cultural sites",
+      "Student-friendly nightlife and markets"
+    ]
+  },
+  {
+    id: 15,
+    imageUrl: "https://images.unsplash.com/photo-1604999333679-b86d54738315?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1025",
+    imageAlt: "Bali, Indonesia",
+    title: "Bali",
+    location: "Indonesia",
+    continent: "Asia",
+    overview: "Tropical paradise with stunning beaches, lush rice terraces, and spiritual culture. Experience yoga, surfing, and incredible nature on a student budget.",
+    budgetPerDay: 20,
+    whyVisit: "Bali offers paradise-level experiences at incredibly affordable prices. Perfect for students who love nature, culture, and adventure.",
+    studentPerks: [
+      "Very affordable accommodations and hostels",
+      "Cheap local food and warungs",
+      "Free beach access everywhere",
+      "Affordable surf rentals and lessons",
+      "Budget-friendly temple visits and activities"
+    ]
+  },
+  {
+    id: 16,
+    imageUrl: "https://plus.unsplash.com/premium_photo-1661948404806-391a240d6d40?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1172",
+    imageAlt: "Seoul, South Korea",
+    title: "Seoul",
+    location: "South Korea",
+    continent: "Asia",
+    overview: "Where ancient palaces meet K-pop culture. Experience incredible food, cutting-edge technology, and vibrant student neighborhoods.",
+    budgetPerDay: 35,
+    whyVisit: "Seoul perfectly combines tradition and modernity with amazing food, affordable prices, and vibrant youth culture.",
+    studentPerks: [
+      "Affordable student accommodations",
+      "Very cheap and delicious Korean BBQ",
+      "Budget-friendly public transport",
+      "Free cultural experiences and temples",
+      "Student discounts at major attractions"
+    ]
+  },
+  {
+    id: 17,
+    imageUrl: "https://images.unsplash.com/photo-1576485290814-1c72aa4bbb8e?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170",
+    imageAlt: "Cape Town, South Africa",
+    title: "Cape Town",
+    location: "South Africa",
+    continent: "Africa",
+    overview: "Stunning natural beauty, vibrant culture, and incredible wildlife. From Table Mountain to penguin beaches, Cape Town offers unique experiences.",
+    budgetPerDay: 30,
+    whyVisit: "Cape Town provides incredible value with its stunning landscapes, diverse culture, and affordable prices. Perfect for adventurous students.",
+    studentPerks: [
+      "Affordable accommodations in great locations",
+      "Student-friendly food and markets",
+      "Budget-friendly public transport",
+      "Free or cheap hiking and outdoor activities",
+      "Affordable wildlife and cultural tours"
+    ]
+  },
+  {
+    id: 18,
+    imageUrl: "https://images.unsplash.com/photo-1587974928442-77dc3e0dba72?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1524",
+    imageAlt: "Marrakech, Morocco",
+    title: "Marrakech",
+    location: "Morocco",
+    continent: "Africa",
+    overview: "A sensory explosion of colors, sounds, and aromas. Explore bustling souks, stunning palaces, and nearby desert adventures.",
+    budgetPerDay: 25,
+    whyVisit: "Marrakech offers rich culture, incredible food, and amazing value. Perfect for students seeking exotic experiences on a budget.",
+    studentPerks: [
+      "Very affordable accommodations in riads",
+      "Budget-friendly local cuisine and tea",
+      "Affordable souk shopping and markets",
+      "Student discounts at historical sites",
+      "Cheap desert tours and activities"
+    ]
+  },
+  {
+    id: 19,
+    imageUrl: "https://plus.unsplash.com/premium_photo-1661936361131-c421746dcd0d?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=2159",
+    imageAlt: "Serengeti National Park, Tanzania",
+    title: "Serengeti National Park",
+    location: "Tanzania",
+    continent: "Africa",
+    overview: "Witness the Great Migration, Big Five, and endless savannas. Experience the raw beauty of African wildlife in their natural habitat.",
+    budgetPerDay: 45,
+    whyVisit: "Tanzania offers one of the world's greatest wildlife experiences at an unforgettable price. Perfect for students passionate about nature and wildlife.",
+    studentPerks: [
+      "Budget-friendly camping safaris",
+      "Student group discounts for tours",
+      "Affordable park entrance fees",
+      "Shared accommodation options available",
+      "Camping and budget lodge packages"
+    ]
+  },
+  // Croatia - Major cities first (ID 20-23)
+  {
+    id: 20,
+    imageUrl: "https://plus.unsplash.com/premium_photo-1661963915825-9dee778ad548?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170",
+    imageAlt: "Zagreb, Croatia",
+    title: "Zagreb",
+    location: "Croatia",
+    continent: "Europe",
+    overview: "Croatia's capital blends Austro-Hungarian architecture with modern culture. Beautiful parks, museums, and a vibrant cafe scene. The perfect introduction to Croatian urban life.",
+    budgetPerDay: 40,
+    whyVisit: "Zagreb offers world-class museums, beautiful architecture, and vibrant student culture at great prices. Perfect for history lovers, art enthusiasts, and anyone seeking an authentic Croatian city experience.",
+    studentPerks: [
+      "Student discounts at museums and galleries",
+      "Very affordable hostels and cafes",
+      "Free walking tours available daily",
+      "Budget-friendly public transport",
+      "Student-friendly nightlife and restaurants"
+    ]
+  },
+  {
+    id: 21,
+    imageUrl: "https://images.unsplash.com/photo-1645356753760-b61ef173c917?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170",
+    imageAlt: "Rijeka, Croatia",
+    title: "Rijeka",
+    location: "Croatia",
+    continent: "Europe",
+    overview: "Croatia's largest port city with rich maritime history, vibrant cultural scene, and stunning Kvarner Bay views. A perfect blend of urban energy and coastal charm.",
+    budgetPerDay: 35,
+    whyVisit: "Rijeka offers authentic Croatian culture without the tourist crowds. Perfect for students who want beautiful Adriatic views, historic architecture, and vibrant nightlife at affordable prices.",
+    studentPerks: [
+      "Very affordable accommodations in the city center",
+      "Student-friendly restaurants and cafes",
+      "Free walking tours of historic sites",
+      "Budget-friendly public transport",
+      "Cheap ferry connections to nearby islands"
+    ]
+  },
+  {
+    id: 22,
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/a/a3/Petrinja_ulica.jpg",
+    imageAlt: "Petrinja, Croatia",
+    title: "Petrinja",
+    location: "Croatia",
+    continent: "Europe",
+    overview: "A charming historic town in continental Croatia known for its wine region, traditional architecture, and rich cultural heritage. Experience authentic inland Croatian life.",
+    budgetPerDay: 25,
+    whyVisit: "Petrinja offers an authentic Croatian experience away from the coast. Perfect for students interested in history, wine culture, and exploring lesser-known destinations with budget-friendly prices.",
+    studentPerks: [
+      "Extremely affordable accommodations",
+      "Local wine tastings at great prices",
+      "Historical sites and museums",
+      "Traditional Croatian cuisine at budget prices",
+      "Less touristy, more authentic experience"
+    ]
+  },
+  {
+    id: 23,
+    imageUrl: "https://images.unsplash.com/photo-1753184657335-b54123c2349b?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=735",
+    imageAlt: "Silba, Croatia",
+    title: "Silba",
+    location: "Croatia",
+    continent: "Europe",
+    overview: "A tiny car-free island paradise in the Adriatic. Sandy beaches, crystal-clear waters, and peaceful island life. Perfect for digital nomads and solo travelers seeking tranquility.",
+    budgetPerDay: 30,
+    whyVisit: "Silba offers the ultimate island escape with no cars, stunning beaches, and a peaceful atmosphere. Perfect for students who want to disconnect and enjoy Croatia's natural beauty on a budget.",
+    studentPerks: [
+      "Very affordable private rooms and hostels",
+      "Free beach access everywhere",
+      "Cheap local restaurants and konoba",
+      "No transport costs - walkable island",
+      "Perfect for water sports and snorkeling"
+    ]
+  },
+  // More Europe destinations
+  {
+    id: 24,
+    imageUrl: "https://plus.unsplash.com/premium_photo-1716932567535-6bb42a3f38ff?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1632",
+    imageAlt: "Vienna, Austria",
+    title: "Vienna",
+    location: "Austria",
+    continent: "Europe",
+    overview: "The City of Music with stunning palaces, world-class museums, and coffee house culture. Experience imperial grandeur and modern art on a student budget.",
+    budgetPerDay: 45,
+    whyVisit: "Vienna combines imperial history with vibrant modern culture. Perfect for students who love classical music, art, and beautiful architecture.",
+    studentPerks: [
+      "Student discounts at museums and palaces",
+      "Affordable cafe culture everywhere",
+      "Budget-friendly student accommodations",
+      "Free classical music concerts",
+      "Discounted public transport passes"
+    ]
+  },
+  {
+    id: 25,
+    imageUrl: "https://images.unsplash.com/photo-1552681618-2a4f14f1e3c3?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170",
+    imageAlt: "Budapest, Hungary",
+    title: "Budapest",
+    location: "Hungary",
+    continent: "Europe",
+    overview: "The Pearl of the Danube with thermal baths, stunning architecture, and incredible nightlife. Experience history, culture, and affordability in this beautiful city.",
+    budgetPerDay: 30,
+    whyVisit: "Budapest offers incredible value with its thermal baths, stunning architecture, and vibrant student culture. Perfect for budget-conscious students who love history and nightlife.",
+    studentPerks: [
+      "Extremely affordable accommodations",
+      "Student discounts at thermal baths",
+      "Budget-friendly Hungarian cuisine",
+      "Free walking tours and historical sites",
+      "Affordable public transport"
+    ]
+  },
+  {
+    id: 26,
+    imageUrl: "https://images.unsplash.com/photo-1595067761453-67f61e26be32?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170",
+    imageAlt: "Stockholm, Sweden",
+    title: "Stockholm",
+    location: "Sweden",
+    continent: "Europe",
+    overview: "A beautiful archipelago city with stunning design, museums, and vibrant culture. Experience Swedish lifestyle and modern Scandinavian architecture.",
+    budgetPerDay: 50,
+    whyVisit: "Stockholm offers world-class design, beautiful scenery, and a unique Scandinavian experience. Perfect for students interested in sustainability, design, and nature.",
+    studentPerks: [
+      "Student discounts at museums and attractions",
+      "Affordable student accommodations",
+      "Free walking tours and cultural events",
+      "Budget-friendly Swedish food",
+      "Discounted public transport passes"
+    ]
+  },
+  // More Asia destinations
+  {
+    id: 27,
+    imageUrl: "https://images.unsplash.com/photo-1567680246734-9f4ad8a078f9?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170",
+    imageAlt: "Shanghai, China",
+    title: "Shanghai",
+    location: "China",
+    continent: "Asia",
+    overview: "A futuristic metropolis where ancient meets ultra-modern. Experience stunning skylines, incredible food, and vibrant youth culture.",
+    budgetPerDay: 35,
+    whyVisit: "Shanghai offers an incredible mix of old and new China with amazing food, stunning architecture, and affordable prices for students.",
+    studentPerks: [
+      "Affordable street food everywhere",
+      "Student discounts at attractions",
+      "Budget-friendly public transport",
+      "Free cultural experiences and parks",
+      "Cheap accommodation options"
+    ]
+  },
+  {
+    id: 28,
+    imageUrl: "https://images.unsplash.com/photo-1540290374958-3b8dac0434a6?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170",
+    imageAlt: "Singapore",
+    title: "Singapore",
+    location: "Singapore",
+    continent: "Asia",
+    overview: "A clean, modern city-state with amazing food, stunning architecture, and perfect public transport. Experience diverse cultures and world-class attractions.",
+    budgetPerDay: 45,
+    whyVisit: "Singapore offers incredible food, stunning architecture, and a unique blend of cultures. Perfect for students who love modern cities with traditional charm.",
+    studentPerks: [
+      "Student discounts at major attractions",
+      "Affordable hawker centers everywhere",
+      "Excellent and cheap public transport",
+      "Free parks and outdoor activities",
+      "Student-friendly hostels and accommodations"
+    ]
+  },
+  // More Americas destinations
+  {
+    id: 29,
+    imageUrl: "https://images.unsplash.com/photo-1580060418028-3a5982d89212?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170",
+    imageAlt: "São Paulo, Brazil",
+    title: "São Paulo",
+    location: "Brazil",
+    continent: "Americas",
+    overview: "South America's largest city offers incredible diversity, world-class food, and vibrant nightlife. Experience authentic Brazilian culture at great prices.",
+    budgetPerDay: 30,
+    whyVisit: "São Paulo offers amazing food, vibrant culture, and incredible value. Perfect for students who love music, food, and authentic experiences.",
+    studentPerks: [
+      "Extremely affordable accommodations",
+      "Incredibly cheap and delicious food",
+      "Free street festivals and events",
+      "Budget-friendly public transport",
+      "Student discounts at museums and attractions"
+    ]
+  },
+  {
+    id: 30,
+    imageUrl: "https://images.unsplash.com/photo-1513819062325-b18dff53a48b?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170",
+    imageAlt: "Buenos Aires, Argentina",
+    title: "Buenos Aires",
+    location: "Argentina",
+    continent: "Americas",
+    overview: "The Paris of South America with stunning architecture, incredible tango culture, and amazing food. Experience vibrant street life and rich culture.",
+    budgetPerDay: 35,
+    whyVisit: "Buenos Aires offers incredible value with its European charm, amazing food, and vibrant student culture. Perfect for students who love culture and nightlife.",
+    studentPerks: [
+      "Very affordable accommodations and food",
+      "Student discounts at cultural attractions",
+      "Free tango shows and street performances",
+      "Budget-friendly parrillas and cafes",
+      "Cheap public transport"
     ]
   }
 ];
