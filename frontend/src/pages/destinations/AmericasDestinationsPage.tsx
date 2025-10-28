@@ -8,19 +8,12 @@ import { Plane } from 'lucide-react';
 import { Spinner } from '@/components/ui/spinner';
 
 const AmericasDestinationsPage = () => {
-  const { selectedCountry, setDestination, setCountry, scrollToTop, setDateRange } = useDestination();
+  const { selectedCountry, setDestination, setCountry, scrollToTop } = useDestination();
   const americasDestinations = getDestinationsByContinent('Americas');
   const [isAnimating, setIsAnimating] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingCountry, setLoadingCountry] = useState<string>('');
   const [previousCountry, setPreviousCountry] = useState<string>('');
-
-  // Reset all fields when page loads
-  useEffect(() => {
-    setCountry(undefined);
-    setDestination(undefined);
-    setDateRange(undefined);
-  }, []);
 
   // Function to get random destinations from continent
   const getRandomDestinations = (count: number) => {
