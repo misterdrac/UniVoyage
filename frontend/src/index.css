@@ -283,3 +283,18 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  @keyframes bounce-gentle {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-4px);
+    }
+  }
+  
+  .animate-bounce-gentle {
+    animation: bounce-gentle 0.3s ease-in-out;
+  }
+}

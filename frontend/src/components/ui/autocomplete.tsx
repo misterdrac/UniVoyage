@@ -4,7 +4,7 @@ import {
   CommandList,
 } from "@/components/ui/command"
 import { Command as CommandPrimitive } from "cmdk"
-import { useState, useRef, useCallback, type KeyboardEvent } from "react"
+import React, { useState, useRef, useCallback, type KeyboardEvent } from "react"
 
 import { Skeleton } from "@/components/ui/skeleton"
 import { Input } from "@/components/ui/input"
@@ -35,8 +35,16 @@ export const AutoComplete = ({
   const inputRef = useRef<HTMLInputElement>(null)
 
   const [isOpen, setOpen] = useState(false)
-  const [selected, setSelected] = useState<Option>(value as Option)
+  const [selected, setSelected] = useState<Option | undefined>(value)
   const [inputValue, setInputValue] = useState<string>(value?.label || "")
+
+  // Update when external value changes
+  React.useEffect(() => {
+    if (value !== selected) {
+      setSelected(value)
+      setInputValue(value?.label || "")
+    }
+  }, [value, selected])
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLInputElement>) => {
@@ -66,7 +74,10 @@ export const AutoComplete = ({
 
   const handleBlur = useCallback(() => {
     setOpen(false)
-    setInputValue(selected?.label)
+    // Only reset to selected label if there's a selection, otherwise keep what user typed
+    if (selected && selected.label) {
+      setInputValue(selected.label)
+    }
   }, [selected])
 
   const handleSelectOption = useCallback(
@@ -111,7 +122,7 @@ export const AutoComplete = ({
       <div className="relative mt-1">
         <div
           className={cn(
-            "animate-in fade-in-0 zoom-in-95 absolute top-0 z-10 w-full rounded-md border bg-popover shadow-md",
+            "animate-in fade-in-0 zoom-in-95 absolute top-0 z-[100] w-full rounded-md border bg-popover shadow-md",
             isOpen && filteredOptions.length > 0 ? "block" : "hidden",
           )}
         >
@@ -142,7 +153,12 @@ export const AutoComplete = ({
                       )}
                     >
                       {isSelected ? <Check className="w-4" /> : null}
-                      {option.label}
+                      <div className="flex flex-col">
+                        <span className="font-medium">{option.label}</span>
+                        {option.location && (
+                          <span className="text-xs text-muted-foreground">{option.location}</span>
+                        )}
+                      </div>
                     </CommandItem>
                   )
                 })}

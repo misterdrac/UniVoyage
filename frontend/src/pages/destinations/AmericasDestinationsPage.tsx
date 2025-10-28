@@ -1,27 +1,36 @@
-import React from 'react';
 import { DestinationCard } from '@/components/ui/destination-card';
-import { destinations } from '@/data/destinations';
+import { DestinationPicker } from '@/components';
+import { getDestinationsByContinent } from '@/data/destinations';
+import { useDestinationPicker } from '@/hooks/useDestinationPicker';
 
-const PopularDestinationsPage: React.FC = () => {
-
-  const handlePlanTrip = (destination: string) => {
-    console.log(`Plan trip clicked for ${destination}`);
-    // TODO: Implement trip planning functionality
-  };
+const AmericasDestinationsPage = () => {
+  const { pickerRef, selectDestination } = useDestinationPicker();
+  const americasDestinations = getDestinationsByContinent('Americas');
 
   return (
     <div className="min-h-screen bg-background pt-20 sm:pt-24 pb-8 px-4 sm:px-6 lg:px-8">
       <div className="container mx-auto">
-        <div className="text-center mb-12 sm:mb-16">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4">Popular Destinations</h1>
-          <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
-            Discover the world's most amazing destinations, perfect for student travelers. 
-            Each location offers unique experiences, rich culture, and student-friendly perks.
-          </p>
+        {/* Hero Text and Destination Picker in one card */}
+        <div className="relative z-40 bg-card/50 backdrop-blur rounded-xl border border-border/50 p-6 sm:p-8 mb-12 sm:mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-6">
+            <div className="flex items-center">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground">Explore the Americas</h1>
+            </div>
+            <div className="flex items-center">
+              <p className="text-center text-lg sm:text-xl text-muted-foreground">
+                From the bustling streets of New York to the sandy beaches of Dominican Republic, the Americas 
+                offer diverse landscapes, cultures, and experiences. Explore iconic cities, stunning 
+                natural beauty, and endless opportunities for adventure and discovery across North 
+                and South America.
+              </p>
+            </div>
+          </div>
+          
+          <DestinationPicker ref={pickerRef} />
         </div>
 
         <div className="space-y-16 sm:space-y-20 lg:space-y-24">
-          {destinations.map((destination, index) => (
+          {americasDestinations.map((destination, index) => (
             <div key={destination.id} className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-center">
               {index % 2 === 0 ? (
                 // Card first, then text
@@ -34,7 +43,7 @@ const PopularDestinationsPage: React.FC = () => {
                       location={destination.location}
                       overview={destination.overview}
                       budgetPerDay={destination.budgetPerDay}
-                      onPlanTrip={() => handlePlanTrip(destination.title)}
+                      onPlanTrip={() => selectDestination(destination)}
                     />
                   </div>
                   <div className="space-y-4 sm:space-y-6 px-4 sm:px-0">
@@ -87,7 +96,7 @@ const PopularDestinationsPage: React.FC = () => {
                       location={destination.location}
                       overview={destination.overview}
                       budgetPerDay={destination.budgetPerDay}
-                      onPlanTrip={() => handlePlanTrip(destination.title)}
+                      onPlanTrip={() => selectDestination(destination)}
                     />
                   </div>
                 </>
@@ -98,7 +107,7 @@ const PopularDestinationsPage: React.FC = () => {
 
         <div className="text-center mt-12 sm:mt-16 px-4">
           <p className="text-sm sm:text-base text-muted-foreground">
-            Ready to start your adventure? Use our Trip Planner to create your perfect itinerary!
+            Ready to explore the Americas? Use our Trip Planner to create your perfect itinerary!
           </p>
         </div>
       </div>
@@ -106,4 +115,6 @@ const PopularDestinationsPage: React.FC = () => {
   );
 };
 
-export default PopularDestinationsPage;
+export default AmericasDestinationsPage;
+
+

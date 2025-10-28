@@ -6,3 +6,4 @@ export * from "./animations";
 
 // UI components
 export { Header } from "./Header";
+export { DestinationPicker } from "./DestinationPicker";

@@ -172,9 +172,8 @@ export function Header() {
               <>
                 <Button 
                   variant="ghost" 
-                  size="sm"
                   onClick={handleProfileClick}
-                  className="hidden sm:flex items-center gap-2"
+                  className="hidden sm:flex items-center gap-2 rounded-md"
                 >
                   {user.profileImage ? (
                     <img
@@ -195,7 +194,7 @@ export function Header() {
               /* User is not logged in */
               <Button 
                 variant="secondary" 
-                size="sm"
+                size="default"
                 onClick={() => setIsLoginOpen(true)}
                 className="hidden sm:block"
               >
@@ -289,12 +288,11 @@ export function Header() {
                 {user ? (
                   <Button 
                     variant="ghost" 
-                    size="sm"
                     onClick={() => {
                       handleProfileClick()
                       setIsMobileMenuOpen(false)
                     }}
-                    className="w-full justify-start"
+                    className="w-full justify-start rounded-md"
                   >
                     {user.profileImage ? (
                       <img
@@ -313,7 +311,7 @@ export function Header() {
                 ) : (
                   <Button 
                     variant="secondary" 
-                    size="sm"
+                    size="default"
                     onClick={() => {
                       setIsLoginOpen(true)
                       setIsMobileMenuOpen(false)
