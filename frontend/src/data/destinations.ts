@@ -450,7 +450,7 @@ export const destinations: Destination[] = [
   },
   {
     id: 25,
-    imageUrl: "https://images.unsplash.com/photo-1552681618-2a4f14f1e3c3?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170",
+    imageUrl: "https://images.unsplash.com/photo-1616432902940-b7a1acbc60b3?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=2070",
     imageAlt: "Budapest, Hungary",
     title: "Budapest",
     location: "Hungary",
@@ -468,7 +468,7 @@ export const destinations: Destination[] = [
   },
   {
     id: 26,
-    imageUrl: "https://images.unsplash.com/photo-1595067761453-67f61e26be32?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170",
+    imageUrl: "https://images.unsplash.com/photo-1509356843151-3e7d96241e11?ixlib=rb-4.1.https://images.unsplash.com/photo-1588653818221-2651ec1a6423?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1171",
     imageAlt: "Stockholm, Sweden",
     title: "Stockholm",
     location: "Sweden",
@@ -487,7 +487,7 @@ export const destinations: Destination[] = [
   // More Asia destinations
   {
     id: 27,
-    imageUrl: "https://images.unsplash.com/photo-1567680246734-9f4ad8a078f9?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170",
+    imageUrl: "https://images.unsplash.com/photo-1538428494232-9c0d8a3ab403?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170",
     imageAlt: "Shanghai, China",
     title: "Shanghai",
     location: "China",
@@ -505,7 +505,7 @@ export const destinations: Destination[] = [
   },
   {
     id: 28,
-    imageUrl: "https://images.unsplash.com/photo-1540290374958-3b8dac0434a6?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170",
+    imageUrl: "https://images.unsplash.com/photo-1605425183435-25b7e99104a4?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=764",
     imageAlt: "Singapore",
     title: "Singapore",
     location: "Singapore",
@@ -524,7 +524,7 @@ export const destinations: Destination[] = [
   // More Americas destinations
   {
     id: 29,
-    imageUrl: "https://images.unsplash.com/photo-1580060418028-3a5982d89212?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170",
+    imageUrl: "https://images.unsplash.com/photo-1543059080-f9b1272213d5?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1074",
     imageAlt: "São Paulo, Brazil",
     title: "São Paulo",
     location: "Brazil",
@@ -542,7 +542,7 @@ export const destinations: Destination[] = [
   },
   {
     id: 30,
-    imageUrl: "https://images.unsplash.com/photo-1513819062325-b18dff53a48b?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170",
+    imageUrl: "https://plus.unsplash.com/premium_photo-1697729901052-fe8900e24993?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1633",
     imageAlt: "Buenos Aires, Argentina",
     title: "Buenos Aires",
     location: "Argentina",
