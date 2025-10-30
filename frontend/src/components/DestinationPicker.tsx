@@ -153,7 +153,7 @@ export const DestinationPicker = ({ continent }: DestinationPickerProps) => {
                   }
                 }
               }}
-              popularOptions={popularDestinations}
+              popularOptions={!selectedCountry ? popularDestinations : undefined}
               popularLabel="You Might Like"
             />
             {selectedDestination && (
