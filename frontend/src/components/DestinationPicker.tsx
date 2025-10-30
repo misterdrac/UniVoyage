@@ -1,9 +1,10 @@
 import { useMemo } from 'react';
 import { Plane, X } from 'lucide-react';
-import { AutoComplete, type Option } from '@/components/ui/autocomplete';
+import { type Option } from '@/components/ui/autocomplete';
+import { DestinationAutoComplete } from '@/components/ui/destination-autocomplete';
 import { Button } from '@/components/ui/button';
 import { DateRangePicker } from './DateRangePicker';
-import { destinations } from '@/data/destinations';
+import { destinations, getPopularDestinations, getPopularCountries } from '@/data/destinations';
 import type { DateRange } from 'react-day-picker';
 import { useDestination } from '@/contexts/DestinationContext';
 import { cn } from '@/lib/utils';
@@ -24,6 +25,15 @@ export const DestinationPicker = ({ continent }: DestinationPickerProps) => {
   } = useDestination();
 
 
+  // Popular countries - major countries with multiple destinations
+  const popularCountries: Option[] = useMemo(() => {
+    return getPopularCountries(continent).map(location => ({
+      value: location,
+      label: location,
+      location: location
+    }));
+  }, [continent]);
+
   // Get unique countries from destinations, filtered by continent if provided
   const countryOptions: Option[] = useMemo(() => {
     const filteredDestinations = continent 
@@ -38,6 +48,15 @@ export const DestinationPicker = ({ continent }: DestinationPickerProps) => {
         label: location,
         location: location
       }));
+  }, [continent]);
+
+  // Popular destinations - major destinations from all continents
+  const popularDestinations: Option[] = useMemo(() => {
+    return getPopularDestinations(continent).map(dest => ({
+      value: dest.id.toString(),
+      label: dest.title,
+      location: dest.location
+    }));
   }, [continent]);
 
   // Convert destinations to options for autocomplete, filtered by continent and selected country
@@ -84,12 +103,14 @@ export const DestinationPicker = ({ continent }: DestinationPickerProps) => {
         <div className="relative md:col-span-2">
           <label className="text-xs text-muted-foreground mb-1.5 block">Country</label>
           <div className="relative">
-            <AutoComplete
+            <DestinationAutoComplete
               options={countryOptions}
               placeholder="Select a country..."
               emptyMessage="No countries found"
               value={selectedCountry}
               onValueChange={handleCountryChange}
+              popularOptions={popularCountries}
+              popularLabel="Popular Lately"
             />
             {selectedCountry && (
               <button
@@ -115,7 +136,7 @@ export const DestinationPicker = ({ continent }: DestinationPickerProps) => {
         <div className="relative md:col-span-4">
           <label className="text-xs text-muted-foreground mb-1.5 block">Destination</label>
           <div className="relative">
-            <AutoComplete
+            <DestinationAutoComplete
               options={destinationOptions}
               placeholder="Search for a destination..."
               emptyMessage="No destinations found"
@@ -132,6 +153,8 @@ export const DestinationPicker = ({ continent }: DestinationPickerProps) => {
                   }
                 }
               }}
+              popularOptions={popularDestinations}
+              popularLabel="You Might Like"
             />
             {selectedDestination && (
               <button

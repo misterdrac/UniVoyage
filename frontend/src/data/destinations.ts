@@ -560,6 +560,19 @@ export const destinations: Destination[] = [
   }
 ];
 
+// Popular destinations and countries constants
+export const POPULAR_DESTINATION_IDS = [
+  // Europe
+  1, 2, 3, 4, 5, 6, // Paris, Barcelona, Prague, Amsterdam, Rome, Berlin
+  // Asia
+  7, 14, 15, 16, // Tokyo, Bangkok, Bali, Seoul
+  // Americas
+  8, 9, 11, // NYC, LA, Rio
+  // Africa
+  17, 18, 19 // Cape Town, Marrakech, Serengeti
+];
+export const POPULAR_COUNTRY_NAMES = ['USA', 'Croatia', 'Italy', 'France', 'Spain', 'Brazil', 'Germany', 'Japan', 'South Africa', 'Morocco', 'Thailand', 'Indonesia', 'South Korea'];
+
 // Helper functions for destination data
 export const getDestinationById = (id: number): Destination | undefined => {
   return destinations.find(destination => destination.id === id);
@@ -579,4 +592,35 @@ export const getDestinationsByContinent = (continent: string): Destination[] => 
   return destinations.filter(destination => 
     destination.continent.toLowerCase() === continent.toLowerCase()
   );
+};
+
+/**
+ * Get popular destinations, optionally filtered by continent
+ * @param continent Optional continent filter
+ * @returns Array of popular destinations in priority order
+ */
+export const getPopularDestinations = (continent?: string): Destination[] => {
+  const filtered = continent 
+    ? destinations.filter(dest => dest.continent === continent)
+    : destinations;
+  
+  return filtered
+    .filter(dest => POPULAR_DESTINATION_IDS.includes(dest.id))
+    .sort((a, b) => POPULAR_DESTINATION_IDS.indexOf(a.id) - POPULAR_DESTINATION_IDS.indexOf(b.id));
+};
+
+/**
+ * Get popular countries based on available destinations, optionally filtered by continent
+ * @param continent Optional continent filter
+ * @returns Array of popular country names in priority order
+ */
+export const getPopularCountries = (continent?: string): string[] => {
+  const filtered = continent 
+    ? destinations.filter(dest => dest.continent === continent)
+    : destinations;
+  
+  const uniqueCountries = Array.from(new Set(filtered.map(dest => dest.location)))
+    .filter(loc => POPULAR_COUNTRY_NAMES.includes(loc));
+  
+  return uniqueCountries.sort((a, b) => POPULAR_COUNTRY_NAMES.indexOf(a) - POPULAR_COUNTRY_NAMES.indexOf(b));
 };
