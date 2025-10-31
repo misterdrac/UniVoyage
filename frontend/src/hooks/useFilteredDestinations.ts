@@ -5,28 +5,39 @@ import type { Destination } from '@/data/destinations';
 interface UseFilteredDestinationsParams {
   destinations: Destination[];
   selectedCountry: Option | undefined;
-  randomCount?: number;
+  selectedDestination?: Option | undefined;
 }
 
 /**
- * Hook to filter destinations based on selected country or return random destinations
+ * Hook to filter destinations based on selected country or return all destinations
+ * Excludes the selected destination from the results
  */
 export const useFilteredDestinations = ({ 
   destinations, 
-  selectedCountry, 
-  randomCount = 6 
+  selectedCountry,
+  selectedDestination,
 }: UseFilteredDestinationsParams) => {
-  const getRandomDestinations = (count: number) => {
-    const shuffled = [...destinations].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, count);
-  };
-
   const filteredDestinations = useMemo(() => {
+    let filtered: Destination[];
+    
+    // Filter by country if selected, otherwise return all
     if (selectedCountry) {
-      return destinations.filter(dest => dest.location === selectedCountry.label);
+      filtered = destinations.filter(dest => dest.location === selectedCountry.label);
+    } else {
+      filtered = destinations;
     }
-    return getRandomDestinations(randomCount);
-  }, [destinations, selectedCountry, randomCount]);
+
+    // Exclude selected destination if one is selected
+    if (selectedDestination) {
+      const selectedId = parseInt(selectedDestination.value);
+      filtered = filtered.filter(dest => dest.id !== selectedId);
+    }
+
+    // Filter out minimal destinations (only show destinations with full details)
+    filtered = filtered.filter(dest => dest.imageUrl !== undefined);
+
+    return filtered;
+  }, [destinations, selectedCountry, selectedDestination]);
 
   return filteredDestinations;
 };

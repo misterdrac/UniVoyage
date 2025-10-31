@@ -1,18 +1,91 @@
+/**
+ * ======================================================================
+ * BACKEND API IMPLEMENTATION GUIDE
+ * ======================================================================
+ * 
+ * This file needs to be replaced with API calls to backend.
+ * 
+ * BACKEND REQUIREMENTS:
+ * 
+ * 1. DATABASE TABLE (Use Flyway migration V3__create_destinations_table.sql):
+ * 
+ * CREATE TABLE destinations (
+ *     id BIGSERIAL PRIMARY KEY,
+ *     title VARCHAR(200) NOT NULL,
+ *     location VARCHAR(100) NOT NULL,
+ *     continent VARCHAR(50) NOT NULL,
+ *     image_url TEXT,
+ *     image_alt TEXT,
+ *     overview TEXT,
+ *     budget_per_day INTEGER,
+ *     why_visit TEXT,
+ *     student_perks TEXT[]
+ * );
+ * 
+ * CREATE INDEX idx_destinations_continent ON destinations(continent);
+ * CREATE INDEX idx_destinations_location ON destinations(location);
+ * 
+ * 2. JAVA BACKEND STRUCTURE (Mirror auth package):
+ * 
+ * backend/src/main/java/com/univoyage/destinations/
+ *     ├── DestinationController.java       # REST endpoints
+ *     ├── DestinationService.java          # Business logic  
+ *     ├── DestinationEntity.java           # JPA entity
+ *     ├── DestinationRepository.java       # JPA repository
+ *     └── dto/
+ *         └── DestinationDto.java          # Response DTO
+ * 
+ * 3. REST API ENDPOINTS NEEDED:
+ * 
+ * GET  /api/destinations                    - All destinations (paginated)
+ * GET  /api/destinations?continent=Europe   - Filter by continent [implements getDestinationsByContinent()]
+ * GET  /api/destinations?location=France    - Filter by country [implements getDestinationsByLocation()]
+ * GET  /api/destinations?maxBudget=50       - Filter by budget [implements getDestinationsByBudget()]
+ * GET  /api/destinations/popular?continent=Europe [implements getPopularDestinations()]
+ * GET  /api/destinations/popular/countries?continent=Europe [implements getPopularCountries()]
+ * GET  /api/destinations/{id}               - Single destination [implements getDestinationById()]
+ * 
+ * 4. RESPONSE FORMAT (use ApiResponse<T> wrapper):
+ * 
+ * {
+ *   "success": true,
+ *   "data": [Destination objects],
+ *   "error": null
+ * }
+ * 
+ * 5. SEED DATA: Migrate all destinations below to DB (use V4 migration)
+ * 
+ *    NOTE: There are TWO types of destinations below:
+ *    - FULL destinations (IDs 1-30): Have all fields including imageUrl, overview, budgetPerDay, etc.
+ *    - MINIMAL destinations (IDs 31-86): Only have id, title, location, continent
+ *    
+ *    FULL destinations = shown as cards on destination pages
+ *    MINIMAL destinations = only searchable in autocomplete dropdown
+ * 
+ * 6. FRONTEND: Will use useQuery/React Query to fetch from these endpoints
+ * 
+ * ======================================================================
+ */
+
 // Destination data structure and mock data
 export interface Destination {
   id: number;
-  imageUrl: string;
-  imageAlt: string;
   title: string;
   location: string;
   continent: string;
-  overview: string;
-  budgetPerDay: number;
-  whyVisit: string;
-  studentPerks: string[];
+  // Optional fields for full destination cards
+  imageUrl?: string;
+  imageAlt?: string;
+  overview?: string;
+  budgetPerDay?: number;
+  whyVisit?: string;
+  studentPerks?: string[];
 }
 
 export const destinations: Destination[] = [
+  // ===================================================================
+  // FULL DESTINATIONS (IDs 1-30): Shown as cards on destination pages
+  // ===================================================================
   // Europe - Major Cities (Lower IDs = Bigger Cities)
   {
     id: 1,
@@ -413,7 +486,7 @@ export const destinations: Destination[] = [
   },
   {
     id: 23,
-    imageUrl: "https://images.unsplash.com/photo-1753184657335-b54123c2349b?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=735",
+    imageUrl: "https://www.yachtscroatia.hr/var/site/storage/images/_aliases/i1920/6/7/6/5/245676-14-cro-HR/1b7d205a1ed0-Otok-Silba-01.jpg.webp",
     imageAlt: "Silba, Croatia",
     title: "Silba",
     location: "Croatia",
@@ -557,7 +630,70 @@ export const destinations: Destination[] = [
       "Budget-friendly parrillas and cafes",
       "Cheap public transport"
     ]
-  }
+  },
+  // ===================================================================
+  // MINIMAL DESTINATIONS (IDs 31-86): Only searchable in autocomplete
+  // ===================================================================
+  // Europe
+  { id: 31, title: "Lyon", location: "France", continent: "Europe" },
+  { id: 32, title: "Nice", location: "France", continent: "Europe" },
+  { id: 33, title: "Madrid", location: "Spain", continent: "Europe" },
+  { id: 34, title: "Lisbon", location: "Portugal", continent: "Europe" },
+  { id: 35, title: "Dublin", location: "Ireland", continent: "Europe" },
+  { id: 36, title: "Vienna", location: "Austria", continent: "Europe" },
+  { id: 37, title: "Copenhagen", location: "Denmark", continent: "Europe" },
+  { id: 38, title: "Stockholm", location: "Sweden", continent: "Europe" },
+  { id: 39, title: "Oslo", location: "Norway", continent: "Europe" },
+  { id: 40, title: "Helsinki", location: "Finland", continent: "Europe" },
+  { id: 41, title: "Warsaw", location: "Poland", continent: "Europe" },
+  { id: 42, title: "Budapest", location: "Hungary", continent: "Europe" },
+  { id: 43, title: "Athens", location: "Greece", continent: "Europe" },
+  { id: 44, title: "Split", location: "Croatia", continent: "Europe" },
+  { id: 45, title: "Dubrovnik", location: "Croatia", continent: "Europe" },
+  { id: 46, title: "Florence", location: "Italy", continent: "Europe" },
+  { id: 47, title: "Venice", location: "Italy", continent: "Europe" },
+  { id: 48, title: "Milan", location: "Italy", continent: "Europe" },
+  { id: 49, title: "Edinburgh", location: "UK", continent: "Europe" },
+  { id: 50, title: "Manchester", location: "UK", continent: "Europe" },
+  // Asia
+  { id: 51, title: "Singapore", location: "Singapore", continent: "Asia" },
+  { id: 52, title: "Ho Chi Minh City", location: "Vietnam", continent: "Asia" },
+  { id: 53, title: "Hanoi", location: "Vietnam", continent: "Asia" },
+  { id: 54, title: "Kuala Lumpur", location: "Malaysia", continent: "Asia" },
+  { id: 55, title: "Jakarta", location: "Indonesia", continent: "Asia" },
+  { id: 56, title: "Manila", location: "Philippines", continent: "Asia" },
+  { id: 57, title: "Kathmandu", location: "Nepal", continent: "Asia" },
+  { id: 58, title: "Colombo", location: "Sri Lanka", continent: "Asia" },
+  { id: 59, title: "Tashkent", location: "Uzbekistan", continent: "Asia" },
+  { id: 60, title: "Almaty", location: "Kazakhstan", continent: "Asia" },
+  // Americas
+  { id: 61, title: "Toronto", location: "Canada", continent: "Americas" },
+  { id: 62, title: "Vancouver", location: "Canada", continent: "Americas" },
+  { id: 63, title: "Montreal", location: "Canada", continent: "Americas" },
+  { id: 64, title: "Mexico City", location: "Mexico", continent: "Americas" },
+  { id: 65, title: "Cancun", location: "Mexico", continent: "Americas" },
+  { id: 66, title: "Lima", location: "Peru", continent: "Americas" },
+  { id: 67, title: "Santiago", location: "Chile", continent: "Americas" },
+  { id: 68, title: "Bogota", location: "Colombia", continent: "Americas" },
+  { id: 69, title: "Cartagena", location: "Colombia", continent: "Americas" },
+  { id: 70, title: "Medellin", location: "Colombia", continent: "Americas" },
+  { id: 71, title: "Quito", location: "Ecuador", continent: "Americas" },
+  { id: 72, title: "Montevideo", location: "Uruguay", continent: "Americas" },
+  { id: 73, title: "La Paz", location: "Bolivia", continent: "Americas" },
+  { id: 74, title: "Asunción", location: "Paraguay", continent: "Americas" },
+  { id: 75, title: "San Juan", location: "Puerto Rico", continent: "Americas" },
+  { id: 76, title: "Havana", location: "Cuba", continent: "Americas" },
+  // Africa
+  { id: 77, title: "Nairobi", location: "Kenya", continent: "Africa" },
+  { id: 78, title: "Dar es Salaam", location: "Tanzania", continent: "Africa" },
+  { id: 79, title: "Cairo", location: "Egypt", continent: "Africa" },
+  { id: 80, title: "Luxor", location: "Egypt", continent: "Africa" },
+  { id: 81, title: "Casablanca", location: "Morocco", continent: "Africa" },
+  { id: 82, title: "Lagos", location: "Nigeria", continent: "Africa" },
+  { id: 83, title: "Accra", location: "Ghana", continent: "Africa" },
+  { id: 84, title: "Addis Ababa", location: "Ethiopia", continent: "Africa" },
+  { id: 85, title: "Entebbe", location: "Uganda", continent: "Africa" },
+  { id: 86, title: "Kigali", location: "Rwanda", continent: "Africa" }
 ];
 
 // Popular destinations and countries constants
@@ -573,6 +709,11 @@ export const POPULAR_DESTINATION_IDS = [
 ];
 export const POPULAR_COUNTRY_NAMES = ['USA', 'Croatia', 'Italy', 'France', 'Spain', 'Brazil', 'Germany', 'Japan', 'South Africa', 'Morocco', 'Thailand', 'Indonesia', 'South Korea'];
 
+// ======================================================================
+// HELPER FUNCTIONS - These need to be implemented as backend API endpoints
+// See implementation guide at top of file
+// ======================================================================
+
 // Helper functions for destination data
 export const getDestinationById = (id: number): Destination | undefined => {
   return destinations.find(destination => destination.id === id);
@@ -585,7 +726,7 @@ export const getDestinationsByLocation = (location: string): Destination[] => {
 };
 
 export const getDestinationsByBudget = (maxBudget: number): Destination[] => {
-  return destinations.filter(destination => destination.budgetPerDay <= maxBudget);
+  return destinations.filter(destination => destination.budgetPerDay && destination.budgetPerDay <= maxBudget);
 };
 
 export const getDestinationsByContinent = (continent: string): Destination[] => {

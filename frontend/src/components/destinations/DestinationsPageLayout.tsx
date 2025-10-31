@@ -4,8 +4,10 @@ import { DestinationPicker } from '@/components';
 import { LoadingSpinner, DestinationFooter } from '@/components/destinations';
 import { useDestination } from '@/contexts/DestinationContext';
 import { useFilteredDestinations } from '@/hooks/useFilteredDestinations';
-import { ChevronDown } from 'lucide-react';
+import { usePaginatedItems } from '@/hooks/usePaginatedItems';
+import { ChevronDown, ArrowDown } from 'lucide-react';
 import type { Destination } from '@/data/destinations';
+import { Button } from '@/components/ui/button';
 
 interface DestinationsPageLayoutProps {
   title: string;
@@ -34,18 +36,24 @@ export const DestinationsPageLayout = ({
     handlePlanTrip,
   } = useDestination();
 
-  // Reset all fields when page loads (if resetOnMount is true)
+  // Reset all fields when page loads (if resetOnMount is true) and scroll to top
   useEffect(() => {
     if (resetOnMount) {
       resetAll();
     }
+    // Scroll to top when navigating to destinations page
+    window.scrollTo(0, 0);
   }, [resetAll, resetOnMount]);
 
-  // Filter destinations based on selected country or show random 6
+  // Filter destinations based on selected country, excluding selected destination
   const filteredDestinations = useFilteredDestinations({
     destinations,
     selectedCountry,
+    selectedDestination,
   });
+
+  // Paginate filtered destinations
+  const { displayedItems, hasMore, loadMore } = usePaginatedItems(filteredDestinations);
 
   return (
     <div className="min-h-screen bg-background pt-20 sm:pt-24 pb-8 px-4 sm:px-6 lg:px-8">
@@ -88,19 +96,19 @@ export const DestinationsPageLayout = ({
               </div>
             )}
             <div className="space-y-16 sm:space-y-20 lg:space-y-24">
-              {filteredDestinations.map((destination, index) => (
+              {displayedItems.map((destination, index) => (
                 <div key={destination.id} className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-center">
                   {index % 2 === 0 ? (
                     // Card first, then text
                     <>
                       <div className="flex justify-center lg:justify-end">
                         <DestinationCard
-                          imageUrl={destination.imageUrl}
+                          imageUrl={destination.imageUrl!}
                           imageAlt={destination.imageAlt || ""}
                           title={destination.title}
                           location={destination.location}
-                          overview={destination.overview}
-                          budgetPerDay={destination.budgetPerDay}
+                          overview={destination.overview!}
+                          budgetPerDay={destination.budgetPerDay!}
                           onPlanTrip={() => handlePlanTrip(destination)}
                         />
                       </div>
@@ -114,7 +122,7 @@ export const DestinationsPageLayout = ({
                         <div>
                           <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2 sm:mb-3">Student Perks</h3>
                           <ul className="space-y-2">
-                            {destination.studentPerks.map((perk, perkIndex) => (
+                            {destination.studentPerks!.map((perk, perkIndex) => (
                               <li key={perkIndex} className="flex items-start gap-2 text-muted-foreground text-sm sm:text-base">
                                 <span className="text-primary mt-1 shrink-0">•</span>
                                 <span>{perk}</span>
@@ -137,7 +145,7 @@ export const DestinationsPageLayout = ({
                         <div>
                           <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2 sm:mb-3">Student Perks</h3>
                           <ul className="space-y-2">
-                            {destination.studentPerks.map((perk, perkIndex) => (
+                            {destination.studentPerks!.map((perk, perkIndex) => (
                               <li key={perkIndex} className="flex items-start gap-2 text-muted-foreground text-sm sm:text-base">
                                 <span className="text-primary mt-1 shrink-0">•</span>
                                 <span>{perk}</span>
@@ -148,12 +156,12 @@ export const DestinationsPageLayout = ({
                       </div>
                       <div className="flex justify-center lg:justify-start order-1 lg:order-2">
                         <DestinationCard
-                          imageUrl={destination.imageUrl}
+                          imageUrl={destination.imageUrl!}
                           imageAlt={destination.imageAlt || ""}
                           title={destination.title}
                           location={destination.location}
-                          overview={destination.overview}
-                          budgetPerDay={destination.budgetPerDay}
+                          overview={destination.overview!}
+                          budgetPerDay={destination.budgetPerDay!}
                           onPlanTrip={() => handlePlanTrip(destination)}
                         />
                       </div>
@@ -165,10 +173,24 @@ export const DestinationsPageLayout = ({
           </>
         )}
 
-        <DestinationFooter
-          selectedCountry={selectedCountry}
-          defaultText={defaultFooterText}
-        />
+        {/* Load More Button */}
+        {!isLoading && hasMore && (
+          <div className="flex justify-center mt-8 mb-6">
+            <Button variant="outline" size="lg" onClick={loadMore} className="gap-2">
+              Load More Destinations
+              <ArrowDown className="size-4" />
+            </Button>
+          </div>
+        )}
+
+        {/* Footer - Hide during loading */}
+        {!isLoading && (
+          <DestinationFooter
+            selectedCountry={selectedCountry}
+            defaultText={defaultFooterText}
+            hasLoadMore={hasMore}
+          />
+        )}
       </div>
     </div>
   );
