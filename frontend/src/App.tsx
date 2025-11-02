@@ -5,14 +5,16 @@ import { Toaster } from '@/components/ui/sonner';
 import { ProtectedRoute } from '@/guards';
 import { HomePage, AboutPage, TourPage, ContactPage, ProfilePage, MyTripsPage, PopularDestinationsPage, EuropeDestinationsPage, AmericasDestinationsPage, AsiaDestinationsPage, AfricaDestinationsPage } from '@/pages';
 
+
+//todo improve this
 function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
         <DestinationProvider>
           <Router>
-          <Header />
-          <Routes>
+            <Header />
+            <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/tour" element={<TourPage />} />
