@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, AuthProvider, DestinationProvider } from '@/contexts';
-import { Header } from '@/components';
+import { Header, Footer } from '@/components';
 import { Toaster } from '@/components/ui/sonner';
 import { ProtectedRoute } from '@/guards';
 import { HomePage, AboutPage, TourPage, ContactPage, ProfilePage, MyTripsPage, PopularDestinationsPage, EuropeDestinationsPage, AmericasDestinationsPage, AsiaDestinationsPage, AfricaDestinationsPage } from '@/pages';
@@ -41,6 +41,7 @@ function App() {
               } 
             />
           </Routes>
+          <Footer />
           <Toaster />
         </Router>
         </DestinationProvider>

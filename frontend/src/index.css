@@ -283,7 +283,7 @@
     @apply bg-background text-foreground;
   }
 }
-
+/* todo move */
 @layer utilities {
   @keyframes bounce-gentle {
     0%, 100% {

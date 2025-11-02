@@ -1,4 +1,23 @@
 import { MapPin, Calendar, Plane } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+
+const features = [
+  {
+    icon: MapPin,
+    title: "Curated Destinations",
+    description: "Handpicked locations perfect for student travelers on any budget",
+  },
+  {
+    icon: Calendar,
+    title: "Flexible Booking",
+    description: "Easy scheduling that works around your academic calendar",
+  },
+  {
+    icon: Plane,
+    title: "Group Travel",
+    description: "Connect with other students and travel together for better experiences",
+  },
+];
 
 export function FeaturesSection() {
   return (
@@ -12,35 +31,29 @@ export function FeaturesSection() {
         </div>
 
         <div className="grid md:grid-cols-3 gap-8">
-          <div className="bg-card border border-border rounded-xl p-6 hover:shadow-lg transition-shadow">
-            <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-              <MapPin className="w-6 h-6 text-primary" />
-            </div>
-            <h3 className="text-xl font-semibold text-card-foreground mb-2">Curated Destinations</h3>
-            <p className="text-muted-foreground">
-              Handpicked locations perfect for student travelers on any budget
-            </p>
-          </div>
-
-          <div className="bg-card border border-border rounded-xl p-6 hover:shadow-lg transition-shadow">
-            <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-              <Calendar className="w-6 h-6 text-primary" />
-            </div>
-            <h3 className="text-xl font-semibold text-card-foreground mb-2">Flexible Booking</h3>
-            <p className="text-muted-foreground">
-              Easy scheduling that works around your academic calendar
-            </p>
-          </div>
-
-          <div className="bg-card border border-border rounded-xl p-6 hover:shadow-lg transition-shadow">
-            <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-              <Plane className="w-6 h-6 text-primary" />
-            </div>
-            <h3 className="text-xl font-semibold text-card-foreground mb-2">Group Travel</h3>
-            <p className="text-muted-foreground">
-              Connect with other students and travel together for better experiences
-            </p>
-          </div>
+          {features.map((feature) => {
+            const Icon = feature.icon;
+            return (
+              <Card 
+                key={feature.title} 
+                className="rounded-2xl hover:shadow-xl hover:scale-105 transition-all duration-300 group"
+              >
+                <CardHeader>
+                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4 transition-all duration-300 group-hover:bg-primary/20 group-hover:scale-110">
+                    <Icon className="w-6 h-6 text-primary transition-transform duration-300 group-hover:scale-110" />
+                  </div>
+                  <CardTitle className="text-xl transition-colors duration-300 group-hover:text-primary">
+                    {feature.title}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription className="text-base">
+                    {feature.description}
+                  </CardDescription>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       </div>
     </section>
