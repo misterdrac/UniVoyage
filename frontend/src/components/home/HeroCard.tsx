@@ -7,7 +7,7 @@ export function HeroCard() {
   const navigate = useNavigate();
 
   return (
-    <div className="bg-card/60 backdrop-blur-md rounded-xl border border-border/50 p-4 md:p-5 shadow-2xl max-w-xl mx-auto">
+    <div className="bg-card/75 backdrop-blur-md rounded-xl border border-border/50 p-4 md:p-5 shadow-2xl max-w-xl mx-auto">
       <div className="text-center">
         <div className="inline-block mb-3">
           <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-semibold">
