@@ -84,7 +84,7 @@ export const DestinationsPageLayout = ({
         {/* Destination Cards */}
         {!isLoading && (
           <>
-            {selectedDestination && (
+            {selectedDestination && displayedItems.length > 0 && (
               <div className="-mt-8 sm:-mt-10 mb-6 sm:mb-8 text-center">
                 <div className="flex items-center justify-center gap-2">
                   <ChevronDown className="size-4 text-muted-foreground" />
@@ -95,8 +95,15 @@ export const DestinationsPageLayout = ({
                 </div>
               </div>
             )}
-            <div className="space-y-16 sm:space-y-20 lg:space-y-24">
-              {displayedItems.map((destination, index) => (
+            {displayedItems.length === 0 ? (
+              <div className="text-center py-12 sm:py-16">
+                <p className="text-lg sm:text-xl text-muted-foreground">
+                  Unfortunately, there are no more destination cards to show, but there are still other amazing options available.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-16 sm:space-y-20 lg:space-y-24">
+                {displayedItems.map((destination, index) => (
                 <div key={destination.id} className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-center">
                   {index % 2 === 0 ? (
                     // Card first, then text
@@ -169,7 +176,8 @@ export const DestinationsPageLayout = ({
                   )}
                 </div>
               ))}
-            </div>
+              </div>
+            )}
           </>
         )}
 

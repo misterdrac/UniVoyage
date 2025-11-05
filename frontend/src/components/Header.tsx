@@ -172,7 +172,7 @@ export function Header() {
                   {user.profileImage ? (
                     <img
                       src={user.profileImage}
-                      alt={user.name}
+                      alt={`${user.firstName} ${user.surname || ''}`.trim()}
                       className="w-6 h-6 rounded-full object-cover"
                       style={{ width: UI_CONSTANTS.PROFILE_PICTURE_SIZE.SMALL, height: UI_CONSTANTS.PROFILE_PICTURE_SIZE.SMALL }}
                     />
@@ -180,7 +180,7 @@ export function Header() {
                     <User className="w-4 h-4" />
                   )}
                   <span className="hidden sm:inline font-medium">
-                    {user.name || user.email}
+                    {`${user.firstName} ${user.surname || ''}`.trim() || user.email}
                   </span>
                 </Button>
               </>
@@ -284,7 +284,7 @@ export function Header() {
                     {user.profileImage ? (
                       <img
                         src={user.profileImage}
-                        alt={user.name}
+                        alt={`${user.firstName} ${user.surname || ''}`.trim()}
                         className="w-6 h-6 rounded-full object-cover mr-2"
                         style={{ width: UI_CONSTANTS.PROFILE_PICTURE_SIZE.SMALL, height: UI_CONSTANTS.PROFILE_PICTURE_SIZE.SMALL }}
                       />
@@ -292,7 +292,7 @@ export function Header() {
                       <User className="w-4 h-4 mr-2" />
                     )}
                     <span className="font-medium">
-                      {user.name || user.email}
+                      {`${user.firstName} ${user.surname || ''}`.trim() || user.email}
                     </span>
                   </Button>
                 ) : (

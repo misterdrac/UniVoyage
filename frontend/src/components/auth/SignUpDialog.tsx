@@ -21,7 +21,8 @@ interface SignUpDialogProps {
 export function SignUpDialog({ open, onOpenChange, onLoginClick }: SignUpDialogProps) {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [name, setName] = useState("")
+  const [firstName, setFirstName] = useState("")
+  const [surname, setSurname] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
@@ -48,7 +49,8 @@ export function SignUpDialog({ open, onOpenChange, onLoginClick }: SignUpDialogP
     const result = await signup({
       email,
       password,
-      name,
+      firstName,
+      surname,
       hobbies,
       languages,
       country: country?.value
@@ -57,7 +59,8 @@ export function SignUpDialog({ open, onOpenChange, onLoginClick }: SignUpDialogP
     if (result.success) {
       toast.success("Account created successfully! Welcome to UniVoyage!")
       onOpenChange(false)
-      setName("")
+      setFirstName("")
+      setSurname("")
       setEmail("")
       setPassword("")
       setConfirmPassword("")
@@ -86,7 +89,7 @@ export function SignUpDialog({ open, onOpenChange, onLoginClick }: SignUpDialogP
   const passwordsMatch = password === confirmPassword
   const passwordStrength = getPasswordStrength(password)
   const isFormValid = 
-    name.trim().length >= 2 &&
+    firstName.trim().length >= 2 &&
     email.trim() !== "" && 
     country !== undefined &&
     password.trim().length >= VALIDATION.MIN_PASSWORD_LENGTH && 
@@ -98,7 +101,8 @@ export function SignUpDialog({ open, onOpenChange, onLoginClick }: SignUpDialogP
     onOpenChange(newOpen)
     if (!newOpen) {
       // Reset form when dialog closes
-      setName("")
+      setFirstName("")
+      setSurname("")
       setEmail("")
       setPassword("")
       setConfirmPassword("")
@@ -121,21 +125,39 @@ export function SignUpDialog({ open, onOpenChange, onLoginClick }: SignUpDialogP
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Name and Email in a row */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Name Input */}
+            {/* First Name Input */}
             <div className="space-y-2">
-              <label htmlFor="signup-name" className="text-sm font-medium text-foreground">
-                Name <span className="text-destructive">*</span>
+              <label htmlFor="signup-firstname" className="text-sm font-medium text-foreground">
+                First Name <span className="text-destructive">*</span>
               </label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  id="signup-name"
+                  id="signup-firstname"
                   type="text"
-                  placeholder="Enter your name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Enter your first name"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
                   className="pl-10"
                   required
+                />
+              </div>
+            </div>
+
+            {/* Surname Input */}
+            <div className="space-y-2">
+              <label htmlFor="signup-surname" className="text-sm font-medium text-foreground">
+                Surname
+              </label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="signup-surname"
+                  type="text"
+                  placeholder="Enter your surname"
+                  value={surname}
+                  onChange={(e) => setSurname(e.target.value)}
+                  className="pl-10"
                 />
               </div>
             </div>

@@ -16,7 +16,19 @@ interface DateRangePickerProps {
 export const DateRangePicker = ({ value, onChange, disabled }: DateRangePickerProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const [tempRange, setTempRange] = useState<DateRange | undefined>(value)
+  const [isMobile, setIsMobile] = useState(false)
   const pickerRef = useRef<HTMLDivElement>(null)
+
+  // Detect mobile screen size
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   // Update tempRange when value changes externally
   useEffect(() => {
@@ -26,7 +38,32 @@ export const DateRangePicker = ({ value, onChange, disabled }: DateRangePickerPr
   // Close calendar when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (pickerRef.current && !pickerRef.current.contains(event.target as Node)) {
+      const target = event.target as HTMLElement
+      
+      // Calculate scrollbar dimensions
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
+      const scrollbarHeight = window.innerHeight - document.documentElement.clientHeight
+      
+      // Don't close if clicking on scrollbar
+      // Check if click is in the scrollbar area
+      const clickX = event.clientX
+      const clickY = event.clientY
+      const windowWidth = window.innerWidth
+      const windowHeight = window.innerHeight
+      
+      // Check if click is in the vertical scrollbar area (right edge)
+      const verticalScrollbarArea = scrollbarWidth > 0 ? scrollbarWidth : 17
+      if (clickX >= windowWidth - verticalScrollbarArea - 5) {
+        return
+      }
+      
+      // Check if click is in the horizontal scrollbar area (bottom edge)
+      const horizontalScrollbarArea = scrollbarHeight > 0 ? scrollbarHeight : 17
+      if (clickY >= windowHeight - horizontalScrollbarArea - 5) {
+        return
+      }
+      
+      if (pickerRef.current && !pickerRef.current.contains(target)) {
         setIsOpen(false)
         setTempRange(value)
       }
@@ -137,37 +174,42 @@ export const DateRangePicker = ({ value, onChange, disabled }: DateRangePickerPr
       
       {isOpen && (
         <div className="absolute top-full left-0 z-100 mt-3 bg-background rounded-2xl shadow-2xl">
-          <div className="p-6">
+          <div className="px-3 sm:px-6 pt-6 pb-3">
             <Calendar
               mode="range"
               defaultMonth={tempRange?.from || new Date()}
               selected={tempRange}
               onSelect={handleDateChange}
-              numberOfMonths={2}
+              numberOfMonths={isMobile ? 1 : 2}
               disabled={isDateDisabled}
               startMonth={getToday()}
               endMonth={getOneYearFromNow()}
               className="rounded-2xl p-0"
             />
           </div>
-          <div className="px-6 pb-6 flex justify-end gap-3">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={handleClear}
-              disabled={!tempRange?.from}
-              className="px-8 h-11 text-base"
-            >
-              Clear
-            </Button>
-            <Button
-              type="button"
-              onClick={handleApply}
-              disabled={!isRangeComplete}
-              className="px-8 h-11 text-base bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Apply
-            </Button>
+          <div className="px-3 sm:px-6 pb-6 space-y-2">
+            <p className="text-xs text-muted-foreground text-center">
+              A trip can last for a maximum of 1 month and must be less than a year away
+            </p>
+            <div className="flex justify-end gap-3">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={handleClear}
+                disabled={!tempRange?.from}
+                className="px-8 h-11 text-base"
+              >
+                Clear
+              </Button>
+              <Button
+                type="button"
+                onClick={handleApply}
+                disabled={!isRangeComplete}
+                className="px-8 h-11 text-base bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Apply
+              </Button>
+            </div>
           </div>
         </div>
       )}

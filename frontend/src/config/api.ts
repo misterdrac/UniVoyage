@@ -15,6 +15,10 @@ export const API_CONFIG = {
       ME: '/auth/me',
       GOOGLE: '/auth/google',
       GOOGLE_CALLBACK: '/auth/google/callback',
+    },
+    USER: {
+      UPDATE_PROFILE: '/user/profile',
+      UPDATE_PROFILE_PICTURE: '/user/profile-picture',
     }
   },
   

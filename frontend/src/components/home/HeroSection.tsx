@@ -1,4 +1,4 @@
-import planeImage from "@/assets/images/plane2.jpg";
+import HeroImage from "@/assets/images/hero2.jpg";
 import { HeroCard } from "./HeroCard";
 import { ExploreMoreButton } from "./ExploreMoreButton";
 
@@ -16,7 +16,7 @@ export function HeroSection() {
         />
         {/* Desktop Image */}
         <img
-          src={planeImage}
+          src={HeroImage}
           alt="Students planning travel"
           className="hidden md:block w-full h-full object-cover"
         />
