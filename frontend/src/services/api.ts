@@ -83,6 +83,8 @@ class ApiService {
   }
 
   // Auth API methods
+  // BE: POST /api/auth/login returns {success, user, token} or {success, error}
+  // User: {id, firstName, surname?, email, hobbies, languages, country, visited, profileImage?, dateOfRegister, dateOfLastSignin?, role}
   async login(email: string, password: string): Promise<AuthResponse> {
     if (this.useMock) {
       const user = authenticateUser(email, password);
@@ -109,6 +111,8 @@ class ApiService {
     return response.data || response;
   }
 
+  // BE: POST /api/auth/register expects {email, password, firstName, surname?, hobbies?, languages?, country?}
+  // Returns {success, user, token} or {success, error}. User: {id, firstName, surname?, email, hobbies, languages, country, visited, profileImage?, dateOfRegister, dateOfLastSignin?, role}
   async register(data: {
     email: string;
     password: string;
@@ -171,6 +175,7 @@ class ApiService {
   }
 
 
+  // BE: POST /api/auth/logout with Authorization: Bearer <token> returns {success: true}
   async logout(): Promise<{ success: boolean }> {
     if (this.useMock) {
       this.removeAuthToken();
@@ -191,6 +196,7 @@ class ApiService {
     return { success: true };
   }
 
+  // BE: GET /api/auth/me with Authorization: Bearer <token> returns {success, data: {user}} or {success: false, error}
   async getCurrentUser(): Promise<User | null> {
     if (this.useMock) {
       const token = this.getAuthToken();
@@ -241,6 +247,8 @@ class ApiService {
     return response.data || response;
   }
 
+  // BE: PUT /api/user/profile with Authorization: Bearer <token> expects {firstName?, surname?, country?, hobbies?, languages?, visited?}
+  // Returns {success, data: {success, user}} or {success: false, error}
   async updateProfile(data: {
     firstName?: string;
     surname?: string;
@@ -296,6 +304,8 @@ class ApiService {
     }
   }
 
+  // BE: POST /api/user/profile-picture with Authorization: Bearer <token>, FormData with 'image' field, max 5MB
+  // Returns {success, data: {success, user}} or {success: false, error}
   async uploadProfilePicture(file: File): Promise<{ success: boolean; user?: User; error?: string }> {
     if (this.useMock) {
       try {

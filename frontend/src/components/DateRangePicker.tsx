@@ -1,5 +1,3 @@
-'use client'
-
 import { useState, useRef, useEffect } from 'react'
 import { Calendar as CalendarIcon } from 'lucide-react'
 import { Input } from '@/components/ui/input'
@@ -22,7 +20,7 @@ export const DateRangePicker = ({ value, onChange, disabled }: DateRangePickerPr
   // Detect mobile screen size
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
+      setIsMobile(window.innerWidth < 1100 || window.innerHeight < 800)  
     }
     
     checkMobile()
@@ -37,6 +35,8 @@ export const DateRangePicker = ({ value, onChange, disabled }: DateRangePickerPr
 
   // Close calendar when clicking outside
   useEffect(() => {
+    if (!isOpen) return
+
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement
       
@@ -45,21 +45,13 @@ export const DateRangePicker = ({ value, onChange, disabled }: DateRangePickerPr
       const scrollbarHeight = window.innerHeight - document.documentElement.clientHeight
       
       // Don't close if clicking on scrollbar
-      // Check if click is in the scrollbar area
-      const clickX = event.clientX
-      const clickY = event.clientY
-      const windowWidth = window.innerWidth
-      const windowHeight = window.innerHeight
-      
-      // Check if click is in the vertical scrollbar area (right edge)
       const verticalScrollbarArea = scrollbarWidth > 0 ? scrollbarWidth : 17
-      if (clickX >= windowWidth - verticalScrollbarArea - 5) {
-        return
-      }
-      
-      // Check if click is in the horizontal scrollbar area (bottom edge)
       const horizontalScrollbarArea = scrollbarHeight > 0 ? scrollbarHeight : 17
-      if (clickY >= windowHeight - horizontalScrollbarArea - 5) {
+      
+      if (
+        event.clientX >= window.innerWidth - verticalScrollbarArea - 5 ||
+        event.clientY >= window.innerHeight - horizontalScrollbarArea - 5
+      ) {
         return
       }
       
@@ -69,30 +61,21 @@ export const DateRangePicker = ({ value, onChange, disabled }: DateRangePickerPr
       }
     }
 
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside)
-      return () => {
-        document.removeEventListener('mousedown', handleClickOutside)
-      }
-    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [isOpen, value])
 
   const formatDateRange = () => {
     if (!value?.from) return null
-    if (value.to) {
-      const fromMonth = value.from.toLocaleDateString('en-US', { month: 'short' })
-      const fromDay = value.from.toLocaleDateString('en-US', { day: 'numeric' })
-      const toMonth = value.to.toLocaleDateString('en-US', { month: 'short' })
-      const toDay = value.to.toLocaleDateString('en-US', { day: 'numeric' })
-      return `${fromMonth} ${fromDay} - ${toMonth} ${toDay}`
+    
+    const formatDate = (date: Date) => {
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
     }
-    const month = value.from.toLocaleDateString('en-US', { month: 'short' })
-    const day = value.from.toLocaleDateString('en-US', { day: 'numeric' })
-    return `${month} ${day}`
-  }
-
-  const handleDateChange = (range: DateRange | undefined) => {
-    setTempRange(range)
+    
+    if (value.to) {
+      return `${formatDate(value.from)} - ${formatDate(value.to)}`
+    }
+    return formatDate(value.from)
   }
 
   const handleApply = () => {
@@ -106,19 +89,18 @@ export const DateRangePicker = ({ value, onChange, disabled }: DateRangePickerPr
     setIsOpen(false)
   }
 
-  // Calculate maximum date (1 year from now)
-  const getOneYearFromNow = () => {
-    const today = new Date()
-    const oneYearFromNow = new Date()
-    oneYearFromNow.setFullYear(today.getFullYear() + 1)
-    return oneYearFromNow
-  }
-
-  // Calculate today date for fromMonth
+  // Helper: Get today at midnight
   const getToday = () => {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
     return today
+  }
+
+  // Helper: Get date 1 year from now
+  const getOneYearFromNow = () => {
+    const date = new Date()
+    date.setFullYear(date.getFullYear() + 1)
+    return date
   }
 
   // Disable dates based on custom rules
@@ -156,8 +138,6 @@ export const DateRangePicker = ({ value, onChange, disabled }: DateRangePickerPr
     return false
   }
 
-  const isRangeComplete = tempRange?.from && tempRange?.to
-
   return (
     <div className="relative w-full" ref={pickerRef}>
       <div className="relative">
@@ -173,13 +153,13 @@ export const DateRangePicker = ({ value, onChange, disabled }: DateRangePickerPr
       </div>
       
       {isOpen && (
-        <div className="absolute top-full left-0 z-100 mt-3 bg-background rounded-2xl shadow-2xl">
+        <div className="absolute top-full left-1/2 -translate-x-1/2 z-100 mt-3 bg-background rounded-2xl shadow-2xl">
           <div className="px-3 sm:px-6 pt-6 pb-3">
             <Calendar
               mode="range"
               defaultMonth={tempRange?.from || new Date()}
               selected={tempRange}
-              onSelect={handleDateChange}
+              onSelect={setTempRange}
               numberOfMonths={isMobile ? 1 : 2}
               disabled={isDateDisabled}
               startMonth={getToday()}
@@ -204,7 +184,7 @@ export const DateRangePicker = ({ value, onChange, disabled }: DateRangePickerPr
               <Button
                 type="button"
                 onClick={handleApply}
-                disabled={!isRangeComplete}
+                disabled={!tempRange?.from || !tempRange?.to}
                 className="px-8 h-11 text-base bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Apply
