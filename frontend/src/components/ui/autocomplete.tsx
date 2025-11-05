@@ -1,3 +1,20 @@
+/**
+ * AutoComplete Component
+ * 
+ * A flexible autocomplete component with support for:
+ * - Basic filtering and search
+ * - Popular options display (optional)
+ * - Result limiting (optional)
+ * - Dynamic height calculation (optional)
+ * 
+ * @see DestinationAutoComplete for a configured version with destination-specific defaults
+ * 
+ * Optional Future Optimizations (see inline comments):
+ * - Consider useMemo for filtering if performance issues arise with large datasets (1000+ items)
+ * - Consider useMemo for dynamic height calculation if virtual scrolling is added
+ * Note: Current implementation is performant and optimizations are not urgent
+ */
+
 import {
   CommandGroup,
   CommandItem,
@@ -21,6 +38,10 @@ type AutoCompleteProps = {
   isLoading?: boolean
   disabled?: boolean
   placeholder?: string
+  popularOptions?: Option[]
+  popularLabel?: string
+  maxResults?: number
+  dynamicHeight?: boolean
 }
 
 export const AutoComplete = ({
@@ -31,6 +52,10 @@ export const AutoComplete = ({
   onValueChange,
   disabled,
   isLoading = false,
+  popularOptions,
+  popularLabel = "Popular",
+  maxResults,
+  dynamicHeight = false,
 }: AutoCompleteProps) => {
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -95,24 +120,57 @@ export const AutoComplete = ({
     [onValueChange],
   )
 
-  // Filter options based on input value and limit to 6 items
-  const filteredOptions = options
-    .filter((option) =>
-      option.label.toLowerCase().includes(inputValue.toLowerCase())
-    )
-    .sort((a, b) => {
-      // Prioritize exact matches, then starts with, then contains
-      const aLower = a.label.toLowerCase()
-      const bLower = b.label.toLowerCase()
-      const inputLower = inputValue.toLowerCase()
-      
-      if (aLower === inputLower && bLower !== inputLower) return -1
-      if (bLower === inputLower && aLower !== inputLower) return 1
-      if (aLower.startsWith(inputLower) && !bLower.startsWith(inputLower)) return -1
-      if (bLower.startsWith(inputLower) && !aLower.startsWith(inputLower)) return 1
-      return 0
-    })
-    .slice(0, 6)
+  // TODO: [Performance - Optional] Consider using useMemo for filtering if logic becomes more complex or options list grows very large (1000+ items)
+  // When to apply: If you notice slow filtering behavior with large datasets or during profiling
+  // Note: Current implementation is performant and not urgent
+  const isEmpty = !inputValue || inputValue.trim() === ''
+  
+  // Filter options based on input value
+  const filteredOptions = (() => {
+    // If input is empty and popular options are provided, show popular options
+    if (isEmpty && popularOptions && popularOptions.length > 0) {
+      const results = maxResults ? popularOptions.slice(0, maxResults) : popularOptions
+      return results
+    }
+    
+    // Otherwise, filter based on input value
+    const filtered = options
+      .filter((option) =>
+        option.label.toLowerCase().includes(inputValue.toLowerCase())
+      )
+      .sort((a, b) => {
+        // Prioritize exact matches, then starts with, then contains
+        const aLower = a.label.toLowerCase()
+        const bLower = b.label.toLowerCase()
+        const inputLower = inputValue.toLowerCase()
+        
+        if (aLower === inputLower && bLower !== inputLower) return -1
+        if (bLower === inputLower && aLower !== inputLower) return 1
+        if (aLower.startsWith(inputLower) && !bLower.startsWith(inputLower)) return -1
+        if (bLower.startsWith(inputLower) && !aLower.startsWith(inputLower)) return 1
+        return 0
+      })
+    
+    return maxResults ? filtered.slice(0, maxResults) : filtered
+  })()
+  
+  // Check if we're showing popular options
+  const isShowingPopular = isEmpty && popularOptions && popularOptions.length > 0
+  
+  // TODO: [Performance - Optional] Consider extracting height calculation to useMemo if this becomes a bottleneck
+  // When to apply: If dynamicHeight calculations cause re-render issues or if you add virtual scrolling
+  // Note: Current implementation is performant and not urgent
+  // Calculate dynamic height if enabled
+  let listClassName = "rounded-lg max-h-[300px] overflow-y-auto overflow-x-hidden"
+  let calculatedHeight = 300
+  if (dynamicHeight) {
+    const hasMultiLineItems = filteredOptions.some(opt => opt.location && opt.location !== opt.label)
+    const itemHeight = hasMultiLineItems ? 56 : 36
+    const bannerHeight = isShowingPopular ? 40 : 0
+    const totalHeight = filteredOptions.length * itemHeight + bannerHeight
+    calculatedHeight = Math.min(totalHeight, 500)
+    listClassName = `rounded-lg overflow-hidden`
+  }
 
   return (
     <CommandPrimitive>
@@ -140,7 +198,7 @@ export const AutoComplete = ({
             isOpen && filteredOptions.length > 0 ? "block" : "hidden",
           )}
         >
-          <CommandList className="rounded-lg max-h-[300px] overflow-hidden">
+          <CommandList className={listClassName} style={dynamicHeight ? { maxHeight: `${calculatedHeight}px` } : undefined}>
             {isLoading ? (
               <CommandPrimitive.Loading>
                 <div className="p-1">
@@ -149,34 +207,41 @@ export const AutoComplete = ({
               </CommandPrimitive.Loading>
             ) : null}
             {filteredOptions.length > 0 && !isLoading ? (
-              <CommandGroup>
-                {filteredOptions.map((option) => {
-                  const isSelected = selected?.value === option.value
-                  return (
-                    <CommandItem
-                      key={option.value}
-                      value={option.label}
-                      onMouseDown={(event) => {
-                        event.preventDefault()
-                        event.stopPropagation()
-                      }}
-                      onSelect={() => handleSelectOption(option)}
-                      className={cn(
-                        "flex w-full items-center gap-2",
-                        !isSelected ? "pl-8" : null,
-                      )}
-                    >
-                      {isSelected ? <Check className="w-4" /> : null}
-                      <div className="flex flex-col">
-                        <span className="font-medium">{option.label}</span>
-                        {option.location && option.location !== option.label && (
-                          <span className="text-xs text-muted-foreground">{option.location}</span>
+              <>
+                {isShowingPopular && (
+                  <div className="px-3 py-2 text-sm font-semibold text-muted-foreground border-b border-border">
+                    {popularLabel}
+                  </div>
+                )}
+                <CommandGroup>
+                  {filteredOptions.map((option) => {
+                    const isSelected = selected?.value === option.value
+                    return (
+                      <CommandItem
+                        key={option.value}
+                        value={option.label}
+                        onMouseDown={(event) => {
+                          event.preventDefault()
+                          event.stopPropagation()
+                        }}
+                        onSelect={() => handleSelectOption(option)}
+                        className={cn(
+                          "flex w-full items-center gap-2",
+                          !isSelected ? "pl-8" : null,
                         )}
-                      </div>
-                    </CommandItem>
-                  )
-                })}
-              </CommandGroup>
+                      >
+                        {isSelected ? <Check className="w-4" /> : null}
+                        <div className="flex flex-col">
+                          <span className="font-medium">{option.label}</span>
+                          {option.location && option.location !== option.label && (
+                            <span className="text-xs text-muted-foreground">{option.location}</span>
+                          )}
+                        </div>
+                      </CommandItem>
+                    )
+                  })}
+                </CommandGroup>
+              </>
             ) : null}
             {!isLoading && filteredOptions.length === 0 && (
               <CommandPrimitive.Empty className="select-none rounded-sm px-2 py-3 text-center text-sm">

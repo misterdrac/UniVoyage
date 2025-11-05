@@ -69,6 +69,56 @@ export const DateRangePicker = ({ value, onChange, disabled }: DateRangePickerPr
     setIsOpen(false)
   }
 
+  // Calculate maximum date (1 year from now)
+  const getOneYearFromNow = () => {
+    const today = new Date()
+    const oneYearFromNow = new Date()
+    oneYearFromNow.setFullYear(today.getFullYear() + 1)
+    return oneYearFromNow
+  }
+
+  // Calculate today date for fromMonth
+  const getToday = () => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    return today
+  }
+
+  // Disable dates based on custom rules
+  const isDateDisabled = (date: Date) => {
+    // First apply the custom disabled function if provided
+    if (disabled && disabled(date)) {
+      return true
+    }
+
+    // Normalize date to start of day for accurate comparison
+    const compareDate = new Date(date)
+    compareDate.setHours(0, 0, 0, 0)
+    const today = getToday()
+    
+    // Disable dates in the past
+    if (compareDate < today) {
+      return true
+    }
+
+    // Disable dates more than 1 year in the future
+    const oneYearFromNow = getOneYearFromNow()
+    if (compareDate > oneYearFromNow) {
+      return true
+    }
+
+    // Disable dates more than 30 days after start date
+    if (tempRange?.from) {
+      const maxDate = new Date(tempRange.from)
+      maxDate.setDate(maxDate.getDate() + 30)
+      if (compareDate > maxDate) {
+        return true
+      }
+    }
+
+    return false
+  }
+
   const isRangeComplete = tempRange?.from && tempRange?.to
 
   return (
@@ -94,7 +144,9 @@ export const DateRangePicker = ({ value, onChange, disabled }: DateRangePickerPr
               selected={tempRange}
               onSelect={handleDateChange}
               numberOfMonths={2}
-              disabled={disabled}
+              disabled={isDateDisabled}
+              startMonth={getToday()}
+              endMonth={getOneYearFromNow()}
               className="rounded-2xl p-0"
             />
           </div>
