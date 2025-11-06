@@ -1,5 +1,6 @@
-import { useMemo } from 'react';
-import { Plane, X } from 'lucide-react';
+import { useMemo, useCallback, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Plane, X, Loader2 } from 'lucide-react';
 import { type Option } from '@/components/ui/autocomplete';
 import { DestinationAutoComplete } from '@/components/ui/destination-autocomplete';
 import { Button } from '@/components/ui/button';
@@ -23,6 +24,8 @@ export const DestinationPicker = ({ continent }: DestinationPickerProps) => {
     setDateRange,
     planTrip
   } = useDestination();
+  const navigate = useNavigate();
+  const [isCreatingTrip, setIsCreatingTrip] = useState(false);
 
 
   // Popular countries - major countries with multiple destinations
@@ -86,14 +89,38 @@ export const DestinationPicker = ({ continent }: DestinationPickerProps) => {
     setDateRange(range);
   };
 
-  // Handle plan trip button click
-  const handlePlanTrip = () => {
-    planTrip({
-      destination: selectedDestination,
-      departDate: dateRange?.from?.toISOString().split('T')[0] || '',
-      returnDate: dateRange?.to?.toISOString().split('T')[0] || ''
-    });
+  // Helper function to format date as YYYY-MM-DD in local timezone (not UTC)
+  const formatDateLocal = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
+
+  // Handle plan trip button click
+  const handlePlanTrip = useCallback(async () => {
+    if (!selectedDestination || !dateRange?.from || !dateRange?.to) {
+      return;
+    }
+
+    setIsCreatingTrip(true);
+    try {
+      const result = await planTrip({
+        destination: selectedDestination,
+        departDate: formatDateLocal(dateRange.from),
+        returnDate: formatDateLocal(dateRange.to)
+      });
+
+      if (result.success) {
+        // Navigate to My Trips page using client-side navigation
+        navigate('/my-trips', { replace: false });
+      }
+    } catch (error) {
+      console.error('Error creating trip:', error);
+    } finally {
+      setIsCreatingTrip(false);
+    }
+  }, [selectedDestination, dateRange, planTrip, navigate]);
 
   return (
     <div className="relative z-10">
@@ -188,10 +215,19 @@ export const DestinationPicker = ({ continent }: DestinationPickerProps) => {
           <Button 
             onClick={handlePlanTrip}
             className="w-full h-12 text-base"
-            disabled={!selectedDestination || !dateRange?.from || !dateRange?.to}
+            disabled={!selectedDestination || !dateRange?.from || !dateRange?.to || isCreatingTrip}
           >
-            <Plane className="mr-2 h-5 w-5" />
-            Plan Trip
+            {isCreatingTrip ? (
+              <>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Creating...
+              </>
+            ) : (
+              <>
+                <Plane className="mr-2 h-5 w-5" />
+                Plan Trip
+              </>
+            )}
           </Button>
         </div>
       </div>

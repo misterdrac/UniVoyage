@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, type ReactNode, useCallback, useEffect, useRef } from 'react';
 import type { Option } from '@/components/ui/autocomplete';
 import type { DateRange } from 'react-day-picker';
+import { useAuth } from './AuthContext';
+import { useTrips } from './TripContext';
 
 interface TripData {
   destination: Option | undefined;
@@ -15,13 +17,15 @@ interface DestinationContextType {
   isLoading: boolean;
   loadingCountry: string;
   isAnimating: boolean;
+  showAuthDialog: boolean;
   setCountry: (country: Option | undefined) => void;
   setDestination: (destination: Option | undefined) => void;
   setDateRange: (range: DateRange | undefined) => void;
   resetAll: () => void;
   handlePlanTrip: (destination: { id: number; title: string; location: string }) => void;
-  planTrip: (data: TripData) => void;
+  planTrip: (data: TripData) => Promise<{ success: boolean; error?: string }>;
   scrollToTop: () => void;
+  setShowAuthDialog: (show: boolean) => void;
 }
 
 const DestinationContext = createContext<DestinationContextType | undefined>(undefined);
@@ -46,7 +50,11 @@ export const DestinationProvider: React.FC<DestinationProviderProps> = ({ childr
   const [isLoading, setIsLoading] = useState(false);
   const [loadingCountry, setLoadingCountry] = useState<string>('');
   const [isAnimating, setIsAnimating] = useState(false);
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
   const previousCountryRef = useRef<string>('');
+  const animationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { user } = useAuth();
+  const { createTrip } = useTrips();
 
   // Watch for country changes and trigger loading animation
   useEffect(() => {
@@ -69,6 +77,16 @@ export const DestinationProvider: React.FC<DestinationProviderProps> = ({ childr
     }
   }, [selectedCountry]);
 
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      // Clear animation timeout on unmount
+      if (animationTimeoutRef.current) {
+        clearTimeout(animationTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const setCountry = useCallback((country: Option | undefined) => {
     setSelectedCountry(country);
   }, []);
@@ -82,6 +100,11 @@ export const DestinationProvider: React.FC<DestinationProviderProps> = ({ childr
   }, []);
 
   const resetAll = useCallback(() => {
+    // Clear animation timeout if it exists
+    if (animationTimeoutRef.current) {
+      clearTimeout(animationTimeoutRef.current);
+      animationTimeoutRef.current = null;
+    }
     setSelectedCountry(undefined);
     setSelectedDestination(undefined);
     setDateRange(undefined);
@@ -96,6 +119,11 @@ export const DestinationProvider: React.FC<DestinationProviderProps> = ({ childr
   }, []);
 
   const handlePlanTrip = useCallback((destination: { id: number; title: string; location: string }) => {
+    // Clear any existing animation timeout
+    if (animationTimeoutRef.current) {
+      clearTimeout(animationTimeoutRef.current);
+    }
+
     const option: Option = {
       value: destination.id.toString(),
       label: destination.title,
@@ -117,15 +145,42 @@ export const DestinationProvider: React.FC<DestinationProviderProps> = ({ childr
     setIsAnimating(true);
     scrollToTop();
     
-    setTimeout(() => {
+    animationTimeoutRef.current = setTimeout(() => {
       setIsAnimating(false);
+      animationTimeoutRef.current = null;
     }, 300);
   }, [selectedCountry, scrollToTop]);
 
-  const planTripHandler = useCallback((data: TripData) => {
-    scrollToTop();
-    onPlanTrip?.(data);
-  }, [onPlanTrip, scrollToTop]);
+  const planTripHandler = useCallback(async (data: TripData): Promise<{ success: boolean; error?: string }> => {
+    // Check if user is logged in
+    if (!user) {
+      setShowAuthDialog(true);
+      return { success: false, error: 'You must be logged in to create a trip' };
+    }
+
+    // Check if destination and dates are selected
+    if (!data.destination || !data.departDate || !data.returnDate) {
+      return { success: false, error: 'Please select a destination and dates' };
+    }
+
+    // Create trip
+    const result = await createTrip({
+      destinationId: parseInt(data.destination.value),
+      destinationName: data.destination.label,
+      destinationLocation: data.destination.location || '',
+      departureDate: data.departDate,
+      returnDate: data.returnDate,
+    });
+
+    if (result.success) {
+      // Reset form on success
+      resetAll();
+      // Also call the original callback if provided
+      onPlanTrip?.(data);
+    }
+
+    return result;
+  }, [user, createTrip, resetAll, onPlanTrip]);
 
   const value: DestinationContextType = {
     selectedCountry,
@@ -134,6 +189,7 @@ export const DestinationProvider: React.FC<DestinationProviderProps> = ({ childr
     isLoading,
     loadingCountry,
     isAnimating,
+    showAuthDialog,
     setCountry,
     setDestination,
     setDateRange: setDateRangeHandler,
@@ -141,6 +197,7 @@ export const DestinationProvider: React.FC<DestinationProviderProps> = ({ childr
     handlePlanTrip,
     planTrip: planTripHandler,
     scrollToTop,
+    setShowAuthDialog,
   };
 
   return (
