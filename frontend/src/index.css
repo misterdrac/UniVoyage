@@ -333,18 +333,18 @@
     @apply bg-background text-foreground;
   }
 }
-/* todo move */
+
 @layer utilities {
-  @keyframes bounce-gentle {
+  @keyframes bounce-once {
     0%, 100% {
       transform: translateY(0);
     }
     50% {
-      transform: translateY(-4px);
+      transform: translateY(-8px);
     }
   }
   
-  .animate-bounce-gentle {
-    animation: bounce-gentle 0.3s ease-in-out;
+  .animate-bounce-once {
+    animation: bounce-once 0.3s ease-in-out;
   }
 }

@@ -1,13 +1,25 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { DestinationCard } from '@/components/ui/destination-card';
-import { DestinationPicker } from '@/components';
-import { LoadingSpinner, DestinationFooter } from '@/components/destinations';
+import { DestinationPicker, LoadingSpinner, DestinationFooter, useFilteredDestinations } from '@/components/destinations';
 import { useDestination } from '@/contexts/DestinationContext';
-import { useFilteredDestinations } from '@/hooks/useFilteredDestinations';
 import { usePaginatedItems } from '@/hooks/usePaginatedItems';
 import { ChevronDown, ArrowDown } from 'lucide-react';
 import type { Destination } from '@/data/destinations';
 import { Button } from '@/components/ui/button';
+
+// Shuffle array using Fisher-Yates algorithm
+const shuffleArray = <T,>(array: T[]): T[] => {
+  const shuffled = [...array]; // Create a copy to avoid mutating original
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]; // Swap elements
+  }
+  return shuffled;
+};
+
+// Store shuffled destinations per page for this session (module-level Map)
+// Key: page identifier (title or continent), Value: shuffled array
+const sessionShuffledDestinations = new Map<string, Destination[]>();
 
 interface DestinationsPageLayoutProps {
   title: string;
@@ -45,9 +57,24 @@ export const DestinationsPageLayout = ({
     window.scrollTo(0, 0);
   }, [resetAll, resetOnMount]);
 
+  // Shuffle destinations once per session (per page)
+  const shuffledDestinations = useMemo(() => {
+    // Create a unique key for this page (use title as identifier)
+    const pageKey = title;
+    
+    // If we haven't shuffled this page this session, do it now
+    if (!sessionShuffledDestinations.has(pageKey)) {
+      const shuffled = shuffleArray(destinations);
+      sessionShuffledDestinations.set(pageKey, shuffled);
+    }
+    
+    // Return the shuffled array for this session
+    return sessionShuffledDestinations.get(pageKey)!;
+  }, [destinations, title]);
+
   // Filter destinations based on selected country, excluding selected destination
   const filteredDestinations = useFilteredDestinations({
-    destinations,
+    destinations: shuffledDestinations,
     selectedCountry,
     selectedDestination,
   });
@@ -73,7 +100,7 @@ export const DestinationsPageLayout = ({
             </div>
           </div>
           
-          <div className={isAnimating ? "animate-bounce-gentle" : ""}>
+          <div className={isAnimating ? "animate-bounce-once" : ""}>
             <DestinationPicker continent={continent} />
           </div>
         </div>

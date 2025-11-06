@@ -32,7 +32,7 @@ export const useProfileForm = ({ user, isEditingProfile, isEditingInterests }: U
     }
   }, [user]);
 
-  // Initialize profile form data when editing starts
+  // Reset profile form when editing starts
   useEffect(() => {
     if (user && isEditingProfile) {
       setFirstName(user.firstName || '');
@@ -41,7 +41,7 @@ export const useProfileForm = ({ user, isEditingProfile, isEditingInterests }: U
     }
   }, [user, isEditingProfile]);
 
-  // Initialize interests form data when editing starts
+  // Reset interests form when editing starts
   useEffect(() => {
     if (user && isEditingInterests) {
       setHobbies(user.hobbies || []);

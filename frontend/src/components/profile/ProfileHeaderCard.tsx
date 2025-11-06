@@ -13,7 +13,6 @@ interface ProfileHeaderCardProps {
   user: UserType;
   isEditing: boolean;
   isSaving: boolean;
-  isLoading: boolean;
   firstName: string;
   surname: string;
   country: Option | undefined;
@@ -34,7 +33,6 @@ export const ProfileHeaderCard = ({
   user,
   isEditing,
   isSaving,
-  isLoading,
   firstName,
   surname,
   country,
@@ -102,7 +100,6 @@ export const ProfileHeaderCard = ({
             imagePreview={imagePreview}
             isUploading={isUploadingImage}
             isEditing={isEditing}
-            isLoading={isLoading}
             onImageClick={onImageClick}
             onImageChange={onImageChange}
             fileInputRef={fileInputRef}

@@ -6,7 +6,6 @@ interface ProfileAvatarProps {
   imagePreview?: string | null;
   isUploading: boolean;
   isEditing: boolean;
-  isLoading: boolean;
   onImageClick: () => void;
   onImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   fileInputRef: React.RefObject<HTMLInputElement | null>;
@@ -18,7 +17,6 @@ export const ProfileAvatar = ({
   imagePreview,
   isUploading,
   isEditing,
-  isLoading,
   onImageClick,
   onImageChange,
   fileInputRef,
@@ -53,7 +51,7 @@ export const ProfileAvatar = ({
           <button
             type="button"
             onClick={onImageClick}
-            disabled={isUploading || isLoading}
+            disabled={isUploading}
             className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer disabled:cursor-not-allowed"
           >
             <Camera className="w-6 h-6 text-white" />
@@ -66,7 +64,7 @@ export const ProfileAvatar = ({
         accept="image/*"
         onChange={onImageChange}
         className="hidden"
-        disabled={isUploading || isLoading || !isEditing}
+        disabled={isUploading || !isEditing}
       />
       {isEditing && (
         <p className="text-xs text-muted-foreground text-center mt-2">

@@ -119,7 +119,7 @@ export const DestinationProvider: React.FC<DestinationProviderProps> = ({ childr
     
     setTimeout(() => {
       setIsAnimating(false);
-    }, 1000);
+    }, 300);
   }, [selectedCountry, scrollToTop]);
 
   const planTripHandler = useCallback((data: TripData) => {

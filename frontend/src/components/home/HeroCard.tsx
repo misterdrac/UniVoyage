@@ -27,8 +27,6 @@ export function HeroCard() {
 
         <div className="flex justify-center mb-4">
           <Button
-            variant="default"
-            size="default"
             className="text-sm px-6 transition-transform duration-200 hover:scale-105 group/btn"
             onClick={() => navigate('/destinations')}
           >

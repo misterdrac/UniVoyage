@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import {
@@ -12,8 +12,8 @@ import {
   useProfileImage,
 } from '@/components/profile';
 
-const ProfilePage: React.FC = () => {
-  const { user, logout, updateProfile, uploadProfilePicture, isLoading } = useAuth();
+const ProfilePage = () => {
+  const { user, logout, updateProfile, uploadProfilePicture } = useAuth();
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isEditingInterests, setIsEditingInterests] = useState(false);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
@@ -133,7 +133,6 @@ const ProfilePage: React.FC = () => {
           user={user}
           isEditing={isEditingProfile}
           isSaving={isSavingProfile}
-          isLoading={isLoading}
           firstName={firstName}
           surname={surname}
           country={country}

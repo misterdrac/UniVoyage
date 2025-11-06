@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { DestinationCard } from "@/components/ui/destination-card";
 import {
@@ -12,7 +13,7 @@ import { getPopularDestinations } from "@/data/destinations";
 export function PopularDestinationsCarousel() {
   const navigate = useNavigate();
 
-  const popularDestinations = getPopularDestinations().slice(0, 12);
+  const popularDestinations = useMemo(() => getPopularDestinations().slice(0, 12), []);
 
   return (
     <section className="pt-32 pb-32">
@@ -40,12 +41,12 @@ export function PopularDestinationsCarousel() {
                 className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3"
               >
                 <DestinationCard
-                  imageUrl={destination.imageUrl!}
-                  imageAlt={destination.imageAlt!}
+                  imageUrl={destination.imageUrl || ''}
+                  imageAlt={destination.imageAlt || destination.title}
                   title={destination.title}
                   location={destination.location}
-                  overview={destination.overview!}
-                  budgetPerDay={destination.budgetPerDay!}
+                  overview={destination.overview || ''}
+                  budgetPerDay={destination.budgetPerDay || 0}
                   onPlanTrip={() => navigate('/destinations')}
                   className="h-[350px] hover:-translate-y-2"
                   hideOverview={true}

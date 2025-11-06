@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'; //todo needs to be moved to dedicated folder
+import { useEffect, useRef, useState } from 'react';
 
 interface AnimatedCounterProps {
   end: number;
