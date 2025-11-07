@@ -4,70 +4,15 @@ import { useTrips } from '@/contexts/TripContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Calendar, MapPin, Plane, Loader2, ArrowRight, Clock, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { destinations } from '@/data/destinations';
 import { calculateTripStatus } from '@/lib/tripUtils';
+import { formatDateShort, formatDateLong, calculateDurationInDays } from '@/lib/dateUtils';
+import { getStatusConfig } from '@/lib/tripStatusUtils';
+import { getDestinationImageById } from '@/lib/destinationUtils';
 
 const MyTripsPage = () => {
   const { trips, isLoading, deleteTrip } = useTrips();
   const navigate = useNavigate();
   const [deletingTripId, setDeletingTripId] = useState<number | null>(null);
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  };
-
-  const formatFullDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-  };
-
-  const calculateDuration = (startDate: string, endDate: string) => {
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    const diffTime = Math.abs(end.getTime() - start.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
-  };
-
-  const getStatusConfig = (status: string) => {
-    switch (status) {
-      case 'planned':
-        return {
-          bg: 'bg-blue-500/10 dark:bg-blue-500/20',
-          text: 'text-blue-600 dark:text-blue-400',
-          border: 'border-blue-500/30 dark:border-blue-500/40',
-          icon: '📅',
-        };
-      case 'ongoing':
-        return {
-          bg: 'bg-green-500/10 dark:bg-green-500/20',
-          text: 'text-green-600 dark:text-green-400',
-          border: 'border-green-500/30 dark:border-green-500/40',
-          icon: '✈️',
-        };
-      case 'completed':
-        return {
-          bg: 'bg-gray-500/10 dark:bg-gray-500/20',
-          text: 'text-gray-600 dark:text-gray-400',
-          border: 'border-gray-500/30 dark:border-gray-500/40',
-          icon: '✓',
-        };
-      default:
-        return {
-          bg: 'bg-gray-500/10 dark:bg-gray-500/20',
-          text: 'text-gray-600 dark:text-gray-400',
-          border: 'border-gray-500/30 dark:border-gray-500/40',
-          icon: '📋',
-        };
-    }
-  };
-
-  // Get destination image URL from destination ID
-  const getDestinationImage = (destinationId: number) => {
-    const destination = destinations.find(d => d.id === destinationId);
-    return destination?.imageUrl || 'https://images.unsplash.com/photo-1613744696511-fd64320d6c7b?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1074';
-  };
 
   const handleDeleteTrip = async (tripId: number, tripName: string, e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent navigation when clicking delete
@@ -126,8 +71,8 @@ const MyTripsPage = () => {
               // Calculate status dynamically based on current date
               const currentStatus = calculateTripStatus(trip.departureDate, trip.returnDate);
               const statusConfig = getStatusConfig(currentStatus);
-              const duration = calculateDuration(trip.departureDate, trip.returnDate);
-              const imageUrl = getDestinationImage(trip.destinationId);
+              const duration = calculateDurationInDays(trip.departureDate, trip.returnDate);
+              const imageUrl = getDestinationImageById(trip.destinationId);
 
               return (
                 <Card
@@ -199,10 +144,10 @@ const MyTripsPage = () => {
                       <Calendar className="h-4 w-4 shrink-0 text-primary" />
                       <div className="flex flex-col text-sm">
                         <span className="font-medium">
-                          {formatDate(trip.departureDate)} - {formatDate(trip.returnDate)}
+                          {formatDateShort(trip.departureDate)} - {formatDateShort(trip.returnDate)}
                         </span>
                         <span className="text-xs text-muted-foreground/80">
-                          {formatFullDate(trip.departureDate)}
+                          {formatDateLong(trip.departureDate)}
                         </span>
                       </div>
                     </div>
