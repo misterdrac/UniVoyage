@@ -17,6 +17,7 @@ interface ConfirmDialogProps {
   cancelLabel?: string
   confirmVariant?: 'default' | 'destructive' | 'outline' | 'secondary'
   isConfirming?: boolean
+  errorMessage?: string | null
   onConfirm: () => void
   onCancel: () => void
 }
@@ -29,6 +30,7 @@ export function ConfirmDialog({
   cancelLabel = 'Cancel',
   confirmVariant = 'destructive',
   isConfirming = false,
+  errorMessage = null,
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
@@ -39,6 +41,11 @@ export function ConfirmDialog({
           <DialogTitle>{title}</DialogTitle>
           {description ? <DialogDescription>{description}</DialogDescription> : null}
         </DialogHeader>
+        {errorMessage ? (
+          <p className="text-sm text-destructive" role="alert" aria-live="assertive">
+            {errorMessage}
+          </p>
+        ) : null}
         <DialogFooter>
           <Button variant="outline" onClick={onCancel} disabled={isConfirming}>
             {cancelLabel}

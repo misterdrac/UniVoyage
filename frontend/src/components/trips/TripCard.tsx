@@ -1,4 +1,4 @@
-import type { MouseEvent } from 'react'
+import { useCallback, useMemo, type MouseEvent, type KeyboardEvent } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { calculateTripStatus } from '@/lib/tripUtils'
 import { getDestinationImageById } from '@/lib/destinationUtils'
@@ -16,19 +16,38 @@ interface TripCardProps {
 }
 
 export function TripCard({ trip, isDeleting = false, onDelete, onView }: TripCardProps) {
-  const status = calculateTripStatus(trip.departureDate, trip.returnDate)
-  const statusConfig = getStatusConfig(status)
-  const duration = calculateDurationInDays(trip.departureDate, trip.returnDate)
-  const imageUrl = getDestinationImageById(trip.destinationId)
+  const status = useMemo(
+    () => calculateTripStatus(trip.departureDate, trip.returnDate),
+    [trip.departureDate, trip.returnDate]
+  )
+  const statusConfig = useMemo(() => getStatusConfig(status), [status])
+  const duration = useMemo(
+    () => calculateDurationInDays(trip.departureDate, trip.returnDate),
+    [trip.departureDate, trip.returnDate]
+  )
+  const imageUrl = useMemo(() => getDestinationImageById(trip.destinationId), [trip.destinationId])
 
-  const handleDelete = (event: MouseEvent<HTMLButtonElement>) => {
-    event.stopPropagation()
-    onDelete(trip)
-  }
+  const handleDelete = useCallback(
+    (event: MouseEvent<HTMLButtonElement>) => {
+      event.stopPropagation()
+      onDelete(trip)
+    },
+    [onDelete, trip]
+  )
 
-  const handleViewDetails = () => {
+  const handleViewDetails = useCallback(() => {
     onView(trip)
-  }
+  }, [onView, trip])
+
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault()
+        handleViewDetails()
+      }
+    },
+    [handleViewDetails]
+  )
 
   return (
     <Card
@@ -37,6 +56,11 @@ export function TripCard({ trip, isDeleting = false, onDelete, onView }: TripCar
         'hover:shadow-xl hover:scale-[1.02] hover:border-primary/30',
         'bg-card'
       )}
+      role="button"
+      tabIndex={0}
+      aria-label={`View trip to ${trip.destinationName}`}
+      onClick={handleViewDetails}
+      onKeyDown={handleKeyDown}
     >
       <div className="relative h-48 overflow-hidden">
         <img

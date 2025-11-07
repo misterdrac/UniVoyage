@@ -5,8 +5,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
   Calendar,
-  MapPin,
-  Clock,
   ArrowLeft,
   LayoutDashboard,
   Wallet,
@@ -17,10 +15,16 @@ import {
   Loader2,
 } from 'lucide-react';
 import { calculateTripStatus } from '@/lib/tripUtils';
-import { formatDateLong, calculateDurationInDays } from '@/lib/dateUtils';
+import { calculateDurationInDays } from '@/lib/dateUtils';
 import { getDestinationImageById } from '@/lib/destinationUtils';
-import { WeatherWidget } from '@/components/ui/weather-widget';
-import { TripHeroSection, TripSectionTabs, TripSectionCard } from '@/components/trips';
+import {
+  TripHeroSection,
+  TripSectionTabs,
+  TripSectionCard,
+  TripOverviewSection,
+  TripWeatherSection,
+  TripPlaceholderSection,
+} from '@/components/trips';
 import type { TripSectionDefinition } from '@/components/trips';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
@@ -32,6 +36,7 @@ const TripDetailPage = () => {
   const { getTripById, isLoading, deleteTrip } = useTrips();
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const tripId = id ? parseInt(id, 10) : null;
   const trip = tripId ? getTripById(tripId) : undefined;
@@ -66,6 +71,7 @@ const TripDetailPage = () => {
 
   const handleRequestDeleteTrip = useCallback(() => {
     setIsDeleteDialogOpen(true);
+    setDeleteError(null);
   }, []);
 
   const handleCancelDeleteTrip = useCallback(() => {
@@ -73,19 +79,25 @@ const TripDetailPage = () => {
       return;
     }
     setIsDeleteDialogOpen(false);
+    setDeleteError(null);
   }, [isDeleting]);
 
   const handleConfirmDeleteTrip = useCallback(async () => {
     if (!tripId || !trip) return;
 
     setIsDeleting(true);
+    setDeleteError(null);
     try {
       const result = await deleteTrip(tripId);
       if (result.success) {
         setIsDeleteDialogOpen(false);
         navigate('/my-trips');
+      } else if (result.error) {
+        setDeleteError(result.error);
       }
     } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to delete trip. Please try again.';
+      setDeleteError(message);
       console.error('Error deleting trip:', error);
     } finally {
       setIsDeleting(false);
@@ -128,6 +140,7 @@ const TripDetailPage = () => {
   const currentStatus = calculateTripStatus(trip.departureDate, trip.returnDate);
   const duration = calculateDurationInDays(trip.departureDate, trip.returnDate);
   const imageUrl = getDestinationImageById(trip.destinationId);
+  const openWeatherApiKey = import.meta.env.VITE_OPENWEATHER_API_KEY as string | undefined;
 
   return (
     <div className="min-h-screen bg-background">
@@ -151,180 +164,50 @@ const TripDetailPage = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <div className="max-w-5xl mx-auto">
           {activeSectionData && (
-            <TripSectionCard icon={activeSectionData.icon} title={activeSectionData.label}>
+            <div
+              id={`${activeSection}-panel`}
+              role="tabpanel"
+              aria-labelledby={`${activeSection}-tab`}
+            >
+              <TripSectionCard icon={activeSectionData.icon} title={activeSectionData.label}>
               {activeSection === 'overview' && (
-                <div className="space-y-8">
-                  <div>
-                    <h3 className="text-xl font-semibold text-foreground mb-3">Trip Overview</h3>
-                    <p className="text-muted-foreground leading-relaxed text-base">
-                      This is your trip to {trip.destinationName}, {trip.destinationLocation}. Your journey begins on{' '}
-                      {formatDateLong(trip.departureDate)} and concludes on {formatDateLong(trip.returnDate)}.
-                    </p>
-                  </div>
-
-                  <div>
-                    <h3 className="text-xl font-semibold text-foreground mb-4">Quick Details</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <Card className="p-5 rounded-xl border bg-card hover:shadow-md transition-shadow">
-                        <div className="flex items-center gap-3 mb-2">
-                          <Clock className="size-5 text-primary" />
-                          <p className="text-sm text-muted-foreground">Duration</p>
-                        </div>
-                        <p className="text-2xl font-bold text-foreground">{duration} day{duration !== 1 ? 's' : ''}</p>
-                      </Card>
-                      <Card className="p-5 rounded-xl border bg-card hover:shadow-md transition-shadow">
-                        <div className="flex items-center gap-3 mb-2">
-                          <MapPin className="size-5 text-primary" />
-                          <p className="text-sm text-muted-foreground">Destination</p>
-                        </div>
-                        <p className="text-2xl font-bold text-foreground">{trip.destinationLocation}</p>
-                      </Card>
-                    </div>
-                  </div>
-
-                  {/* Weather Section */}
-                  <div>
-                    <h3 className="text-xl font-semibold text-foreground mb-4">Weather</h3>
-                    {currentStatus === 'ongoing' ? (
-                      <div className="space-y-3">
-                        <p className="text-sm text-muted-foreground">Current Weather Conditions</p>
-                        <WeatherWidget
-                          apiKey={import.meta.env.VITE_OPENWEATHER_API_KEY}
-                          cityName={trip.destinationName}
-                          locationName={trip.destinationLocation}
-                          width="100%"
-                          animated={true}
-                        />
-                      </div>
-                    ) : (
-                      <WeatherWidget
-                        apiKey={import.meta.env.VITE_OPENWEATHER_API_KEY}
-                        forecastMode={{
-                          cityName: trip.destinationName,
-                          locationName: trip.destinationLocation,
-                          departureDate: trip.departureDate,
-                          returnDate: trip.returnDate,
-                        }}
-                        width="100%"
-                        animated={true}
-                      />
-                    )}
-                  </div>
-
-                  <div>
-                    <h3 className="text-xl font-semibold text-foreground mb-3">What's Next?</h3>
-                    <p className="text-muted-foreground leading-relaxed text-base">
-                      Use the navigation tabs above to explore different sections of your trip. You can manage your budget,
-                      view accommodation details, discover places to visit, check the map, see weather forecasts, and
-                      plan your itinerary.
-                    </p>
-                  </div>
-                </div>
+                <TripOverviewSection
+                  trip={trip}
+                  duration={duration}
+                  currentStatus={currentStatus}
+                  openWeatherApiKey={openWeatherApiKey}
+                />
               )}
 
               {activeSection === 'budget' && (
-                <div className="space-y-6">
-                  <p className="text-muted-foreground">Budget management will be available here.</p>
-                </div>
+                <TripPlaceholderSection message="Budget management will be available here." />
               )}
 
               {activeSection === 'accommodation' && (
-                <div className="space-y-6">
-                  <p className="text-muted-foreground">Accommodation details will be available here.</p>
-                </div>
+                <TripPlaceholderSection message="Accommodation details will be available here." />
               )}
 
               {activeSection === 'things-to-visit' && (
-                <div className="space-y-6">
-                  <p className="text-muted-foreground">Places to visit will be listed here.</p>
-                </div>
+                <TripPlaceholderSection message="Places to visit will be listed here." />
               )}
 
               {activeSection === 'map' && (
-                <div className="space-y-6">
-                  <p className="text-muted-foreground">Interactive map will be displayed here.</p>
-                </div>
+                <TripPlaceholderSection message="Interactive map will be displayed here." />
               )}
 
               {activeSection === 'weather' && (
-                <div className="space-y-6">
-                  {/* Main Weather Display */}
-                  {currentStatus === 'ongoing' ? (
-                    <div className="space-y-4">
-                      <div>
-                        <h4 className="text-lg font-semibold text-foreground mb-2">Current Weather</h4>
-                        <WeatherWidget
-                          apiKey={import.meta.env.VITE_OPENWEATHER_API_KEY}
-                          cityName={trip.destinationName}
-                          locationName={trip.destinationLocation}
-                          width="100%"
-                          animated={true}
-                        />
-                      </div>
-                      <div>
-                        <h4 className="text-lg font-semibold text-foreground mb-2">Remaining Trip Forecast</h4>
-                        <WeatherWidget
-                          apiKey={import.meta.env.VITE_OPENWEATHER_API_KEY}
-                          forecastMode={{
-                            cityName: trip.destinationName,
-                            locationName: trip.destinationLocation,
-                            departureDate: trip.departureDate,
-                            returnDate: trip.returnDate,
-                          }}
-                          width="100%"
-                          animated={true}
-                        />
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      <div>
-                        <h4 className="text-lg font-semibold text-foreground mb-2">Trip Forecast</h4>
-                        <WeatherWidget
-                          apiKey={import.meta.env.VITE_OPENWEATHER_API_KEY}
-                          forecastMode={{
-                            cityName: trip.destinationName,
-                            locationName: trip.destinationLocation,
-                            departureDate: trip.departureDate,
-                            returnDate: trip.returnDate,
-                          }}
-                          width="100%"
-                          animated={true}
-                        />
-                      </div>
-                      <Card className="p-6 border-2 border-dashed">
-                        <CardContent className="p-0">
-                          <p className="text-sm text-muted-foreground text-center">
-                            💡 <strong>Tip:</strong> Weather forecasts are most accurate within 5 days. 
-                            Check back closer to your trip for the most up-to-date information.
-                          </p>
-                        </CardContent>
-                      </Card>
-                      
-                      {/* Future Enhancements Placeholder */}
-                      <Card className="p-6 border-2 border-dashed bg-muted/30">
-                        <CardContent className="p-0 space-y-3">
-                          <h4 className="text-base font-semibold text-foreground">Coming Soon</h4>
-                          <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
-                            <li>Hourly forecast for the next 24-48 hours</li>
-                            <li>Extended forecast for the full trip duration</li>
-                            <li>Detailed weather metrics (humidity, wind speed, UV index)</li>
-                            <li>Weather alerts and warnings</li>
-                            <li>Packing suggestions based on forecast</li>
-                          </ul>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  )}
-                </div>
+                <TripWeatherSection
+                  trip={trip}
+                  currentStatus={currentStatus}
+                  openWeatherApiKey={openWeatherApiKey}
+                />
               )}
 
               {activeSection === 'itinerary' && (
-                <div className="space-y-6">
-                  <p className="text-muted-foreground">Your detailed itinerary will be displayed here.</p>
-                </div>
+                <TripPlaceholderSection message="Your detailed itinerary will be displayed here." />
               )}
-            </TripSectionCard>
+              </TripSectionCard>
+            </div>
           )}
         </div>
       </div>
@@ -336,6 +219,7 @@ const TripDetailPage = () => {
         confirmLabel="Delete"
         cancelLabel="Cancel"
         isConfirming={isDeleting}
+        errorMessage={deleteError}
         onCancel={handleCancelDeleteTrip}
         onConfirm={handleConfirmDeleteTrip}
       />

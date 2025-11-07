@@ -21,7 +21,7 @@ export function TripSectionTabs<T extends string>({
   return (
     <div className="sticky top-[68px] z-40 bg-background/95 backdrop-blur-sm border-b -mt-px">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex gap-1 overflow-x-auto scrollbar-hide">
+        <div className="flex gap-1 overflow-x-auto scrollbar-hide" role="tablist" aria-label="Trip detail sections">
           {sections.map((section) => {
             const Icon = section.icon
             const isActive = activeSection === section.id
@@ -37,6 +37,11 @@ export function TripSectionTabs<T extends string>({
                     ? 'text-primary border-primary bg-primary/5'
                     : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
                 )}
+                role="tab"
+                aria-selected={isActive}
+                aria-controls={`${section.id}-panel`}
+                tabIndex={isActive ? 0 : -1}
+                id={`${section.id}-tab`}
               >
                 <Icon className="size-4" />
                 <span>{section.label}</span>

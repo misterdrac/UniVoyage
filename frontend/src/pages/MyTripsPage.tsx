@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTrips } from '@/contexts/TripContext';
 import { Loader2 } from 'lucide-react';
@@ -12,10 +12,12 @@ const MyTripsPage = () => {
   const navigate = useNavigate();
   const [deletingTripId, setDeletingTripId] = useState<number | null>(null);
   const [pendingDeleteTrip, setPendingDeleteTrip] = useState<Trip | null>(null);
-  const isDialogOpen = pendingDeleteTrip !== null;
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const isDialogOpen = useMemo(() => pendingDeleteTrip !== null, [pendingDeleteTrip]);
 
   const handleRequestDeleteTrip = useCallback((trip: Trip) => {
     setPendingDeleteTrip(trip);
+    setDeleteError(null);
   }, []);
 
   const handleCancelDeleteTrip = useCallback(() => {
@@ -23,6 +25,7 @@ const MyTripsPage = () => {
       return;
     }
     setPendingDeleteTrip(null);
+    setDeleteError(null);
   }, [deletingTripId]);
 
   const handleConfirmDeleteTrip = useCallback(async () => {
@@ -31,12 +34,19 @@ const MyTripsPage = () => {
     }
 
     setDeletingTripId(pendingDeleteTrip.id);
+    setDeleteError(null);
     try {
       const result = await deleteTrip(pendingDeleteTrip.id);
       if (result.success) {
         setPendingDeleteTrip(null);
+        setDeleteError(null);
+      }
+      if (!result.success && result.error) {
+        setDeleteError(result.error);
       }
     } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to delete trip. Please try again.';
+      setDeleteError(message);
       console.error('Error deleting trip:', error);
     } finally {
       setDeletingTripId(null);
@@ -70,7 +80,7 @@ const MyTripsPage = () => {
           <p className="text-muted-foreground">Manage and view all your planned adventures</p>
         </div>
         
-        {trips.length === 0 ? (
+        {!trips.length ? (
           <EmptyTripsState />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -98,6 +108,7 @@ const MyTripsPage = () => {
         confirmLabel="Delete"
         cancelLabel="Cancel"
         isConfirming={deletingTripId !== null}
+        errorMessage={deleteError}
         onCancel={handleCancelDeleteTrip}
         onConfirm={handleConfirmDeleteTrip}
       />
