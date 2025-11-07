@@ -23,6 +23,7 @@ import {
   TripSectionCard,
   TripOverviewSection,
   TripWeatherSection,
+  TripBudgetSection,
   TripPlaceholderSection,
 } from '@/components/trips';
 import type { TripSectionDefinition } from '@/components/trips';
@@ -180,7 +181,7 @@ const TripDetailPage = () => {
               )}
 
               {activeSection === 'budget' && (
-                <TripPlaceholderSection message="Budget management will be available here." />
+                <TripBudgetSection trip={trip} />
               )}
 
               {activeSection === 'accommodation' && (
