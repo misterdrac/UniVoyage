@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTrips } from '@/contexts/TripContext';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
   Calendar,
@@ -15,14 +15,14 @@ import {
   Map,
   Cloud,
   Loader2,
-  Trash2,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { calculateTripStatus } from '@/lib/tripUtils';
 import { formatDateLong, calculateDurationInDays } from '@/lib/dateUtils';
-import { getStatusConfig } from '@/lib/tripStatusUtils';
 import { getDestinationImageById } from '@/lib/destinationUtils';
 import { WeatherWidget } from '@/components/ui/weather-widget';
+import { TripHeroSection, TripSectionTabs, TripSectionCard } from '@/components/trips';
+import type { TripSectionDefinition } from '@/components/trips';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 type Section = 'overview' | 'budget' | 'accommodation' | 'things-to-visit' | 'map' | 'weather' | 'itinerary';
 
@@ -31,21 +31,66 @@ const TripDetailPage = () => {
   const navigate = useNavigate();
   const { getTripById, isLoading, deleteTrip } = useTrips();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const tripId = id ? parseInt(id, 10) : null;
   const trip = tripId ? getTripById(tripId) : undefined;
 
-  const sections: { id: Section; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
-    { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-    { id: 'budget', label: 'Budget', icon: Wallet },
-    { id: 'accommodation', label: 'Accommodation', icon: Hotel },
-    { id: 'things-to-visit', label: 'Things to Visit', icon: MapPinIcon },
-    { id: 'map', label: 'Map', icon: Map },
-    { id: 'weather', label: 'Weather', icon: Cloud },
-    { id: 'itinerary', label: 'Itinerary', icon: Calendar },
-  ];
+  const sections = useMemo<TripSectionDefinition<Section>[]>(
+    () => [
+      { id: 'overview', label: 'Overview', icon: LayoutDashboard },
+      { id: 'budget', label: 'Budget', icon: Wallet },
+      { id: 'accommodation', label: 'Accommodation', icon: Hotel },
+      { id: 'things-to-visit', label: 'Things to Visit', icon: MapPinIcon },
+      { id: 'map', label: 'Map', icon: Map },
+      { id: 'weather', label: 'Weather', icon: Cloud },
+      { id: 'itinerary', label: 'Itinerary', icon: Calendar },
+    ],
+    []
+  );
 
   const [activeSection, setActiveSection] = useState<Section>('overview');
+
+  const activeSectionData = useMemo(
+    () => sections.find((s) => s.id === activeSection),
+    [sections, activeSection]
+  );
+
+  const handleBack = useCallback(() => {
+    navigate('/my-trips');
+  }, [navigate]);
+
+  const handleSectionChange = useCallback((section: Section) => {
+    setActiveSection(section);
+  }, []);
+
+  const handleRequestDeleteTrip = useCallback(() => {
+    setIsDeleteDialogOpen(true);
+  }, []);
+
+  const handleCancelDeleteTrip = useCallback(() => {
+    if (isDeleting) {
+      return;
+    }
+    setIsDeleteDialogOpen(false);
+  }, [isDeleting]);
+
+  const handleConfirmDeleteTrip = useCallback(async () => {
+    if (!tripId || !trip) return;
+
+    setIsDeleting(true);
+    try {
+      const result = await deleteTrip(tripId);
+      if (result.success) {
+        setIsDeleteDialogOpen(false);
+        navigate('/my-trips');
+      }
+    } catch (error) {
+      console.error('Error deleting trip:', error);
+    } finally {
+      setIsDeleting(false);
+    }
+  }, [tripId, trip, deleteTrip, navigate]);
 
   if (isLoading) {
     return (
@@ -81,156 +126,32 @@ const TripDetailPage = () => {
   }
 
   const currentStatus = calculateTripStatus(trip.departureDate, trip.returnDate);
-  const statusConfig = getStatusConfig(currentStatus);
   const duration = calculateDurationInDays(trip.departureDate, trip.returnDate);
   const imageUrl = getDestinationImageById(trip.destinationId);
-  const activeSectionData = sections.find((s) => s.id === activeSection);
-
-  const handleDeleteTrip = async () => {
-    if (!tripId) return;
-    
-    const confirmed = window.confirm(
-      `Are you sure you want to delete your trip to ${trip.destinationName}? This action cannot be undone.`
-    );
-    
-    if (!confirmed) return;
-    
-    setIsDeleting(true);
-    try {
-      const result = await deleteTrip(tripId);
-      if (result.success) {
-        navigate('/my-trips');
-      }
-    } catch (error) {
-      console.error('Error deleting trip:', error);
-    } finally {
-      setIsDeleting(false);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <div className="relative w-full h-[400px] sm:h-[500px] overflow-hidden">
-        <img
-          src={imageUrl}
-          alt={trip.destinationName}
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-linear-to-b from-black/20 via-black/10 to-black/60" />
+      <TripHeroSection
+        trip={trip}
+        duration={duration}
+        status={currentStatus}
+        imageUrl={imageUrl}
+        isDeleting={isDeleting}
+        onBack={handleBack}
+        onDelete={handleRequestDeleteTrip}
+      />
 
-        {/* Hero Content */}
-        <div className="absolute inset-0 flex items-end">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 pb-8 sm:pb-12">
-            <div className="max-w-3xl">
-              <div className="mb-3">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => navigate('/my-trips')}
-                  className="text-white hover:bg-white/20"
-                >
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back to Trips
-                </Button>
-              </div>
-              <div className="mb-3">
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-3 drop-shadow-lg">
-                  {trip.destinationName}
-                </h1>
-                <p className="text-xl sm:text-2xl text-white/90 mb-4 drop-shadow-md">
-                  {trip.destinationLocation}
-                </p>
-              </div>
-              <div className="flex items-center gap-4 flex-wrap text-white/90">
-                <div className="flex items-center gap-2">
-                  <Calendar className="size-5" />
-                  <span className="text-lg">
-                    {formatDateLong(trip.departureDate)} - {formatDateLong(trip.returnDate)}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2">
-                    <Clock className="size-5" />
-                    <span className="text-lg">{duration} day{duration !== 1 ? 's' : ''}</span>
-                  </div>
-                  <span
-                    className={cn(
-                      'inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full border backdrop-blur-sm',
-                      statusConfig.bg,
-                      statusConfig.text,
-                      statusConfig.border
-                    )}
-                  >
-                    <span>{statusConfig.icon}</span>
-                    <span className="capitalize">{currentStatus}</span>
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={handleDeleteTrip}
-                    disabled={isDeleting}
-                    className="text-white hover:bg-red-500/20 hover:text-red-200 disabled:opacity-50"
-                    aria-label="Delete trip"
-                  >
-                    {isDeleting ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Trash2 className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Navigation Tabs - Sticky */}
-      <div className="sticky top-[68px] z-40 bg-background/95 backdrop-blur-sm border-b -mt-px">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex gap-1 overflow-x-auto scrollbar-hide">
-            {sections.map((section) => {
-              const Icon = section.icon;
-              const isActive = activeSection === section.id;
-              return (
-                <button
-                  key={section.id}
-                  onClick={() => setActiveSection(section.id)}
-                  className={cn(
-                    'flex items-center gap-2 px-4 py-3 text-sm font-medium transition-all whitespace-nowrap',
-                    'border-b-2 border-transparent',
-                    isActive
-                      ? 'text-primary border-primary bg-primary/5'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
-                  )}
-                >
-                  <Icon className="size-4" />
-                  <span>{section.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </div>
+      <TripSectionTabs
+        sections={sections}
+        activeSection={activeSection}
+        onSectionChange={handleSectionChange}
+      />
 
       {/* Main Content */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <div className="max-w-5xl mx-auto">
-          <Card className="border-0 shadow-lg">
-            <CardHeader className="pb-4">
-              <div className="flex items-center gap-3">
-                {activeSectionData && (
-                  <>
-                    <div className="p-2 rounded-lg bg-primary/10">
-                      <activeSectionData.icon className="size-5 text-primary" />
-                    </div>
-                    <CardTitle className="text-2xl sm:text-3xl">{activeSectionData.label}</CardTitle>
-                  </>
-                )}
-              </div>
-            </CardHeader>
-            <CardContent className="pt-0">
+          {activeSectionData && (
+            <TripSectionCard icon={activeSectionData.icon} title={activeSectionData.label}>
               {activeSection === 'overview' && (
                 <div className="space-y-8">
                   <div>
@@ -403,10 +324,21 @@ const TripDetailPage = () => {
                   <p className="text-muted-foreground">Your detailed itinerary will be displayed here.</p>
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </TripSectionCard>
+          )}
         </div>
       </div>
+
+      <ConfirmDialog
+        open={isDeleteDialogOpen}
+        title="Delete trip"
+        description={`Are you sure you want to delete your trip to ${trip.destinationName}? This action cannot be undone.`}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        isConfirming={isDeleting}
+        onCancel={handleCancelDeleteTrip}
+        onConfirm={handleConfirmDeleteTrip}
+      />
     </div>
   );
 };
