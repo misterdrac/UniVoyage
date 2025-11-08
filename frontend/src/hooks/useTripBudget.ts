@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { MAX_TOTAL_BUDGET } from '@/lib/budgeting'
 
 export type BudgetCategoryValue = 'accommodation' | 'transportation' | 'food' | 'activities' | 'shopping' | 'misc'
 
@@ -28,8 +29,6 @@ export interface CategoryTotals {
 }
 
 const STORAGE_PREFIX = 'trip-budget-'
-const MAX_TOTAL_BUDGET = 10_000
-
 const DEFAULT_CATEGORIES: { value: BudgetCategoryValue; label: string; suggestion: string }[] = [
   { value: 'accommodation', label: 'Accommodation', suggestion: 'Hotels, hostels, rentals, resort fees' },
   { value: 'transportation', label: 'Transportation', suggestion: 'Flights, trains, rideshares, local transit' },
@@ -250,6 +249,16 @@ export const useTripBudget = (tripId: number | null | undefined) => {
     })
   }, [allocations, expenses])
 
+  const latestExpenseByCategory = useMemo(() => {
+    return expenses.reduce(
+      (acc, expense) => {
+        acc[expense.category] = expense
+        return acc
+      },
+      {} as Partial<Record<BudgetCategoryValue, TripBudgetExpense>>
+    )
+  }, [expenses])
+
   return {
     expenses,
     addExpense,
@@ -265,7 +274,6 @@ export const useTripBudget = (tripId: number | null | undefined) => {
     totalBudget,
     updateTotalBudget,
     categories: DEFAULT_CATEGORIES,
+    latestExpenseByCategory,
   }
 }
-
-
