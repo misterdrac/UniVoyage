@@ -13,6 +13,8 @@ interface DestinationCardProps extends React.HTMLAttributes<HTMLDivElement> {
   overview: string;
   budgetPerDay: number;
   onPlanTrip: () => void;
+  hideOverview?: boolean;
+  buttonText?: string;
 }
 
 const DestinationCard = React.forwardRef<HTMLDivElement, DestinationCardProps>(
@@ -27,6 +29,8 @@ const DestinationCard = React.forwardRef<HTMLDivElement, DestinationCardProps>(
       overview,
       budgetPerDay,
       onPlanTrip,
+      hideOverview = false,
+      buttonText = "Plan Trip",
       ...props
     },
     ref
@@ -36,7 +40,7 @@ const DestinationCard = React.forwardRef<HTMLDivElement, DestinationCardProps>(
         ref={ref}
         className={cn(
           "group relative z-0 w-full max-w-sm sm:max-w-md lg:max-w-none overflow-hidden rounded-xl border border-border bg-card shadow-lg",
-          "transition-all duration-300 ease-in-out hover:shadow-2xl hover:-translate-y-2",
+          "transition-all duration-300 ease-in-out hover:shadow-2xl",
           "active:scale-95 sm:active:scale-100", // Mobile tap feedback
           className
         )}
@@ -69,12 +73,14 @@ const DestinationCard = React.forwardRef<HTMLDivElement, DestinationCardProps>(
               <h3 className="text-2xl sm:text-3xl font-bold text-white">{title}</h3>
               <p className="text-xs sm:text-sm text-white/80 dark:text-white/90">{location}</p>
             </div>
-            <div>
-              <h4 className="text-xs sm:text-sm font-semibold text-white/90 dark:text-white/95">OVERVIEW</h4>
-              <p className="text-xs sm:text-sm text-white/70 dark:text-white/80 leading-relaxed">
-                {overview}
-              </p>
-            </div>
+            {!hideOverview && (
+              <div>
+                <h4 className="text-xs sm:text-sm font-semibold text-white/90 dark:text-white/95">OVERVIEW</h4>
+                <p className="text-xs sm:text-sm text-white/70 dark:text-white/80 leading-relaxed">
+                  {overview}
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Mobile Bottom Section: Always visible on mobile */}
@@ -89,7 +95,7 @@ const DestinationCard = React.forwardRef<HTMLDivElement, DestinationCardProps>(
                 size="sm" 
                 className="bg-white/10 text-white hover:bg-white/20 border border-white/20 text-xs px-3 py-2"
               >
-                Plan Trip <ArrowRight className="ml-1 h-3 w-3" />
+                {buttonText} <ArrowRight className="ml-1 h-3 w-3" />
               </Button>
             </div>
           </div>
@@ -106,7 +112,7 @@ const DestinationCard = React.forwardRef<HTMLDivElement, DestinationCardProps>(
                 size="sm" 
                 className="bg-white/10 text-white hover:bg-white/20 border border-white/20 text-sm px-4 py-3"
               >
-                Plan Trip <ArrowRight className="ml-2 h-4 w-4" />
+                {buttonText} <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
           </div>

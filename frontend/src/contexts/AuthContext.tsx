@@ -6,7 +6,8 @@ import { API_CONSTANTS } from '@/lib/constants';
 interface SignupData {
   email: string;
   password: string;
-  name?: string;
+  firstName?: string;
+  surname?: string;
   hobbies?: string[];
   languages?: string[];
   country?: string;
@@ -17,6 +18,15 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signup: (data: SignupData) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
+  updateProfile: (data: {
+    firstName?: string;
+    surname?: string;
+    country?: string;
+    hobbies?: string[];
+    languages?: string[];
+    visited?: string[];
+  }) => Promise<{ success: boolean; error?: string }>;
+  uploadProfilePicture: (file: File) => Promise<{ success: boolean; error?: string }>;
   isLoading: boolean;
 }
 
@@ -129,11 +139,68 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const updateProfile = async (data: {
+    firstName?: string;
+    surname?: string;
+    country?: string;
+    hobbies?: string[];
+    languages?: string[];
+    visited?: string[];
+  }): Promise<{ success: boolean; error?: string }> => {
+    try {
+      setIsLoading(true);
+      
+      const result = await apiService.updateProfile(data);
+      
+      if (result.success && result.user) {
+        setUser(result.user);
+        localStorage.setItem(API_CONSTANTS.USER_KEY, JSON.stringify(result.user));
+        return { success: true };
+      } else {
+        return { success: false, error: result.error || 'Update failed' };
+      }
+    } catch (error) {
+      console.error('Update profile error:', error);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'An error occurred during update' 
+      };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const uploadProfilePicture = async (file: File): Promise<{ success: boolean; error?: string }> => {
+    try {
+      setIsLoading(true);
+      
+      const result = await apiService.uploadProfilePicture(file);
+      
+      if (result.success && result.user) {
+        setUser(result.user);
+        localStorage.setItem(API_CONSTANTS.USER_KEY, JSON.stringify(result.user));
+        return { success: true };
+      } else {
+        return { success: false, error: result.error || 'Upload failed' };
+      }
+    } catch (error) {
+      console.error('Upload profile picture error:', error);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'An error occurred during upload' 
+      };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const value: AuthContextType = {
     user,
     login,
     signup,
     logout,
+    updateProfile,
+    uploadProfilePicture,
     isLoading
   };
 

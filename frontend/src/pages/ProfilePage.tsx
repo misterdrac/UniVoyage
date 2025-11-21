@@ -1,17 +1,121 @@
-import React from 'react';
+import { useState, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
-import { LogOut, User } from 'lucide-react';
 import { toast } from 'sonner';
-import { UI_CONSTANTS, LANGUAGES, TRAVEL_INTERESTS } from '@/lib/constants';
+import {
+  ProfileHeaderCard,
+  ProfileCompletionCard,
+  ProfileStatsCards,
+  AchievementsSection,
+  TravelInformationCard,
+  AccountInformationCard,
+  useProfileForm,
+  useProfileImage,
+} from '@/components/profile';
 
-const ProfilePage: React.FC = () => {
-  const { user, logout } = useAuth();
+const ProfilePage = () => {
+  const { user, logout, updateProfile, uploadProfilePicture } = useAuth();
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [isEditingInterests, setIsEditingInterests] = useState(false);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [isSavingInterests, setIsSavingInterests] = useState(false);
 
-  const handleLogout = () => {
+  // Custom hooks for form and image management
+  const {
+    firstName,
+    setFirstName,
+    surname,
+    setSurname,
+    country,
+    setCountry,
+    resetProfileForm,
+    hobbies,
+    setHobbies,
+    languages,
+    setLanguages,
+    visited,
+    setVisited,
+    resetInterestsForm,
+  } = useProfileForm({
+    user,
+    isEditingProfile,
+    isEditingInterests,
+  });
+
+  const {
+    isUploadingImage,
+    imagePreview,
+    fileInputRef,
+    handleImageClick,
+    handleImageChange,
+    clearImagePreview,
+  } = useProfileImage({
+    uploadProfilePicture,
+  });
+
+  // Handlers
+  const handleLogout = useCallback(() => {
     logout();
     toast.success("You've been logged out successfully");
-  };
+  }, [logout]);
+
+  const handleEditProfile = useCallback(() => {
+    setIsEditingProfile(true);
+  }, []);
+
+  const handleCancelProfile = useCallback(() => {
+    resetProfileForm();
+    clearImagePreview();
+    setIsEditingProfile(false);
+  }, [resetProfileForm, clearImagePreview]);
+
+  const handleEditInterests = useCallback(() => {
+    setIsEditingInterests(true);
+  }, []);
+
+  const handleCancelInterests = useCallback(() => {
+    resetInterestsForm();
+    setIsEditingInterests(false);
+  }, [resetInterestsForm]);
+
+  const handleSaveProfile = useCallback(
+    async (data: { firstName: string; surname?: string; country?: string }) => {
+      setIsSavingProfile(true);
+      try {
+        const result = await updateProfile(data);
+        if (result.success) {
+          toast.success('Profile updated successfully!');
+          setIsEditingProfile(false);
+        } else {
+          toast.error(result.error || 'Failed to update profile');
+        }
+      } catch (error) {
+        toast.error('An error occurred while updating your profile');
+      } finally {
+        setIsSavingProfile(false);
+      }
+    },
+    [updateProfile]
+  );
+
+  const handleSaveInterests = useCallback(
+    async (data: { hobbies: string[]; languages: string[]; visited: string[] }) => {
+      setIsSavingInterests(true);
+      try {
+        const result = await updateProfile(data);
+        if (result.success) {
+          toast.success('Travel information updated successfully!');
+          setIsEditingInterests(false);
+        } else {
+          toast.error(result.error || 'Failed to update travel information');
+        }
+      } catch (error) {
+        toast.error('An error occurred while updating your travel information');
+      } finally {
+        setIsSavingInterests(false);
+      }
+    },
+    [updateProfile]
+  );
 
   // This should never happen due to ProtectedRoute, but TypeScript needs this
   if (!user) {
@@ -19,131 +123,59 @@ const ProfilePage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pt-24 pb-8 px-8">
-      <div className="container mx-auto">
-        <h1 className="text-2xl font-bold text-foreground mb-8">Profile</h1>
-
-        {/* Inspect mockUsers.ts for the user object structure */}
-        {/* Search https://ui.shadcn.com/docs/components for components to use */}
-        {/* You can also try to find components on https://21st.dev/community/components */}
-        
-        {/* TODO: Add edit profile functionality */}
-        {/* TODO: Implement profile picture upload */}
-        {/* TODO: Add form validation for all profile fields */}
-        {/* TODO: Create multi-select component for interests */}
-        {/* TODO: Create autocomplete component for languages and countries visited */}
-        {/* TODO: Add save/cancel buttons with loading states */}
-        {/* TODO: Integrate with backend API endpoints: PUT /api/user/profile, POST /api/user/profile-picture */}
-        
-        <div className="bg-card rounded-lg border border-border p-6">
-          <div className="flex items-start gap-6 mb-6">
-            <div className="shrink-0">
-              {user.profileImage ? (
-                <img
-                  src={user.profileImage}
-                  alt={user.name}
-                  className="rounded-full object-cover border-2 border-border"
-                  style={{ width: UI_CONSTANTS.PROFILE_PICTURE_SIZE.LARGE, height: UI_CONSTANTS.PROFILE_PICTURE_SIZE.LARGE }}
-                />
-              ) : (
-                <div 
-                  className="rounded-full bg-muted flex items-center justify-center border-2 border-border"
-                  style={{ width: UI_CONSTANTS.PROFILE_PICTURE_SIZE.LARGE, height: UI_CONSTANTS.PROFILE_PICTURE_SIZE.LARGE }}
-                >
-                  <User className="w-8 h-8 text-muted-foreground" />
-                </div>
-              )}
-            </div>
-            <div className="flex-1">
-              <h2 className="text-2xl font-bold text-foreground mb-2">
-                {user.name}
-              </h2>
-              <p className="text-muted-foreground">{user.email}</p>
-            </div>
-          </div>
-          
-          <h3 className="text-lg font-semibold text-foreground mb-4">Personal Information</h3>
-          <div className="space-y-2 text-sm text-muted-foreground">
-            <p><span className="font-medium">Country:</span> {user.country || 'Not provided'}</p>
-            <p><span className="font-medium">Role:</span> {user.role || 'USER'}</p>
-          </div>
+    <div className="min-h-screen bg-background pt-24 pb-8 px-4 sm:px-6 lg:px-8">
+      <div className="container mx-auto max-w-6xl">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-3xl font-bold text-foreground">Profile</h1>
         </div>
 
-        <div className="bg-card rounded-lg border border-border p-6 mt-6">
-          <h2 className="text-lg font-semibold text-foreground mb-4">Travel Information</h2>
-          <div className="space-y-4">
-            <div>
-              <p className="font-medium text-foreground mb-2">Languages Spoken:</p>
-              <div className="flex flex-wrap gap-2">
-                {user.languages.length > 0 ? (
-                  user.languages.map((langCode, index) => {
-                    const language = LANGUAGES.find(l => l.value === langCode);
-                    return (
-                      <span key={index} className="bg-primary/10 text-primary px-2 py-1 rounded-md text-sm">
-                        {language?.label || langCode}
-                      </span>
-                    );
-                  })
-                ) : (
-                  <span className="text-muted-foreground">No languages specified</span>
-                )}
-              </div>
-            </div>
-            
-            <div>
-              <p className="font-medium text-foreground mb-2">Countries Visited:</p>
-              <div className="flex flex-wrap gap-2">
-                {user.visited.length > 0 ? (
-                  user.visited.map((country, index) => (
-                    <span key={index} className="bg-secondary/10 text-secondary-foreground px-2 py-1 rounded-md text-sm">
-                      {country}
-                    </span>
-                  ))
-                ) : (
-                  <span className="text-muted-foreground">No countries visited yet</span>
-                )}
-              </div>
-            </div>
-            
-            <div>
-              <p className="font-medium text-foreground mb-2">Hobbies & Interests:</p>
-              <div className="flex flex-wrap gap-2">
-                {user.hobbies.length > 0 ? (
-                  user.hobbies.map((interestValue, index) => {
-                    const interest = TRAVEL_INTERESTS.find(i => i.value === interestValue);
-                    return (
-                      <span key={index} className="bg-accent/10 text-accent-foreground px-2 py-1 rounded-md text-sm">
-                        {interest?.label || interestValue}
-                      </span>
-                    );
-                  })
-                ) : (
-                  <span className="text-muted-foreground">No hobbies specified</span>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+        <ProfileHeaderCard
+          user={user}
+          isEditing={isEditingProfile}
+          isSaving={isSavingProfile}
+          firstName={firstName}
+          surname={surname}
+          country={country}
+          imagePreview={imagePreview}
+          isUploadingImage={isUploadingImage}
+          fileInputRef={fileInputRef}
+          onEdit={handleEditProfile}
+          onCancel={handleCancelProfile}
+          onSave={handleSaveProfile}
+          onFirstNameChange={setFirstName}
+          onSurnameChange={setSurname}
+          onCountryChange={setCountry}
+          onImageClick={handleImageClick}
+          onImageChange={handleImageChange}
+        />
 
-        <div className="bg-card rounded-lg border border-border p-6 mt-6">
-          <h2 className="text-lg font-semibold text-foreground mb-4">Account Information</h2>
-          <div className="space-y-2 text-sm text-muted-foreground mb-6">
-            <p><span className="font-medium">Member since:</span> {new Date(user.dateOfRegister).toLocaleDateString()}</p>
-            <p><span className="font-medium">Last login:</span> {user.dateOfLastSignin ? new Date(user.dateOfLastSignin).toLocaleDateString() : 'Never'}</p>
-            <p><span className="font-medium">Account status:</span> <span className="text-green-600">Active</span></p>
-          </div>
-          
-          <div className="pt-4 border-t border-border">
-            <Button 
-              variant="destructive" 
-              onClick={handleLogout}
-              className="flex items-center gap-2"
-            >
-              <LogOut className="w-4 h-4" />
-              Logout
-            </Button>
-          </div>
-        </div>
+        <ProfileCompletionCard user={user} />
+
+        <ProfileStatsCards user={user} />
+
+        <AchievementsSection user={user} />
+
+        <TravelInformationCard
+          user={user}
+          isEditing={isEditingInterests}
+          isSaving={isSavingInterests}
+          hobbies={hobbies}
+          languages={languages}
+          visited={visited}
+          onEdit={handleEditInterests}
+          onCancel={handleCancelInterests}
+          onSave={handleSaveInterests}
+          onHobbiesChange={setHobbies}
+          onLanguagesChange={setLanguages}
+          onVisitedChange={setVisited}
+        />
+
+        <AccountInformationCard
+          user={user}
+          isEditingProfile={isEditingProfile}
+          isEditingInterests={isEditingInterests}
+          onLogout={handleLogout}
+        />
       </div>
     </div>
   );

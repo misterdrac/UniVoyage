@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'; //todo needs to be moved to dedicated folder
+import { useEffect, useRef, useState } from 'react';
 
 interface AnimatedCounterProps {
   end: number;
@@ -9,14 +9,26 @@ interface AnimatedCounterProps {
 
 export function AnimatedCounter({ end, duration = 2000, suffix = '', className = '' }: AnimatedCounterProps) {
   const [count, setCount] = useState(0);
-  const [hasAnimated, setHasAnimated] = useState(false);
+  const hasAnimatedRef = useRef(false);
   const counterRef = useRef<HTMLDivElement>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
+    // If already animated, just set the final count and don't observe
+    if (hasAnimatedRef.current) {
+      setCount(end);
+      return;
+    }
+
+    observerRef.current = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && !hasAnimated) {
-          setHasAnimated(true);
+        if (entries[0].isIntersecting && !hasAnimatedRef.current) {
+          hasAnimatedRef.current = true;
+          
+          // Disconnect observer immediately after animation starts
+          if (observerRef.current && counterRef.current) {
+            observerRef.current.unobserve(counterRef.current);
+          }
           
           const startTime = Date.now();
           const startValue = 0;
@@ -45,16 +57,16 @@ export function AnimatedCounter({ end, duration = 2000, suffix = '', className =
       { threshold: 0.5 }
     );
 
-    if (counterRef.current) {
-      observer.observe(counterRef.current);
+    if (counterRef.current && observerRef.current) {
+      observerRef.current.observe(counterRef.current);
     }
 
     return () => {
-      if (counterRef.current) {
-        observer.unobserve(counterRef.current);
+      if (observerRef.current && counterRef.current) {
+        observerRef.current.unobserve(counterRef.current);
       }
     };
-  }, [end, duration, hasAnimated]);
+  }, [end, duration]);
 
   return (
     <div ref={counterRef} className={className}>

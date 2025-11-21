@@ -1,6 +1,7 @@
 export interface User {
   id: string;
-  name: string; // Single name field
+  firstName: string;
+  surname?: string;
   email: string;
   password: string; // Only for mock - backend should never return this
   hobbies: string[]; // Array of interests/hobbies (e.g., ['history', 'party', 'nature'])
@@ -16,7 +17,8 @@ export interface User {
 export const mockUsers: User[] = [
   {
     id: "1",
-    name: "John Doe",
+    firstName: "John",
+    surname: "Doe",
     email: "john.doe@example.com",
     password: "Password123",
     hobbies: ["history", "culture", "food", "photography"],
@@ -24,13 +26,14 @@ export const mockUsers: User[] = [
     country: "US",
     visited: ["US", "CA", "MX", "FR", "IT"],
     profileImage: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
-    dateOfRegister: "2024-01-01T00:00:00Z",
+    dateOfRegister: "1000-01-01T00:00:00Z",
     dateOfLastSignin: "2024-01-15T10:30:00Z",
     role: "USER"
   },
   {
     id: "2",
-    name: "Jane Smith",
+    firstName: "Jane",
+    surname: "Smith",
     email: "jane.smith@example.com",
     password: "SecurePass456",
     hobbies: ["party", "nightlife", "adventure", "beaches"],
@@ -54,7 +57,7 @@ export const authenticateUser = (email: string, password: string): User | null =
   return user || null;
 };
 
-export const createUser = (email: string, password: string, name?: string, hobbies?: string[], languages?: string[]): User => {
+export const createUser = (email: string, password: string, firstName?: string, surname?: string, hobbies?: string[], languages?: string[]): User => {
   // Check if user already exists
   const existingUser = mockUsers.find(u => u.email === email);
   if (existingUser) {
@@ -63,7 +66,8 @@ export const createUser = (email: string, password: string, name?: string, hobbi
 
   const newUser: User = {
     id: Date.now().toString(),
-    name: name || "",
+    firstName: firstName || "",
+    surname: surname,
     email,
     password,
     hobbies: hobbies || [],

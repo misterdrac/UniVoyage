@@ -1,5 +1,3 @@
-'use client'
-
 import { useState, useRef, useEffect } from 'react'
 import { Calendar as CalendarIcon } from 'lucide-react'
 import { Input } from '@/components/ui/input'
@@ -16,7 +14,19 @@ interface DateRangePickerProps {
 export const DateRangePicker = ({ value, onChange, disabled }: DateRangePickerProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const [tempRange, setTempRange] = useState<DateRange | undefined>(value)
+  const [isMobile, setIsMobile] = useState(false)
   const pickerRef = useRef<HTMLDivElement>(null)
+
+  // Detect mobile screen size
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1100 || window.innerHeight < 800)  
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   // Update tempRange when value changes externally
   useEffect(() => {
@@ -25,37 +35,47 @@ export const DateRangePicker = ({ value, onChange, disabled }: DateRangePickerPr
 
   // Close calendar when clicking outside
   useEffect(() => {
+    if (!isOpen) return
+
     const handleClickOutside = (event: MouseEvent) => {
-      if (pickerRef.current && !pickerRef.current.contains(event.target as Node)) {
+      const target = event.target as HTMLElement
+      
+      // Calculate scrollbar dimensions
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
+      const scrollbarHeight = window.innerHeight - document.documentElement.clientHeight
+      
+      // Don't close if clicking on scrollbar
+      const verticalScrollbarArea = scrollbarWidth > 0 ? scrollbarWidth : 17
+      const horizontalScrollbarArea = scrollbarHeight > 0 ? scrollbarHeight : 17
+      
+      if (
+        event.clientX >= window.innerWidth - verticalScrollbarArea - 5 ||
+        event.clientY >= window.innerHeight - horizontalScrollbarArea - 5
+      ) {
+        return
+      }
+      
+      if (pickerRef.current && !pickerRef.current.contains(target)) {
         setIsOpen(false)
         setTempRange(value)
       }
     }
 
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside)
-      return () => {
-        document.removeEventListener('mousedown', handleClickOutside)
-      }
-    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [isOpen, value])
 
   const formatDateRange = () => {
     if (!value?.from) return null
-    if (value.to) {
-      const fromMonth = value.from.toLocaleDateString('en-US', { month: 'short' })
-      const fromDay = value.from.toLocaleDateString('en-US', { day: 'numeric' })
-      const toMonth = value.to.toLocaleDateString('en-US', { month: 'short' })
-      const toDay = value.to.toLocaleDateString('en-US', { day: 'numeric' })
-      return `${fromMonth} ${fromDay} - ${toMonth} ${toDay}`
+    
+    const formatDate = (date: Date) => {
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
     }
-    const month = value.from.toLocaleDateString('en-US', { month: 'short' })
-    const day = value.from.toLocaleDateString('en-US', { day: 'numeric' })
-    return `${month} ${day}`
-  }
-
-  const handleDateChange = (range: DateRange | undefined) => {
-    setTempRange(range)
+    
+    if (value.to) {
+      return `${formatDate(value.from)} - ${formatDate(value.to)}`
+    }
+    return formatDate(value.from)
   }
 
   const handleApply = () => {
@@ -69,19 +89,18 @@ export const DateRangePicker = ({ value, onChange, disabled }: DateRangePickerPr
     setIsOpen(false)
   }
 
-  // Calculate maximum date (1 year from now)
-  const getOneYearFromNow = () => {
-    const today = new Date()
-    const oneYearFromNow = new Date()
-    oneYearFromNow.setFullYear(today.getFullYear() + 1)
-    return oneYearFromNow
-  }
-
-  // Calculate today date for fromMonth
+  // Helper: Get today at midnight
   const getToday = () => {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
     return today
+  }
+
+  // Helper: Get date 1 year from now
+  const getOneYearFromNow = () => {
+    const date = new Date()
+    date.setFullYear(date.getFullYear() + 1)
+    return date
   }
 
   // Disable dates based on custom rules
@@ -119,8 +138,6 @@ export const DateRangePicker = ({ value, onChange, disabled }: DateRangePickerPr
     return false
   }
 
-  const isRangeComplete = tempRange?.from && tempRange?.to
-
   return (
     <div className="relative w-full" ref={pickerRef}>
       <div className="relative">
@@ -136,41 +153,47 @@ export const DateRangePicker = ({ value, onChange, disabled }: DateRangePickerPr
       </div>
       
       {isOpen && (
-        <div className="absolute top-full left-0 z-100 mt-3 bg-background rounded-2xl shadow-2xl">
-          <div className="p-6">
+        <div className="absolute top-full left-1/2 -translate-x-1/2 z-100 mt-3 bg-background rounded-2xl shadow-2xl">
+          <div className="px-3 sm:px-6 pt-6 pb-3">
             <Calendar
               mode="range"
               defaultMonth={tempRange?.from || new Date()}
               selected={tempRange}
-              onSelect={handleDateChange}
-              numberOfMonths={2}
+              onSelect={setTempRange}
+              numberOfMonths={isMobile ? 1 : 2}
               disabled={isDateDisabled}
               startMonth={getToday()}
               endMonth={getOneYearFromNow()}
               className="rounded-2xl p-0"
             />
           </div>
-          <div className="px-6 pb-6 flex justify-end gap-3">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={handleClear}
-              disabled={!tempRange?.from}
-              className="px-8 h-11 text-base"
-            >
-              Clear
-            </Button>
-            <Button
-              type="button"
-              onClick={handleApply}
-              disabled={!isRangeComplete}
-              className="px-8 h-11 text-base bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Apply
-            </Button>
+          <div className="px-3 sm:px-6 pb-6 space-y-2">
+            <p className="text-xs text-muted-foreground text-center">
+              A trip can last for a maximum of 1 month and must be less than a year away
+            </p>
+            <div className="flex justify-end gap-3">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={handleClear}
+                disabled={!tempRange?.from}
+                className="px-8 h-11 text-base"
+              >
+                Clear
+              </Button>
+              <Button
+                type="button"
+                onClick={handleApply}
+                disabled={!tempRange?.from || !tempRange?.to}
+                className="px-8 h-11 text-base bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Apply
+              </Button>
+            </div>
           </div>
         </div>
       )}
     </div>
   )
 }
+
