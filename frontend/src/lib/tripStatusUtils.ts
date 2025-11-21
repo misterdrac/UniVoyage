@@ -11,30 +11,30 @@ export const getStatusConfig = (status: TripStatus): TripStatusConfig => {
   switch (status) {
     case 'planned':
       return {
-        bg: 'bg-blue-500/10 dark:bg-blue-500/20',
-        text: 'text-blue-600 dark:text-blue-400',
-        border: 'border-blue-500/30 dark:border-blue-500/40',
+        bg: 'bg-blue-500/20',
+        text: 'text-blue-400',
+        border: 'border-blue-500/40',
         icon: '📅',
       }
     case 'ongoing':
       return {
-        bg: 'bg-green-500/10 dark:bg-green-500/20',
-        text: 'text-green-600 dark:text-green-400',
-        border: 'border-green-500/30 dark:border-green-500/40',
+        bg: 'bg-green-500/20',
+        text: 'text-green-400',
+        border: 'border-green-500/40',
         icon: '✈️',
       }
     case 'completed':
       return {
-        bg: 'bg-gray-500/10 dark:bg-gray-500/20',
-        text: 'text-gray-600 dark:text-gray-400',
-        border: 'border-gray-500/30 dark:border-gray-500/40',
+        bg: 'bg-gray-500/20',
+        text: 'text-gray-400',
+        border: 'border-gray-500/40',
         icon: '✓',
       }
     default:
       return {
-        bg: 'bg-gray-500/10 dark:bg-gray-500/20',
-        text: 'text-gray-600 dark:text-gray-400',
-        border: 'border-gray-500/30 dark:border-gray-500/40',
+        bg: 'bg-gray-500/20',
+        text: 'text-gray-400',
+        border: 'border-gray-500/40',
         icon: '📋',
       }
   }
