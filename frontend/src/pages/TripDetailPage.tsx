@@ -1,5 +1,5 @@
-import { useCallback, useMemo, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useCallback, useMemo } from 'react';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTrips } from '@/contexts/TripContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -28,82 +28,91 @@ import {
 } from '@/components/trips';
 import type { TripSectionDefinition } from '@/components/trips';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { useDeleteTrip } from '@/hooks/useDeleteTrip';
 
 type Section = 'overview' | 'budget' | 'accommodation' | 'things-to-visit' | 'map' | 'weather' | 'itinerary';
+
+// Sections configuration - constant outside component for better performance
+const TRIP_SECTIONS: TripSectionDefinition<Section>[] = [
+  { id: 'overview', label: 'Overview', icon: LayoutDashboard },
+  { id: 'budget', label: 'Budget', icon: Wallet },
+  { id: 'accommodation', label: 'Accommodation', icon: Hotel },
+  { id: 'things-to-visit', label: 'Things to Visit', icon: MapPinIcon },
+  { id: 'map', label: 'Map', icon: Map },
+  { id: 'weather', label: 'Weather', icon: Cloud },
+  { id: 'itinerary', label: 'Itinerary', icon: Calendar },
+];
+
+// Valid section IDs for quick lookup - constant
+const VALID_SECTION_IDS = new Set(TRIP_SECTIONS.map(s => s.id));
+
+// Weather API key - memoized at module level
+const OPENWEATHER_API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY as string | undefined;
 
 const TripDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { getTripById, isLoading, deleteTrip } = useTrips();
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
-
   const tripId = id ? parseInt(id, 10) : null;
   const trip = tripId ? getTripById(tripId) : undefined;
 
-  const sections = useMemo<TripSectionDefinition<Section>[]>(
-    () => [
-      { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-      { id: 'budget', label: 'Budget', icon: Wallet },
-      { id: 'accommodation', label: 'Accommodation', icon: Hotel },
-      { id: 'things-to-visit', label: 'Things to Visit', icon: MapPinIcon },
-      { id: 'map', label: 'Map', icon: Map },
-      { id: 'weather', label: 'Weather', icon: Cloud },
-      { id: 'itinerary', label: 'Itinerary', icon: Calendar },
-    ],
-    []
-  );
+  const {
+    pendingDeleteTrip,
+    isDeleting,
+    deleteError,
+    requestDelete: handleRequestDeleteTrip,
+    cancelDelete: handleCancelDeleteTrip,
+    confirmDelete: handleConfirmDeleteTrip,
+  } = useDeleteTrip({
+    onSuccess: () => navigate('/my-trips'),
+  });
 
-  const [activeSection, setActiveSection] = useState<Section>('overview');
+  // Derive active section directly from URL (single source of truth)
+  const activeSection = useMemo<Section>(() => {
+    const sectionParam = searchParams.get('section');
+    return (sectionParam && VALID_SECTION_IDS.has(sectionParam)) 
+      ? (sectionParam as Section)
+      : 'overview';
+  }, [searchParams]);
 
-  const activeSectionData = useMemo(
-    () => sections.find((s) => s.id === activeSection),
-    [sections, activeSection]
-  );
+  // Memoize derived trip data to avoid recalculation on every render
+  const tripData = useMemo(() => {
+    if (!trip) return null;
+    return {
+      currentStatus: calculateTripStatus(trip.departureDate, trip.returnDate),
+      duration: calculateDurationInDays(trip.departureDate, trip.returnDate),
+      imageUrl: getDestinationImageById(trip.destinationId),
+    };
+  }, [trip]);
+
+  const activeSectionData = TRIP_SECTIONS.find((s) => s.id === activeSection);
 
   const handleBack = useCallback(() => {
     navigate('/my-trips');
   }, [navigate]);
 
   const handleSectionChange = useCallback((section: Section) => {
-    setActiveSection(section);
-  }, []);
-
-  const handleRequestDeleteTrip = useCallback(() => {
-    setIsDeleteDialogOpen(true);
-    setDeleteError(null);
-  }, []);
-
-  const handleCancelDeleteTrip = useCallback(() => {
-    if (isDeleting) {
-      return;
-    }
-    setIsDeleteDialogOpen(false);
-    setDeleteError(null);
-  }, [isDeleting]);
-
-  const handleConfirmDeleteTrip = useCallback(async () => {
-    if (!tripId || !trip) return;
-
-    setIsDeleting(true);
-    setDeleteError(null);
-    try {
-      const result = await deleteTrip(tripId);
-      if (result.success) {
-        setIsDeleteDialogOpen(false);
-        navigate('/my-trips');
-      } else if (result.error) {
-        setDeleteError(result.error);
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      if (section === 'overview') {
+        next.delete('section');
+      } else {
+        next.set('section', section);
       }
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to delete trip. Please try again.';
-      setDeleteError(message);
-      console.error('Error deleting trip:', error);
-    } finally {
-      setIsDeleting(false);
-    }
-  }, [tripId, trip, deleteTrip, navigate]);
+      return next;
+    }, { replace: true });
+  }, [setSearchParams]);
+
+  const handleConfirmDelete = useCallback(async () => {
+    if (!trip) return;
+    await handleConfirmDeleteTrip(deleteTrip);
+  }, [trip, handleConfirmDeleteTrip, deleteTrip]);
+
+  // Request delete when trip is available
+  const handleDeleteClick = useCallback(() => {
+    if (trip) handleRequestDeleteTrip(trip);
+  }, [trip, handleRequestDeleteTrip]);
 
   if (isLoading) {
     return (
@@ -117,7 +126,7 @@ const TripDetailPage = () => {
     );
   }
 
-  if (!trip) {
+  if (!trip || !tripData) {
     return (
       <div className="min-h-screen bg-background pt-24 pb-8 px-8">
         <div className="container mx-auto">
@@ -138,10 +147,7 @@ const TripDetailPage = () => {
     );
   }
 
-  const currentStatus = calculateTripStatus(trip.departureDate, trip.returnDate);
-  const duration = calculateDurationInDays(trip.departureDate, trip.returnDate);
-  const imageUrl = getDestinationImageById(trip.destinationId);
-  const openWeatherApiKey = import.meta.env.VITE_OPENWEATHER_API_KEY as string | undefined;
+  const { currentStatus, duration, imageUrl } = tripData;
 
   return (
     <div className="min-h-screen bg-background">
@@ -152,11 +158,11 @@ const TripDetailPage = () => {
         imageUrl={imageUrl}
         isDeleting={isDeleting}
         onBack={handleBack}
-        onDelete={handleRequestDeleteTrip}
+        onDelete={handleDeleteClick}
       />
 
       <TripSectionTabs
-        sections={sections}
+        sections={TRIP_SECTIONS}
         activeSection={activeSection}
         onSectionChange={handleSectionChange}
       />
@@ -171,42 +177,42 @@ const TripDetailPage = () => {
               aria-labelledby={`${activeSection}-tab`}
             >
               <TripSectionCard icon={activeSectionData.icon} title={activeSectionData.label}>
-              {activeSection === 'overview' && (
-                <TripOverviewSection
-                  trip={trip}
-                  duration={duration}
-                  currentStatus={currentStatus}
-                  openWeatherApiKey={openWeatherApiKey}
-                />
-              )}
+                {activeSection === 'overview' && (
+                  <TripOverviewSection
+                    trip={trip}
+                    duration={duration}
+                    currentStatus={currentStatus}
+                    openWeatherApiKey={OPENWEATHER_API_KEY}
+                  />
+                )}
 
-              {activeSection === 'budget' && (
-                <TripBudgetSection trip={trip} />
-              )}
+                {activeSection === 'budget' && (
+                  <TripBudgetSection trip={trip} />
+                )}
 
-              {activeSection === 'accommodation' && (
-                <TripPlaceholderSection message="Accommodation details will be available here." />
-              )}
+                {activeSection === 'accommodation' && (
+                  <TripPlaceholderSection message="Accommodation details will be available here." />
+                )}
 
-              {activeSection === 'things-to-visit' && (
-                <TripPlaceholderSection message="Places to visit will be listed here." />
-              )}
+                {activeSection === 'things-to-visit' && (
+                  <TripPlaceholderSection message="Places to visit will be listed here." />
+                )}
 
-              {activeSection === 'map' && (
-                <TripPlaceholderSection message="Interactive map will be displayed here." />
-              )}
+                {activeSection === 'map' && (
+                  <TripPlaceholderSection message="Interactive map will be displayed here." />
+                )}
 
-              {activeSection === 'weather' && (
-                <TripWeatherSection
-                  trip={trip}
-                  currentStatus={currentStatus}
-                  openWeatherApiKey={openWeatherApiKey}
-                />
-              )}
+                {activeSection === 'weather' && (
+                  <TripWeatherSection
+                    trip={trip}
+                    currentStatus={currentStatus}
+                    openWeatherApiKey={OPENWEATHER_API_KEY}
+                  />
+                )}
 
-              {activeSection === 'itinerary' && (
-                <TripPlaceholderSection message="Your detailed itinerary will be displayed here." />
-              )}
+                {activeSection === 'itinerary' && (
+                  <TripPlaceholderSection message="Your detailed itinerary will be displayed here." />
+                )}
               </TripSectionCard>
             </div>
           )}
@@ -214,7 +220,7 @@ const TripDetailPage = () => {
       </div>
 
       <ConfirmDialog
-        open={isDeleteDialogOpen}
+        open={pendingDeleteTrip !== null}
         title="Delete trip"
         description={`Are you sure you want to delete your trip to ${trip.destinationName}? This action cannot be undone.`}
         confirmLabel="Delete"
@@ -222,7 +228,7 @@ const TripDetailPage = () => {
         isConfirming={isDeleting}
         errorMessage={deleteError}
         onCancel={handleCancelDeleteTrip}
-        onConfirm={handleConfirmDeleteTrip}
+        onConfirm={handleConfirmDelete}
       />
     </div>
   );

@@ -13,60 +13,29 @@ import {
   type TripStatusFilter,
 } from '@/lib/tripFilters';
 import { sortTrips, type TripSortOption } from '@/lib/tripSorting';
+import { useDeleteTrip } from '@/hooks/useDeleteTrip';
 
 const MyTripsPage = () => {
   const { trips, isLoading, deleteTrip } = useTrips();
   const navigate = useNavigate();
-  const [deletingTripId, setDeletingTripId] = useState<number | null>(null);
-  const [pendingDeleteTrip, setPendingDeleteTrip] = useState<Trip | null>(null);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
-  const isDialogOpen = useMemo(() => pendingDeleteTrip !== null, [pendingDeleteTrip]);
   const [filters, setFilters] = useState<TripFilters>({ ...DEFAULT_TRIP_FILTERS });
 
-  const handleRequestDeleteTrip = useCallback((trip: Trip) => {
-    setPendingDeleteTrip(trip);
-    setDeleteError(null);
-  }, []);
+  const {
+    pendingDeleteTrip,
+    isDeleting,
+    deleteError,
+    requestDelete: handleRequestDeleteTrip,
+    cancelDelete: handleCancelDeleteTrip,
+    confirmDelete: handleConfirmDeleteTrip,
+  } = useDeleteTrip();
 
-  const handleCancelDeleteTrip = useCallback(() => {
-    if (deletingTripId !== null) {
-      return;
-    }
-    setPendingDeleteTrip(null);
-    setDeleteError(null);
-  }, [deletingTripId]);
+  const handleViewTrip = useCallback((trip: Trip) => {
+    navigate(`/trips/${trip.id}`);
+  }, [navigate]);
 
-  const handleConfirmDeleteTrip = useCallback(async () => {
-    if (!pendingDeleteTrip) {
-      return;
-    }
-
-    setDeletingTripId(pendingDeleteTrip.id);
-    setDeleteError(null);
-    try {
-      const result = await deleteTrip(pendingDeleteTrip.id);
-      if (result.success) {
-        setPendingDeleteTrip(null);
-        setDeleteError(null);
-      }
-      if (!result.success && result.error) {
-        setDeleteError(result.error);
-      }
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to delete trip. Please try again.';
-      setDeleteError(message);
-      console.error('Error deleting trip:', error);
-    } finally {
-      setDeletingTripId(null);
-    }
-  }, [pendingDeleteTrip, deleteTrip]);
-
-  const handleViewTrip = useCallback(
-    (trip: Trip) => {
-      navigate(`/trips/${trip.id}`);
-    },
-    [navigate]
-  );
+  const handleConfirmDelete = useCallback(async () => {
+    await handleConfirmDeleteTrip(deleteTrip);
+  }, [handleConfirmDeleteTrip, deleteTrip]);
 
   const handleStatusChange = useCallback((status: TripStatusFilter) => {
     setFilters((previous) => ({
@@ -125,7 +94,7 @@ const MyTripsPage = () => {
             />
             <TripResultsSection
               trips={sortedTrips}
-              deletingTripId={deletingTripId}
+              deletingTripId={pendingDeleteTrip?.id ?? null}
               hasActiveFilters={hasActiveFilters}
               onResetFilters={handleResetFilters}
               onDeleteTrip={handleRequestDeleteTrip}
@@ -136,12 +105,12 @@ const MyTripsPage = () => {
       </div>
 
       <DeleteTripDialog
-        open={isDialogOpen}
+        open={pendingDeleteTrip !== null}
         trip={pendingDeleteTrip}
-        isConfirming={deletingTripId !== null}
+        isConfirming={isDeleting}
         errorMessage={deleteError}
         onCancel={handleCancelDeleteTrip}
-        onConfirm={handleConfirmDeleteTrip}
+        onConfirm={handleConfirmDelete}
       />
     </div>
   );
