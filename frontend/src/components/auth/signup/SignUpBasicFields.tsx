@@ -26,7 +26,7 @@ export const SignUpBasicFields = ({
 }: SignUpBasicFieldsProps) => {
   return (
     <>
-      {/* Name and Email in a row */}
+      {/* First Name and Surname in a row */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* First Name Input */}
         <div className="space-y-2">
@@ -64,7 +64,10 @@ export const SignUpBasicFields = ({
             />
           </div>
         </div>
+      </div>
 
+      {/* Email and Country in a row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Email Input */}
         <div className="space-y-2">
           <label htmlFor="signup-email" className="text-sm font-medium text-foreground">
@@ -83,20 +86,20 @@ export const SignUpBasicFields = ({
             />
           </div>
         </div>
-      </div>
 
-      {/* Country */}
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-foreground">
-          Country of Origin <span className="text-destructive">*</span>
-        </label>
-        <AutoComplete
-          options={COUNTRIES}
-          placeholder="Select your country..."
-          emptyMessage="No countries found"
-          value={country}
-          onValueChange={setCountry}
-        />
+        {/* Country */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-foreground">
+            Country of Origin <span className="text-destructive">*</span>
+          </label>
+          <AutoComplete
+            options={COUNTRIES}
+            placeholder="Select your country..."
+            emptyMessage="No countries found"
+            value={country}
+            onValueChange={setCountry}
+          />
+        </div>
       </div>
     </>
   );

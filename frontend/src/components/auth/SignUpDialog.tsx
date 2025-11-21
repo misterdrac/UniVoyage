@@ -111,13 +111,6 @@ export function SignUpDialog({ open, onOpenChange, onLoginClick }: SignUpDialogP
             setShowPasswordError={setShowPasswordError}
           />
 
-          {/* Error Message */}
-          {error && (
-            <div className="text-sm text-destructive text-center">
-              {error}
-            </div>
-          )}
-
           <SignUpFormActions
             isLoading={isLoading}
             isFormValid={isFormValid}
