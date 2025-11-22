@@ -1,8 +1,9 @@
 package com.univoyage.auth.user;
 
-import com.univoyage.user.hobby.UserHobby;
-import com.univoyage.user.language.UserLanguage;
-import com.univoyage.user.visited.UserVisitedCountry;
+import com.univoyage.user.relations.UserHobby;
+import com.univoyage.user.relations.UserLanguage;
+import com.univoyage.user.relations.UserVisitedCountry;
+import com.univoyage.user.relations.Country;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -53,8 +54,9 @@ public class UserEntity {
     private Set<UserLanguage> userLanguages;
 
     // added with new layout
-    @Column(name = "country_of_origin_code", length = 2)
-    private String countryOfOriginCode;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "country_of_origin_code", referencedColumnName = "iso_code")
+    private Country countryOfOrigin;
 
     // added with new layout
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -67,8 +69,8 @@ public class UserEntity {
     private byte[] profileImageData;
 
     // timestamptz, DB default now()
-    @Column(name = "date_of_register", nullable = false, insertable = false, updatable = false)
-    private Instant dateOfRegister = Instant.now();
+    @Column(name = "date_of_register", nullable = false)
+    private Instant dateOfRegister;
 
     @Column(name = "date_of_last_signin")
     private Instant dateOfLastSignin;
