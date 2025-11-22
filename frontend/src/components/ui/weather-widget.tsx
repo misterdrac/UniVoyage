@@ -950,7 +950,7 @@ export function WeatherWidget({
             <CardHeader className="p-0 pb-4">
               <CardTitle className="flex items-center gap-2 text-lg">
                 <Calendar className="w-5 h-5" />
-                Weather Forecast - First 3 Days
+                Weather Forecast
               </CardTitle>
             </CardHeader>
             <AnimatePresence mode="wait">
@@ -1025,7 +1025,7 @@ export function WeatherWidget({
                   </>
                 ) : (
                   <>
-                    Showing {forecast.length} day{forecast.length !== 1 ? 's' : ''} of forecast available for your trip.
+                    Expect these weather conditions on your trip.
                   </>
                 )}
               </p>

@@ -1,57 +1,71 @@
+import { useMemo } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { WeatherWidget } from '@/components/ui/weather-widget'
 import type { Trip } from '@/types/trip'
+import type { TripStatus } from '@/lib/tripStatusUtils'
 
 interface TripWeatherSectionProps {
   trip: Trip
-  currentStatus: string
+  currentStatus: TripStatus
   openWeatherApiKey: string | undefined
 }
 
 export function TripWeatherSection({ trip, currentStatus, openWeatherApiKey }: TripWeatherSectionProps) {
+  // Memoize derived status checks to avoid recalculation
+  const statusChecks = useMemo(() => ({
+    isOngoingOrCompleted: currentStatus === 'ongoing' || currentStatus === 'completed',
+    isOngoing: currentStatus === 'ongoing',
+    isPlanned: currentStatus === 'planned',
+  }), [currentStatus])
+
+  // Memoize common widget props to avoid recreating object on every render
+  const commonWidgetProps = useMemo(() => ({
+    apiKey: openWeatherApiKey,
+    width: "100%" as const,
+    animated: true,
+  }), [openWeatherApiKey])
+
+  // Memoize forecast mode configuration to avoid recreating object on every render
+  const forecastMode = useMemo(() => ({
+    cityName: trip.destinationName,
+    locationName: trip.destinationLocation,
+    departureDate: trip.departureDate,
+    returnDate: trip.returnDate,
+  }), [trip.destinationName, trip.destinationLocation, trip.departureDate, trip.returnDate])
+
   return (
     <div className="space-y-6">
-      {currentStatus === 'ongoing' ? (
+      {statusChecks.isOngoingOrCompleted && (
         <div className="space-y-4">
           <div>
-            <h4 className="text-lg font-semibold text-foreground mb-2">Current Weather</h4>
+            <h4 className="text-lg font-semibold text-foreground mb-2">
+              Current weather conditions
+            </h4>
             <WeatherWidget
-              apiKey={openWeatherApiKey}
+              {...commonWidgetProps}
               cityName={trip.destinationName}
               locationName={trip.destinationLocation}
-              width="100%"
-              animated
             />
           </div>
-          <div>
-            <h4 className="text-lg font-semibold text-foreground mb-2">Remaining Trip Forecast</h4>
-            <WeatherWidget
-              apiKey={openWeatherApiKey}
-              forecastMode={{
-                cityName: trip.destinationName,
-                locationName: trip.destinationLocation,
-                departureDate: trip.departureDate,
-                returnDate: trip.returnDate,
-              }}
-              width="100%"
-              animated
-            />
-          </div>
+          {statusChecks.isOngoing && (
+            <div>
+              <h4 className="text-lg font-semibold text-foreground mb-2">Forecast for the following days</h4>
+              <WeatherWidget
+                {...commonWidgetProps}
+                forecastMode={forecastMode}
+              />
+            </div>
+          )}
         </div>
-      ) : (
+      )}
+
+      {statusChecks.isPlanned && (
         <div className="space-y-4">
           <div>
             <h4 className="text-lg font-semibold text-foreground mb-2">Trip Forecast</h4>
             <WeatherWidget
-              apiKey={openWeatherApiKey}
-              forecastMode={{
-                cityName: trip.destinationName,
-                locationName: trip.destinationLocation,
-                departureDate: trip.departureDate,
-                returnDate: trip.returnDate,
-              }}
-              width="100%"
-              animated
+              {...commonWidgetProps}
+              forecastMode={forecastMode}
             />
           </div>
           <Card className="p-6 border-2 border-dashed">
@@ -60,18 +74,6 @@ export function TripWeatherSection({ trip, currentStatus, openWeatherApiKey }: T
                 💡 <strong>Tip:</strong> Weather forecasts are most accurate within 5 days. Check back closer to your trip for
                 the most up-to-date information.
               </p>
-            </CardContent>
-          </Card>
-          <Card className="p-6 border-2 border-dashed bg-muted/30">
-            <CardContent className="p-0 space-y-3">
-              <h4 className="text-base font-semibold text-foreground">Coming Soon</h4>
-              <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
-                <li>Hourly forecast for the next 24-48 hours</li>
-                <li>Extended forecast for the full trip duration</li>
-                <li>Detailed weather metrics (humidity, wind speed, UV index)</li>
-                <li>Weather alerts and warnings</li>
-                <li>Packing suggestions based on forecast</li>
-              </ul>
             </CardContent>
           </Card>
         </div>
