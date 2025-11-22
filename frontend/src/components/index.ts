@@ -6,3 +6,6 @@ export * from "./animations";
 
 // Layout components
 export * from "./layout";
+
+// Trip components
+export * from "./trips";

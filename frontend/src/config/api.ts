@@ -19,6 +19,13 @@ export const API_CONFIG = {
     USER: {
       UPDATE_PROFILE: '/user/profile',
       UPDATE_PROFILE_PICTURE: '/user/profile-picture',
+    },
+    TRIPS: {
+      CREATE: '/trips',
+      GET_ALL: '/trips',
+      GET_BY_ID: '/trips',
+      UPDATE: '/trips',
+      DELETE: '/trips',
     }
   },
   

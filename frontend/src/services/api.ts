@@ -382,6 +382,157 @@ class ApiService {
       return { success: false, error: err?.message ?? "Upload failed" };
     }
   }
+
+  // Trip API methods
+  // BE: POST /api/trips with Authorization: Bearer <token> expects {destinationId, destinationName, destinationLocation, departureDate, returnDate}
+  // Returns {success, data: {trip}} or {success: false, error}
+  async createTrip(data: {
+    destinationId: number;
+    destinationName: string;
+    destinationLocation: string;
+    departureDate: string;
+    returnDate: string;
+  }): Promise<{ success: boolean; trip?: any; error?: string }> {
+    if (this.useMock) {
+      try {
+        const savedUser = localStorage.getItem(API_CONSTANTS.USER_KEY);
+        if (!savedUser) {
+          return { success: false, error: 'User not found' };
+        }
+        
+        const user = JSON.parse(savedUser) as User;
+        const trips = this.getMockTrips();
+        
+        const newTrip = {
+          id: trips.length > 0 ? Math.max(...trips.map(t => t.id)) + 1 : 1,
+          userId: user.id,
+          destinationId: data.destinationId,
+          destinationName: data.destinationName,
+          destinationLocation: data.destinationLocation,
+          departureDate: data.departureDate,
+          returnDate: data.returnDate,
+          createdAt: new Date().toISOString(),
+          status: 'planned' as const,
+        };
+        
+        trips.push(newTrip);
+        localStorage.setItem('mock_trips', JSON.stringify(trips));
+        
+        return { success: true, trip: newTrip };
+      } catch (err: any) {
+        return { success: false, error: err?.message ?? "Trip creation failed" };
+      }
+    }
+
+    try {
+      const res = await this.request<{ success: boolean; trip: any }>(
+        API_CONFIG.ENDPOINTS.TRIPS.CREATE,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        }
+      );
+
+      if (res.success && res.data?.trip) {
+        return { success: true, trip: res.data.trip };
+      }
+
+      return { success: false, error: res.error ?? "Trip creation failed" };
+    } catch (err: any) {
+      return { success: false, error: err?.message ?? "Trip creation failed" };
+    }
+  }
+
+  // BE: GET /api/trips with Authorization: Bearer <token>
+  // Returns {success, data: {trips: Trip[]}} or {success: false, error}
+  async getTrips(): Promise<{ success: boolean; trips?: any[]; error?: string }> {
+    if (this.useMock) {
+      try {
+        const savedUser = localStorage.getItem(API_CONSTANTS.USER_KEY);
+        if (!savedUser) {
+          return { success: false, error: 'User not found' };
+        }
+        
+        const user = JSON.parse(savedUser) as User;
+        const trips = this.getMockTrips();
+        const userTrips = trips.filter(trip => trip.userId === user.id);
+        
+        return { success: true, trips: userTrips };
+      } catch (err: any) {
+        return { success: false, error: err?.message ?? "Failed to fetch trips" };
+      }
+    }
+
+    try {
+      const res = await this.request<{ success: boolean; trips: any[] }>(
+        API_CONFIG.ENDPOINTS.TRIPS.GET_ALL
+      );
+
+      if (res.success && res.data?.trips) {
+        return { success: true, trips: res.data.trips };
+      }
+
+      return { success: false, error: res.error ?? "Failed to fetch trips" };
+    } catch (err: any) {
+      return { success: false, error: err?.message ?? "Failed to fetch trips" };
+    }
+  }
+
+  // BE: DELETE /api/trips/:id with Authorization: Bearer <token>
+  // Returns {success} or {success: false, error}
+  async deleteTrip(tripId: number): Promise<{ success: boolean; error?: string }> {
+    if (this.useMock) {
+      try {
+        const savedUser = localStorage.getItem(API_CONSTANTS.USER_KEY);
+        if (!savedUser) {
+          return { success: false, error: 'User not found' };
+        }
+        
+        const user = JSON.parse(savedUser) as User;
+        const trips = this.getMockTrips();
+        const tripIndex = trips.findIndex(t => t.id === tripId && t.userId === user.id);
+        
+        if (tripIndex === -1) {
+          return { success: false, error: 'Trip not found' };
+        }
+        
+        trips.splice(tripIndex, 1);
+        localStorage.setItem('mock_trips', JSON.stringify(trips));
+        
+        return { success: true };
+      } catch (err: any) {
+        return { success: false, error: err?.message ?? "Trip deletion failed" };
+      }
+    }
+
+    try {
+      const res = await this.request<{ success: boolean }>(
+        `${API_CONFIG.ENDPOINTS.TRIPS.DELETE}/${tripId}`,
+        {
+          method: 'DELETE',
+        }
+      );
+
+      if (res.success) {
+        return { success: true };
+      }
+
+      return { success: false, error: res.error ?? "Trip deletion failed" };
+    } catch (err: any) {
+      return { success: false, error: err?.message ?? "Trip deletion failed" };
+    }
+  }
+
+  // Helper method to get mock trips from localStorage
+  private getMockTrips(): any[] {
+    try {
+      const tripsJson = localStorage.getItem('mock_trips');
+      return tripsJson ? JSON.parse(tripsJson) : [];
+    } catch {
+      return [];
+    }
+  }
 }
 
 // Export singleton instance
