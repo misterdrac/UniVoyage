@@ -13,6 +13,6 @@ CREATE TABLE hobbies (
 
 -- Table of all countries (for origin and visited countries)
 CREATE TABLE countries (
-    iso_code CHAR(3) PRIMARY KEY, -- ISO 3-letter code (e.g., 'USA', 'HRV')
+    iso_code CHAR(2) PRIMARY KEY, -- ISO 2-letter code (e.g., 'US', 'HR')
     country_name VARCHAR(100) UNIQUE NOT NULL
 );
