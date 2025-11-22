@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useEffect } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTrips } from '@/contexts/TripContext';
 import { Card, CardContent } from '@/components/ui/card';
@@ -75,14 +75,6 @@ const TripDetailPage = () => {
       ? (sectionParam as Section)
       : 'overview';
   }, [searchParams]);
-
-  // TODO: Consider creating a global ScrollToTop component for route changes
-  // Some pages may need to preserve scroll position (e.g., infinite scroll, back navigation)
-  // For now, we handle scroll per-page for flexibility
-  // Scroll to top when trip ID changes (when navigating to trip detail page)
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [tripId]);
 
   // Memoize derived trip data to avoid recalculation on every render
   const tripData = useMemo(() => {

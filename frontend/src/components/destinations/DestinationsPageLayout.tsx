@@ -36,7 +36,7 @@ export const DestinationsPageLayout = ({
   destinations,
   continent,
   defaultFooterText,
-  resetOnMount = true,
+  resetOnMount = false,
 }: DestinationsPageLayoutProps) => {
   const {
     selectedCountry,
@@ -48,14 +48,13 @@ export const DestinationsPageLayout = ({
     handlePlanTrip,
   } = useDestination();
 
-  // Reset all fields when page loads (if resetOnMount is true) and scroll to top
-  useEffect(() => {
-    if (resetOnMount) {
-      resetAll();
-    }
-    // Scroll to top when navigating to destinations page
-    window.scrollTo(0, 0);
-  }, [resetAll, resetOnMount]);
+  // Reset all fields when page loads (if resetOnMount is true)
+  // todo find a solution to this
+  // useEffect(() => {
+  //   if (resetOnMount) {
+  //     resetAll();
+  //   }
+  // }, [resetAll, resetOnMount]);
 
   // Shuffle destinations once per session (per page)
   const shuffledDestinations = useMemo(() => {
