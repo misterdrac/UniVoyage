@@ -13,8 +13,7 @@ public class Hobby {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "hobby_name"
-    nullable =false,unique =true length =100)
+    @Column(name = "hobby_name", nullable = false, unique = true, length =100)
     private String hobbyName;
 
     @OneToMany(mappedBy = "hobby", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

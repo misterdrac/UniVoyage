@@ -1,9 +1,9 @@
 package com.univoyage.auth.user;
 
-import com.univoyage.user.relations.UserHobby;
-import com.univoyage.user.relations.UserLanguage;
-import com.univoyage.user.relations.UserVisitedCountry;
-import com.univoyage.user.relations.Country;
+import com.univoyage.auth.user.relations.UserHobby;
+import com.univoyage.auth.user.relations.UserLanguage;
+import com.univoyage.auth.user.relations.UserVisitedCountry;
+import com.univoyage.auth.user.relations.Country;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -12,14 +12,15 @@ import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 
 // JPA Entity representing a user in the database, mapped to the "users" table
 // Java object that represents a row in users table, it's ORM mapping
 @Entity
 @Table(name = "users")
 @Data @NoArgsConstructor @AllArgsConstructor @Builder
-@EqualsAndHashCode(exclude = {"userHobbies", "userLanguages", "visitedCountries"}) // Important for relationships
-@ToString(exclude = {"userHobbies", "userLanguages", "visitedCountries", "profileImage"}) // Keep logs clean
+@EqualsAndHashCode(exclude = {"userHobbies", "userLanguages", "visitedCountries", "profileImageData"}) // Important for relationships
+@ToString(exclude = {"userHobbies", "userLanguages", "visitedCountries", "profileImageData"}) // Keep logs clean
 public class UserEntity {
 
     @Id
@@ -56,7 +57,7 @@ public class UserEntity {
     // added with new layout
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "country_of_origin_code", referencedColumnName = "iso_code")
-    private Country countryOfOrigin;
+    private Country country;
 
     // added with new layout
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)

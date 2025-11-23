@@ -1,7 +1,7 @@
-package com.univoyage.user.visited;
+package com.univoyage.auth.user.relations;
 
 import com.univoyage.auth.user.UserEntity;
-import com.univoyage.user.relations.Country;
+import com.univoyage.auth.user.relations.Country;
 import jakarta.persistence.*;
 import lombok.*;
 

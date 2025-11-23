@@ -1,9 +1,9 @@
 package com.univoyage.auth.user;
 
-
-import com.univoyage.user.hobby.HobbyDto;
-import com.univoyage.user.language.LanguageDto;
-import com.univoyage.user.visited.VisitedCoutriesDto;
+import com.univoyage.auth.user.dto.HobbyDto;
+import com.univoyage.auth.user.dto.LanguageDto;
+import com.univoyage.auth.user.dto.VisitedCountryDto;
+import com.univoyage.auth.user.dto.CountryDto;
 
 import lombok.*;
 import java.time.Instant;
@@ -18,13 +18,12 @@ public class UserDto {
     String surname;
     String email;
     String role;
-    String country;
+    CountryDto countryOfOrigin;
     List<HobbyDto> hobbies;
     List<LanguageDto> languages;
-    List<VisitedCoutriesDto> visited;
+    List<VisitedCountryDto> visitedCountries;
     Instant dateOfRegister;
     Instant dateOfLastSignin;
-    //String profileImage;
 
     public static UserDto from(UserEntity entity) {
         return UserDto.builder()
@@ -33,8 +32,9 @@ public class UserDto {
                 .surname(entity.getSurname())
                 .email(entity.getEmail())
                 .role(entity.getRole())
-                .country(entity.getCountry())
-                // Mapping relationships: convert Entity lists to DTO lists
+                .countryOfOrigin(entity.getCountry() != null
+                        ? CountryDto.from(entity.getCountry())
+                        : null)
                 .hobbies(entity.getUserHobbies().stream()
                         .map(uh -> HobbyDto.from(uh.getHobby()))
                         .collect(Collectors.toList()))
@@ -46,8 +46,6 @@ public class UserDto {
                         .collect(Collectors.toList()))
                 .dateOfRegister(entity.getDateOfRegister())
                 .dateOfLastSignin(entity.getDateOfLastSignin())
-                //.profileImage(null) -> NOT TRANSFERRING BYTE[], REASON FOR NOT MAPPING
                 .build();
     }
-
 }

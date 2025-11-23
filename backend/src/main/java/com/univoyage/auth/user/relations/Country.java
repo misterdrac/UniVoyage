@@ -1,4 +1,4 @@
-package com.univoyage.user.country;
+package com.univoyage.auth.user.relations;
 
 import jakarta.persistence.*;
 import lombok.*;
