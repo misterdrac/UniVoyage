@@ -32,7 +32,7 @@ public class RegisterRequestDto {
     String countryCode;
 
     Set<Long> hobbyIds;
-    Set<Long> languageIds;
+    Set<String> languageCodes;
 
     // Updated to use 2-character codes
     Set<@Size(min = 2, max = 2) String> visitedCountryCodes;
