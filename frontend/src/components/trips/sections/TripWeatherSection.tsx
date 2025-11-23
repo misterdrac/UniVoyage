@@ -1,4 +1,3 @@
-import { useMemo } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { WeatherWidget } from '@/components/ui/weather-widget'
 import type { Trip } from '@/types/trip'
@@ -16,13 +15,12 @@ export function TripWeatherSection({ trip, currentStatus, openWeatherApiKey }: T
   const isPlanned = currentStatus === 'planned'
   const showCurrentWeather = isOngoing || isCompleted
 
-  // Memoize forecast mode configuration to avoid recreating object on every render
-  const forecastMode = useMemo(() => ({
+  const forecastMode = {
     cityName: trip.destinationName,
     locationName: trip.destinationLocation,
     departureDate: trip.departureDate,
     returnDate: trip.returnDate,
-  }), [trip.destinationName, trip.destinationLocation, trip.departureDate, trip.returnDate])
+  }
 
   if (!openWeatherApiKey) {
     return (
