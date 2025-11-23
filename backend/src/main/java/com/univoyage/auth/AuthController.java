@@ -7,6 +7,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 @CrossOrigin(origins = {"http://localhost:5173","http://127.0.0.1:5173"}, allowCredentials = "true")
 @RestController
@@ -26,17 +33,8 @@ public class AuthController {
         // call AuthService to handle registration login
         AuthPayload payload = authService.register(request);
 
-        int status = payload.isSuccess() ? 200 : 409;
-
-        // we create ApiResponse instance that will print response if it failed or succeeded
-        ApiResponse<AuthPayload> body;
-        if (payload.isSuccess()) {
-            body = ApiResponse.ok(payload);
-        } else {
-            body = ApiResponse.fail(payload.getError());
-        }
-
-        // return HTTP response with appropriate status and body
-        return ResponseEntity.status(status).body(body);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.ok(payload));
     }
 }
