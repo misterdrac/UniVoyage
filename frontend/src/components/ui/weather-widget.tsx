@@ -1,6 +1,6 @@
 import * as React from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Cloud, CloudRain, Snowflake, Loader2, MapPin, RefreshCw, Sun, Moon, CloudLightning, CloudFog as CloudMist, Thermometer, Calendar } from "lucide-react"
+import { Cloud, CloudRain, Snowflake, Loader2, MapPin, Sun, Moon, CloudLightning, CloudFog as CloudMist, Thermometer, Calendar } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { getCachedWeather, setCachedWeather } from "@/lib/weatherCache"
 import { cn } from "@/lib/utils"
@@ -13,6 +13,7 @@ export interface WeatherData {
   weatherType: WeatherType
   dateTime: string
   isDay: boolean
+  timezoneOffsetSeconds?: number
 }
 
 export interface ForecastDay {
@@ -25,6 +26,11 @@ export interface ForecastDay {
   weatherType: WeatherType
   description: string
   icon: string
+}
+
+interface ForecastCachePayload {
+  days: ForecastDay[]
+  timezoneOffsetSeconds?: number
 }
 
 export interface ForecastApiResponse {
@@ -44,6 +50,7 @@ export interface ForecastApiResponse {
   }>
   city: {
     name: string
+    timezone?: number
   }
 }
 
@@ -56,6 +63,7 @@ export interface WeatherApiResponse {
     main: string
     icon: string
   }>
+  timezone?: number
 }
 
 export interface WeatherWidgetProps {
@@ -140,14 +148,85 @@ const mapWeatherType = (condition: string): WeatherType => {
   return 'unknown'
 }
 
-/**
- * Helper: Format date as YYYY-MM-DD in local timezone
- */
-const formatDateLocal = (date: Date): string => {
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
+const DAY_IN_MS = 24 * 60 * 60 * 1000
+
+const formatISODateInTimezone = (timestampMs: number, offsetMs: number): string => {
+  const adjusted = new Date(timestampMs + offsetMs)
+  const year = adjusted.getUTCFullYear()
+  const month = String(adjusted.getUTCMonth() + 1).padStart(2, '0')
+  const day = String(adjusted.getUTCDate()).padStart(2, '0')
   return `${year}-${month}-${day}`
+}
+
+const formatDateLabelInTimezone = (timestampMs: number, offsetMs: number): string => {
+  const adjusted = new Date(timestampMs + offsetMs)
+  return new Intl.DateTimeFormat('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    timeZone: 'UTC',
+  }).format(adjusted)
+}
+
+const getTimezoneDayNumber = (timestampMs: number, offsetMs: number): number =>
+  Math.floor((timestampMs + offsetMs) / DAY_IN_MS)
+
+const parseTripDateToDayNumber = (dateString: string, offsetMs: number): number => {
+  const [year, month, day] = dateString.split('-').map(Number)
+  const localMidnightUtc = Date.UTC(year, month - 1, day) - offsetMs
+  return getTimezoneDayNumber(localMidnightUtc, offsetMs)
+}
+
+const getDayStartTimestamp = (dayNumber: number, offsetMs: number): number => {
+  const dayStartLocalMs = dayNumber * DAY_IN_MS
+  return dayStartLocalMs - offsetMs
+}
+
+const formatDateTimeForTimezone = (timezoneSeconds?: number): string => {
+  const formatOptions: Intl.DateTimeFormatOptions = {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    hour12: true
+  }
+
+  if (typeof timezoneSeconds !== 'number') {
+    return new Intl.DateTimeFormat('en-US', formatOptions).format(new Date())
+  }
+
+  const targetDate = new Date(Date.now() + timezoneSeconds * 1000)
+  return new Intl.DateTimeFormat('en-US', {
+    ...formatOptions,
+    timeZone: 'UTC'
+  }).format(targetDate)
+}
+
+const normalizeLocalDate = (date: Date) => {
+  const normalized = new Date(date)
+  normalized.setHours(0, 0, 0, 0)
+  return normalized
+}
+
+const isFinalTripDayForToday = (returnDate?: string, timezoneOffsetSeconds?: number): boolean => {
+  if (!returnDate) return false
+
+  if (typeof timezoneOffsetSeconds !== 'number') {
+    const today = normalizeLocalDate(new Date())
+    const target = normalizeLocalDate(new Date(returnDate))
+
+    if (Number.isNaN(target.getTime())) {
+      return false
+    }
+
+    return today.getTime() === target.getTime()
+  }
+
+  const offsetMs = timezoneOffsetSeconds * 1000
+  const todayDayNumber = getTimezoneDayNumber(Date.now(), offsetMs)
+  const returnDayNumber = parseTripDateToDayNumber(returnDate, offsetMs)
+  return todayDayNumber === returnDayNumber
 }
 
 /**
@@ -157,57 +236,41 @@ const formatDateLocal = (date: Date): string => {
 const groupForecastByDay = (
   forecastList: ForecastApiResponse['list'], 
   departureDate: string,
-  isOngoing: boolean
+  isOngoing: boolean,
+  timezoneOffsetSeconds: number = 0,
+  returnDate?: string
 ): ForecastDay[] => {
-  // Parse dates in local timezone
-  const departureParts = departureDate.split('-').map(Number)
-  const departure = new Date(departureParts[0], departureParts[1] - 1, departureParts[2])
-  departure.setHours(0, 0, 0, 0)
-  
-  // Get today's date
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  
-  // Determine start date: if trip is ongoing, start from today; otherwise from departure
-  const startDate = isOngoing ? today : departure
-  
-  // Calculate end date: fetch 4 days if ongoing (to get 3 days excluding today), 3 days if not started
+  const offsetMs = timezoneOffsetSeconds * 1000
+  const todayDayNumber = getTimezoneDayNumber(Date.now(), offsetMs)
+  const departureDayNumber = parseTripDateToDayNumber(departureDate, offsetMs)
+  const startDayNumber = isOngoing ? todayDayNumber : departureDayNumber
   const daysToFetch = isOngoing ? 4 : 3
-  const endDate = new Date(startDate)
-  endDate.setDate(endDate.getDate() + daysToFetch - 1) // -1 because we include start date
-  endDate.setHours(0, 0, 0, 0)
-  
+  const defaultEndDayNumber = startDayNumber + daysToFetch - 1
+  const returnDayNumber = returnDate ? parseTripDateToDayNumber(returnDate, offsetMs) : null
+  const endDayNumber = returnDayNumber !== null
+    ? Math.min(defaultEndDayNumber, returnDayNumber)
+    : defaultEndDayNumber
+
   const days: Map<string, ForecastDay> = new Map()
   
-  // Process each forecast entry
   forecastList.forEach((item) => {
-    const itemDate = new Date(item.dt * 1000)
-    // Use local timezone for comparison
-    const itemDateLocal = new Date(itemDate.getFullYear(), itemDate.getMonth(), itemDate.getDate())
-    itemDateLocal.setHours(0, 0, 0, 0)
-    
-    // Only include forecasts within the date range
-    if (itemDateLocal < startDate || itemDateLocal > endDate) {
+    const itemDayNumber = getTimezoneDayNumber(item.dt * 1000, offsetMs)
+
+    if (itemDayNumber < startDayNumber || itemDayNumber > endDayNumber) {
       return
     }
     
-    // If trip is ongoing, exclude today from forecast (we show current weather for today)
-    if (isOngoing && itemDateLocal.getTime() === today.getTime()) {
+    if (isOngoing && itemDayNumber === todayDayNumber) {
       return
     }
     
-    const dateKey = formatDateLocal(itemDateLocal)
+    const dayStartTimestamp = getDayStartTimestamp(itemDayNumber, offsetMs)
+    const dateKey = formatISODateInTimezone(dayStartTimestamp, offsetMs)
     
     if (!days.has(dateKey)) {
-      const dateLabel = itemDateLocal.toLocaleDateString('en-US', { 
-        weekday: 'short', 
-        month: 'short', 
-        day: 'numeric' 
-      })
-      
       days.set(dateKey, {
         date: dateKey,
-        dateLabel,
+        dateLabel: formatDateLabelInTimezone(dayStartTimestamp, offsetMs),
         temperature: {
           min: item.main.temp_min,
           max: item.main.temp_max,
@@ -224,11 +287,10 @@ const groupForecastByDay = (
     }
   })
   
-  // Convert to array, sort by date, and return maximum 3 days
   const sortedDays = Array.from(days.values()).sort((a, b) => 
-    new Date(a.date).getTime() - new Date(b.date).getTime()
+    a.date.localeCompare(b.date)
   )
-  
+
   return sortedDays.slice(0, 3)
 }
 
@@ -586,27 +648,14 @@ export function WeatherWidget({
   const [loading, setLoading] = React.useState<boolean>(true)
   const [initialLoad, setInitialLoad] = React.useState<boolean>(true)
   const [error, setError] = React.useState<string | null>(null)
-  const [refreshing, setRefreshing] = React.useState<boolean>(false)
-  const [isRefreshingDebounced, setIsRefreshingDebounced] = React.useState<boolean>(false)
   const [locationRequested, setLocationRequested] = React.useState<boolean>(false)
   const [permissionStatus, setPermissionStatus] = React.useState<PermissionState | null>(null)
   const [isTooFarAway, setIsTooFarAway] = React.useState<boolean>(false)
+  const [isFinalTripDay, setIsFinalTripDay] = React.useState<boolean>(false)
 
   // Debounced refresh button handler
-  const handleRefreshClick = React.useCallback(() => {
-    if (isRefreshingDebounced) return;
-    
-    setIsRefreshingDebounced(true);
-    setLocationRequested(true);
-    getUserLocation();
-    
-    // Prevent multiple clicks for 1 second
-    setTimeout(() => setIsRefreshingDebounced(false), 1000);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isRefreshingDebounced]);
-
   const fetchWeather = React.useCallback(async (latitude?: number, longitude?: number, city?: string) => {
-    setRefreshing(true)
+    setError(null)
     try {
       let weatherData: WeatherData
 
@@ -642,7 +691,6 @@ export function WeatherWidget({
           onWeatherLoaded?.(cached)
           setLoading(false)
           setInitialLoad(false)
-          setRefreshing(false)
           return
         }
 
@@ -662,16 +710,7 @@ export function WeatherWidget({
         }
 
         const data: WeatherApiResponse = await response.json()
-
-        const now = new Date()
-        const formattedDateTime = new Intl.DateTimeFormat('en-US', {
-          weekday: 'short',
-          month: 'short',
-          day: 'numeric',
-          hour: 'numeric',
-          minute: 'numeric',
-          hour12: true
-        }).format(now)
+        const timezoneOffsetSeconds = data.timezone
 
         // Check if it's day or night from icon code (icon codes ending with 'd' are day)
         const isDay = data.weather[0].icon.includes('d')
@@ -680,8 +719,9 @@ export function WeatherWidget({
           city: data.name,
           temperature: Math.round(data.main.temp),
           weatherType: mapWeatherType(data.weather[0].main),
-          dateTime: formattedDateTime,
-          isDay
+          dateTime: formatDateTimeForTimezone(timezoneOffsetSeconds),
+          isDay,
+          timezoneOffsetSeconds
         }
 
         // Cache the result
@@ -692,9 +732,11 @@ export function WeatherWidget({
       onWeatherLoaded?.(weatherData)
       
       // Announce to screen readers that weather has been updated
-      const announceElement = document.getElementById('weather-update-announcement');
+      const announceElement = typeof document !== 'undefined'
+        ? document.getElementById('weather-update-announcement')
+        : null
       if (announceElement) {
-        announceElement.textContent = `Weather updated for ${weatherData.city}: ${weatherData.temperature} degrees, ${weatherData.weatherType} conditions`;
+        announceElement.textContent = `Weather updated for ${weatherData.city}: ${weatherData.temperature} degrees, ${weatherData.weatherType} conditions`
       }
       
     } catch (err) {
@@ -705,7 +747,6 @@ export function WeatherWidget({
     } finally {
       setLoading(false)
       setInitialLoad(false)
-      setRefreshing(false)
     }
   }, [apiKey, locationName, onFetchWeather, onWeatherLoaded, onError])
 
@@ -713,42 +754,47 @@ export function WeatherWidget({
   const fetchForecast = React.useCallback(async () => {
     if (!forecastMode || !apiKey) return
 
+    const { cityName, locationName, departureDate, returnDate } = forecastMode
+
+    if (isFinalTripDayForToday(returnDate)) {
+      setIsFinalTripDay(true)
+      setForecast([])
+      setIsTooFarAway(false)
+      setError(null)
+      setLoading(false)
+      setInitialLoad(false)
+      return
+    } else {
+      setIsFinalTripDay(false)
+    }
+
     setLoading(true)
     setError(null)
     setIsTooFarAway(false)
     
     try {
-      const { cityName, locationName, departureDate, returnDate } = forecastMode
       const queryLocation = locationName ? `${cityName}, ${locationName}` : cityName
 
-      // Parse dates in local timezone
-      const departureParts = departureDate.split('-').map(Number)
-      const departure = new Date(departureParts[0], departureParts[1] - 1, departureParts[2])
-      departure.setHours(0, 0, 0, 0)
-      
-      // Get today at midnight in local timezone
-      const today = new Date()
-      today.setHours(0, 0, 0, 0)
-      
-      // Calculate days until trip starts
-      const daysUntilTrip = Math.floor((departure.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
-      
-      // Only fetch if trip starts within the next 5 days (OpenWeatherMap free tier limit)
-      if (daysUntilTrip > 5) {
-        setIsTooFarAway(true)
-        setLoading(false)
-        setInitialLoad(false)
-        return
-      }
-      
       // Check cache first (use departure and return dates as part of cache key)
       const cacheKey = `${queryLocation}_${departureDate}_${returnDate}`
-      const cached = getCachedWeather(cacheKey, 'forecast') as ForecastDay[] | null
+      const cached = getCachedWeather(cacheKey, 'forecast') as ForecastDay[] | ForecastCachePayload | null
       if (cached) {
-        setForecast(cached)
-        setLoading(false)
-        setInitialLoad(false)
-        return
+        const cachedDays = Array.isArray(cached) ? cached : cached?.days
+        const cachedTimezoneOffset = Array.isArray(cached) ? undefined : cached?.timezoneOffsetSeconds
+
+        if (isFinalTripDayForToday(returnDate, cachedTimezoneOffset)) {
+          setIsFinalTripDay(true)
+          setForecast([])
+          return
+        }
+
+        if (cachedDays) {
+          setIsFinalTripDay(false)
+          setForecast(cachedDays)
+          setLoading(false)
+          setInitialLoad(false)
+          return
+        }
       }
 
       // Fetch forecast from API
@@ -770,19 +816,44 @@ export function WeatherWidget({
       }
 
       const data: ForecastApiResponse = await response.json()
-      
-      // Check if trip is ongoing (today >= departure)
-      const isOngoing = today.getTime() >= departure.getTime()
+      const timezoneOffsetSeconds = data.city?.timezone ?? 0
+      const offsetMs = timezoneOffsetSeconds * 1000
+      const todayDayNumber = getTimezoneDayNumber(Date.now(), offsetMs)
+      const departureDayNumber = parseTripDateToDayNumber(departureDate, offsetMs)
+      const daysUntilTrip = departureDayNumber - todayDayNumber
+      const isOngoing = todayDayNumber >= departureDayNumber
+
+      if (isFinalTripDayForToday(returnDate, timezoneOffsetSeconds)) {
+        setIsFinalTripDay(true)
+        setForecast([])
+        return
+      }
+
+      setIsFinalTripDay(false)
+
+      if (!isOngoing && daysUntilTrip > 5) {
+        setIsTooFarAway(true)
+        return
+      }
       
       // Group forecast by day for first 3 days (excluding today if ongoing)
-      const forecastDays = groupForecastByDay(data.list, departureDate, isOngoing)
+      const forecastDays = groupForecastByDay(
+        data.list,
+        departureDate,
+        isOngoing,
+        timezoneOffsetSeconds,
+        returnDate
+      )
       
       if (forecastDays.length === 0) {
         throw new Error("No forecast data available for the trip dates")
       }
 
       // Cache the result
-      setCachedWeather(cacheKey, 'forecast', forecastDays)
+      setCachedWeather(cacheKey, 'forecast', {
+        days: forecastDays,
+        timezoneOffsetSeconds,
+      })
 
       setForecast(forecastDays)
       setError(null)
@@ -801,17 +872,17 @@ export function WeatherWidget({
 
   // Check permission status
   const checkPermissionStatus = React.useCallback(async () => {
-    if (!("permissions" in navigator)) return null;
+    if (typeof navigator === 'undefined' || !('permissions' in navigator)) return null
     
     try {
-      const result = await navigator.permissions.query({ name: 'geolocation' as PermissionName });
-      setPermissionStatus(result.state);
-      return result.state;
+      const result = await navigator.permissions.query({ name: 'geolocation' as PermissionName })
+      setPermissionStatus(result.state)
+      return result.state
     } catch (err) {
-      console.error('Error checking permission status:', err);
-      return null;
+      console.error('Error checking permission status:', err)
+      return null
     }
-  }, []);
+  }, [])
 
   const getUserLocation = React.useCallback(async () => {
     // If city name is provided, use it directly
@@ -846,6 +917,15 @@ export function WeatherWidget({
       setError("Location access denied. Please enable location services in your browser settings");
       setLoading(false);
       return;
+    }
+
+    if (typeof navigator === 'undefined') {
+      const errorMessage = "Geolocation is not supported in this environment"
+      setError(errorMessage)
+      setLoading(false)
+      setInitialLoad(false)
+      onError?.(errorMessage)
+      return
     }
 
     if ("geolocation" in navigator) {
@@ -890,12 +970,12 @@ export function WeatherWidget({
     }
   }, [fetchWeather, cityName, location, fallbackLocation, onError, locationRequested, initialLoad, checkPermissionStatus]);
 
-  const requestLocationAccess = () => {
-    setLocationRequested(true);
-    setLoading(true);
-    setError(null);
-    getUserLocation();
-  };
+  const requestLocationAccess = React.useCallback(() => {
+    setLocationRequested(true)
+    setLoading(true)
+    setError(null)
+    getUserLocation()
+  }, [getUserLocation])
 
   React.useEffect(() => {
     // If forecast mode, fetch forecast instead of current weather
@@ -976,6 +1056,16 @@ export function WeatherWidget({
                     Check back closer to your trip date for accurate weather information.
                   </p>
                 </div>
+              ) : isFinalTripDay ? (
+                <div className="text-center py-8">
+                  <Calendar className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground mb-2">
+                    You're on the final day of this trip.
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Future-day forecasts wrap up once the journey ends, but you can keep checking the current conditions above.
+                  </p>
+                </div>
               ) : forecast.length === 0 ? (
                 <div className="text-center py-8">
                   <p className="text-sm text-muted-foreground">
@@ -1017,17 +1107,9 @@ export function WeatherWidget({
                 </div>
               )}
             </AnimatePresence>
-            {forecast.length > 0 && (
+            {forecast.length > 0 && !isFinalTripDay && (
               <p className="text-xs text-muted-foreground text-center mt-4">
-                {forecast.length < 3 ? (
-                  <>
-                    Only {forecast.length} day{forecast.length !== 1 ? 's' : ''} of forecast available. Check back tomorrow for more.
-                  </>
-                ) : (
-                  <>
-                    Expect these weather conditions on your trip.
-                  </>
-                )}
+                Note: weather forecasts are not 100% accurate and should be used as a guide only.
               </p>
             )}
           </>
@@ -1075,19 +1157,16 @@ export function WeatherWidget({
                   onClick={requestLocationAccess}
                   className="inline-flex items-center justify-center rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-8 px-3 py-2"
                   aria-label="Allow location access"
-                  disabled={isRefreshingDebounced}
                 >
                   Get Weather
                 </button>
               ) : (
                 <>
                   <button 
-                    onClick={handleRefreshClick}
+                    onClick={requestLocationAccess}
                     className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input hover:bg-accent hover:text-accent-foreground h-8 px-3 py-2"
                     aria-label="Refresh weather data"
-                    disabled={isRefreshingDebounced}
                   >
-                    <RefreshCw className="h-4 w-4 mr-1" />
                     <span>Try Again</span>
                   </button>
                   
@@ -1110,24 +1189,10 @@ export function WeatherWidget({
               exit={{ opacity: 0 }}
               aria-label={`Current weather in ${weather.city}`}
             >
-              <div className="flex justify-between items-center mb-2">
+              <div className="flex items-center mb-2">
                 <div className="text-3xl">
                   {getWeatherIcon(weather.weatherType, weather.isDay, animated)}
                 </div>
-                <motion.button 
-                  variants={weatherAnimations.item}
-                  onClick={handleRefreshClick}
-                  className="text-muted-foreground hover:text-foreground transition-colors rounded-full p-1 focus:outline-none focus:ring-2 focus:ring-ring"
-                  aria-label="Refresh weather data"
-                  disabled={refreshing || isRefreshingDebounced}
-                >
-                  <motion.div
-                    animate={refreshing ? { rotate: 360 } : {}}
-                    transition={{ repeat: Infinity, duration: 1, ease: "linear" as const }}
-                  >
-                    <RefreshCw size={16} />
-                  </motion.div>
-                </motion.button>
               </div>
               <div className="space-y-1">
                 <motion.div 

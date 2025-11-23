@@ -11,19 +11,10 @@ interface TripWeatherSectionProps {
 }
 
 export function TripWeatherSection({ trip, currentStatus, openWeatherApiKey }: TripWeatherSectionProps) {
-  // Memoize derived status checks to avoid recalculation
-  const statusChecks = useMemo(() => ({
-    isOngoingOrCompleted: currentStatus === 'ongoing' || currentStatus === 'completed',
-    isOngoing: currentStatus === 'ongoing',
-    isPlanned: currentStatus === 'planned',
-  }), [currentStatus])
-
-  // Memoize common widget props to avoid recreating object on every render
-  const commonWidgetProps = useMemo(() => ({
-    apiKey: openWeatherApiKey,
-    width: "100%" as const,
-    animated: true,
-  }), [openWeatherApiKey])
+  const isOngoing = currentStatus === 'ongoing'
+  const isCompleted = currentStatus === 'completed'
+  const isPlanned = currentStatus === 'planned'
+  const showCurrentWeather = isOngoing || isCompleted
 
   // Memoize forecast mode configuration to avoid recreating object on every render
   const forecastMode = useMemo(() => ({
@@ -33,25 +24,43 @@ export function TripWeatherSection({ trip, currentStatus, openWeatherApiKey }: T
     returnDate: trip.returnDate,
   }), [trip.destinationName, trip.destinationLocation, trip.departureDate, trip.returnDate])
 
+  if (!openWeatherApiKey) {
+    return (
+      <Card className="p-6 border-2 border-dashed">
+        <CardContent className="p-0">
+          <p className="text-sm text-muted-foreground text-center">
+            Weather data is currently unavailable. Add an OpenWeather API key to enable live trip forecasts.
+          </p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  const widgetBaseProps = {
+    apiKey: openWeatherApiKey,
+    width: "100%" as const,
+    animated: true,
+  }
+
   return (
     <div className="space-y-6">
-      {statusChecks.isOngoingOrCompleted && (
+      {showCurrentWeather && (
         <div className="space-y-4">
           <div>
             <h4 className="text-lg font-semibold text-foreground mb-2">
               Current weather conditions
             </h4>
             <WeatherWidget
-              {...commonWidgetProps}
+              {...widgetBaseProps}
               cityName={trip.destinationName}
               locationName={trip.destinationLocation}
             />
           </div>
-          {statusChecks.isOngoing && (
+          {isOngoing && (
             <div>
               <h4 className="text-lg font-semibold text-foreground mb-2">Forecast for the following days</h4>
               <WeatherWidget
-                {...commonWidgetProps}
+                {...widgetBaseProps}
                 forecastMode={forecastMode}
               />
             </div>
@@ -59,12 +68,12 @@ export function TripWeatherSection({ trip, currentStatus, openWeatherApiKey }: T
         </div>
       )}
 
-      {statusChecks.isPlanned && (
+      {isPlanned && (
         <div className="space-y-4">
           <div>
             <h4 className="text-lg font-semibold text-foreground mb-2">Trip Forecast</h4>
             <WeatherWidget
-              {...commonWidgetProps}
+              {...widgetBaseProps}
               forecastMode={forecastMode}
             />
           </div>
