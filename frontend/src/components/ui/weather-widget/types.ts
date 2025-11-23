@@ -102,6 +102,10 @@ export interface WeatherWidgetProps {
    */
   onWeatherLoaded?: (data: WeatherData) => void
   /**
+   * Callback when forecast data is loaded (forecast mode only)
+   */
+  onForecastLoaded?: (days: ForecastDay[]) => void
+  /**
    * Callback on error
    */
   onError?: (error: string) => void

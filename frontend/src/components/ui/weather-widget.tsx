@@ -46,6 +46,7 @@ export function WeatherWidget({
   fallbackLocation,
   className = "",
   onWeatherLoaded,
+  onForecastLoaded,
   onError,
   animated = true,
   forecastMode
@@ -60,7 +61,10 @@ export function WeatherWidget({
   const [isTooFarAway, setIsTooFarAway] = React.useState<boolean>(false)
   const [isFinalTripDay, setIsFinalTripDay] = React.useState<boolean>(false)
 
-  // Debounced refresh button handler
+  const emitForecast = React.useCallback((days: ForecastDay[]) => {
+    onForecastLoaded?.(days)
+  }, [onForecastLoaded])
+
   const fetchWeather = React.useCallback(async (latitude?: number, longitude?: number, city?: string) => {
     setError(null)
     try {
@@ -166,6 +170,7 @@ export function WeatherWidget({
     if (isFinalTripDayForToday(returnDate)) {
       setIsFinalTripDay(true)
       setForecast([])
+      emitForecast([])
       setIsTooFarAway(false)
       setError(null)
       setLoading(false)
@@ -192,12 +197,14 @@ export function WeatherWidget({
         if (isFinalTripDayForToday(returnDate, cachedTimezoneOffset)) {
           setIsFinalTripDay(true)
           setForecast([])
+          emitForecast([])
           return
         }
 
         if (cachedDays) {
           setIsFinalTripDay(false)
           setForecast(cachedDays)
+          emitForecast(cachedDays)
           setLoading(false)
           setInitialLoad(false)
           return
@@ -233,6 +240,7 @@ export function WeatherWidget({
       if (isFinalTripDayForToday(returnDate, timezoneOffsetSeconds)) {
         setIsFinalTripDay(true)
         setForecast([])
+        emitForecast([])
         return
       }
 
@@ -263,6 +271,7 @@ export function WeatherWidget({
       })
 
       setForecast(forecastDays)
+      emitForecast(forecastDays)
       setError(null)
       setIsTooFarAway(false)
     } catch (err) {
@@ -275,7 +284,7 @@ export function WeatherWidget({
       setLoading(false)
       setInitialLoad(false)
     }
-  }, [forecastMode, apiKey, onError])
+  }, [forecastMode, apiKey, onError, emitForecast])
 
   // Check permission status
   const checkPermissionStatus = React.useCallback(async () => {

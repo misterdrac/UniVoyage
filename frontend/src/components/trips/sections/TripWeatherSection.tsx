@@ -1,7 +1,10 @@
+import { useMemo, useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { WeatherWidget } from '@/components/ui/weather-widget'
+import type { ForecastDay } from '@/components/ui/weather-widget'
 import type { Trip } from '@/types/trip'
 import type { TripStatus } from '@/lib/tripStatusUtils'
+import { PackingSuggestionsSection } from './PackingSuggestionsSection'
 
 interface TripWeatherSectionProps {
   trip: Trip
@@ -15,12 +18,14 @@ export function TripWeatherSection({ trip, currentStatus, openWeatherApiKey }: T
   const isPlanned = currentStatus === 'planned'
   const showCurrentWeather = isOngoing || isCompleted
 
-  const forecastMode = {
+  const [packingForecast, setPackingForecast] = useState<ForecastDay[] | null>(null)
+
+  const forecastMode = useMemo(() => ({
     cityName: trip.destinationName,
     locationName: trip.destinationLocation,
     departureDate: trip.departureDate,
     returnDate: trip.returnDate,
-  }
+  }), [trip.destinationName, trip.destinationLocation, trip.departureDate, trip.returnDate])
 
   if (!openWeatherApiKey) {
     return (
@@ -60,6 +65,7 @@ export function TripWeatherSection({ trip, currentStatus, openWeatherApiKey }: T
               <WeatherWidget
                 {...widgetBaseProps}
                 forecastMode={forecastMode}
+                onForecastLoaded={setPackingForecast}
               />
             </div>
           )}
@@ -73,6 +79,7 @@ export function TripWeatherSection({ trip, currentStatus, openWeatherApiKey }: T
             <WeatherWidget
               {...widgetBaseProps}
               forecastMode={forecastMode}
+              onForecastLoaded={setPackingForecast}
             />
           </div>
           <Card className="p-6 border-2 border-dashed">
@@ -85,6 +92,15 @@ export function TripWeatherSection({ trip, currentStatus, openWeatherApiKey }: T
           </Card>
         </div>
       )}
+
+      <PackingSuggestionsSection
+        tripId={trip.id}
+        destinationName={trip.destinationName}
+        departureDate={trip.departureDate}
+        returnDate={trip.returnDate}
+        forecast={packingForecast}
+        currentStatus={currentStatus}
+      />
     </div>
   )
 }
