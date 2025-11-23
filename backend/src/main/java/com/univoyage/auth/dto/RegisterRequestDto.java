@@ -2,20 +2,38 @@ package com.univoyage.auth.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import lombok.*;
+import jakarta.validation.constraints.Size;
+import lombok.Value;
 
-import java.util.List;
+import java.util.Set;
 
-
-// DTO for user registration request
-// used in AuthController
-@Data @NoArgsConstructor @AllArgsConstructor @Builder
+@Value
 public class RegisterRequestDto {
-    @Email @NotBlank private String email;
-    @NotBlank private String password;
-    @NotBlank private String name;         // required by your table
-    private String country;
-    private List<String> hobbies;
-    private List<String> languages;
-    private List<String> visited;          // optional; UI can ignore
+
+    @NotBlank
+    @Size(max = 150)
+    String name;
+
+    @NotBlank
+    @Size(max = 150)
+    String surname;
+
+    @NotBlank
+    @Email
+    @Size(max = 150)
+    String email;
+
+    @NotBlank
+    @Size(min = 8, message = "Password must be at least 8 characters long")
+    String password;
+
+    @NotBlank
+    @Size(min = 2, max = 2, message = "Country code must be 2 characters long (ISO alpha-2)")
+    String countryCode;
+
+    Set<Long> hobbyIds;
+    Set<Long> languageIds;
+
+    // Updated to use 2-character codes
+    Set<@Size(min = 2, max = 2) String> visitedCountryCodes;
 }
