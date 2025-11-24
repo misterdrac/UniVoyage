@@ -1,78 +1,88 @@
 package com.univoyage.auth.user;
 
-import com.univoyage.auth.user.relations.UserHobby;
-import com.univoyage.auth.user.relations.UserLanguage;
-import com.univoyage.auth.user.relations.UserVisitedCountry;
-import com.univoyage.auth.user.relations.Country;
-
+import com.univoyage.auth.Role;
+import com.univoyage.auth.user.relations.*;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.Instant;
-import java.util.List;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
-// JPA Entity representing a user in the database, mapped to the "users" table
-// Java object that represents a row in users table, it's ORM mapping
+@Getter @Setter
+@Builder
+@NoArgsConstructor @AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString
 @Entity
 @Table(name = "users")
-@Data @NoArgsConstructor @AllArgsConstructor @Builder
-@EqualsAndHashCode(exclude = {"userHobbies", "userLanguages", "visitedCountries", "profileImageData"}) // Important for relationships
-@ToString(exclude = {"userHobbies", "userLanguages", "visitedCountries", "profileImageData"}) // Keep logs clean
-public class UserEntity {
+public class UserEntity implements UserDetails {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // bigint serial/sequence/increment
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // BIGSERIAL
+    @EqualsAndHashCode.Include
     private Long id;
 
-    @Column(nullable = false, length = 150)
+    @Column(name = "name", nullable = false)
     private String name;
 
-    // added with new layout
-    @Column(nullable = false, length = 150)
+    @Column(name = "surname", nullable = false)
     private String surname;
 
-    @Column(nullable = false, unique = true, length = 150)
+    @Column(unique = true, nullable = false)
     private String email;
 
-    // password will be hashed, but we don't change name to mess with ORM mapping
-    @Column(name = "password_hash", nullable = false, columnDefinition = "text")
+    @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
-    // user role is default
-    @Column(nullable = false, length = 50)
-    @Builder.Default
-    private String role = "user";
-
-    // added with new layout
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<UserHobby> userHobbies;
-
-    // added with new layout
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<UserLanguage> userLanguages;
-
-    // added with new layout
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "country_of_origin_code", referencedColumnName = "iso_code")
+    @JoinColumn(name = "country_of_origin_code")
+    @ToString.Exclude
     private Country country;
 
-    // added with new layout
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<UserVisitedCountry> visitedCountries;
-
-    // bytea
-    // Correct for PostgreSQL bytea
-    @Basic(fetch = FetchType.LAZY)
-    @Column(name = "profile_image_data", columnDefinition = "bytea", nullable = true)
-    private byte[] profileImageData;
-
-    // timestamptz, DB default now()
     @Column(name = "date_of_register", nullable = false)
     private Instant dateOfRegister;
 
     @Column(name = "date_of_last_signin")
     private Instant dateOfLastSignin;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role = Role.USER;
+
+    @Column(name = "profile_image_path")
+    private String profileImagePath;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    private Set<UserHobby> userHobbies = new HashSet<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    private Set<UserLanguage> userLanguages = new HashSet<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    private Set<UserVisitedCountry> visitedCountries = new HashSet<>();
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Set.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
+    }
+
+    // UserDetails interface methods
+    // getUsername() will return email because we dont use username field
+    @Override public String getPassword() { return passwordHash; }
+    @Override public String getUsername() { return email; }
+
+    // return true for all below methods for simplicity, Spring Boot expects these methods to be implemented, so we
+    // set them to always return true
+    @Override public boolean isAccountNonExpired() { return true; }
+    @Override public boolean isAccountNonLocked() { return true; }
+    @Override public boolean isCredentialsNonExpired() { return true; }
+    @Override public boolean isEnabled() { return true; }
 }
