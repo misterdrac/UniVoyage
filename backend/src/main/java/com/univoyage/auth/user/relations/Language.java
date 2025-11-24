@@ -16,7 +16,4 @@ public class Language {
     @Column(name = "lang_name", unique = true, nullable = false, length = 50)
     private String langName;
 
-    @OneToMany(mappedBy = "language", fetch = FetchType.LAZY)
-    @ToString.Exclude
-    private Set<UserLanguage> userLanguages;
 }

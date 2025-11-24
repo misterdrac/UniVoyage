@@ -19,7 +19,7 @@ CREATE TABLE users (
 
     country_of_origin_code VARCHAR(2),
 
-    profile_image_url TEXT,
+    profile_image_path TEXT,
     date_of_register TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     date_of_last_signin TIMESTAMPTZ,
 

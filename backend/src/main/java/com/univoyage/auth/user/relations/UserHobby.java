@@ -4,20 +4,22 @@ import com.univoyage.auth.user.UserEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-// Composite key is mandatory for the Many-to-Many junction table
 @Entity
 @Table(name = "user_hobbies")
 @IdClass(UserHobbyId.class)
-@Data @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter @Setter
+@NoArgsConstructor @AllArgsConstructor @Builder
+@ToString
 public class UserHobby {
 
     @Id
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id")
+    @ToString.Exclude
     private UserEntity user;
 
     @Id
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "hobby_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "hobby_id")
     private Hobby hobby;
 }

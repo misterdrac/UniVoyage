@@ -27,22 +27,30 @@ public class UserEntity implements UserDetails {
     @EqualsAndHashCode.Include
     private Long id;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false, length = 150)
     private String name;
 
-    @Column(name = "surname", nullable = false)
+    @Column(name = "surname", nullable = false, length = 150)
     private String surname;
 
-    @Column(unique = true, nullable = false)
+    @Column(name = "email", nullable = false, unique = true, length = 150)
     private String email;
 
-    @Column(name = "password_hash", nullable = false)
+    @Column(name = "password_hash", nullable = false, columnDefinition = "TEXT")
     private String passwordHash;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false, length = 20)
+    private Role role = Role.USER;
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "country_of_origin_code")
+    @JoinColumn(name = "country_of_origin_code",
+            foreignKey = @ForeignKey(name = "fk_users_country_origin"))
     @ToString.Exclude
     private Country country;
+
+    @Column(name = "profile_image_path")
+    private String profileImagePath;
 
     @Column(name = "date_of_register", nullable = false)
     private Instant dateOfRegister;
