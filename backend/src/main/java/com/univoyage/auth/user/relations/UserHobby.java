@@ -6,20 +6,18 @@ import lombok.*;
 
 @Entity
 @Table(name = "user_hobbies")
-@IdClass(UserHobbyId.class)
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor @Builder
-@ToString
+@IdClass(UserHobbyId.class)
 public class UserHobby {
 
     @Id
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id")
-    @ToString.Exclude
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 
     @Id
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "hobby_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "hobby_id", nullable = false)
     private Hobby hobby;
 }

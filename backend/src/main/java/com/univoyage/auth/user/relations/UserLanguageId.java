@@ -1,14 +1,14 @@
 package com.univoyage.auth.user.relations;
 
-import jakarta.persistence.Column;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.io.Serializable;
 
+@Embeddable
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
-@EqualsAndHashCode
-public class UserLanguageId implements Serializable {
+public class UserLanguageId implements java.io.Serializable {
 
     @Column(name = "user_id")
     private Long userId;
@@ -16,3 +16,4 @@ public class UserLanguageId implements Serializable {
     @Column(name = "lang_code")
     private String langCode;
 }
+

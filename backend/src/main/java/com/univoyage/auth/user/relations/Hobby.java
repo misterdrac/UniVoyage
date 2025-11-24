@@ -3,9 +3,6 @@ package com.univoyage.auth.user.relations;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.HashSet;
-import java.util.Set;
-
 @Entity
 @Table(name = "hobbies")
 @Getter @Setter

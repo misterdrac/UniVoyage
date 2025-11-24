@@ -1,13 +1,13 @@
 package com.univoyage.auth.user.relations;
 
-import jakarta.persistence.Column;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.io.Serializable;
 
+@Embeddable
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
-@EqualsAndHashCode
 public class UserHobbyId implements Serializable {
 
     @Column(name = "user_id")

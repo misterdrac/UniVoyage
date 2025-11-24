@@ -4,27 +4,26 @@ import com.univoyage.auth.user.UserEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.Instant;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "user_visited_countries")
-@IdClass(UserVisitedCountryId.class)
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor @Builder
-@ToString
 public class UserVisitedCountry {
 
     @Id
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id")
-    @ToString.Exclude
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 
-    @Id
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "country_code")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "country_code", nullable = false)
     private Country country;
 
     @Column(name = "date_of_visit")
-    private Instant dateOfVisit; // TIMESTAMPTZ
+    private LocalDate dateOfVisit;
 }

@@ -2,11 +2,11 @@ package com.univoyage.auth.user.relations;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.util.Set;
 
 @Entity
 @Table(name = "languages")
-@Data @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter @Setter
+@NoArgsConstructor @AllArgsConstructor @Builder
 public class Language {
 
     @Id

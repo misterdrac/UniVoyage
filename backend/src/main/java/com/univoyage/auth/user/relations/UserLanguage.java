@@ -6,20 +6,18 @@ import lombok.*;
 
 @Entity
 @Table(name = "user_languages")
-@IdClass(UserLanguageId.class)
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor @Builder
-@ToString
+@IdClass(UserLanguageId.class)
 public class UserLanguage {
 
     @Id
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id")
-    @ToString.Exclude
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 
     @Id
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "lang_code")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "lang_code", nullable = false)
     private Language language;
 }
