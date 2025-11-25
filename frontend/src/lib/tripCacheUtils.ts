@@ -16,6 +16,19 @@ export const clearPackingSuggestionsCache = (tripId: number): void => {
 }
 
 /**
+ * Clear itinerary plan cache for a specific trip
+ */
+export const clearItineraryPlanCache = (tripId: number): void => {
+  try {
+    if (typeof window === 'undefined') return
+    const storageKey = `trip-itinerary-${tripId}`
+    localStorage.removeItem(storageKey)
+  } catch (error) {
+    console.error('Error clearing itinerary cache:', error)
+  }
+}
+
+/**
  * Clear weather forecast cache for a specific trip
  * The cache key format is: `${cityName}, ${locationName}_${departureDate}_${returnDate}`
  * or `${cityName}_${departureDate}_${returnDate}` if locationName is not provided or empty
@@ -56,6 +69,7 @@ export const clearTripCache = (
   returnDate: string
 ): void => {
   clearPackingSuggestionsCache(tripId)
+  clearItineraryPlanCache(tripId)
   clearWeatherForecastCache(cityName, locationName, departureDate, returnDate)
 }
 

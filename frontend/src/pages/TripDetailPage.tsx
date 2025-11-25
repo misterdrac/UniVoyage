@@ -25,6 +25,7 @@ import {
   TripWeatherSection,
   TripBudgetSection,
   TripPlaceholderSection,
+  TripItinerarySection,
 } from '@/components/trips';
 import type { TripSectionDefinition } from '@/components/trips';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -211,7 +212,7 @@ const TripDetailPage = () => {
                 )}
 
                 {activeSection === 'itinerary' && (
-                  <TripPlaceholderSection message="Your detailed itinerary will be displayed here." />
+                  <TripItinerarySection trip={trip} currentStatus={currentStatus} />
                 )}
               </TripSectionCard>
             </div>
