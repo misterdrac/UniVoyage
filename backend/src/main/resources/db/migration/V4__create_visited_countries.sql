@@ -3,7 +3,7 @@
 CREATE TABLE user_visited_countries (
     user_id BIGINT NOT NULL,
     country_code VARCHAR(2) NOT NULL,
-    date_of_visit TIMESTAMPTZ,
+    date_of_visit DATE,
 
     PRIMARY KEY (user_id, country_code),
 
