@@ -12,22 +12,18 @@ class ApiService {
     this.useMock = API_CONFIG.USE_MOCK;
   }
 
-  // Get auth token from localStorage
   private getAuthToken(): string | null {
     return localStorage.getItem(API_CONSTANTS.AUTH_TOKEN_KEY);
   }
 
-  // Set auth token in localStorage
   private setAuthToken(token: string): void {
     localStorage.setItem(API_CONSTANTS.AUTH_TOKEN_KEY, token);
   }
 
-  // Remove auth token from localStorage
   private removeAuthToken(): void {
     localStorage.removeItem(API_CONSTANTS.AUTH_TOKEN_KEY);
   }
 
-  // Get headers for API requests
   private getHeaders(): HeadersInit {
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
@@ -41,7 +37,6 @@ class ApiService {
     return headers;
   }
 
-  // Generic API request method
   private async request<T>(
     endpoint: string,
     options: RequestInit = {}
@@ -82,9 +77,8 @@ class ApiService {
     }
   }
 
-  // Auth API methods
-  // BE: POST /api/auth/login returns {success, user, token} or {success, error}
-  // User: {id, firstName, surname?, email, hobbies, languages, country, visited, profileImage?, dateOfRegister, dateOfLastSignin?, role}
+  // ---------------- AUTH ----------------
+
   async login(email: string, password: string): Promise<AuthResponse> {
     if (this.useMock) {
       const user = authenticateUser(email, password);
@@ -111,22 +105,42 @@ class ApiService {
     return response.data || response;
   }
 
-  // BE: POST /api/auth/register expects {email, password, firstName, surname?, hobbies?, languages?, country?}
-  // Returns {success, user, token} or {success, error}. User: {id, firstName, surname?, email, hobbies, languages, country, visited, profileImage?, dateOfRegister, dateOfLastSignin?, role}
+  /**
+   * BE: POST /api/auth/register expects:
+   * {
+   *   email, password, name, surname?,
+   *   countryCode,
+   *   hobbyIds?: number[],
+   *   languageCodes?: string[],
+   *   visitedCountryCodes?: string[]
+   * }
+   */
   async register(data: {
     email: string;
     password: string;
-    firstName?: string;
+    name: string;
     surname?: string;
-    hobbies?: string[];
-    languages?: string[];
-    country?: string;
+
+    countryCode: string;
+    hobbyIds?: number[];
+    languageCodes?: string[];
+    visitedCountryCodes?: string[];
   }): Promise<AuthResponse> {
     // ---- MOCK PATH ----
     if (this.useMock) {
       try {
-        const user = createUser(data.email, data.password, data.firstName, data.surname, data.hobbies, data.languages);
-        if (data.country) user.country = data.country;
+        // mockUsers ti radi sa stringovima pa samo “fake” mapiramo
+        const user = createUser(
+          data.email,
+          data.password,
+          data.name,
+          data.surname,
+          (data.hobbyIds ?? []).map(String),
+          (data.languageCodes ?? [])
+        );
+        user.country = data.countryCode;
+        user.visited = data.visitedCountryCodes ?? [];
+
         const token = `mock_token_${Date.now()}`;
         this.setAuthToken(token);
         return { success: true, user, token };
@@ -142,21 +156,19 @@ class ApiService {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          // send only the fields backend understands (avoid undefineds)
           body: JSON.stringify({
+            name: data.name,
+            surname: data.surname,
             email: data.email,
+            countryCode: data.countryCode,
+            hobbyIds: data.hobbyIds ?? [],
+            languageCodes: data.languageCodes ?? [],
             password: data.password,
-            firstName: data.firstName ?? null,
-            surname: data.surname ?? null,
-            hobbies: data.hobbies ?? [],
-            languages: data.languages ?? [],
-            country: data.country ?? null, // if your backend @NotBlank, make sure UI passes it
+            visitedCountryCodes: data.visitedCountryCodes ?? [],
           }),
         }
       );
 
-      // Your request() returns ApiResponse<T>. The backend returns {success,user,token}.
-      // So res.success is transport-level, res.data is the backend payload.
       if (!res.success) {
         return { success: false, error: res.error ?? "Registration failed" };
       }
@@ -169,13 +181,10 @@ class ApiService {
       if (payload.token) this.setAuthToken(payload.token);
       return payload;
     } catch (err: any) {
-      // Normalize common backend errors: 400/409, etc.
       return { success: false, error: err?.message ?? "Registration failed" };
     }
   }
 
-
-  // BE: POST /api/auth/logout with Authorization: Bearer <token> returns {success: true}
   async logout(): Promise<{ success: boolean }> {
     if (this.useMock) {
       this.removeAuthToken();
@@ -187,7 +196,6 @@ class ApiService {
         method: 'POST',
       });
     } catch (error) {
-      // Even if logout fails on server, clear local token
       console.warn('Logout request failed:', error);
     } finally {
       this.removeAuthToken();
@@ -196,13 +204,11 @@ class ApiService {
     return { success: true };
   }
 
-  // BE: GET /api/auth/me with Authorization: Bearer <token> returns {success, data: {user}} or {success: false, error}
   async getCurrentUser(): Promise<User | null> {
     if (this.useMock) {
       const token = this.getAuthToken();
       if (!token) return null;
-      
-      // In mock mode, get user from localStorage
+
       const savedUser = localStorage.getItem(API_CONSTANTS.USER_KEY);
       return savedUser ? JSON.parse(savedUser) : null;
     }
@@ -223,7 +229,6 @@ class ApiService {
       throw new Error('Google auth not available in mock mode');
     }
 
-    // Redirect to Google OAuth
     window.location.href = `${this.baseURL}${API_CONFIG.ENDPOINTS.AUTH.GOOGLE}`;
   }
 
@@ -247,15 +252,24 @@ class ApiService {
     return response.data || response;
   }
 
-  // BE: PUT /api/user/profile with Authorization: Bearer <token> expects {firstName?, surname?, country?, hobbies?, languages?, visited?}
-  // Returns {success, data: {success, user}} or {success: false, error}
+  /**
+   * BE: PUT /api/user/profile expects:
+   * {
+   *   name?, surname?,
+   *   countryCode?,
+   *   hobbyIds?,
+   *   languageCodes?,
+   *   visitedCountryCodes?
+   * }
+   */
   async updateProfile(data: {
-    firstName?: string;
+    name?: string;
     surname?: string;
-    country?: string;
-    hobbies?: string[];
-    languages?: string[];
-    visited?: string[];
+
+    countryCode?: string;
+    hobbyIds?: number[];
+    languageCodes?: string[];
+    visitedCountryCodes?: string[];
   }): Promise<{ success: boolean; user?: User; error?: string }> {
     if (this.useMock) {
       try {
@@ -263,21 +277,23 @@ class ApiService {
         if (!savedUser) {
           return { success: false, error: 'User not found' };
         }
-        
+
         const user = JSON.parse(savedUser) as User;
-        const updatedUser = { ...user, ...data };
-        
-        // Update mockUsers if it exists
+
+        const updatedUser: User = {
+          ...user,
+          ...data,
+          hobbies: data.hobbyIds ? data.hobbyIds.map(String) : user.hobbies,
+          languages: data.languageCodes ?? user.languages,
+          country: data.countryCode ?? user.country,
+          visited: data.visitedCountryCodes ?? user.visited,
+        };
+
         const { updateUserProfile } = await import('@/data/mockUsers');
-        const result = updateUserProfile(user.id, data);
-        if (result) {
-          localStorage.setItem(API_CONSTANTS.USER_KEY, JSON.stringify(result));
-          return { success: true, user: result };
-        }
-        
-        // Fallback: just update localStorage
-        localStorage.setItem(API_CONSTANTS.USER_KEY, JSON.stringify(updatedUser));
-        return { success: true, user: updatedUser };
+        const result = updateUserProfile(user.id, updatedUser);
+        localStorage.setItem(API_CONSTANTS.USER_KEY, JSON.stringify(result ?? updatedUser));
+
+        return { success: true, user: result ?? updatedUser };
       } catch (err: any) {
         return { success: false, error: err?.message ?? "Update failed" };
       }
@@ -289,7 +305,15 @@ class ApiService {
         {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data),
+          body: JSON.stringify({
+            name: data.name ?? null,
+            surname: data.surname ?? null,
+
+            countryCode: data.countryCode ?? null,
+            hobbyIds: data.hobbyIds ?? [],
+            languageCodes: data.languageCodes ?? [],
+            visitedCountryCodes: data.visitedCountryCodes ?? [],
+          }),
         }
       );
 
@@ -304,8 +328,8 @@ class ApiService {
     }
   }
 
-  // BE: POST /api/user/profile-picture with Authorization: Bearer <token>, FormData with 'image' field, max 5MB
-  // Returns {success, data: {success, user}} or {success: false, error}
+  // ---------------- PROFILE PICTURE ----------------
+
   async uploadProfilePicture(file: File): Promise<{ success: boolean; user?: User; error?: string }> {
     if (this.useMock) {
       try {
@@ -313,18 +337,15 @@ class ApiService {
         if (!savedUser) {
           return { success: false, error: 'User not found' };
         }
-        
-        // Validate file type
+
         if (!file.type.startsWith('image/')) {
           return { success: false, error: 'File must be an image' };
         }
-        
-        // Validate file size (max 5MB)
+
         if (file.size > 5 * 1024 * 1024) {
           return { success: false, error: 'Image must be less than 5MB' };
         }
-        
-        // Convert file to base64 data URL for mock mode
+
         const reader = new FileReader();
         return new Promise((resolve, reject) => {
           reader.onloadend = async () => {
@@ -332,23 +353,19 @@ class ApiService {
               const base64String = reader.result as string;
               const user = JSON.parse(savedUser) as User;
               const updatedUser = { ...user, profileImage: base64String };
-              
-              // Update mockUsers if it exists
+
               const { updateUserProfile } = await import('@/data/mockUsers');
               const result = updateUserProfile(user.id, { profileImage: base64String });
-              if (result) {
-                localStorage.setItem(API_CONSTANTS.USER_KEY, JSON.stringify(result));
-                resolve({ success: true, user: result });
-              } else {
-                localStorage.setItem(API_CONSTANTS.USER_KEY, JSON.stringify(updatedUser));
-                resolve({ success: true, user: updatedUser });
-              }
+              const finalUser = result ?? updatedUser;
+
+              localStorage.setItem(API_CONSTANTS.USER_KEY, JSON.stringify(finalUser));
+              resolve({ success: true, user: finalUser });
             } catch (err: any) {
               reject({ success: false, error: err?.message ?? "Upload failed" });
             }
           };
           reader.onerror = () => reject({ success: false, error: 'Failed to read file' });
-          
+
           reader.readAsDataURL(file);
         });
       } catch (err: any) {
@@ -357,7 +374,6 @@ class ApiService {
     }
 
     try {
-      // Create FormData for file upload
       const formData = new FormData();
       formData.append('image', file);
 
@@ -366,7 +382,7 @@ class ApiService {
         {
           method: 'POST',
           headers: {
-            // Don't set Content-Type, let browser set it with boundary for FormData
+            // let browser set boundary
           },
           body: formData,
         }
@@ -383,9 +399,8 @@ class ApiService {
     }
   }
 
-  // Trip API methods
-  // BE: POST /api/trips with Authorization: Bearer <token> expects {destinationId, destinationName, destinationLocation, departureDate, returnDate}
-  // Returns {success, data: {trip}} or {success: false, error}
+  // ---------------- TRIPS (unchanged) ----------------
+
   async createTrip(data: {
     destinationId: number;
     destinationName: string;
@@ -399,10 +414,10 @@ class ApiService {
         if (!savedUser) {
           return { success: false, error: 'User not found' };
         }
-        
+
         const user = JSON.parse(savedUser) as User;
         const trips = this.getMockTrips();
-        
+
         const newTrip = {
           id: trips.length > 0 ? Math.max(...trips.map(t => t.id)) + 1 : 1,
           userId: user.id,
@@ -414,10 +429,10 @@ class ApiService {
           createdAt: new Date().toISOString(),
           status: 'planned' as const,
         };
-        
+
         trips.push(newTrip);
         localStorage.setItem('mock_trips', JSON.stringify(trips));
-        
+
         return { success: true, trip: newTrip };
       } catch (err: any) {
         return { success: false, error: err?.message ?? "Trip creation failed" };
@@ -444,8 +459,6 @@ class ApiService {
     }
   }
 
-  // BE: GET /api/trips with Authorization: Bearer <token>
-  // Returns {success, data: {trips: Trip[]}} or {success: false, error}
   async getTrips(): Promise<{ success: boolean; trips?: any[]; error?: string }> {
     if (this.useMock) {
       try {
@@ -453,11 +466,11 @@ class ApiService {
         if (!savedUser) {
           return { success: false, error: 'User not found' };
         }
-        
+
         const user = JSON.parse(savedUser) as User;
         const trips = this.getMockTrips();
         const userTrips = trips.filter(trip => trip.userId === user.id);
-        
+
         return { success: true, trips: userTrips };
       } catch (err: any) {
         return { success: false, error: err?.message ?? "Failed to fetch trips" };
@@ -479,8 +492,6 @@ class ApiService {
     }
   }
 
-  // BE: DELETE /api/trips/:id with Authorization: Bearer <token>
-  // Returns {success} or {success: false, error}
   async deleteTrip(tripId: number): Promise<{ success: boolean; error?: string }> {
     if (this.useMock) {
       try {
@@ -488,18 +499,18 @@ class ApiService {
         if (!savedUser) {
           return { success: false, error: 'User not found' };
         }
-        
+
         const user = JSON.parse(savedUser) as User;
         const trips = this.getMockTrips();
         const tripIndex = trips.findIndex(t => t.id === tripId && t.userId === user.id);
-        
+
         if (tripIndex === -1) {
           return { success: false, error: 'Trip not found' };
         }
-        
+
         trips.splice(tripIndex, 1);
         localStorage.setItem('mock_trips', JSON.stringify(trips));
-        
+
         return { success: true };
       } catch (err: any) {
         return { success: false, error: err?.message ?? "Trip deletion failed" };
@@ -524,7 +535,6 @@ class ApiService {
     }
   }
 
-  // Helper method to get mock trips from localStorage
   private getMockTrips(): any[] {
     try {
       const tripsJson = localStorage.getItem('mock_trips');
@@ -535,5 +545,4 @@ class ApiService {
   }
 }
 
-// Export singleton instance
 export const apiService = new ApiService();
