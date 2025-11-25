@@ -1,15 +1,19 @@
 package com.univoyage.auth.user.dto;
 
-import lombok.Builder;
-import lombok.Data;
+import com.univoyage.auth.user.relations.Hobby;
+import lombok.*;
 
-@Data @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class HobbyDto {
     private Long id;
     private String hobbyName;
 
-    // Static method to map Entity to DTO
-    public static HobbyDto from(com.univoyage.auth.user.relations.Hobby entity) {
+    public static HobbyDto from(Hobby entity) {
+        if (entity == null) return null;
         return HobbyDto.builder()
                 .id(entity.getId())
                 .hobbyName(entity.getHobbyName())
