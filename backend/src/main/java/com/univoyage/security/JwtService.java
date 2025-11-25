@@ -4,7 +4,6 @@ import com.univoyage.auth.user.UserEntity;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.security.Keys;
-import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +11,7 @@ import java.security.Key;
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -23,10 +23,7 @@ public class JwtService {
     private final String issuer;
     private final String audience;
 
-    private static final String CSRF_CLAIM = "csrf";
-
-    @Getter // add getter for headerPrefix
-    private final String headerPrefix = "Bearer ";
+    public static final String CSRF_CLAIM = "csrf";
 
     public JwtService(
             @Value("${app.jwt.secret}") String secret,
@@ -40,24 +37,20 @@ public class JwtService {
         this.audience = audience;
     }
 
-    // generates CSRF secret for inclusion in JWT claims
-    // called later when generating JWT
+    /** Token B: random CSRF secret (frontend šalje u headeru) */
     public String generateCsrfSecret() {
-        SecureRandom random = new SecureRandom();
         byte[] bytes = new byte[32];
-        random.nextBytes(bytes);
+        new SecureRandom().nextBytes(bytes);
         return Encoders.BASE64URL.encode(bytes);
     }
 
-    // generate JWT with subject, claims and CSRF secret
-    // called in next method
-    // returns JWT and includes CSRF secret in claims
+    /** Generira JWT (Token A) s ugrađenim csrf claimom (Token B) */
     public String generate(String subject, Map<String, Object> claims, String csrfSecret) {
         claims.put(CSRF_CLAIM, csrfSecret);
 
         Instant now = Instant.now();
         return Jwts.builder()
-                .setSubject(subject)
+                .setSubject(subject) // email
                 .setIssuer(issuer)
                 .setAudience(audience)
                 .addClaims(claims)
@@ -68,25 +61,18 @@ public class JwtService {
                 .compact();
     }
 
-    // generate JWT with subject and claims, generates CSRF secret internally
-    public String generate(String subject, Map<String, Object> claims) {
-        return generate(subject, claims, generateCsrfSecret());
+    /** Convenience: generiraj token za usera + vrati i csrfSecret */
+    public TokenPair generateForUser(UserEntity user) {
+        String csrfSecret = generateCsrfSecret();
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("uid", user.getId());
+        claims.put("role", user.getRole().name());
+
+        String jwt = generate(user.getEmail(), claims, csrfSecret);
+        return new TokenPair(jwt, csrfSecret);
     }
 
-    // generate JWT for given user, user is identified by email, claims
-    // returns JWT with user ID, role, csrf secret and whole JWT
-    // This method generates JWT by calling the previous generate method that calls the one before it
-    // method before wraps user info with JWT claims
-    public String generateToken(UserEntity user) {
-        Map<String, Object> claims = Map.of(
-                "uid", user.getId(),
-                "role", user.getRole().name()
-        );
-
-        return generate(user.getEmail(), claims);
-    }
-
-    // parse and validate JWT, return claims
+    /** Parsiranje + validacija potpisa/issuer/exp */
     private Claims parse(String token) {
         try {
             return Jwts.parserBuilder()
@@ -96,33 +82,27 @@ public class JwtService {
                     .parseClaimsJws(token)
                     .getBody();
         } catch (JwtException | IllegalArgumentException e) {
-            throw new IllegalArgumentException("Invalid JWT token: " + e.getMessage());
+            throw new IllegalArgumentException("Invalid JWT: " + e.getMessage());
         }
     }
 
-    // extract specific claim using resolver function
     public <T> T extractClaim(String token, Function<Claims, T> resolver) {
         return resolver.apply(parse(token));
     }
-    // extract subject (email) from JWT
+
     public String extractSubject(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
-    // extract CSRF secret from JWT
     public String extractCsrfSecret(String token) {
         return extractClaim(token, c -> c.get(CSRF_CLAIM, String.class));
     }
 
-    // validate JWT for given user
-    public boolean isTokenValid(String token, UserEntity user) {
-        String subject = extractSubject(token);
-        return subject.equals(user.getEmail()) && !isExpired(token);
+    public boolean isValid(String token) {
+        parse(token); // baca exception ako nije ok
+        return true;
     }
 
-    // check if JWT is expired
-    private boolean isExpired(String token) {
-        Date exp = extractClaim(token, Claims::getExpiration);
-        return exp.before(new Date());
-    }
+    /** Simple holder */
+    public record TokenPair(String jwt, String csrfSecret) {}
 }
