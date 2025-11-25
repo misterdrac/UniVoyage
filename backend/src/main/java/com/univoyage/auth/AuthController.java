@@ -2,6 +2,7 @@ package com.univoyage.auth;
 
 import com.univoyage.auth.dto.AuthPayload;
 import com.univoyage.auth.dto.RegisterRequestDto;
+import com.univoyage.auth.dto.LoginRequestDto;
 import com.univoyage.common.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,8 +34,43 @@ public class AuthController {
         // call AuthService to handle registration login
         AuthPayload payload = authService.register(request);
 
+        if(!payload.isSuccess()) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(payload);
+        }
+
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(ApiResponse.ok(payload));
+                .body(payload);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<AuthPayload>> login(@RequestBody LoginRequestDto request) {
+        AuthPayload payload = authService.login(request);
+
+        if(!payload.isSuccess()) {
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(payload);
+        }
+
+        return ResponseEntity.ok(payload);
+    }
+
+    // Get current authenticated user, JWT is not issued again because we already have it
+    // issueing it again would be redundant and would lead to infinite token refresh loop on client side
+    @GetMapping("/me")
+    public ResponseEntity<UserDto> me(@AuthenticationPrincipal User user) {
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(AuthPayload.fail("Not authenticated"));
+        }
+        return ResponseEntity.ok(UserDto.from(user), null, null);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<AuthPayload> logout() {
+        // Invalidate the JWT token on the client side by clearing the HttpOnly cookie
+        return ResponseEntity.ok(AuthPayload.ok(null, null, null));
     }
 }
