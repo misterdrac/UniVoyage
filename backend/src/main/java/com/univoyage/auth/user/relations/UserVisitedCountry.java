@@ -9,21 +9,36 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "user_visited_countries")
 @Getter @Setter
-@NoArgsConstructor @AllArgsConstructor @Builder
+@NoArgsConstructor @AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class UserVisitedCountry {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @EmbeddedId
+    @EqualsAndHashCode.Include
+    private UserVisitedCountryId id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("userId") // povezuje id.userId s user.id
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("countryCode") // povezuje id.countryCode s country.isoCode
     @JoinColumn(name = "country_code", nullable = false)
     private Country country;
 
     @Column(name = "date_of_visit")
     private LocalDate dateOfVisit;
+
+    public static UserVisitedCountry of(UserEntity user, Country country, LocalDate date) {
+        UserVisitedCountryId key = new UserVisitedCountryId(user.getId(), country.getIsoCode());
+
+        UserVisitedCountry uvc = new UserVisitedCountry();
+        uvc.setId(key);
+        uvc.setUser(user);
+        uvc.setCountry(country);
+        uvc.setDateOfVisit(date);
+
+        return uvc;
+    }
 }

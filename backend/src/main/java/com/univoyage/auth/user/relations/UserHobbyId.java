@@ -8,6 +8,7 @@ import java.io.Serializable;
 @Embeddable
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
+@EqualsAndHashCode
 public class UserHobbyId implements Serializable {
 
     @Column(name = "user_id")

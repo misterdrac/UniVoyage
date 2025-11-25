@@ -8,7 +8,8 @@ import java.io.Serializable;
 @Embeddable
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
-public class UserLanguageId implements java.io.Serializable {
+@EqualsAndHashCode
+public class UserLanguageId implements Serializable {
 
     @Column(name = "user_id")
     private Long userId;
