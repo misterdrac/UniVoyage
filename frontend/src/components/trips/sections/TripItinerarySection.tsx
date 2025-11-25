@@ -11,6 +11,7 @@ import {
   AlertCircle,
   CalendarDays,
   Clock,
+  ClipboardCheck,
   Loader2,
   MapPin,
   RefreshCw,
@@ -100,10 +101,22 @@ export function TripItinerarySection({ trip, currentStatus }: TripItinerarySecti
   const [structuredItinerary, setStructuredItinerary] = useState<NormalizedItinerary | null>(null)
   const [rawItinerary, setRawItinerary] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [loadingStepIndex, setLoadingStepIndex] = useState(0)
   const [error, setError] = useState<string | null>(null)
   const [cachedSignature, setCachedSignature] = useState<string | null>(null)
 
   const storageKey = useMemo(() => `trip-itinerary-${trip.id}`, [trip.id])
+
+  const loadingSteps = useMemo(
+    () => [
+      'Mapping day themes…',
+      'Pairing cafés and restaurants…',
+      'Sequencing travel times…',
+      'Sprinkling in slow moments…',
+      'Checking evening highlights…',
+    ],
+    []
+  )
 
   const userHobbies = useMemo(() => {
     return user?.hobbies && Array.isArray(user.hobbies) && user.hobbies.length > 0
@@ -268,6 +281,17 @@ export function TripItinerarySection({ trip, currentStatus }: TripItinerarySecti
     }
   }, [normalizeItinerary, storageKey])
 
+  useEffect(() => {
+    if (!isLoading) {
+      setLoadingStepIndex(0)
+      return
+    }
+    const interval = window.setInterval(() => {
+      setLoadingStepIndex((prev) => (prev + 1) % loadingSteps.length)
+    }, 2000)
+    return () => window.clearInterval(interval)
+  }, [isLoading, loadingSteps])
+
   const buildPrompt = useCallback(() => {
     const dateRange = `${formatDateLong(trip.departureDate)} – ${formatDateLong(trip.returnDate)}`
     const dayAnchors = itineraryDates
@@ -303,7 +327,7 @@ Return STRICT JSON ONLY following:
         { "time": "Evening", "activity": "Wrap-up idea", "details": "Include dining/nightlife cue" }
       ],
       "dining": ["Restaurant or cafe + signature dish"],
-      "tips": ["Quick practical or cultural tip"]
+      "tips": ["Action-focused reminder under 80 characters"]
     }
   ],
   "logistics": [
@@ -316,6 +340,7 @@ Return STRICT JSON ONLY following:
 Rules:
 - Provide exactly ${totalDays} day objects.
 - Keep every string under 160 characters.
+- Tips must be practical, specific reminders (start with verbs or include concrete cues).
 - No markdown, bullet markers, or additional keys.
 - Mention rest/slow moments at least once.
 - Include diverse areas of ${locationLabel} across days.
@@ -405,12 +430,16 @@ Rules:
   }
 
   const renderDay = (day: NormalizedItineraryDay, isLast: boolean) => (
-    <div key={`itinerary-day-${day.dayNumber}-${day.title}`} className="relative pl-10">
-      <div className="absolute left-3 top-4 h-4 w-4 -translate-x-1/2 rounded-full border-2 border-primary bg-background shadow-sm" />
-      {!isLast && (
-        <div className="absolute left-3.5 top-8 bottom-0 w-px bg-gradient-to-b from-primary/40 via-primary/10 to-transparent" />
-      )}
-      <div className="rounded-2xl border bg-gradient-to-br from-background via-card to-background p-5 shadow-sm">
+    <div key={`itinerary-day-${day.dayNumber}-${day.title}`} className="grid grid-cols-[32px_1fr] gap-6">
+      <div className="flex h-full flex-col items-center">
+        <div className="relative z-10 flex h-8 w-8 items-center justify-center rounded-full border-2 border-primary bg-background shadow-sm">
+          <span className="block h-2 w-2 rounded-full bg-primary" />
+        </div>
+        {!isLast && (
+          <div className="mt-2 w-px flex-1 bg-linear-to-b from-primary/70 via-primary/20 to-transparent" />
+        )}
+      </div>
+      <div className="rounded-2xl border bg-linear-to-br from-background via-card to-background p-5 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-xs uppercase tracking-wide text-muted-foreground">
@@ -431,7 +460,7 @@ Rules:
             {day.dining.length > 0 && (
               <div className="rounded-xl border border-dashed bg-muted/40 p-4">
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  Dining & sips
+                  Local bites & sips
                 </p>
                 <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
                   {day.dining.map((item, idx) => (
@@ -443,7 +472,7 @@ Rules:
             {day.tips.length > 0 && (
               <div className="rounded-xl border border-dashed bg-muted/40 p-4">
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  Quick tips
+                  Smart reminders
                 </p>
                 <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
                   {day.tips.map((tip, idx) => (
@@ -463,7 +492,7 @@ Rules:
     return (
       <div className="space-y-8">
         {(structuredItinerary.intro || currentStatus === 'ongoing') && (
-          <Card className="border border-primary/20 bg-gradient-to-r from-primary/5 via-background to-card shadow-sm">
+          <Card className="border border-primary/20 bg-linear-to-r from-primary/5 via-background to-card shadow-sm">
             <CardContent className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-start gap-3">
                 <Sparkles className="h-5 w-5 text-primary" />
@@ -484,32 +513,34 @@ Rules:
           </Card>
         )}
 
-        <div className="relative">
-          <div
-            className="pointer-events-none absolute left-3 top-0 h-full w-px bg-gradient-to-b from-primary/30 via-primary/5 to-transparent"
-            aria-hidden="true"
-          />
-          <div className="space-y-8">
-            {structuredItinerary.days.map((day, idx) => renderDay(day, idx === structuredItinerary.days.length - 1))}
-          </div>
+        <div className="space-y-10">
+          {structuredItinerary.days.map((day, idx) => renderDay(day, idx === structuredItinerary.days.length - 1))}
         </div>
 
         {structuredItinerary.logistics.length > 0 && (
-          <Card className="border border-dashed">
-            <CardContent className="p-5">
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">
-                Practical logistics
-              </p>
-              <div className="grid gap-4 md:grid-cols-2">
-                {structuredItinerary.logistics.map((item, idx) => (
-                  <div key={`${item.title}-${idx}`} className="rounded-xl border bg-muted/30 p-4">
-                    <p className="text-sm font-semibold text-foreground">{item.title}</p>
-                    <p className="text-sm text-muted-foreground mt-1">{item.detail}</p>
-                  </div>
-                ))}
+          <div className="grid grid-cols-[32px_1fr] gap-6">
+            <div className="flex h-full flex-col items-center">
+              <div className="relative z-10 flex h-8 w-8 items-center justify-center rounded-full border-2 border-primary bg-background shadow-sm">
+                <ClipboardCheck className="h-4 w-4 text-primary" />
               </div>
-            </CardContent>
-          </Card>
+              <div className="mt-2 w-px flex-1 bg-linear-to-b from-primary/70 via-primary/20 to-transparent" />
+            </div>
+            <Card className="border border-dashed">
+              <CardContent className="p-5">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">
+                  On-the-ground notes
+                </p>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {structuredItinerary.logistics.map((item, idx) => (
+                    <div key={`${item.title}-${idx}`} className="rounded-xl border bg-muted/30 p-4">
+                      <p className="text-sm font-semibold text-foreground">{item.title}</p>
+                      <p className="text-sm text-muted-foreground mt-1">{item.detail}</p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         )}
 
         {structuredItinerary.closingNote && (
@@ -537,9 +568,9 @@ Rules:
       <div className="rounded-xl border bg-muted/40 p-4">
         <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
           <Sparkles className="h-4 w-4 text-primary" />
-          Gemini raw response
+          Gemini debug snapshot
         </div>
-        <pre className="max-h-[420px] overflow-auto text-xs font-mono text-muted-foreground whitespace-pre-wrap break-words">
+        <pre className="max-h-[420px] overflow-auto text-xs font-mono text-muted-foreground whitespace-pre-wrap wrap-break-word">
           {formatted}
         </pre>
       </div>
@@ -549,6 +580,8 @@ Rules:
   const hasExistingPlan = Boolean(structuredItinerary || rawItinerary)
   const hasStalePlan = Boolean(cachedSignature && fullSignature && cachedSignature !== fullSignature)
   const isGeminiConfigured = Boolean(GEMINI_API_KEY && GEMINI_MODEL && geminiClient)
+  const canRefreshPlan = hasExistingPlan && hasStalePlan
+  const isTripPlanned = currentStatus === 'planned'
 
   return (
     <div className="space-y-6">
@@ -564,7 +597,7 @@ Rules:
           </div>
         </div>
         <p className="mt-2 text-sm text-muted-foreground">
-          Gemini crafts a day-by-day roadmap styled like a modern journey line. Adjustments stay cached per trip.
+          Plan your days with an AI-powered itinerary tailored to your interests.
         </p>
       </div>
 
@@ -577,7 +610,7 @@ Rules:
 
       {hasStalePlan && (
         <div className="rounded-xl border border-info/30 bg-info/5 p-3 text-xs text-info">
-          Your travel dates or interests changed since this itinerary was generated. Refresh for the latest personalized flow.
+          Properties of the trip changed since this itinerary was generated. Refresh for the latest personalized flow.
         </div>
       )}
 
@@ -590,44 +623,79 @@ Rules:
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="text-sm text-muted-foreground">
-          {hasExistingPlan
-            ? 'Regenerate anytime to adjust the vibes or reflect new dates.'
-            : 'Let Gemini outline the key beats of your adventure in seconds.'}
+          {hasExistingPlan && hasStalePlan
+            ? 'Looks like your interests shifted—refresh to realign the flow.'
+            : null}
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
-          <Button
-            onClick={generateItinerary}
-            disabled={isLoading || !isGeminiConfigured}
-            className={cn(
-              'flex items-center gap-2',
-              (isLoading || !isGeminiConfigured) && 'cursor-not-allowed opacity-80'
-            )}
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Generating…
-              </>
-            ) : hasExistingPlan ? (
-              <>
-                <RefreshCw className="h-4 w-4" />
-                Regenerate itinerary
-              </>
-            ) : (
-              <>
-                <Sparkles className="h-4 w-4" />
-                Generate itinerary
-              </>
-            )}
-          </Button>
+          {!hasExistingPlan && isTripPlanned && (
+            <Button
+              onClick={generateItinerary}
+              disabled={isLoading || !isGeminiConfigured}
+              className={cn(
+                'flex items-center gap-2',
+                (isLoading || !isGeminiConfigured) && 'cursor-not-allowed opacity-80'
+              )}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Crafting your plan…
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4" />
+                  Generate itinerary
+                </>
+              )}
+            </Button>
+          )}
+          {!isTripPlanned && (
+            <p className="text-xs text-muted-foreground">
+              Itinerary generation is available only before the trip begins.
+            </p>
+          )}
+          {canRefreshPlan && (
+            <Button
+              onClick={generateItinerary}
+              disabled={isLoading || !isGeminiConfigured}
+              className={cn(
+                'flex items-center gap-2',
+                (isLoading || !isGeminiConfigured) && 'cursor-not-allowed opacity-80'
+              )}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Crafting your plan…
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="h-4 w-4" />
+                  Refresh itinerary
+                </>
+              )}
+            </Button>
+          )}
         </div>
       </div>
 
       {isLoading && (
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Loader2 className="h-3.5 w-3.5 animate-spin" />
-          Mapping your roadmap…
-        </div>
+        <Card className="border-primary/30 bg-card/80 shadow-xl">
+          <CardContent className="flex flex-col items-center gap-6 py-10 text-center">
+            <div className="relative h-24 w-24">
+              <div className="absolute inset-0 animate-spin rounded-full border-4 border-primary/20 border-t-primary" />
+              <div className="absolute inset-3 animate-[spin_4s_linear_infinite] rounded-full border-4 border-primary/10 border-t-transparent" />
+              <div className="relative flex h-full w-full items-center justify-center">
+                <Sparkles className="h-6 w-6 text-primary" />
+              </div>
+            </div>
+            <div>
+              <p className="text-base font-semibold text-foreground">Generating itinerary…</p>
+              <p className="mt-2 text-sm text-muted-foreground">{loadingSteps[loadingStepIndex]}</p>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {structuredItinerary && renderItinerary()}
@@ -636,9 +704,9 @@ Rules:
       {!hasExistingPlan && !isLoading && (
         <div className="rounded-2xl border border-dashed bg-muted/20 p-6 text-center">
           <Sparkles className="mx-auto h-5 w-5 text-primary" />
-          <p className="mt-3 text-sm font-semibold text-foreground">Ready for lift-off?</p>
+          <p className="mt-3 text-sm font-semibold text-foreground">No plan yet—let’s storyboard it.</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Generate an itinerary to see a flowing roadmap with curated meals, slow moments, and evening highlights.
+            Once generated, you’ll get a cinematic timeline full of standout meals, mindful pauses, and night stories.
           </p>
         </div>
       )}
