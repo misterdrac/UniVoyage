@@ -1,23 +1,34 @@
 package com.univoyage.auth.dto;
 
-import com.univoyage.auth.user.UserDto;
-import lombok.Builder;
-import lombok.Value;
+import com.univoyage.auth.user.dto.UserDto;
+import lombok.*;
 
-// DTO for authentication response payload, what returns after register/login
-// contains success status, user info, token or error message
-@Value @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class AuthPayload {
-    boolean success;
-    UserDto user;
-    String token;
-    String error;
 
-    // methods for creating success and failure payloads on register/login
-    public static AuthPayload ok(UserDto user, String token){
-        return AuthPayload.builder().success(true).user(user).token(token).build();
+    private boolean success;
+    private UserDto user;
+    private String token;     // JWT (HttpOnly cookie)
+    private String csrfToken; // Token B (header)
+    private String error;
+
+    public static AuthPayload ok(UserDto user, String token, String csrfToken) {
+        return AuthPayload.builder()
+                .success(true)
+                .user(user)
+                .token(token)
+                .csrfToken(csrfToken)
+                .build();
     }
-    public static AuthPayload fail(String error){
-        return AuthPayload.builder().success(false).error(error).build();
+
+    public static AuthPayload fail(String error) {
+        return AuthPayload.builder()
+                .success(false)
+                .error(error)
+                .build();
     }
 }
