@@ -40,6 +40,10 @@ public class AuthService {
             return AuthPayload.fail("Email is already in use");
         }
 
+        if (request.getCountryCode() == null || request.getCountryCode().isBlank()) {
+            return AuthPayload.fail("Country code is required");
+        }
+
         // home country (ISO code)
         Country country = countryRepository.findByIsoCode(request.getCountryCode())
                 .orElseThrow(() -> new IllegalArgumentException(
