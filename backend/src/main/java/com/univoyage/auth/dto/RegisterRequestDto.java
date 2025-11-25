@@ -1,39 +1,26 @@
 package com.univoyage.auth.dto;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
-import lombok.Value;
-
+import lombok.Data;
 import java.util.Set;
 
-@Value
+@Data
 public class RegisterRequestDto {
 
-    @NotBlank
-    @Size(max = 150)
-    String name;
+    private String email;
+    private String password;
 
-    @NotBlank
-    @Size(max = 150)
-    String surname;
+    private String name;
+    private String surname;
 
-    @NotBlank
-    @Email
-    @Size(max = 150)
-    String email;
+    // country ISO code (e.g. "HR")
+    private String countryCode;
 
-    @NotBlank
-    @Size(min = 8, message = "Password must be at least 8 characters long")
-    String password;
+    // list of IDs user selected
+    private Set<Long> hobbyIds;
 
-    @NotBlank
-    @Size(min = 2, max = 2, message = "Country code must be 2 characters long (ISO alpha-2)")
-    String countryCode;
+    // language code list (e.g. ["HR", "EN", "DE"])
+    private Set<String> languageCodes;
 
-    Set<Long> hobbyIds;
-    Set<String> languageCodes;
-
-    // Updated to use 2-character codes
-    Set<@Size(min = 2, max = 2) String> visitedCountryCodes;
+    // visited countries as ISO codes
+    private Set<String> visitedCountryCodes;
 }
