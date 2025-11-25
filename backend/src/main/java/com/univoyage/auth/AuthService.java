@@ -1,13 +1,14 @@
 package com.univoyage.auth;
 
 import com.univoyage.auth.dto.AuthPayload;
+import com.univoyage.auth.dto.LoginRequestDto;
 import com.univoyage.auth.dto.RegisterRequestDto;
 import com.univoyage.auth.repository.CountryRepository;
 import com.univoyage.auth.repository.HobbyRepository;
 import com.univoyage.auth.repository.LanguageRepository;
-import com.univoyage.auth.user.UserDto;
 import com.univoyage.auth.user.UserEntity;
 import com.univoyage.auth.user.UserRepository;
+import com.univoyage.auth.user.dto.UserDto;
 import com.univoyage.auth.user.relations.*;
 import com.univoyage.security.JwtService;
 import lombok.RequiredArgsConstructor;
@@ -16,9 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.Set;
+import java.time.LocalDate;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,18 +36,16 @@ public class AuthService {
     @Transactional
     public AuthPayload register(RegisterRequestDto request) {
 
-        // 1) email unique
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("Email is already in use");
+            return AuthPayload.fail("Email is already in use");
         }
 
-        // 2) country of origin by ISO
+        // home country (ISO code)
         Country country = countryRepository.findByIsoCode(request.getCountryCode())
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Invalid country code: " + request.getCountryCode()
                 ));
 
-        // 3) create user
         UserEntity newUser = UserEntity.builder()
                 .name(request.getName())
                 .surname(request.getSurname())
@@ -55,10 +53,10 @@ public class AuthService {
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .country(country)
                 .dateOfRegister(Instant.now())
-                .role(Role.USER)
+                .role(com.univoyage.auth.Role.USER)
                 .build();
 
-        // 4) hobbies
+        // hobbies (Long IDs)
         Set<Hobby> hobbyEntities = Optional.ofNullable(request.getHobbyIds())
                 .orElse(Collections.emptySet())
                 .stream()
@@ -66,16 +64,13 @@ public class AuthService {
                         .orElseThrow(() -> new IllegalArgumentException("Invalid hobby id: " + id)))
                 .collect(Collectors.toSet());
 
-        Set<UserHobby> userHobbies = hobbyEntities.stream()
-                .map(h -> UserHobby.builder()
-                        .user(newUser)
-                        .hobby(h)
-                        .build())
-                .collect(Collectors.toSet());
+        newUser.setUserHobbies(
+                hobbyEntities.stream()
+                        .map(h -> UserHobby.of(newUser, h))
+                        .collect(Collectors.toSet())
+        );
 
-        newUser.setUserHobbies(userHobbies);
-
-        // 5) languages
+        // languages (ISO codes)
         Set<Language> languageEntities = Optional.ofNullable(request.getLanguageCodes())
                 .orElse(Collections.emptySet())
                 .stream()
@@ -83,40 +78,46 @@ public class AuthService {
                         .orElseThrow(() -> new IllegalArgumentException("Invalid language code: " + code)))
                 .collect(Collectors.toSet());
 
-        Set<UserLanguage> userLanguages = languageEntities.stream()
-                .map(l -> UserLanguage.builder()
-                        .user(newUser)
-                        .language(l)
-                        .build())
-                .collect(Collectors.toSet());
+        newUser.setUserLanguages(
+                languageEntities.stream()
+                        .map(lang -> UserLanguage.of(newUser, lang))
+                        .collect(Collectors.toSet())
+        );
 
-        newUser.setUserLanguages(userLanguages);
+        // visited countries (ISO codes)
+        Set<UserVisitedCountry> visitedCountries =
+                Optional.ofNullable(request.getVisitedCountryCodes())
+                        .orElse(Collections.emptySet())
+                        .stream()
+                        .map(code -> {
+                            Country visited = countryRepository.findByIsoCode(code)
+                                    .orElseThrow(() -> new IllegalArgumentException(
+                                            "Invalid visited country code: " + code
+                                    ));
+                            return UserVisitedCountry.of(newUser, visited, LocalDate.now());
+                        })
+                        .collect(Collectors.toSet());
 
-        // 6) visited countries (2-char ISO)
-        Set<Country> visitedCountries = Optional.ofNullable(request.getVisitedCountryCodes())
-                .orElse(Collections.emptySet())
-                .stream()
-                .map(code -> countryRepository.findByIsoCode(code)
-                        .orElseThrow(() -> new IllegalArgumentException("Invalid visited country code: " + code)))
-                .collect(Collectors.toSet());
+        newUser.setVisitedCountries(visitedCountries);
 
-        Set<UserVisitedCountry> uvc = visitedCountries.stream()
-                .map(vc -> UserVisitedCountry.builder()
-                        .user(newUser)
-                        .country(vc)
-                        .dateOfVisit(null)
-                        .build())
-                .collect(Collectors.toSet());
-
-        newUser.setVisitedCountries(uvc);
-
-        // 7) save
         UserEntity savedUser = userRepository.save(newUser);
+        JwtService.TokenPair pair = jwtService.generateForUser(savedUser);
 
-        // 8) jwt + csrf inside
-        String token = jwtService.generateToken(savedUser);
+        return AuthPayload.ok(UserDto.from(savedUser), pair.jwt(), pair.csrfSecret());
+    }
 
-        // 9) payload
-        return new AuthPayload(token, UserDto.from(savedUser));
+    @Transactional(readOnly = true)
+    public AuthPayload login(LoginRequestDto request) {
+
+        UserEntity user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
+            return AuthPayload.fail("Invalid credentials");
+        }
+
+        JwtService.TokenPair pair = jwtService.generateForUser(user);
+
+        return AuthPayload.ok(UserDto.from(user), pair.jwt(), pair.csrfSecret());
     }
 }
