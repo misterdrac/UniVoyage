@@ -149,3 +149,4 @@ export function ItineraryTimeline({ itinerary, locationLabel, durationInDays }: 
   )
 }
 
+

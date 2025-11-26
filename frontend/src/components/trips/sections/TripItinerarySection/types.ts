@@ -22,3 +22,4 @@ export interface NormalizedItinerary {
   closingNote?: string
 }
 
+
