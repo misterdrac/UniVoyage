@@ -23,7 +23,7 @@ export const useSignUpForm = ({ onSuccess, signup }: UseSignUpFormProps) => {
   const [showPasswordError, setShowPasswordError] = useState(false);
 
   // UI state ostavljamo kako je da ne diraš ostale komponente
-  const [firstName, setFirstName] = useState("");
+  const [name, setName] = useState("");
   const [surname, setSurname] = useState("");
   const [email, setEmail] = useState("");
 
@@ -51,7 +51,7 @@ export const useSignUpForm = ({ onSuccess, signup }: UseSignUpFormProps) => {
 
   const isFormValid = useMemo(
     () =>
-      firstName.trim().length >= 2 &&
+      name.trim().length >= 2 &&
       email.trim() !== "" &&
       country !== undefined &&
       password.trim().length >= VALIDATION.MIN_PASSWORD_LENGTH &&
@@ -59,7 +59,7 @@ export const useSignUpForm = ({ onSuccess, signup }: UseSignUpFormProps) => {
       VALIDATION.EMAIL_REGEX.test(email) &&
       passwordStrength.isStrong,
     [
-      firstName,
+      name,
       email,
       country,
       password,
@@ -69,7 +69,7 @@ export const useSignUpForm = ({ onSuccess, signup }: UseSignUpFormProps) => {
   );
 
   const resetForm = useCallback(() => {
-    setFirstName("");
+    setName("");
     setSurname("");
     setEmail("");
     setPassword("");
@@ -111,7 +111,7 @@ export const useSignUpForm = ({ onSuccess, signup }: UseSignUpFormProps) => {
 
         const payload = {
           // redoslijed kako si tražio
-          name: firstName,
+          name,
           surname,
           email,
           countryCode: country.value,
@@ -138,7 +138,7 @@ export const useSignUpForm = ({ onSuccess, signup }: UseSignUpFormProps) => {
     [
       email,
       password,
-      firstName,
+      name,
       surname,
       hobbies,
       languages,
@@ -153,8 +153,8 @@ export const useSignUpForm = ({ onSuccess, signup }: UseSignUpFormProps) => {
 
   return {
     // Form state
-    firstName,
-    setFirstName,
+    name,
+    setName,
     surname,
     setSurname,
     email,

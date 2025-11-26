@@ -20,8 +20,8 @@ export function SignUpDialog({ open, onOpenChange, onLoginClick }: SignUpDialogP
   }, [onOpenChange]);
 
   const {
-    firstName,
-    setFirstName,
+    name,
+    setName,
     surname,
     setSurname,
     email,
@@ -85,8 +85,8 @@ export function SignUpDialog({ open, onOpenChange, onLoginClick }: SignUpDialogP
         
         <form onSubmit={handleFormSubmit} className="space-y-4">
           <SignUpBasicFields
-            firstName={firstName}
-            setFirstName={setFirstName}
+            name={name}
+            setName={setName}
             surname={surname}
             setSurname={setSurname}
             email={email}

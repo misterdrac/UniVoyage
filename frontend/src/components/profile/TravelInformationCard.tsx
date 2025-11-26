@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { ChipSelect } from '@/components/ui/chip-select';
 import { LANGUAGES, TRAVEL_INTERESTS, COUNTRIES } from '@/lib/constants';
-import type { User } from '@/data/mockUsers';
+import type { User } from '@/types/user';
 
 interface TravelInformationCardProps {
   user: User;
@@ -145,15 +145,15 @@ export const TravelInformationCard = ({
             <div>
               <p className="font-medium text-foreground mb-2">Languages Spoken:</p>
               <div className="flex flex-wrap gap-2">
-                {user.languages.length > 0 ? (
-                  user.languages.map((langCode, index) => {
-                    const language = LANGUAGES.find((l) => l.value === langCode);
+                {user.languages && user.languages.length > 0 ? (
+                  user.languages.map((lang, index) => {
+                    const language = LANGUAGES.find((l) => l.value === lang.code);
                     return (
                       <span
                         key={index}
                         className="bg-primary/10 text-primary px-2 py-1 rounded-md text-sm"
                       >
-                        {language?.label || langCode}
+                        {language?.label || lang.name || lang.code}
                       </span>
                     );
                   })
@@ -166,15 +166,17 @@ export const TravelInformationCard = ({
             <div>
               <p className="font-medium text-foreground mb-2">Countries Visited:</p>
               <div className="flex flex-wrap gap-2">
-                {user.visited.length > 0 ? (
-                  user.visited.map((countryCode, index) => {
-                    const country = COUNTRIES.find((c) => c.value === countryCode);
+                {user.visitedCountries && user.visitedCountries.length > 0 ? (
+                  user.visitedCountries.map((vc, index) => {
+                    const countryCode = vc.country?.isoCode;
+                    const countryName = vc.country?.countryName;
+                    const country = countryCode ? COUNTRIES.find((c) => c.value === countryCode) : undefined;
                     return (
                       <span
                         key={index}
                         className="bg-secondary/10 text-secondary-foreground px-2 py-1 rounded-md text-sm"
                       >
-                        {country?.label || countryCode}
+                        {country?.label || countryName || countryCode || 'Unknown country'}
                       </span>
                     );
                   })
@@ -187,18 +189,15 @@ export const TravelInformationCard = ({
             <div>
               <p className="font-medium text-foreground mb-2">Hobbies & Interests:</p>
               <div className="flex flex-wrap gap-2">
-                {user.hobbies.length > 0 ? (
-                  user.hobbies.map((interestValue, index) => {
-                    const interest = TRAVEL_INTERESTS.find((i) => i.value === interestValue);
-                    return (
-                      <span
-                        key={index}
-                        className="bg-accent/10 text-accent-foreground px-2 py-1 rounded-md text-sm"
-                      >
-                        {interest?.label || interestValue}
-                      </span>
-                    );
-                  })
+                {user.hobbies && user.hobbies.length > 0 ? (
+                  user.hobbies.map((hobby, index) => (
+                    <span
+                      key={index}
+                      className="bg-accent/10 text-accent-foreground px-2 py-1 rounded-md text-sm"
+                    >
+                      {hobby.name}
+                    </span>
+                  ))
                 ) : (
                   <span className="text-muted-foreground">No hobbies specified</span>
                 )}

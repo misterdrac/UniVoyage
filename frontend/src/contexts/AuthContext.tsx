@@ -1,16 +1,17 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import type { User } from '@/data/mockUsers';
+import type { User } from '@/types/user';
 import { apiService } from '@/services/api';
 import { API_CONSTANTS } from '@/lib/constants';
 
 interface SignupData {
   email: string;
   password: string;
-  firstName?: string;
+  name?: string;
   surname?: string;
-  hobbies?: string[];
-  languages?: string[];
-  country?: string;
+  hobbyIds?: number[];
+  languageCodes?: string[];
+  countryCode?: string;
+  visitedCountryCodes?: string[];
 }
 
 interface AuthContextType {
@@ -19,12 +20,12 @@ interface AuthContextType {
   signup: (data: SignupData) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   updateProfile: (data: {
-    firstName?: string;
+    name?: string;
     surname?: string;
-    country?: string;
-    hobbies?: string[];
-    languages?: string[];
-    visited?: string[];
+    countryCode?: string;
+    hobbyIds?: number[];
+    languageCodes?: string[];
+    visitedCountryCodes?: string[];
   }) => Promise<{ success: boolean; error?: string }>;
   uploadProfilePicture: (file: File) => Promise<{ success: boolean; error?: string }>;
   isLoading: boolean;
@@ -140,17 +141,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const updateProfile = async (data: {
-    firstName?: string;
+    name?: string;
     surname?: string;
-    country?: string;
-    hobbies?: string[];
-    languages?: string[];
-    visited?: string[];
+    countryCode?: string;
+    hobbyIds?: number[];
+    languageCodes?: string[];
+    visitedCountryCodes?: string[];
   }): Promise<{ success: boolean; error?: string }> => {
     try {
       setIsLoading(true);
-      
-      const result = await apiService.updateProfile(data);
+
+      const result = await apiService.updateProfile({
+        name: data.name,
+        surname: data.surname,
+        countryCode: data.countryCode,
+        hobbyIds: data.hobbyIds,
+        languageCodes: data.languageCodes,
+        visitedCountryCodes: data.visitedCountryCodes,
+      });
       
       if (result.success && result.user) {
         setUser(result.user);

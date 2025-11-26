@@ -4,8 +4,8 @@ import { AutoComplete, type Option } from "@/components/ui/autocomplete";
 import { COUNTRIES } from "@/lib/constants";
 
 interface SignUpBasicFieldsProps {
-  firstName: string;
-  setFirstName: (value: string) => void;
+  name: string;
+  setName: (value: string) => void;
   surname: string;
   setSurname: (value: string) => void;
   email: string;
@@ -15,8 +15,8 @@ interface SignUpBasicFieldsProps {
 }
 
 export const SignUpBasicFields = ({
-  firstName,
-  setFirstName,
+  name,
+  setName,
   surname,
   setSurname,
   email,
@@ -31,16 +31,16 @@ export const SignUpBasicFields = ({
         {/* First Name Input */}
         <div className="space-y-2">
           <label htmlFor="signup-firstname" className="text-sm font-medium text-foreground">
-            First Name <span className="text-destructive">*</span>
+            Name <span className="text-destructive">*</span>
           </label>
           <div className="relative">
             <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               id="signup-firstname"
               type="text"
-              placeholder="Enter your first name"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
+              placeholder="Enter your name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               className="pl-10"
               required
             />

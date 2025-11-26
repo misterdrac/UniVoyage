@@ -21,8 +21,8 @@ const ProfilePage = () => {
 
   // Custom hooks for form and image management
   const {
-    firstName,
-    setFirstName,
+    name,
+    setName,
     surname,
     setSurname,
     country,
@@ -78,10 +78,14 @@ const ProfilePage = () => {
   }, [resetInterestsForm]);
 
   const handleSaveProfile = useCallback(
-    async (data: { firstName: string; surname?: string; country?: string }) => {
+    async (data: { name: string; surname?: string; countryCode?: string }) => {
       setIsSavingProfile(true);
       try {
-        const result = await updateProfile(data);
+        const result = await updateProfile({
+          name: data.name,
+          surname: data.surname,
+          countryCode: data.countryCode,
+        });
         if (result.success) {
           toast.success('Profile updated successfully!');
           setIsEditingProfile(false);
@@ -101,7 +105,14 @@ const ProfilePage = () => {
     async (data: { hobbies: string[]; languages: string[]; visited: string[] }) => {
       setIsSavingInterests(true);
       try {
-        const result = await updateProfile(data);
+        const hobbyIds = data.hobbies
+          .map(h => Number(h))
+          .filter((id): id is number => Number.isFinite(id));
+        const result = await updateProfile({
+          hobbyIds,
+          languageCodes: data.languages,
+          visitedCountryCodes: data.visited,
+        });
         if (result.success) {
           toast.success('Travel information updated successfully!');
           setIsEditingInterests(false);
@@ -133,7 +144,7 @@ const ProfilePage = () => {
           user={user}
           isEditing={isEditingProfile}
           isSaving={isSavingProfile}
-          firstName={firstName}
+          name={name}
           surname={surname}
           country={country}
           imagePreview={imagePreview}
@@ -142,7 +153,7 @@ const ProfilePage = () => {
           onEdit={handleEditProfile}
           onCancel={handleCancelProfile}
           onSave={handleSaveProfile}
-          onFirstNameChange={setFirstName}
+          onNameChange={setName}
           onSurnameChange={setSurname}
           onCountryChange={setCountry}
           onImageClick={handleImageClick}

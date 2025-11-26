@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UI_CONSTANTS } from "@/lib/constants";
-import type { User as UserType } from "@/data/mockUsers";
+import type { User as UserType } from "@/types/user";
 
 interface UserMenuButtonProps {
   user: UserType;
@@ -18,8 +18,8 @@ export const UserMenuButton = ({ user, variant = "desktop" }: UserMenuButtonProp
   }, [navigate]);
 
   const userDisplayName = useMemo(
-    () => `${user.firstName} ${user.surname || ''}`.trim() || user.email,
-    [user.firstName, user.surname, user.email]
+    () => `${user.name ?? ''} ${user.surname ?? ''}`.trim() || user.email,
+    [user.name, user.surname, user.email]
   );
 
   if (variant === "mobile") {

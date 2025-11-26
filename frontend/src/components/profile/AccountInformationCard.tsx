@@ -1,7 +1,7 @@
 import { Calendar, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
-import type { User } from '@/data/mockUsers';
+import type { User } from '@/types/user';
 
 interface AccountInformationCardProps {
   user: User;
@@ -31,11 +31,13 @@ export const AccountInformationCard = ({
             <div className="space-y-1">
               <p className="text-sm font-medium text-muted-foreground">Member since</p>
               <p className="text-base font-semibold text-foreground">
-                {new Date(user.dateOfRegister).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                })}
+                {user.dateOfRegister
+                  ? new Date(user.dateOfRegister).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })
+                  : 'Not available'}
               </p>
             </div>
             <div className="space-y-1">

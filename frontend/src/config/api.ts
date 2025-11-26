@@ -41,10 +41,11 @@ export interface ApiResponse<T = unknown> {
   message?: string;
 }
 
-export interface AuthResponse {
+export interface AuthResponse<TUser = any> {
   success: boolean;
-  user?: any;
+  user?: TUser;
   token?: string;
+  csrfToken?: string;
   error?: string;
 }
 

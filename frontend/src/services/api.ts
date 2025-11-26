@@ -1,7 +1,22 @@
 import { API_CONFIG, type ApiResponse, type AuthResponse, ApiError } from '@/config/api';
-import type { User } from '@/data/mockUsers';
-import { API_CONSTANTS } from '@/lib/constants';
+import type { User, CountryDto, HobbyDto, LanguageDto, VisitedCountryDto } from '@/types/user';
+import { API_CONSTANTS, COUNTRIES, LANGUAGES, TRAVEL_INTERESTS } from '@/lib/constants';
 import { authenticateUser, createUser } from '@/data/mockUsers';
+
+type BackendUserDto = {
+  id: number;
+  name: string;
+  surname?: string;
+  email: string;
+  role: string;
+  countryOfOrigin?: CountryDto;
+  hobbies?: HobbyDto[];
+  languages?: LanguageDto[];
+  visitedCountries?: VisitedCountryDto[];
+  profileImage?: string;
+  dateOfRegister?: string;
+  dateOfLastSignin?: string;
+};
 
 class ApiService {
   private baseURL: string;
@@ -10,6 +25,79 @@ class ApiService {
   constructor() {
     this.baseURL = API_CONFIG.BASE_URL;
     this.useMock = API_CONFIG.USE_MOCK;
+  }
+
+  private adaptUserDto(user?: BackendUserDto): User | undefined {
+    if (!user) {
+      return undefined;
+    }
+
+    return {
+      id: user.id,
+      name: user.name,
+      surname: user.surname,
+      email: user.email,
+      role: user.role,
+      countryOfOrigin: user.countryOfOrigin,
+      hobbies: user.hobbies ?? [],
+      languages: user.languages ?? [],
+      visitedCountries: user.visitedCountries ?? [],
+      profileImage: user.profileImage,
+      dateOfRegister: user.dateOfRegister,
+      dateOfLastSignin: user.dateOfLastSignin,
+    };
+  }
+
+  private adaptAuthPayload(payload?: AuthResponse<BackendUserDto>): AuthResponse<User> {
+    if (!payload) {
+      return { success: false, error: 'Missing auth payload' };
+    }
+
+    return {
+      success: payload.success,
+      token: payload.token,
+      csrfToken: payload.csrfToken,
+      error: payload.error,
+      user: this.adaptUserDto(payload.user),
+    };
+  }
+
+  private resolveCountry(code?: string): CountryDto | undefined {
+    if (!code) {
+      return undefined;
+    }
+    const match = COUNTRIES.find(c => c.value === code);
+    return {
+      isoCode: code,
+      countryName: match?.label || code,
+    };
+  }
+
+  private mapVisitedCountryCodes(codes?: string[]): VisitedCountryDto[] {
+    return (codes ?? []).map(code => ({
+      country: this.resolveCountry(code) ?? { isoCode: code, countryName: code },
+      dateOfVisit: new Date().toISOString(),
+    }));
+  }
+
+  private mapHobbyIds(ids?: number[]): HobbyDto[] {
+    return (ids ?? []).map(id => {
+      const match = TRAVEL_INTERESTS.find(h => Number(h.value) === id);
+      return {
+        id,
+        name: match?.label ?? `Interest ${id}`,
+      };
+    });
+  }
+
+  private mapLanguageCodes(codes?: string[]): LanguageDto[] {
+    return (codes ?? []).map(code => {
+      const match = LANGUAGES.find(lang => lang.value === code);
+      return {
+        code,
+        name: match?.label ?? code,
+      };
+    });
   }
 
   private getAuthToken(): string | null {
@@ -24,6 +112,18 @@ class ApiService {
     localStorage.removeItem(API_CONSTANTS.AUTH_TOKEN_KEY);
   }
 
+  private getCsrfToken(): string | null {
+    if (typeof document === 'undefined') {
+      return null;
+    }
+    const cookieName = `${API_CONSTANTS.CSRF_COOKIE_NAME}=`;
+    return document.cookie
+      ?.split(';')
+      .map(cookie => cookie.trim())
+      .find(cookie => cookie.startsWith(cookieName))
+      ?.substring(cookieName.length) ?? null;
+  }
+
   private getHeaders(): HeadersInit {
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
@@ -32,6 +132,11 @@ class ApiService {
     const token = this.getAuthToken();
     if (token) {
       headers.Authorization = `Bearer ${token}`;
+    }
+
+    const csrfToken = this.getCsrfToken();
+    if (csrfToken) {
+      headers['X-CSRF-TOKEN'] = csrfToken;
     }
 
     return headers;
@@ -52,6 +157,7 @@ class ApiService {
         ...this.getHeaders(),
         ...options.headers,
       },
+      credentials: options.credentials ?? 'include',
     };
 
     try {
@@ -79,7 +185,7 @@ class ApiService {
 
   // ---------------- AUTH ----------------
 
-  async login(email: string, password: string): Promise<AuthResponse> {
+  async login(email: string, password: string): Promise<AuthResponse<User>> {
     if (this.useMock) {
       const user = authenticateUser(email, password);
       if (user) {
@@ -90,7 +196,7 @@ class ApiService {
       return { success: false, error: 'Invalid email or password' };
     }
 
-    const response = await this.request<AuthResponse>(
+    const response = await this.request<AuthResponse<BackendUserDto>>(
       API_CONFIG.ENDPOINTS.AUTH.LOGIN,
       {
         method: 'POST',
@@ -98,11 +204,19 @@ class ApiService {
       }
     );
 
-    if (response.success && response.data?.token) {
-      this.setAuthToken(response.data.token);
+    const payload = this.adaptAuthPayload(response.data);
+
+    if (payload.success) {
+      if (payload.token) {
+        this.setAuthToken(payload.token);
+      }
+      return payload;
     }
 
-    return response.data || response;
+    return {
+      success: false,
+      error: payload.error || response.error || 'Login failed',
+    };
   }
 
   /**
@@ -120,42 +234,38 @@ class ApiService {
     password: string;
     name: string;
     surname?: string;
-
     countryCode: string;
     hobbyIds?: number[];
     languageCodes?: string[];
     visitedCountryCodes?: string[];
-  }): Promise<AuthResponse> {
-    // ---- MOCK PATH ----
+  }): Promise<AuthResponse<User>> {
     if (this.useMock) {
       try {
-        // mockUsers ti radi sa stringovima pa samo “fake” mapiramo
         const user = createUser(
           data.email,
           data.password,
           data.name,
           data.surname,
-          (data.hobbyIds ?? []).map(String),
-          (data.languageCodes ?? [])
+          data.hobbyIds,
+          data.languageCodes
         );
-        user.country = data.countryCode;
-        user.visited = data.visitedCountryCodes ?? [];
+        user.countryOfOrigin = this.resolveCountry(data.countryCode);
+        user.visitedCountries = this.mapVisitedCountryCodes(data.visitedCountryCodes);
 
         const token = `mock_token_${Date.now()}`;
         this.setAuthToken(token);
         return { success: true, user, token };
       } catch (err: any) {
-        return { success: false, error: err?.message ?? "Registration failed" };
+        return { success: false, error: err?.message ?? 'Registration failed' };
       }
     }
 
-    // ---- REAL API PATH ----
     try {
-      const res = await this.request<AuthResponse>(
+      const res = await this.request<AuthResponse<BackendUserDto>>(
         API_CONFIG.ENDPOINTS.AUTH.REGISTER,
         {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             name: data.name,
             surname: data.surname,
@@ -169,19 +279,17 @@ class ApiService {
         }
       );
 
-      if (!res.success) {
-        return { success: false, error: res.error ?? "Registration failed" };
+      const payload = this.adaptAuthPayload(res.data);
+      if (payload.success) {
+        if (payload.token) {
+          this.setAuthToken(payload.token);
+        }
+        return payload;
       }
 
-      const payload = res.data as AuthResponse | undefined;
-      if (!payload || !payload.success) {
-        return { success: false, error: payload?.error ?? "Registration failed" };
-      }
-
-      if (payload.token) this.setAuthToken(payload.token);
-      return payload;
+      return { success: false, error: payload.error || res.error || 'Registration failed' };
     } catch (err: any) {
-      return { success: false, error: err?.message ?? "Registration failed" };
+      return { success: false, error: err?.message ?? 'Registration failed' };
     }
   }
 
@@ -214,10 +322,10 @@ class ApiService {
     }
 
     try {
-      const response = await this.request<{ user: User }>(
+      const response = await this.request<BackendUserDto>(
         API_CONFIG.ENDPOINTS.AUTH.ME
       );
-      return response.data?.user || null;
+      return this.adaptUserDto(response.data) || null;
     } catch (error) {
       console.error('Failed to get current user:', error);
       return null;
@@ -265,12 +373,20 @@ class ApiService {
   async updateProfile(data: {
     name?: string;
     surname?: string;
-
     countryCode?: string;
     hobbyIds?: number[];
     languageCodes?: string[];
     visitedCountryCodes?: string[];
   }): Promise<{ success: boolean; user?: User; error?: string }> {
+    const normalized = {
+      name: data.name,
+      surname: data.surname,
+      countryCode: data.countryCode,
+      hobbyIds: data.hobbyIds,
+      languageCodes: data.languageCodes,
+      visitedCountryCodes: data.visitedCountryCodes,
+    };
+
     if (this.useMock) {
       try {
         const savedUser = localStorage.getItem(API_CONSTANTS.USER_KEY);
@@ -282,18 +398,21 @@ class ApiService {
 
         const updatedUser: User = {
           ...user,
-          ...data,
-          hobbies: data.hobbyIds ? data.hobbyIds.map(String) : user.hobbies,
-          languages: data.languageCodes ?? user.languages,
-          country: data.countryCode ?? user.country,
-          visited: data.visitedCountryCodes ?? user.visited,
+          name: normalized.name ?? user.name,
+          surname: normalized.surname ?? user.surname,
+          countryOfOrigin: normalized.countryCode
+            ? this.resolveCountry(normalized.countryCode)
+            : user.countryOfOrigin,
+          hobbies: normalized.hobbyIds ? this.mapHobbyIds(normalized.hobbyIds) : user.hobbies,
+          languages: normalized.languageCodes ? this.mapLanguageCodes(normalized.languageCodes) : user.languages,
+          visitedCountries: normalized.visitedCountryCodes
+            ? this.mapVisitedCountryCodes(normalized.visitedCountryCodes)
+            : user.visitedCountries,
         };
 
-        const { updateUserProfile } = await import('@/data/mockUsers');
-        const result = updateUserProfile(user.id, updatedUser);
-        localStorage.setItem(API_CONSTANTS.USER_KEY, JSON.stringify(result ?? updatedUser));
+        localStorage.setItem(API_CONSTANTS.USER_KEY, JSON.stringify(updatedUser));
 
-        return { success: true, user: result ?? updatedUser };
+        return { success: true, user: updatedUser };
       } catch (err: any) {
         return { success: false, error: err?.message ?? "Update failed" };
       }
@@ -306,20 +425,22 @@ class ApiService {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            name: data.name ?? null,
-            surname: data.surname ?? null,
-
-            countryCode: data.countryCode ?? null,
-            hobbyIds: data.hobbyIds ?? [],
-            languageCodes: data.languageCodes ?? [],
-            visitedCountryCodes: data.visitedCountryCodes ?? [],
+            name: normalized.name ?? null,
+            surname: normalized.surname ?? null,
+            countryCode: normalized.countryCode ?? null,
+            hobbyIds: normalized.hobbyIds ?? [],
+            languageCodes: normalized.languageCodes ?? [],
+            visitedCountryCodes: normalized.visitedCountryCodes ?? [],
           }),
         }
       );
 
       if (res.success && res.data?.user) {
-        localStorage.setItem(API_CONSTANTS.USER_KEY, JSON.stringify(res.data.user));
-        return { success: true, user: res.data.user };
+        const adaptedUser = this.adaptUserDto(res.data.user);
+        if (adaptedUser) {
+          localStorage.setItem(API_CONSTANTS.USER_KEY, JSON.stringify(adaptedUser));
+          return { success: true, user: adaptedUser };
+        }
       }
 
       return { success: false, error: res.error ?? "Update failed" };
@@ -377,7 +498,7 @@ class ApiService {
       const formData = new FormData();
       formData.append('image', file);
 
-      const res = await this.request<{ success: boolean; user: User }>(
+      const res = await this.request<{ success: boolean; user: BackendUserDto }>(
         API_CONFIG.ENDPOINTS.USER.UPDATE_PROFILE_PICTURE,
         {
           method: 'POST',
@@ -389,8 +510,11 @@ class ApiService {
       );
 
       if (res.success && res.data?.user) {
-        localStorage.setItem(API_CONSTANTS.USER_KEY, JSON.stringify(res.data.user));
-        return { success: true, user: res.data.user };
+        const adaptedUser = this.adaptUserDto(res.data.user);
+        if (adaptedUser) {
+          localStorage.setItem(API_CONSTANTS.USER_KEY, JSON.stringify(adaptedUser));
+          return { success: true, user: adaptedUser };
+        }
       }
 
       return { success: false, error: res.error ?? "Upload failed" };
