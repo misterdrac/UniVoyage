@@ -24,6 +24,18 @@ export const TRAVEL_INTERESTS = [
   { value: "16", label: "🎵 Music" },
   { value: "17", label: "🎨 Art" },
   { value: "18", label: "🎪 Festivals" },
+  { value: "19", label: "🧖‍♀️ Wellness & Spa" },
+  { value: "20", label: "🍷 Wine & Tasting" },
+  { value: "21", label: "🤝 Volunteering" },
+  { value: "22", label: "🚗 Road Trips" },
+  { value: "23", label: "⛵ Sailing & Boating" },
+  { value: "24", label: "🧘‍♀️ Relaxation & Meditation" },
+  { value: "25", label: "🌌 Stargazing" },
+  { value: "26", label: "📜 Genealogy & Ancestry" },
+  { value: "27", label: "🥕 Local Markets" },
+  { value: "28", label: "📚 Reading & Writing" },
+  { value: "29", label: "🐠 Scuba Diving & Snorkeling" },
+  { value: "30", label: "⛳ Golf & Country Clubs" },
 ];
 
 // Languages options
