@@ -51,9 +51,11 @@ export function TripOverviewSection({
 
       <div>
         <h3 className="text-xl font-semibold text-foreground mb-4">Weather</h3>
-        {currentStatus === 'ongoing' ? (
+        {currentStatus === 'ongoing' || currentStatus === 'completed' ? (
           <div className="space-y-3">
-            <p className="text-sm text-muted-foreground">Current Weather Conditions</p>
+            <p className="text-sm text-muted-foreground">
+              Current Weather Conditions
+            </p>
             <WeatherWidget
               apiKey={openWeatherApiKey}
               cityName={trip.destinationName}
@@ -63,17 +65,20 @@ export function TripOverviewSection({
             />
           </div>
         ) : (
-          <WeatherWidget
-            apiKey={openWeatherApiKey}
-            forecastMode={{
-              cityName: trip.destinationName,
-              locationName: trip.destinationLocation,
-              departureDate: trip.departureDate,
-              returnDate: trip.returnDate,
-            }}
-            width="100%"
-            animated
-          />
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">Weather Forecast for Your Trip</p>
+            <WeatherWidget
+              apiKey={openWeatherApiKey}
+              forecastMode={{
+                cityName: trip.destinationName,
+                locationName: trip.destinationLocation,
+                departureDate: trip.departureDate,
+                returnDate: trip.returnDate,
+              }}
+              width="100%"
+              animated
+            />
+          </div>
         )}
       </div>
 

@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, AuthProvider, DestinationProvider, TripProvider } from '@/contexts';
-import { Header, Footer } from '@/components';
+import { Header, Footer, ScrollToTop } from '@/components';
 import { Toaster } from '@/components/ui/sonner';
 import { ProtectedRoute } from '@/guards';
 import { HomePage, AboutPage, TourPage, ContactPage, ProfilePage, MyTripsPage, TripDetailPage, PopularDestinationsPage, EuropeDestinationsPage, AmericasDestinationsPage, AsiaDestinationsPage, AfricaDestinationsPage } from '@/pages';
@@ -36,6 +36,7 @@ function AppContent() {
   return (
     <>
       <Router>
+        <ScrollToTop />
         <Header />
         <Routes>
           <Route path="/" element={<HomePage />} />

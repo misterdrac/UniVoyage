@@ -1,57 +1,85 @@
+import { useMemo, useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { WeatherWidget } from '@/components/ui/weather-widget'
+import type { ForecastDay } from '@/components/ui/weather-widget'
 import type { Trip } from '@/types/trip'
+import type { TripStatus } from '@/lib/tripStatusUtils'
+import { PackingSuggestionsSection } from './PackingSuggestionsSection'
 
 interface TripWeatherSectionProps {
   trip: Trip
-  currentStatus: string
+  currentStatus: TripStatus
   openWeatherApiKey: string | undefined
 }
 
 export function TripWeatherSection({ trip, currentStatus, openWeatherApiKey }: TripWeatherSectionProps) {
+  const isOngoing = currentStatus === 'ongoing'
+  const isCompleted = currentStatus === 'completed'
+  const isPlanned = currentStatus === 'planned'
+  const showCurrentWeather = isOngoing || isCompleted
+
+  const [packingForecast, setPackingForecast] = useState<ForecastDay[] | null>(null)
+
+  const forecastMode = useMemo(() => ({
+    cityName: trip.destinationName,
+    locationName: trip.destinationLocation,
+    departureDate: trip.departureDate,
+    returnDate: trip.returnDate,
+  }), [trip.destinationName, trip.destinationLocation, trip.departureDate, trip.returnDate])
+
+  if (!openWeatherApiKey) {
+    return (
+      <Card className="p-6 border-2 border-dashed">
+        <CardContent className="p-0">
+          <p className="text-sm text-muted-foreground text-center">
+            Weather data is currently unavailable. Add an OpenWeather API key to enable live trip forecasts.
+          </p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  const widgetBaseProps = {
+    apiKey: openWeatherApiKey,
+    width: "100%" as const,
+    animated: true,
+  }
+
   return (
     <div className="space-y-6">
-      {currentStatus === 'ongoing' ? (
+      {showCurrentWeather && (
         <div className="space-y-4">
           <div>
-            <h4 className="text-lg font-semibold text-foreground mb-2">Current Weather</h4>
+            <h4 className="text-lg font-semibold text-foreground mb-2">
+              Current weather conditions
+            </h4>
             <WeatherWidget
-              apiKey={openWeatherApiKey}
+              {...widgetBaseProps}
               cityName={trip.destinationName}
               locationName={trip.destinationLocation}
-              width="100%"
-              animated
             />
           </div>
-          <div>
-            <h4 className="text-lg font-semibold text-foreground mb-2">Remaining Trip Forecast</h4>
-            <WeatherWidget
-              apiKey={openWeatherApiKey}
-              forecastMode={{
-                cityName: trip.destinationName,
-                locationName: trip.destinationLocation,
-                departureDate: trip.departureDate,
-                returnDate: trip.returnDate,
-              }}
-              width="100%"
-              animated
-            />
-          </div>
+          {isOngoing && (
+            <div>
+              <h4 className="text-lg font-semibold text-foreground mb-2">Forecast for the following days</h4>
+              <WeatherWidget
+                {...widgetBaseProps}
+                forecastMode={forecastMode}
+                onForecastLoaded={setPackingForecast}
+              />
+            </div>
+          )}
         </div>
-      ) : (
+      )}
+
+      {isPlanned && (
         <div className="space-y-4">
           <div>
             <h4 className="text-lg font-semibold text-foreground mb-2">Trip Forecast</h4>
             <WeatherWidget
-              apiKey={openWeatherApiKey}
-              forecastMode={{
-                cityName: trip.destinationName,
-                locationName: trip.destinationLocation,
-                departureDate: trip.departureDate,
-                returnDate: trip.returnDate,
-              }}
-              width="100%"
-              animated
+              {...widgetBaseProps}
+              forecastMode={forecastMode}
+              onForecastLoaded={setPackingForecast}
             />
           </div>
           <Card className="p-6 border-2 border-dashed">
@@ -62,20 +90,17 @@ export function TripWeatherSection({ trip, currentStatus, openWeatherApiKey }: T
               </p>
             </CardContent>
           </Card>
-          <Card className="p-6 border-2 border-dashed bg-muted/30">
-            <CardContent className="p-0 space-y-3">
-              <h4 className="text-base font-semibold text-foreground">Coming Soon</h4>
-              <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
-                <li>Hourly forecast for the next 24-48 hours</li>
-                <li>Extended forecast for the full trip duration</li>
-                <li>Detailed weather metrics (humidity, wind speed, UV index)</li>
-                <li>Weather alerts and warnings</li>
-                <li>Packing suggestions based on forecast</li>
-              </ul>
-            </CardContent>
-          </Card>
         </div>
       )}
+
+      <PackingSuggestionsSection
+        tripId={trip.id}
+        destinationName={trip.destinationName}
+        departureDate={trip.departureDate}
+        returnDate={trip.returnDate}
+        forecast={packingForecast}
+        currentStatus={currentStatus}
+      />
     </div>
   )
 }

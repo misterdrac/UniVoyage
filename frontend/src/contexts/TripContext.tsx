@@ -3,6 +3,7 @@ import type { Trip } from '@/types/trip';
 import { apiService } from '@/services/api';
 import { useAuth } from './AuthContext';
 import { toast } from 'sonner';
+import { clearTripCache } from '@/lib/tripCacheUtils';
 
 interface TripContextType {
   trips: Trip[];
@@ -102,6 +103,18 @@ export const TripProvider: React.FC<TripProviderProps> = ({ children }) => {
       return { success: false, error: 'You must be logged in to delete a trip' };
     }
 
+    // Get trip data before deletion to clear associated cache
+    const tripToDelete = trips.find(trip => trip.id === tripId);
+    if (tripToDelete) {
+      clearTripCache(
+        tripToDelete.id,
+        tripToDelete.destinationName,
+        tripToDelete.destinationLocation,
+        tripToDelete.departureDate,
+        tripToDelete.returnDate
+      );
+    }
+
     setIsLoading(true);
     try {
       const result = await apiService.deleteTrip(tripId);
@@ -121,7 +134,7 @@ export const TripProvider: React.FC<TripProviderProps> = ({ children }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [user, refreshTrips]);
+  }, [user, refreshTrips, trips]);
 
   const getTripById = useCallback((id: number): Trip | undefined => {
     return trips.find(trip => trip.id === id);
