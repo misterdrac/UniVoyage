@@ -1,4 +1,5 @@
 import { API_CONFIG, type ApiResponse, type AuthResponse, ApiError } from '@/config/api';
+import type { StoredItineraryPayload } from '@/types/itinerary';
 import type { User, CountryDto, HobbyDto, LanguageDto, VisitedCountryDto } from '@/types/user';
 import { API_CONSTANTS, COUNTRIES, LANGUAGES, TRAVEL_INTERESTS } from '@/lib/constants';
 import { authenticateUser, createUser } from '@/data/mockUsers';
@@ -656,6 +657,72 @@ class ApiService {
       return { success: false, error: res.error ?? "Trip deletion failed" };
     } catch (err: any) {
       return { success: false, error: err?.message ?? "Trip deletion failed" };
+    }
+  }
+
+  // ---------------- ITINERARIES ----------------
+
+  async getTripItinerary(
+    tripId: number
+  ): Promise<{ success: boolean; itinerary?: StoredItineraryPayload; error?: string }> {
+    if (this.useMock) {
+      try {
+        const cached = localStorage.getItem(`trip-itinerary-${tripId}`)
+        if (!cached) {
+          return { success: true }
+        }
+        const parsed = JSON.parse(cached) as StoredItineraryPayload
+        return { success: true, itinerary: parsed }
+      } catch (err: any) {
+        return { success: false, error: err?.message ?? 'Failed to load itinerary' }
+      }
+    }
+
+    try {
+      const res = await this.request<{ itinerary?: StoredItineraryPayload }>(
+        `${API_CONFIG.ENDPOINTS.TRIPS.GET_BY_ID}/${tripId}/itinerary`
+      )
+
+      if (res.success) {
+        return { success: true, itinerary: res.data?.itinerary }
+      }
+
+      return { success: false, error: res.error ?? 'Failed to load itinerary' }
+    } catch (err: any) {
+      return { success: false, error: err?.message ?? 'Failed to load itinerary' }
+    }
+  }
+
+  async saveTripItinerary(
+    tripId: number,
+    payload: StoredItineraryPayload
+  ): Promise<{ success: boolean; error?: string }> {
+    if (this.useMock) {
+      try {
+        localStorage.setItem(`trip-itinerary-${tripId}`, JSON.stringify(payload))
+        return { success: true }
+      } catch (err: any) {
+        return { success: false, error: err?.message ?? 'Failed to save itinerary' }
+      }
+    }
+
+    try {
+      const res = await this.request<{ itinerary?: StoredItineraryPayload }>(
+        `${API_CONFIG.ENDPOINTS.TRIPS.UPDATE}/${tripId}/itinerary`,
+        {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        }
+      )
+
+      if (res.success) {
+        return { success: true }
+      }
+
+      return { success: false, error: res.error ?? 'Failed to save itinerary' }
+    } catch (err: any) {
+      return { success: false, error: err?.message ?? 'Failed to save itinerary' }
     }
   }
 

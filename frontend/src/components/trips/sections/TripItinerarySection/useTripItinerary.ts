@@ -1,14 +1,18 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { GoogleGenAI } from '@google/genai'
+import { toast } from 'sonner'
+import { API_CONFIG } from '@/config/api'
 import { useAuth } from '@/contexts/AuthContext'
 import { calculateDurationInDays, formatDateLong } from '@/lib/dateUtils'
-import type { Trip } from '@/types/trip'
 import type { TripStatus } from '@/lib/tripStatusUtils'
+import { apiService } from '@/services/api'
+import type { Trip } from '@/types/trip'
 import type {
   NormalizedItinerary,
   NormalizedItineraryDay,
   NormalizedItinerarySegment,
-} from './types'
+  StoredItineraryPayload,
+} from '@/types/itinerary'
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY ?? ''
 const GEMINI_MODEL = import.meta.env.VITE_GEMINI_MODEL ?? 'gemini-3.5-flash'
@@ -27,6 +31,17 @@ const LOADING_STEPS = [
   'Sprinkling in slow moments…',
   'Checking evening highlights…',
 ]
+
+/**
+ * Handles Gemini API errors - logs full error for developers, returns user-friendly message
+ */
+const handleGeminiError = (err: unknown): string => {
+  // Log full error for developers
+  console.error('[Itinerary Generation Error]', err)
+  
+  // Return user-friendly message
+  return 'Oops! Something went wrong while generating your itinerary. Please try again in a moment.'
+}
 
 interface GeminiItinerarySegment {
   time?: string
@@ -58,12 +73,6 @@ interface GeminiItinerary {
   closingNote?: string
   farewell?: string
   outro?: string
-}
-
-interface StoredItineraryPayload {
-  structured: NormalizedItinerary | null
-  raw: string | null
-  signature: string | null
 }
 
 interface UseTripItineraryArgs {
@@ -154,16 +163,39 @@ export function useTripItinerary({ trip, currentStatus }: UseTripItineraryArgs):
   )
 
   const persistItinerary = useCallback(
-    (payload: Omit<StoredItineraryPayload, 'signature'>) => {
+    async (
+      payload: {
+        structured: NormalizedItinerary | null
+        raw: string | null
+        signature?: string | null
+      },
+      options?: { skipRemote?: boolean }
+    ) => {
       if (typeof window === 'undefined') return
+
       const snapshot: StoredItineraryPayload = {
-        ...payload,
-        signature: fullSignature || null,
+        structured: payload.structured,
+        raw: payload.raw,
+        signature: payload.signature ?? fullSignature ?? null,
       }
-      localStorage.setItem(storageKey, JSON.stringify(snapshot))
+
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(snapshot))
+      } catch (err) {
+        console.error('Failed to cache itinerary', err)
+      }
+
       setCachedSignature(snapshot.signature ?? null)
+
+      if (options?.skipRemote || API_CONFIG.USE_MOCK) return
+
+      try {
+        await apiService.saveTripItinerary(trip.id, snapshot)
+      } catch (err) {
+        console.error('Failed to sync itinerary to server', err)
+      }
     },
-    [fullSignature, storageKey]
+    [fullSignature, storageKey, trip.id]
   )
 
   const normalizeItinerary = useCallback(
@@ -241,22 +273,76 @@ export function useTripItinerary({ trip, currentStatus }: UseTripItineraryArgs):
     [itineraryDates]
   )
 
+  const hydrateFromSnapshot = useCallback(
+    (snapshot: StoredItineraryPayload | null) => {
+      if (!snapshot) {
+        setStructuredItinerary(null)
+        setRawItinerary(null)
+        setCachedSignature(null)
+        return
+      }
+
+      if (snapshot.structured) {
+        setStructuredItinerary(normalizeItinerary(snapshot.structured as unknown as GeminiItinerary))
+        setRawItinerary(null)
+      } else if (snapshot.raw) {
+        setStructuredItinerary(null)
+        setRawItinerary(snapshot.raw)
+      } else {
+        setStructuredItinerary(null)
+        setRawItinerary(null)
+      }
+
+      setCachedSignature(snapshot.signature ?? null)
+    },
+    [normalizeItinerary]
+  )
+
   useEffect(() => {
     if (typeof window === 'undefined') return
     const cached = localStorage.getItem(storageKey)
-    if (!cached) return
+    if (!cached) {
+      hydrateFromSnapshot(null)
+      return
+    }
     try {
       const parsed = JSON.parse(cached) as StoredItineraryPayload
-      setCachedSignature(parsed.signature ?? null)
-      if (parsed.structured) {
-        setStructuredItinerary(normalizeItinerary(parsed.structured as unknown as GeminiItinerary))
-      } else if (parsed.raw) {
-        setRawItinerary(parsed.raw)
-      }
+      hydrateFromSnapshot(parsed)
     } catch (err) {
       console.error('Failed to load cached itinerary', err)
     }
-  }, [normalizeItinerary, storageKey])
+  }, [hydrateFromSnapshot, storageKey])
+
+  useEffect(() => {
+    if (API_CONFIG.USE_MOCK) return
+
+    let isCancelled = false
+
+    const fetchRemoteItinerary = async () => {
+      try {
+        const result = await apiService.getTripItinerary(trip.id)
+        if (!result.success || !result.itinerary || isCancelled) return
+
+        hydrateFromSnapshot(result.itinerary)
+        await persistItinerary(
+          {
+            structured: result.itinerary.structured ?? null,
+            raw: result.itinerary.raw ?? null,
+            signature: result.itinerary.signature ?? null,
+          },
+          { skipRemote: true }
+        )
+      } catch (err) {
+        console.error('Failed to fetch itinerary from server', err)
+      }
+    }
+
+    fetchRemoteItinerary()
+
+    return () => {
+      isCancelled = true
+    }
+  }, [hydrateFromSnapshot, persistItinerary, trip.id])
 
   useEffect(() => {
     if (!isLoading) {
@@ -362,20 +448,21 @@ Rules:
         if (normalized) {
           setStructuredItinerary(normalized)
           setRawItinerary(null)
-          persistItinerary({ structured: normalized, raw: null })
+          await persistItinerary({ structured: normalized, raw: null })
         } else {
           setStructuredItinerary(null)
           setRawItinerary(cleaned)
-          persistItinerary({ structured: null, raw: cleaned })
+          await persistItinerary({ structured: null, raw: cleaned })
         }
       } catch {
         setStructuredItinerary(null)
         setRawItinerary(cleaned)
-        persistItinerary({ structured: null, raw: cleaned })
+        await persistItinerary({ structured: null, raw: cleaned })
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to generate itinerary.'
-      setError(message)
+      const userMessage = handleGeminiError(err)
+      setError(userMessage)
+      toast.error(userMessage)
     } finally {
       setIsLoading(false)
     }

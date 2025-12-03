@@ -1,6 +1,6 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { CalendarDays, Clock, ClipboardCheck, Sparkles } from 'lucide-react'
-import type { NormalizedItinerary, NormalizedItinerarySegment } from './types'
+import type { NormalizedItinerary, NormalizedItinerarySegment } from '@/types/itinerary'
 
 interface ItineraryTimelineProps {
   itinerary: NormalizedItinerary

@@ -22,4 +22,10 @@ export interface NormalizedItinerary {
   closingNote?: string
 }
 
+export interface StoredItineraryPayload {
+  structured: NormalizedItinerary | null
+  raw: string | null
+  signature: string | null
+}
+
 
