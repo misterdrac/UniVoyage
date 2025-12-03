@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { GoogleGenAI } from '@google/genai'
 import { toast } from 'sonner'
 import { API_CONFIG } from '@/config/api'
 import { useAuth } from '@/contexts/AuthContext'
@@ -7,73 +6,15 @@ import { calculateDurationInDays, formatDateLong } from '@/lib/dateUtils'
 import type { TripStatus } from '@/lib/tripStatusUtils'
 import { apiService } from '@/services/api'
 import type { Trip } from '@/types/trip'
-import type {
-  NormalizedItinerary,
-  NormalizedItineraryDay,
-  NormalizedItinerarySegment,
-  StoredItineraryPayload,
-} from '@/types/itinerary'
-
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY ?? ''
-const GEMINI_MODEL = import.meta.env.VITE_GEMINI_MODEL ?? 'gemini-3.5-flash'
-
-const geminiClient = GEMINI_API_KEY
-  ? new GoogleGenAI({
-      apiKey: GEMINI_API_KEY,
-    })
-  : null
-
-const SEGMENT_TIME_FALLBACKS = ['Morning', 'Afternoon', 'Evening']
-const LOADING_STEPS = [
-  'Mapping day themes…',
-  'Pairing cafés and restaurants…',
-  'Sequencing travel times…',
-  'Sprinkling in slow moments…',
-  'Checking evening highlights…',
-]
-
-/**
- * Handles Gemini API errors - logs full error for developers, returns user-friendly message
- */
-const handleGeminiError = (err: unknown): string => {
-  // Log full error for developers
-  console.error('[Itinerary Generation Error]', err)
-  
-  // Return user-friendly message
-  return 'Oops! Something went wrong while generating your itinerary. Please try again in a moment.'
-}
-
-interface GeminiItinerarySegment {
-  time?: string
-  activity?: string
-  details?: string
-  note?: string
-}
-
-interface GeminiItineraryDay {
-  dayNumber?: number
-  dateLabel?: string
-  title?: string
-  theme?: string
-  vibe?: string
-  summary?: string
-  overview?: string
-  segments?: GeminiItinerarySegment[]
-  dining?: string[]
-  meals?: string[]
-  tips?: string[]
-  notes?: string[]
-}
-
-interface GeminiItinerary {
-  intro?: string
-  opening?: string
-  days?: GeminiItineraryDay[]
-  logistics?: Array<{ title?: string; detail?: string; icon?: string }>
-  closingNote?: string
-  farewell?: string
-  outro?: string
-}
+import type { NormalizedItinerary, StoredItineraryPayload } from '@/types/itinerary'
+import { geminiClient, GEMINI_API_KEY, GEMINI_MODEL } from './utils/geminiClient'
+import {
+  buildGeminiPrompt,
+  handleGeminiError,
+  LOADING_STEPS,
+  normalizeGeminiItinerary,
+  type GeminiItinerary,
+} from './utils/geminiItinerary'
 
 interface UseTripItineraryArgs {
   trip: Trip
@@ -107,7 +48,13 @@ export function useTripItinerary({ trip, currentStatus }: UseTripItineraryArgs):
   const storageKey = useMemo(() => `trip-itinerary-${trip.id}`, [trip.id])
 
   const userHobbies = useMemo(() => {
-    return user?.hobbies && Array.isArray(user.hobbies) && user.hobbies.length > 0 ? user.hobbies : []
+    if (!user?.hobbies || !Array.isArray(user.hobbies)) {
+      return []
+    }
+
+    return user.hobbies
+      .map((hobby) => hobby?.name?.trim())
+      .filter((name): name is string => Boolean(name && name.length > 0))
   }, [user?.hobbies])
 
   const locationLabel = useMemo(() => {
@@ -200,75 +147,7 @@ export function useTripItinerary({ trip, currentStatus }: UseTripItineraryArgs):
 
   const normalizeItinerary = useCallback(
     (payload: GeminiItinerary | null): NormalizedItinerary | null => {
-      if (!payload) return null
-      const days = Array.isArray(payload.days) ? payload.days : []
-      if (!days.length) return null
-
-      const normalizedDays: NormalizedItineraryDay[] = days
-        .map((day, index) => {
-          const fallbackDate = itineraryDates[index]?.label ?? `Day ${index + 1}`
-          const usableSegments = Array.isArray(day.segments) ? day.segments : []
-          const normalizedSegments: NormalizedItinerarySegment[] = usableSegments
-            .filter((segment) => typeof segment?.activity === 'string' && segment.activity.trim().length > 0)
-            .map((segment, segIndex) => ({
-              time:
-                segment.time?.trim() ??
-                SEGMENT_TIME_FALLBACKS[segIndex] ??
-                SEGMENT_TIME_FALLBACKS[SEGMENT_TIME_FALLBACKS.length - 1],
-              activity: segment.activity!.trim(),
-              details: segment.details ?? segment.note ?? '',
-            }))
-
-          const dining =
-            Array.isArray(day.dining) && day.dining.length
-              ? day.dining
-              : Array.isArray(day.meals)
-              ? day.meals
-              : []
-
-          const tips =
-            Array.isArray(day.tips) && day.tips.length
-              ? day.tips
-              : Array.isArray(day.notes)
-              ? day.notes
-              : []
-
-          return {
-            dayNumber: day.dayNumber ?? index + 1,
-            dateLabel: day.dateLabel ?? fallbackDate,
-            title: day.title ?? `Day ${index + 1}`,
-            summary: day.summary ?? day.overview ?? '',
-            vibe: day.vibe ?? day.theme ?? '',
-            segments: normalizedSegments,
-            dining,
-            tips,
-          }
-        })
-        .filter(
-          (day) =>
-            day.segments.length > 0 ||
-            Boolean(day.summary) ||
-            day.dining.length > 0 ||
-            day.tips.length > 0
-        )
-
-      if (!normalizedDays.length) return null
-
-      const logistics = Array.isArray(payload.logistics)
-        ? payload.logistics
-            .filter((item) => item?.title && item?.detail)
-            .map((item) => ({
-              title: item!.title!.trim(),
-              detail: item!.detail!.trim(),
-            }))
-        : []
-
-      return {
-        intro: payload.intro ?? payload.opening ?? '',
-        days: normalizedDays.slice(0, itineraryDates.length || normalizedDays.length),
-        logistics,
-        closingNote: payload.closingNote ?? payload.farewell ?? payload.outro ?? '',
-      }
+      return normalizeGeminiItinerary(payload, itineraryDates)
     },
     [itineraryDates]
   )
@@ -356,56 +235,13 @@ export function useTripItinerary({ trip, currentStatus }: UseTripItineraryArgs):
   }, [isLoading])
 
   const buildPrompt = useCallback(() => {
-    const dateRange = `${formatDateLong(trip.departureDate)} – ${formatDateLong(trip.returnDate)}`
-    const dayAnchors = itineraryDates.map((day, idx) => `Day ${idx + 1} (${day.label})`).join('\n')
-    const totalDays = Math.max(itineraryDates.length, 1)
-    const hobbiesContext = userHobbies.length > 0
-      ? `\nTraveler interests: ${userHobbies.join(', ')}. Prioritize activities, experiences, and venues that align with these interests throughout the itinerary.`
-      : ''
-
-    return `
-You are a modern travel designer crafting a ${totalDays}-day roadmap itinerary for curious travelers visiting ${locationLabel}.
-
-Trip window: ${dateRange}
-Daily anchors:
-${dayAnchors || `Day 1 (${formatDateLong(trip.departureDate)})`}${hobbiesContext}
-
-Focus: mix culture, food, scenic walks, mindful pauses, and one memorable evening experience. Mention realistic neighborhoods, transport options, and dining cues for ${locationLabel}.
-
-Return STRICT JSON ONLY following:
-{
-  "intro": "1 sentence welcome",
-  "days": [
-    {
-      "dayNumber": 1,
-      "dateLabel": "Mon, Jun 2",
-      "title": "Theme name",
-      "vibe": "Mood such as Culture / Coastline",
-      "summary": "1 sentence overview",
-      "segments": [
-        { "time": "Morning", "activity": "Key activity", "details": "Include why + transport or ticket tip" },
-        { "time": "Afternoon", "activity": "Second experience", "details": "Add local insight" },
-        { "time": "Evening", "activity": "Wrap-up idea", "details": "Include dining/nightlife cue" }
-      ],
-      "dining": ["Restaurant or cafe + signature dish"],
-      "tips": ["Action-focused reminder under 80 characters"]
-    }
-  ],
-  "logistics": [
-    { "title": "Transit", "detail": "Passes, ride-share, or walking notes" },
-    { "title": "Reservations", "detail": "What needs booking" }
-  ],
-  "closingNote": "Friendly send-off"
-}
-
-Rules:
-- Provide exactly ${totalDays} day objects.
-- Keep every string under 160 characters.
-- Tips must be practical, specific reminders (start with verbs or include concrete cues).
-- No markdown, bullet markers, or additional keys.
-- Mention rest/slow moments at least once.
-- Include diverse areas of ${locationLabel} across days.
-`.trim()
+    return buildGeminiPrompt({
+      itineraryDates,
+      locationLabel,
+      departureDate: trip.departureDate,
+      returnDate: trip.returnDate,
+      userHobbies,
+    })
   }, [itineraryDates, locationLabel, trip.departureDate, trip.returnDate, userHobbies])
 
   const generateItinerary = useCallback(async () => {
