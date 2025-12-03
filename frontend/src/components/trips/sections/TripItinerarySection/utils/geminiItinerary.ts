@@ -13,7 +13,11 @@ export const LOADING_STEPS = [
   'Consulting local experts…',
   'Inspecting transport options…',
   'Finding hidden gems…',
-  'Making sure everything is perfect…'
+  'Mapping the points of interest…',
+  'Making sure everything is perfect…',
+  'Almost there…',
+  'Checking out the weather…',
+
 ]
 
 export interface GeminiItinerarySegment {
