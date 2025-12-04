@@ -221,7 +221,7 @@ export const useTripBudget = (tripId: number | null | undefined) => {
       {
         ...expense,
         id,
-        amount: Number(expense.amount) || 0,
+        amount: parseFloat(Number(expense.amount).toFixed(2)) || 0,
       },
     ])
   }, [])
@@ -234,7 +234,7 @@ export const useTripBudget = (tripId: number | null | undefined) => {
               ...expense,
               ...updates,
               amount:
-                updates.amount !== undefined ? Number(updates.amount) || 0 : expense.amount,
+                updates.amount !== undefined ? parseFloat(Number(updates.amount).toFixed(2)) || 0 : expense.amount,
             }
           : expense
       )

@@ -1,13 +1,14 @@
 import { Label } from '@/components/ui/label'
-import { Wallet, TrendingUp, TrendingDown } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Wallet, TrendingUp, TrendingDown, ChevronUp, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const formatCurrency = (amount: number): string => {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(amount)
 }
 
@@ -56,13 +57,37 @@ export function TotalBudgetCard({
             <Label htmlFor="total-budget" className="text-sm font-medium text-muted-foreground">
               Budget Amount
             </Label>
-            <div className="text-right">
-              <p className="text-2xl font-bold text-foreground">
-                {formatCurrency(totalBudget)}
-              </p>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Max: {formatCurrency(10000)}
-              </p>
+            <div className="flex items-center gap-1.5">
+              <div className="text-right">
+                <p className="text-2xl font-bold text-foreground">
+                  {formatCurrency(totalBudget)}
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Max: {formatCurrency(10000)}
+                </p>
+              </div>
+              <div className="flex flex-col gap-0 shrink-0">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-5 w-5 p-0 hover:bg-muted rounded-b-none"
+                  onClick={() => updateTotalBudget(Math.min(10000, totalBudget + 1))}
+                  disabled={totalBudget >= 10000}
+                >
+                  <ChevronUp className="h-2.5 w-2.5" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-5 w-5 p-0 hover:bg-muted rounded-t-none"
+                  onClick={() => updateTotalBudget(Math.max(0, totalBudget - 1))}
+                  disabled={totalBudget <= 0}
+                >
+                  <ChevronDown className="h-2.5 w-2.5" />
+                </Button>
+              </div>
             </div>
           </div>
           <input
