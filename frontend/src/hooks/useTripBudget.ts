@@ -111,12 +111,21 @@ const parseBudgetData = (raw: string | null): StoredBudgetData => {
   return fallback
 }
 
+/**
+ * Persists budget data to localStorage.
+ * This is a temporary solution until backend support is added.
+ * Data is stored with key: 'trip-budget-{tripId}'
+ */
 const persistBudgetData = (key: string | null, data: StoredBudgetData) => {
   if (!key) return
   try {
     localStorage.setItem(key, JSON.stringify(data))
   } catch (error) {
-    console.error('Failed to persist trip budget', error)
+    console.error('Failed to persist trip budget to localStorage', error)
+    // Handle quota exceeded error
+    if (error instanceof DOMException && error.name === 'QuotaExceededError') {
+      console.warn('localStorage quota exceeded. Budget data may not be saved.')
+    }
   }
 }
 
@@ -124,26 +133,49 @@ export const useTripBudget = (tripId: number | null | undefined) => {
   const [expenses, setExpenses] = useState<TripBudgetExpense[]>([])
   const [allocations, setAllocations] = useState<Record<BudgetCategoryValue, number>>(emptyAllocations())
   const [totalBudget, setTotalBudget] = useState<number>(0)
+  const [isInitialized, setIsInitialized] = useState(false)
 
   const storageKey = useMemo(() => getStorageKey(tripId), [tripId])
 
+  // Load budget data from localStorage on mount or when tripId changes
+  // This runs every time the component mounts, ensuring data is loaded when switching tabs
   useEffect(() => {
     if (!storageKey) {
       setExpenses([])
       setAllocations(emptyAllocations())
       setTotalBudget(0)
+      setIsInitialized(true)
       return
     }
 
-    const stored = parseBudgetData(localStorage.getItem(storageKey))
-    setAllocations(stored.allocations)
-    setExpenses(stored.expenses)
-    setTotalBudget(Math.min(Math.max(stored.totalBudget || 0, 0), MAX_TOTAL_BUDGET))
-  }, [storageKey])
+    try {
+      const stored = parseBudgetData(localStorage.getItem(storageKey))
+      // Only update state if we have valid stored data
+      if (stored) {
+        setAllocations(stored.allocations)
+        setExpenses(stored.expenses)
+        setTotalBudget(Math.min(Math.max(stored.totalBudget || 0, 0), MAX_TOTAL_BUDGET))
+      }
+      setIsInitialized(true)
+    } catch (error) {
+      console.error('Failed to load budget data from localStorage', error)
+      // Reset to defaults on error
+      setAllocations(emptyAllocations())
+      setExpenses([])
+      setTotalBudget(0)
+      setIsInitialized(true)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storageKey]) // Only depend on storageKey, not on state values
 
+  // Persist budget data to localStorage whenever it changes
+  // TODO: Replace with backend API calls when backend support is added
+  // Only persist after initial load to avoid overwriting with empty defaults
   useEffect(() => {
+    if (!isInitialized || !storageKey) return
+    
     persistBudgetData(storageKey, { allocations, expenses, totalBudget })
-  }, [storageKey, allocations, expenses, totalBudget])
+  }, [storageKey, allocations, expenses, totalBudget, isInitialized])
 
   const updateAllocation = useCallback((category: BudgetCategoryValue, amount: number) => {
     setAllocations((prev) => ({
