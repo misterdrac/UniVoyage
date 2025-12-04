@@ -58,6 +58,7 @@ const ProfilePage = () => {
     toast.success("You've been logged out successfully");
   }, [logout]);
 
+
   const handleEditProfile = useCallback(() => {
     setIsEditingProfile(true);
   }, []);
@@ -136,7 +137,7 @@ const ProfilePage = () => {
   return (
     <div className="min-h-screen bg-background pt-24 pb-8 px-4 sm:px-6 lg:px-8">
       <div className="container mx-auto max-w-6xl">
-        <div className="flex items-center justify-between mb-6">
+        <div className="mb-6">
           <h1 className="text-3xl font-bold text-foreground">Profile</h1>
         </div>
 

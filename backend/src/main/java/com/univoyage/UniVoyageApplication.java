@@ -1,4 +1,4 @@
-package com.univoyage.univoyage;
+package com.univoyage;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

@@ -116,11 +116,10 @@ export class ApiClient {
       'Content-Type': 'application/json',
     }
 
-    const token = this.getAuthToken()
-    if (token) {
-      headers.Authorization = `Bearer ${token}`
-    }
+    // JWT is stored in HttpOnly cookie, so browser sends it automatically
+    // We don't need to send it as Bearer token
 
+    // CSRF token is in a readable cookie, we need to send it in header
     const csrfToken = this.getCsrfToken()
     if (csrfToken) {
       headers['X-CSRF-TOKEN'] = csrfToken
@@ -146,7 +145,22 @@ export class ApiClient {
 
     try {
       const response = await fetch(url, config)
-      const data = await response.json()
+      
+      // Check if response has content before trying to parse JSON
+      const contentType = response.headers.get('content-type')
+      let data: any = {}
+      
+      if (contentType && contentType.includes('application/json')) {
+        const text = await response.text()
+        if (text) {
+          try {
+            data = JSON.parse(text)
+          } catch (e) {
+            console.error('Failed to parse JSON response:', text)
+            data = { error: 'Invalid JSON response', message: text }
+          }
+        }
+      }
 
       if (!response.ok) {
         throw new ApiError(data.error || data.message || 'Request failed', response.status, data.code)

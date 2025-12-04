@@ -42,7 +42,7 @@ public class CorsConfig extends OncePerRequestFilter {
         // If you plan to send cookies, keep true. If you later use wildcard origin, MUST set this to false.
         response.setHeader("Access-Control-Allow-Credentials", "true");
         response.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,PATCH,OPTIONS");
-        response.setHeader("Access-Control-Allow-Headers", "Authorization,Content-Type,Accept,Origin,X-Requested-With");
+        response.setHeader("Access-Control-Allow-Headers", "Authorization,Content-Type,Accept,Origin,X-Requested-With,X-CSRF-TOKEN");
         response.setHeader("Access-Control-Expose-Headers", "Authorization,Content-Type");
         response.setHeader("Access-Control-Max-Age", "3600");
 
