@@ -86,7 +86,14 @@ export const DateRangePicker = ({ value, onChange, disabled }: DateRangePickerPr
   const handleClear = () => {
     setTempRange(undefined)
     onChange?.(undefined)
-    setIsOpen(false)
+  }
+
+  const handleDateSelect = (range: DateRange | undefined) => {
+    setTempRange(range)
+    // Auto-apply when both dates are selected, but keep calendar open
+    if (range?.from && range?.to) {
+      onChange?.(range)
+    }
   }
 
   // Helper: Get today at midnight
@@ -159,7 +166,7 @@ export const DateRangePicker = ({ value, onChange, disabled }: DateRangePickerPr
               mode="range"
               defaultMonth={tempRange?.from || new Date()}
               selected={tempRange}
-              onSelect={setTempRange}
+              onSelect={handleDateSelect}
               numberOfMonths={isMobile ? 1 : 2}
               disabled={isDateDisabled}
               startMonth={getToday()}
