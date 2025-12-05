@@ -26,6 +26,7 @@ import {
   TripBudgetSection,
   TripPlaceholderSection,
   TripItinerarySection,
+  TripPointsOfInterestSection,
 } from '@/components/trips';
 import type { TripSectionDefinition } from '@/components/trips';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -196,7 +197,7 @@ const TripDetailPage = () => {
                 )}
 
                 {activeSection === 'things-to-visit' && (
-                  <TripPlaceholderSection message="Places to visit will be listed here." />
+                  <TripPointsOfInterestSection trip={trip} />
                 )}
 
                 {activeSection === 'map' && (
