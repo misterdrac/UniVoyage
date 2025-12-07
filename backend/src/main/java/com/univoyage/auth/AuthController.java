@@ -33,7 +33,7 @@ public class AuthController {
     private final AuthService authService;
     private final UserRepository userRepository;
 
-    @Value("${app.jwt.ttl-seconds:2592000}")
+    @Value("${app.jwt.ttl-seconds}")
     private long jwtTtlSeconds;
 
     // POST /api/auth/register
