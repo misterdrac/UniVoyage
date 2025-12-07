@@ -1,4 +1,4 @@
-package com.univoyage.univoyage;
+package com.univoyage;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
