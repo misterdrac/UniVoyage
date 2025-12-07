@@ -2,6 +2,7 @@ package com.univoyage.univoyage;
 
 import org.springframework.boot.SpringApplication;
 
+@SpringBootTest
 public class TestUniVoyageApplication {
 
 	public static void main(String[] args) {

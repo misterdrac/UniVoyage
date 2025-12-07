@@ -30,9 +30,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     // Header name for the client-sent CSRF secret (Token B)
     private static final String CSRF_HEADER_NAME = "X-CSRF-TOKEN";
 
-    // Path for public endpoints where the filter should be bypassed
-    private static final String AUTH_PATH = "/api/auth/";
-
+    // Public endpoints that don't require authentication
+    private static final String[] PUBLIC_PATHS = {
+            "/api/auth/register",
+            "/api/auth/login"
+    };
 
     @Override
     protected void doFilterInternal(
@@ -41,10 +43,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @SuppressWarnings("null") FilterChain filterChain
     ) throws ServletException, IOException {
 
-        // 1. Check for public path (e.g., /api/auth/register, /api/auth/login)
-        if (request.getServletPath().contains(AUTH_PATH)) {
-            filterChain.doFilter(request, response);
-            return;
+        // 1. Check for public paths (only register and login, NOT /api/auth/me)
+        String servletPath = request.getServletPath();
+        for (String publicPath : PUBLIC_PATHS) {
+            if (servletPath.equals(publicPath)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
         }
 
         // 2. Extract JWT (Token A) from the HttpOnly Cookie
@@ -52,7 +57,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String jwt = (jwtCookie != null) ? jwtCookie.getValue() : null;
 
         if (jwt == null) {
-            filterChain.doFilter(request, response); // No JWT present, authentication will fail
+            // No JWT present - let Spring Security handle the 401/403
+            filterChain.doFilter(request, response);
             return;
         }
 
@@ -77,16 +83,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // 4. Double Submit Cookie Check: The Core CSRF Mitigation
         if (headerCsrfSecret == null || !headerCsrfSecret.equals(jwtCsrfSecret)) {
             // Mismatch: CSRF attack suspected OR frontend failed to send the header.
+            System.out.println("CSRF mismatch! Header: " + headerCsrfSecret + ", JWT: " + jwtCsrfSecret);
             response.addCookie(CookieUtils.createExpiredCookie(JWT_COOKIE_NAME));
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
 
         // 5. Authentication: Set Security Context
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        if (username != null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
 
             // Token is already verified and CSRF is checked, set the context
+            // Always set authentication even if it exists (in case of token refresh)
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                     userDetails,
                     null,
@@ -94,6 +102,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             );
             authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authToken);
+            System.out.println("✅ Authentication set for user: " + username + " with authorities: " + userDetails.getAuthorities());
         }
 
         filterChain.doFilter(request, response);

@@ -38,7 +38,10 @@ public class SecurityConfiguration {
                 // auth rules
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
+                        // /api/auth/me and other auth endpoints require authentication
+                        .requestMatchers("/api/auth/me").authenticated()
+                        .requestMatchers("/api/auth/**").authenticated()
                         // sve ostalo traži validan JWT + CSRF header
                         .anyRequest().authenticated()
                 )
