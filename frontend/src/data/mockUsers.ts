@@ -5,7 +5,8 @@ interface MockUser extends User {
 }
 
 const makeVisited = (country: CountryDto, date: string): VisitedCountryDto => ({
-  country,
+  isoCode: country.isoCode,
+  countryName: country.countryName,
   dateOfVisit: date,
 });
 
@@ -19,7 +20,8 @@ const cloneUser = (user: MockUser): User => ({
   hobbies: [...user.hobbies],
   languages: [...user.languages],
   visitedCountries: user.visitedCountries.map(vc => ({
-    country: { ...vc.country },
+    isoCode: vc.isoCode,
+    countryName: vc.countryName,
     dateOfVisit: vc.dateOfVisit,
   })),
   profileImage: user.profileImage,
@@ -27,8 +29,8 @@ const cloneUser = (user: MockUser): User => ({
   dateOfLastSignin: user.dateOfLastSignin,
 });
 
-const createHobby = (id: number, name: string): HobbyDto => ({ id, name });
-const createLanguage = (code: string, name: string): LanguageDto => ({ code, name });
+const createHobby = (id: number, hobbyName: string): HobbyDto => ({ id, hobbyName });
+const createLanguage = (langCode: string, langName: string): LanguageDto => ({ langCode, langName });
 const createCountry = (isoCode: string, countryName: string): CountryDto => ({ isoCode, countryName });
 
 const us = createCountry('US', 'United States');

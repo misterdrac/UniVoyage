@@ -147,13 +147,13 @@ export const TravelInformationCard = ({
               <div className="flex flex-wrap gap-2">
                 {user.languages && user.languages.length > 0 ? (
                   user.languages.map((lang, index) => {
-                    const language = LANGUAGES.find((l) => l.value === lang.code);
+                    const language = LANGUAGES.find((l) => l.value === lang.langCode);
                     return (
                       <span
                         key={index}
                         className="bg-primary/10 text-primary px-2 py-1 rounded-md text-sm"
                       >
-                        {language?.label || lang.name || lang.code}
+                        {language?.label || lang.langName || lang.langCode}
                       </span>
                     );
                   })
@@ -168,8 +168,8 @@ export const TravelInformationCard = ({
               <div className="flex flex-wrap gap-2">
                 {user.visitedCountries && user.visitedCountries.length > 0 ? (
                   user.visitedCountries.map((vc, index) => {
-                    const countryCode = vc.country?.isoCode;
-                    const countryName = vc.country?.countryName;
+                    const countryCode = vc.isoCode;
+                    const countryName = vc.countryName;
                     const country = countryCode ? COUNTRIES.find((c) => c.value === countryCode) : undefined;
                     return (
                       <span
@@ -190,14 +190,17 @@ export const TravelInformationCard = ({
               <p className="font-medium text-foreground mb-2">Hobbies & Interests:</p>
               <div className="flex flex-wrap gap-2">
                 {user.hobbies && user.hobbies.length > 0 ? (
-                  user.hobbies.map((hobby, index) => (
-                    <span
-                      key={index}
-                      className="bg-accent/10 text-accent-foreground px-2 py-1 rounded-md text-sm"
-                    >
-                      {hobby.name}
-                    </span>
-                  ))
+                  user.hobbies.map((hobby, index) => {
+                    const hobbyOption = TRAVEL_INTERESTS.find((h) => Number(h.value) === hobby.id);
+                    return (
+                      <span
+                        key={index}
+                        className="bg-accent/10 text-accent-foreground px-2 py-1 rounded-md text-sm"
+                      >
+                        {hobbyOption?.label || hobby.hobbyName || `Hobby ${hobby.id}`}
+                      </span>
+                    );
+                  })
                 ) : (
                   <span className="text-muted-foreground">No hobbies specified</span>
                 )}

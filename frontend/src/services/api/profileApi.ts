@@ -61,7 +61,7 @@ export const profileApi: { [K in keyof ProfileApi]: (this: ApiClient, ...args: P
 
       try {
         const res = await this.request<{ success: boolean; user: User }>(API_CONFIG.ENDPOINTS.USER.UPDATE_PROFILE, {
-          method: 'PUT',
+          method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             name: normalized.name ?? null,

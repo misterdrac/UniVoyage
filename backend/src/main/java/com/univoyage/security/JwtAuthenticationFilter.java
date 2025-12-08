@@ -45,6 +45,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // 1. Check for public paths (only register and login, NOT /api/auth/me)
         String servletPath = request.getServletPath();
+        
         for (String publicPath : PUBLIC_PATHS) {
             if (servletPath.equals(publicPath)) {
                 filterChain.doFilter(request, response);
@@ -83,7 +84,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // 4. Double Submit Cookie Check: The Core CSRF Mitigation
         if (headerCsrfSecret == null || !headerCsrfSecret.equals(jwtCsrfSecret)) {
             // Mismatch: CSRF attack suspected OR frontend failed to send the header.
-            System.out.println("CSRF mismatch! Header: " + headerCsrfSecret + ", JWT: " + jwtCsrfSecret);
             response.addCookie(CookieUtils.createExpiredCookie(JWT_COOKIE_NAME));
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
@@ -102,7 +102,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             );
             authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authToken);
-            System.out.println("✅ Authentication set for user: " + username + " with authorities: " + userDetails.getAuthorities());
         }
 
         filterChain.doFilter(request, response);

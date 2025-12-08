@@ -1,5 +1,6 @@
 import type { CountryDto, HobbyDto, LanguageDto, VisitedCountryDto } from '@/types/user'
 
+
 export type BackendUserDto = {
   id: number
   name: string

@@ -5,16 +5,17 @@ export interface CountryDto {
 
 export interface HobbyDto {
   id: number;
-  name: string;
+  hobbyName: string;
 }
 
 export interface LanguageDto {
-  code: string;
-  name: string;
+  langCode: string;
+  langName: string;
 }
 
 export interface VisitedCountryDto {
-  country: CountryDto;
+  isoCode: string;
+  countryName: string;
   dateOfVisit: string;
 }
 

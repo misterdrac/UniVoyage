@@ -29,9 +29,9 @@ export const useProfileForm = ({ user, isEditingProfile, isEditingInterests }: U
         user.countryOfOrigin ? COUNTRIES.find(c => c.value === user.countryOfOrigin.isoCode) : undefined
       );
       setHobbies(user.hobbies?.map(h => h.id.toString()) || []);
-      setLanguages(user.languages?.map(l => l.code) || []);
+      setLanguages(user.languages?.map(l => l.langCode) || []);
       setVisited(
-        user.visitedCountries?.map(vc => vc.country?.isoCode).filter((code): code is string => Boolean(code)) || []
+        user.visitedCountries?.map(vc => vc.isoCode).filter((code): code is string => Boolean(code)) || []
       );
     }
   }, [user]);
@@ -51,9 +51,9 @@ export const useProfileForm = ({ user, isEditingProfile, isEditingInterests }: U
   useEffect(() => {
     if (user && isEditingInterests) {
       setHobbies(user.hobbies?.map(h => h.id.toString()) || []);
-      setLanguages(user.languages?.map(l => l.code) || []);
+      setLanguages(user.languages?.map(l => l.langCode) || []);
       setVisited(
-        user.visitedCountries?.map(vc => vc.country?.isoCode).filter((code): code is string => Boolean(code)) || []
+        user.visitedCountries?.map(vc => vc.isoCode).filter((code): code is string => Boolean(code)) || []
       );
     }
   }, [user, isEditingInterests]);
@@ -71,9 +71,9 @@ export const useProfileForm = ({ user, isEditingProfile, isEditingInterests }: U
   const resetInterestsForm = useCallback(() => {
     if (user) {
       setHobbies(user.hobbies?.map(h => h.id.toString()) || []);
-      setLanguages(user.languages?.map(l => l.code) || []);
+      setLanguages(user.languages?.map(l => l.langCode) || []);
       setVisited(
-        user.visitedCountries?.map(vc => vc.country?.isoCode).filter((code): code is string => Boolean(code)) || []
+        user.visitedCountries?.map(vc => vc.isoCode).filter((code): code is string => Boolean(code)) || []
       );
     }
   }, [user]);

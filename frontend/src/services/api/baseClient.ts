@@ -17,6 +17,12 @@ export class ApiClient {
       return undefined
     }
 
+
+    const visitedCountries: VisitedCountryDto[] = (user.visitedCountries ?? []).map((vc) => ({
+      ...vc,
+      dateOfVisit: typeof vc.dateOfVisit === 'string' ? vc.dateOfVisit : (vc.dateOfVisit ? new Date(vc.dateOfVisit).toISOString() : new Date().toISOString()),
+    }))
+
     return {
       id: user.id,
       name: user.name,
@@ -26,7 +32,7 @@ export class ApiClient {
       countryOfOrigin: user.countryOfOrigin,
       hobbies: user.hobbies ?? [],
       languages: user.languages ?? [],
-      visitedCountries: user.visitedCountries ?? [],
+      visitedCountries,
       profileImage: user.profileImage,
       dateOfRegister: user.dateOfRegister,
       dateOfLastSignin: user.dateOfLastSignin,
@@ -59,10 +65,14 @@ export class ApiClient {
   }
 
   public mapVisitedCountryCodes(codes?: string[]): VisitedCountryDto[] {
-    return (codes ?? []).map((code) => ({
-      country: this.resolveCountry(code) ?? { isoCode: code, countryName: code },
-      dateOfVisit: new Date().toISOString(),
-    }))
+    return (codes ?? []).map((code) => {
+      const country = this.resolveCountry(code) ?? { isoCode: code, countryName: code }
+      return {
+        isoCode: country.isoCode,
+        countryName: country.countryName,
+        dateOfVisit: new Date().toISOString(),
+      }
+    })
   }
 
   public mapHobbyIds(ids?: number[]): HobbyDto[] {
@@ -70,7 +80,7 @@ export class ApiClient {
       const match = TRAVEL_INTERESTS.find((h) => Number(h.value) === id)
       return {
         id,
-        name: match?.label ?? `Interest ${id}`,
+        hobbyName: match?.label ?? `Interest ${id}`,
       }
     })
   }
@@ -79,8 +89,8 @@ export class ApiClient {
     return (codes ?? []).map((code) => {
       const match = LANGUAGES.find((lang) => lang.value === code)
       return {
-        code,
-        name: match?.label ?? code,
+        langCode: code,
+        langName: match?.label ?? code,
       }
     })
   }
