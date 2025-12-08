@@ -50,13 +50,15 @@ public class AuthService {
                         "Invalid country code: " + request.getCountryCode()
                 ));
 
+        Instant now = Instant.now();
         UserEntity newUser = UserEntity.builder()
                 .name(request.getName())
                 .surname(request.getSurname())
                 .email(request.getEmail())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .country(country)
-                .dateOfRegister(Instant.now())
+                .dateOfRegister(now)
+                .dateOfLastSignin(now)
                 .role(com.univoyage.auth.Role.USER)
                 .build();
 
@@ -110,7 +112,7 @@ public class AuthService {
         return AuthPayload.ok(UserDto.from(savedUser), pair.jwt(), pair.csrfSecret());
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public AuthPayload login(LoginRequestDto request) {
 
         UserEntity user = userRepository.findByEmail(request.getEmail())
@@ -119,6 +121,10 @@ public class AuthService {
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
             return AuthPayload.fail("Invalid credentials");
         }
+
+        // Update last sign in date
+        user.setDateOfLastSignin(Instant.now());
+        userRepository.save(user);
 
         JwtService.TokenPair pair = jwtService.generateForUser(user);
 
