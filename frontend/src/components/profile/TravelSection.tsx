@@ -1,7 +1,9 @@
 import { Edit2, Check, Trash2, X, type LucideIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AutoComplete, type Option } from '@/components/ui/autocomplete';
-
+/**
+ * @todo possible improvement?
+ */
 interface TravelSectionProps {
   sectionType: 'languages' | 'hobbies' | 'countries';
   title: string;
