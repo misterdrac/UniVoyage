@@ -15,6 +15,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+/** Service for handling JWT (JSON Web Tokens) and CSRF (Cross-Site Request Forgery) tokens.
+ * This service generates, validates, and extracts claims from JWTs.
+ */
+
 @Service
 public class JwtService {
 
@@ -37,20 +41,26 @@ public class JwtService {
         this.audience = audience;
     }
 
-    /** Token B: random CSRF secret (frontend šalje u headeru) */
+    // for current implementation, we don't need to use the token directly, because we need to implement sending it on each form
+    /** Generating CSRF(Cross-Site Request Forgery) token
+     * we call it Token A
+     * */
     public String generateCsrfSecret() {
         byte[] bytes = new byte[32];
         new SecureRandom().nextBytes(bytes);
         return Encoders.BASE64URL.encode(bytes);
     }
 
-    /** Generira JWT (Token A) s ugrađenim csrf claimom (Token B) */
-    public String generate(String subject, Map<String, Object> claims, String csrfSecret) {
-        claims.put(CSRF_CLAIM, csrfSecret);
+    /** Generating JWT(JSON Web Token) with CSRF claim
+     * we call it Token B, JWT is issued by user ID
+     * */
+    public String generateJwtToken(String subject, Map<String, Object> claims, String csrfSecret) {
 
+        claims.put(CSRF_CLAIM, csrfSecret);
         Instant now = Instant.now();
+
         return Jwts.builder()
-                .setSubject(subject) // user ID
+                .setSubject(subject)
                 .setIssuer(issuer)
                 .setAudience(audience)
                 .addClaims(claims)
@@ -61,21 +71,37 @@ public class JwtService {
                 .compact();
     }
 
-    /** Convenience: generiraj token za usera + vrati i csrfSecret */
+    /** Convenience - function that returns JWT token with CSRF token as TokenPair
+     * claims are put into HashMap -> used for testing
+     * Only importaint information which token holds is:
+     * 1) subject - user ID
+     * 2) issuer - univoyage
+     * 3) audiance - web
+     * 4) CSRF Token - for user
+     * 5) issued at - time of issue
+     * 6) issued not before - issue is not set before this time
+     * 7) experies at - time of issue + TTL of token
+     * */
     public TokenPair generateForUser(UserEntity user) {
         String csrfSecret = generateCsrfSecret();
         Map<String, Object> claims = new HashMap<>();
-        claims.put("uid", user.getId());
+
+        // Here we add additional claims if needed, but they are more for testing purposes
+        //claims.put("uid", user.getId());
+        //claims.put("username", user.getUsername()); // will be commented out if necessary
+        //claims.put("email", user.getEmail()); // will be commented out if necessary
         //claims.put("role", user.getRole().name()); // will be commented out if necessary
-        // claims.put("email", user.getEmail()); // no longer issueing email as subject, using user ID instead -> better security
 
         String subject = String.valueOf(user.getId());
         // no longer issueing email as subject, using user ID instead -> better security
-        String jwt = generate(subject, claims, csrfSecret);
+        String jwt = generateJwtToken(subject, claims, csrfSecret);
         return new TokenPair(jwt, csrfSecret);
     }
 
-    /** Parsiranje + validacija potpisa/issuer/exp */
+    /** Method for parsing token - checks if token is really valid, if mismatched returns error
+     *  - importaint is that we issue token with field issuer and check that field when validating the token
+     *  - if not, attackers might use some other token not issued by us
+     *  */
     private Claims parse(String token) {
         try {
             return Jwts.parserBuilder()
@@ -89,20 +115,33 @@ public class JwtService {
         }
     }
 
+    /** Extracting claim from token using resolver function
+     *  - this is used for extracting subject, CSRF secret and other claims
+     *  */
     public <T> T extractClaim(String token, Function<Claims, T> resolver) {
         return resolver.apply(parse(token));
     }
 
+    /** Extracting subject from token
+     *  - subject is user ID, so we can use it to load user details
+     *  */
     public String extractSubject(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
+    /** Extracting CSRF secret from token
+     *  - this is used for checking if CSRF token matches the one in JWT
+     *  */
     public String extractCsrfSecret(String token) {
         return extractClaim(token, c -> c.get(CSRF_CLAIM, String.class));
     }
 
+    /** Validating token
+     *  - this method checks if token is valid, not expired and has correct issuer
+     *  - it does not check if CSRF secret matches, that is done separately
+     *  */
     public boolean isValid(String token) {
-        parse(token); // baca exception ako nije ok
+        parse(token);
         return true;
     }
 
