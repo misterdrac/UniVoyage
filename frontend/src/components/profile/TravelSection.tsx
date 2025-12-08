@@ -1,7 +1,6 @@
-import { Edit2, Check, Trash2, X, LucideIcon } from 'lucide-react';
+import { Edit2, Check, Trash2, X, type LucideIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AutoComplete, type Option } from '@/components/ui/autocomplete';
-import { toast } from 'sonner';
 
 interface TravelSectionProps {
   sectionType: 'languages' | 'hobbies' | 'countries';
@@ -52,7 +51,6 @@ export const TravelSection = ({
   bgFromVar,
   bgViaVar,
   bgToVar,
-  isEditing,
   isSaving,
   activeInput,
   options,
