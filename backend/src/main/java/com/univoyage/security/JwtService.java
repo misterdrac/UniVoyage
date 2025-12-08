@@ -50,7 +50,7 @@ public class JwtService {
 
         Instant now = Instant.now();
         return Jwts.builder()
-                .setSubject(subject) // email
+                .setSubject(subject) // user ID
                 .setIssuer(issuer)
                 .setAudience(audience)
                 .addClaims(claims)
@@ -66,9 +66,12 @@ public class JwtService {
         String csrfSecret = generateCsrfSecret();
         Map<String, Object> claims = new HashMap<>();
         claims.put("uid", user.getId());
-        claims.put("role", user.getRole().name());
+        //claims.put("role", user.getRole().name()); // will be commented out if necessary
+        // claims.put("email", user.getEmail()); // no longer issueing email as subject, using user ID instead -> better security
 
-        String jwt = generate(user.getEmail(), claims, csrfSecret);
+        String subject = String.valueOf(user.getId());
+        // no longer issueing email as subject, using user ID instead -> better security
+        String jwt = generate(subject, claims, csrfSecret);
         return new TokenPair(jwt, csrfSecret);
     }
 

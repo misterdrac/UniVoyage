@@ -65,12 +65,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // 3. Extract CSRF Secret (Token B) from the custom header
         final String headerCsrfSecret = request.getHeader(CSRF_HEADER_NAME);
 
-        String username = null;
+        String userIdString = null;
         String jwtCsrfSecret = null;
 
         try {
             // Parse JWT, handles signature validation and expiration check internally
-            username = jwtService.extractSubject(jwt);
+            userIdString = jwtService.extractSubject(jwt);
             jwtCsrfSecret = jwtService.extractCsrfSecret(jwt);
 
         } catch (IllegalArgumentException e) {
@@ -90,8 +90,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         // 5. Authentication: Set Security Context
-        if (username != null) {
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+        if (userIdString != null) {
+            UserDetails userDetails = this.userDetailsService.loadUserByUsername(userIdString);
 
             // Token is already verified and CSRF is checked, set the context
             // Always set authentication even if it exists (in case of token refresh)
@@ -102,7 +102,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             );
             authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authToken);
-            System.out.println("✅ Authentication set for user: " + username + " with authorities: " + userDetails.getAuthorities());
+            System.out.println("✅ Authentication set for user: " + userIdString + " with authorities: " + userDetails.getAuthorities());
         }
 
         filterChain.doFilter(request, response);
