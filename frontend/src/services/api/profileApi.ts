@@ -67,9 +67,9 @@ export const profileApi: { [K in keyof ProfileApi]: (this: ApiClient, ...args: P
             name: normalized.name ?? null,
             surname: normalized.surname ?? null,
             countryCode: normalized.countryCode ?? null,
-            hobbyIds: normalized.hobbyIds ?? [],
-            languageCodes: normalized.languageCodes ?? [],
-            visitedCountryCodes: normalized.visitedCountryCodes ?? [],
+            hobbyIds: normalized.hobbyIds ?? null, // -> ?? [] changed to ?? null, same for languageCodes and visitedCountryCodes
+            languageCodes: normalized.languageCodes ?? null,
+            visitedCountryCodes: normalized.visitedCountryCodes ?? null,
           }),
         })
 
