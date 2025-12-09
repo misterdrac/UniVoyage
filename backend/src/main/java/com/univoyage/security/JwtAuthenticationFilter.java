@@ -17,6 +17,13 @@ import org.springframework.web.util.WebUtils;
 
 import java.io.IOException;
 
+/**
+ * JwtAuthenticationFilter is a Spring Security filter that processes JWT authentication.
+ * It checks for a JWT in an HttpOnly cookie and a CSRF secret in a custom header.
+ * If both are valid, it sets the authentication in the SecurityContext.
+ * This filter is applied to all requests except public endpoints like register and login.
+ */
+
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -36,6 +43,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/api/auth/login"
     };
 
+    /**
+     * This filter checks for the JWT in the HttpOnly cookie and the CSRF secret in the header.
+     * It performs the following steps:
+     * 1. Checks if the request is for a public path (register/login).
+     * 2. Extracts the JWT from the HttpOnly cookie.
+     * 3. Extracts the CSRF secret from the custom header.
+     * 4. Validates the JWT and checks if the CSRF secret matches.
+     * 5. Sets the authentication in the SecurityContext if valid.
+     */
     @Override
     protected void doFilterInternal(
             @SuppressWarnings("null") HttpServletRequest request,
@@ -66,12 +82,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // 3. Extract CSRF Secret (Token B) from the custom header
         final String headerCsrfSecret = request.getHeader(CSRF_HEADER_NAME);
 
-        String username = null;
+        String userIdString = null;
         String jwtCsrfSecret = null;
 
         try {
             // Parse JWT, handles signature validation and expiration check internally
-            username = jwtService.extractSubject(jwt);
+            userIdString = jwtService.extractSubject(jwt);
             jwtCsrfSecret = jwtService.extractCsrfSecret(jwt);
 
         } catch (IllegalArgumentException e) {
@@ -90,8 +106,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         // 5. Authentication: Set Security Context
-        if (username != null) {
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+        if (userIdString != null) {
+            UserDetails userDetails = this.userDetailsService.loadUserByUsername(userIdString);
 
             // Token is already verified and CSRF is checked, set the context
             // Always set authentication even if it exists (in case of token refresh)
@@ -102,6 +118,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             );
             authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authToken);
+            System.out.println("Authentication set for user [" + userIdString + "] with authorities: " + userDetails.getAuthorities());
         }
 
         filterChain.doFilter(request, response);
