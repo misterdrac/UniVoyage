@@ -26,7 +26,7 @@ export const useProfileForm = ({ user, isEditingProfile, isEditingInterests }: U
       setName(user.name || '');
       setSurname(user.surname || '');
       setCountry(
-        user.countryOfOrigin ? COUNTRIES.find(c => c.value === user.countryOfOrigin.isoCode) : undefined
+        user.countryOfOrigin ? COUNTRIES.find(c => c.value === user.countryOfOrigin?.isoCode) : undefined
       );
       setHobbies(user.hobbies?.map(h => h.id.toString()) || []);
       setLanguages(user.languages?.map(l => l.langCode) || []);
@@ -42,7 +42,7 @@ export const useProfileForm = ({ user, isEditingProfile, isEditingInterests }: U
       setName(user.name || '');
       setSurname(user.surname || '');
       setCountry(
-        user.countryOfOrigin ? COUNTRIES.find(c => c.value === user.countryOfOrigin.isoCode) : undefined
+        user.countryOfOrigin ? COUNTRIES.find(c => c.value === user.countryOfOrigin?.isoCode) : undefined
       );
     }
   }, [user, isEditingProfile]);
@@ -63,7 +63,7 @@ export const useProfileForm = ({ user, isEditingProfile, isEditingInterests }: U
       setName(user.name || '');
       setSurname(user.surname || '');
       setCountry(
-        user.countryOfOrigin ? COUNTRIES.find(c => c.value === user.countryOfOrigin.isoCode) : undefined
+        user.countryOfOrigin ? COUNTRIES.find(c => c.value === user.countryOfOrigin?.isoCode) : undefined
       );
     }
   }, [user]);

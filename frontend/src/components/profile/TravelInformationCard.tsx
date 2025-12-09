@@ -15,6 +15,7 @@ interface TravelInformationCardProps {
   languages: string[];
   visited: string[];
   onEdit: () => void;
+  onCancel: () => void;
   onSave: (data: { hobbies: string[]; languages: string[]; visited: string[] }) => Promise<void>;
   onHobbiesChange: (value: string[]) => void;
   onLanguagesChange: (value: string[]) => void;
@@ -88,6 +89,7 @@ export const TravelInformationCard = ({
   languages,
   visited,
   onEdit,
+  onCancel,
   onSave,
   onHobbiesChange,
   onLanguagesChange,
@@ -108,18 +110,18 @@ export const TravelInformationCard = ({
     []
   );
 
-  const [activeInput, setActiveInput] = useState<SectionType | null>(null);
+  const [activeSection, setActiveSection] = useState<SectionType | null>(null);
   const [tempLanguages, setTempLanguages] = useState<string[]>(languages);
   const [tempHobbies, setTempHobbies] = useState<string[]>(hobbies);
   const [tempVisited, setTempVisited] = useState<string[]>(visited);
-  const [selectedOption, setSelectedOption] = useState<Option | undefined>(undefined);
 
   useEffect(() => {
     if (isEditing) {
       setTempLanguages(languages);
       setTempHobbies(hobbies);
       setTempVisited(visited);
-      setActiveInput(null);
+    } else {
+      setActiveSection(null);
     }
   }, [isEditing, languages, hobbies, visited]);
 
@@ -132,7 +134,6 @@ export const TravelInformationCard = ({
       setTempState([...tempState, option.value]);
       toast.success(`Added ${config.getLabel(option.value)}`);
     }
-    setSelectedOption(undefined);
   };
 
   const createRemoveHandler = (section: SectionType) => (value: string) => {
@@ -159,8 +160,7 @@ export const TravelInformationCard = ({
       visited: section === 'countries' ? tempVisited : visited,
     });
 
-    setActiveInput(null);
-    setSelectedOption(undefined);
+    setActiveSection(null);
   };
 
   const handleCancelSection = (section: SectionType) => {
@@ -179,8 +179,8 @@ export const TravelInformationCard = ({
     };
     toast.info(`Canceled changes to ${sectionNames[section]}`);
 
-    setActiveInput(null);
-    setSelectedOption(undefined);
+    setActiveSection(null);
+    onCancel();
   };
 
   const getDisplayItems = (section: SectionType) => {
@@ -235,106 +235,55 @@ export const TravelInformationCard = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* todo possible improvement? */}
             <TravelSection
-              sectionType="languages"
-              title={SECTION_CONFIG.languages.title}
-              icon={SECTION_CONFIG.languages.icon}
-              iconColorVar={SECTION_CONFIG.languages.iconColorVar}
-              iconBgVar={SECTION_CONFIG.languages.iconBgVar}
-              buttonColorVar={SECTION_CONFIG.languages.buttonColorVar}
-              buttonHoverVar={SECTION_CONFIG.languages.buttonHoverVar}
-              badgeBgVar={SECTION_CONFIG.languages.badgeBgVar}
-              badgeTextVar={SECTION_CONFIG.languages.badgeTextVar}
-              badgeBorderVar={SECTION_CONFIG.languages.badgeBorderVar}
-              borderVar={SECTION_CONFIG.languages.borderVar}
-              bgFromVar={SECTION_CONFIG.languages.bgFromVar}
-              bgViaVar={SECTION_CONFIG.languages.bgViaVar}
-              bgToVar={SECTION_CONFIG.languages.bgToVar}
-              isEditing={isEditing}
+            config={SECTION_CONFIG.languages}
+            isActive={activeSection === 'languages'}
               isSaving={isSaving}
-              activeInput={activeInput}
               options={getOptions('languages')}
               tempItems={getTempItems('languages')}
               displayItems={getDisplayItems('languages')}
-              selectedOption={selectedOption}
-              onEdit={onEdit}
+            onStartEdit={() => {
+              setActiveSection('languages');
+              onEdit();
+            }}
               onAdd={createAddHandler('languages')}
               onRemove={createRemoveHandler('languages')}
               onSave={() => handleSaveSection('languages')}
               onCancel={() => handleCancelSection('languages')}
-              onSetActiveInput={setActiveInput}
-              onSetSelectedOption={setSelectedOption}
-              placeholder={SECTION_CONFIG.languages.placeholder}
-              emptyMessage={SECTION_CONFIG.languages.emptyMessage}
-              getItemLabel={SECTION_CONFIG.languages.getLabel}
             />
 
             <TravelSection
-              sectionType="hobbies"
-              title={SECTION_CONFIG.hobbies.title}
-              icon={SECTION_CONFIG.hobbies.icon}
-              iconColorVar={SECTION_CONFIG.hobbies.iconColorVar}
-              iconBgVar={SECTION_CONFIG.hobbies.iconBgVar}
-              buttonColorVar={SECTION_CONFIG.hobbies.buttonColorVar}
-              buttonHoverVar={SECTION_CONFIG.hobbies.buttonHoverVar}
-              badgeBgVar={SECTION_CONFIG.hobbies.badgeBgVar}
-              badgeTextVar={SECTION_CONFIG.hobbies.badgeTextVar}
-              badgeBorderVar={SECTION_CONFIG.hobbies.badgeBorderVar}
-              borderVar={SECTION_CONFIG.hobbies.borderVar}
-              bgFromVar={SECTION_CONFIG.hobbies.bgFromVar}
-              bgViaVar={SECTION_CONFIG.hobbies.bgViaVar}
-              bgToVar={SECTION_CONFIG.hobbies.bgToVar}
-              isEditing={isEditing}
+            config={SECTION_CONFIG.hobbies}
+            isActive={activeSection === 'hobbies'}
               isSaving={isSaving}
-              activeInput={activeInput}
               options={getOptions('hobbies')}
               tempItems={getTempItems('hobbies')}
               displayItems={getDisplayItems('hobbies')}
-              selectedOption={selectedOption}
-              onEdit={onEdit}
+            onStartEdit={() => {
+              setActiveSection('hobbies');
+              onEdit();
+            }}
               onAdd={createAddHandler('hobbies')}
               onRemove={createRemoveHandler('hobbies')}
               onSave={() => handleSaveSection('hobbies')}
               onCancel={() => handleCancelSection('hobbies')}
-              onSetActiveInput={setActiveInput}
-              onSetSelectedOption={setSelectedOption}
-              placeholder={SECTION_CONFIG.hobbies.placeholder}
-              emptyMessage={SECTION_CONFIG.hobbies.emptyMessage}
-              getItemLabel={SECTION_CONFIG.hobbies.getLabel}
             />
           </div>
 
           <TravelSection
-            sectionType="countries"
-            title={SECTION_CONFIG.countries.title}
-            icon={SECTION_CONFIG.countries.icon}
-            iconColorVar={SECTION_CONFIG.countries.iconColorVar}
-            iconBgVar={SECTION_CONFIG.countries.iconBgVar}
-            buttonColorVar={SECTION_CONFIG.countries.buttonColorVar}
-            buttonHoverVar={SECTION_CONFIG.countries.buttonHoverVar}
-            badgeBgVar={SECTION_CONFIG.countries.badgeBgVar}
-            badgeTextVar={SECTION_CONFIG.countries.badgeTextVar}
-            badgeBorderVar={SECTION_CONFIG.countries.badgeBorderVar}
-            borderVar={SECTION_CONFIG.countries.borderVar}
-            bgFromVar={SECTION_CONFIG.countries.bgFromVar}
-            bgViaVar={SECTION_CONFIG.countries.bgViaVar}
-            bgToVar={SECTION_CONFIG.countries.bgToVar}
-            isEditing={isEditing}
+            config={SECTION_CONFIG.countries}
+            isActive={activeSection === 'countries'}
             isSaving={isSaving}
-            activeInput={activeInput}
             options={getOptions('countries')}
             tempItems={getTempItems('countries')}
             displayItems={getDisplayItems('countries')}
-            selectedOption={selectedOption}
-            onEdit={onEdit}
+            onStartEdit={() => {
+              setActiveSection('countries');
+              onEdit();
+            }}
             onAdd={createAddHandler('countries')}
             onRemove={createRemoveHandler('countries')}
             onSave={() => handleSaveSection('countries')}
             onCancel={() => handleCancelSection('countries')}
-            onSetActiveInput={setActiveInput}
-            onSetSelectedOption={setSelectedOption}
-            placeholder={SECTION_CONFIG.countries.placeholder}
-            emptyMessage={SECTION_CONFIG.countries.emptyMessage}
-            getItemLabel={SECTION_CONFIG.countries.getLabel}
           />
         </div>
       </CardContent>

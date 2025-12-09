@@ -1,11 +1,8 @@
 import { Edit2, Check, Trash2, X, type LucideIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AutoComplete, type Option } from '@/components/ui/autocomplete';
-/**
- * @todo possible improvement?
- */
-interface TravelSectionProps {
-  sectionType: 'languages' | 'hobbies' | 'countries';
+
+interface TravelSectionConfig {
   title: string;
   icon: LucideIcon;
   iconColorVar: string;
@@ -19,59 +16,56 @@ interface TravelSectionProps {
   bgFromVar: string;
   bgViaVar: string;
   bgToVar: string;
-  isEditing: boolean;
+  placeholder: string;
+  emptyMessage: string;
+  getLabel: (value: string) => string;
+}
+
+interface TravelSectionProps {
+  config: TravelSectionConfig;
+  isActive: boolean;
   isSaving: boolean;
-  activeInput: 'languages' | 'hobbies' | 'countries' | null;
   options: Option[];
   tempItems: string[];
   displayItems: Array<{ value: string; label: string }>;
-  selectedOption: Option | undefined;
-  onEdit: () => void;
+  onStartEdit: () => void;
   onAdd: (option: Option) => void;
   onRemove: (value: string) => void;
   onSave: () => Promise<void>;
   onCancel: () => void;
-  onSetActiveInput: (section: 'languages' | 'hobbies' | 'countries') => void;
-  onSetSelectedOption: (option: Option | undefined) => void;
-  placeholder: string;
-  emptyMessage: string;
-  getItemLabel: (value: string) => string;
 }
 
 export const TravelSection = ({
-  sectionType,
-  title,
-  icon: Icon,
-  iconColorVar,
-  iconBgVar,
-  buttonColorVar,
-  buttonHoverVar,
-  badgeBgVar,
-  badgeTextVar,
-  badgeBorderVar,
-  borderVar,
-  bgFromVar,
-  bgViaVar,
-  bgToVar,
+  config,
+  isActive,
   isSaving,
-  activeInput,
   options,
   tempItems,
   displayItems,
-  selectedOption,
-  onEdit,
+  onStartEdit,
   onAdd,
   onRemove,
   onSave,
   onCancel,
-  onSetActiveInput,
-  onSetSelectedOption,
-  placeholder,
-  emptyMessage,
-  getItemLabel,
 }: TravelSectionProps) => {
-  const isActive = activeInput === sectionType;
-
+  const {
+    title,
+    icon: Icon,
+    iconColorVar,
+    iconBgVar,
+    buttonColorVar,
+    buttonHoverVar,
+    badgeBgVar,
+    badgeTextVar,
+    badgeBorderVar,
+    borderVar,
+    bgFromVar,
+    bgViaVar,
+    bgToVar,
+    placeholder,
+    emptyMessage,
+    getLabel,
+  } = config;
   return (
     <div
       className="p-5 rounded-xl border"
@@ -125,8 +119,7 @@ export const TravelSection = ({
         ) : (
           <Button
             onClick={() => {
-              onSetActiveInput(sectionType);
-              onEdit();
+              onStartEdit();
             }}
             size="sm"
             variant="ghost"
@@ -146,11 +139,7 @@ export const TravelSection = ({
           <div className="mb-3">
             <AutoComplete
               options={options.filter(opt => !tempItems.includes(opt.value))}
-              value={selectedOption}
-              onValueChange={(option) => {
-                onAdd(option);
-                onSetSelectedOption(undefined);
-              }}
+              onValueChange={(option) => onAdd(option)}
               placeholder={placeholder}
               emptyMessage={emptyMessage}
               disabled={isSaving}
@@ -168,7 +157,7 @@ export const TravelSection = ({
                     borderColor: `var(${badgeBorderVar})`,
                   }}
                 >
-                  {getItemLabel(value)}
+                {getLabel(value)}
                   <button
                     onClick={() => onRemove(value)}
                     className="hover:text-destructive transition-colors"
