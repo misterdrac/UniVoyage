@@ -3,6 +3,7 @@ package com.univoyage.auth;
 import com.univoyage.auth.dto.AuthPayload;
 import com.univoyage.auth.dto.LoginRequestDto;
 import com.univoyage.auth.dto.RegisterRequestDto;
+import com.univoyage.auth.dto.UpdateProfileRequestDto;
 import com.univoyage.auth.repository.CountryRepository;
 import com.univoyage.auth.repository.HobbyRepository;
 import com.univoyage.auth.repository.LanguageRepository;
@@ -129,5 +130,100 @@ public class AuthService {
         JwtService.TokenPair pair = jwtService.generateForUser(user);
 
         return AuthPayload.ok(UserDto.from(user), pair.jwt(), pair.csrfSecret());
+    }
+
+    @Transactional
+    public UserDto updateProfile(Long userId, UpdateProfileRequestDto request) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
+
+        // Update basic fields if provided
+        if (request.getName() != null && !request.getName().isBlank()) {
+            user.setName(request.getName());
+        }
+        if (request.getSurname() != null && !request.getSurname().isBlank()) {
+            user.setSurname(request.getSurname());
+        }
+
+        // Update country if provided
+        if (request.getCountryCode() != null && !request.getCountryCode().isBlank()) {
+            Country country = countryRepository.findByIsoCode(request.getCountryCode())
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "Invalid country code: " + request.getCountryCode()
+                    ));
+            user.setCountry(country);
+        }
+
+        // Update hobbies if provided
+        if (request.getHobbyIds() != null) {
+            // Remove existing hobbies that are not in the new list
+            Set<Long> newHobbyIds = request.getHobbyIds();
+            user.getUserHobbies().removeIf(uh -> !newHobbyIds.contains(uh.getHobby().getId()));
+            
+            // Add new hobbies that don't exist yet
+            Set<Long> existingHobbyIds = user.getUserHobbies().stream()
+                    .map(uh -> uh.getHobby().getId())
+                    .collect(Collectors.toSet());
+            
+            Set<Hobby> newHobbies = newHobbyIds.stream()
+                    .filter(id -> !existingHobbyIds.contains(id))
+                    .map(id -> hobbyRepository.findById(id)
+                            .orElseThrow(() -> new IllegalArgumentException("Invalid hobby id: " + id)))
+                    .collect(Collectors.toSet());
+
+            for (Hobby hobby : newHobbies) {
+                user.getUserHobbies().add(UserHobby.of(user, hobby));
+            }
+        }
+
+        // Update languages if provided
+        if (request.getLanguageCodes() != null) {
+            // Remove existing languages that are not in the new list
+            Set<String> newLanguageCodes = request.getLanguageCodes();
+            user.getUserLanguages().removeIf(ul -> !newLanguageCodes.contains(ul.getLanguage().getLangCode()));
+            
+            // Add new languages that don't exist yet
+            Set<String> existingLanguageCodes = user.getUserLanguages().stream()
+                    .map(ul -> ul.getLanguage().getLangCode())
+                    .collect(Collectors.toSet());
+            
+            Set<Language> newLanguages = newLanguageCodes.stream()
+                    .filter(code -> !existingLanguageCodes.contains(code))
+                    .map(code -> languageRepository.findById(code)
+                            .orElseThrow(() -> new IllegalArgumentException("Invalid language code: " + code)))
+                    .collect(Collectors.toSet());
+
+            for (Language language : newLanguages) {
+                user.getUserLanguages().add(UserLanguage.of(user, language));
+            }
+        }
+
+        // Update visited countries if provided
+        if (request.getVisitedCountryCodes() != null) {
+            // Remove existing visited countries that are not in the new list
+            Set<String> newCountryCodes = request.getVisitedCountryCodes();
+            user.getVisitedCountries().removeIf(uvc -> !newCountryCodes.contains(uvc.getCountry().getIsoCode()));
+            
+            // Add new visited countries that don't exist yet
+            Set<String> existingCountryCodes = user.getVisitedCountries().stream()
+                    .map(uvc -> uvc.getCountry().getIsoCode())
+                    .collect(Collectors.toSet());
+            
+            Set<UserVisitedCountry> newVisitedCountries = newCountryCodes.stream()
+                    .filter(code -> !existingCountryCodes.contains(code))
+                    .map(code -> {
+                        Country visited = countryRepository.findByIsoCode(code)
+                                .orElseThrow(() -> new IllegalArgumentException(
+                                        "Invalid visited country code: " + code
+                                ));
+                        return UserVisitedCountry.of(user, visited, LocalDate.now());
+                    })
+                    .collect(Collectors.toSet());
+
+            user.getVisitedCountries().addAll(newVisitedCountries);
+        }
+
+        UserEntity savedUser = userRepository.save(user);
+        return UserDto.from(savedUser);
     }
 }

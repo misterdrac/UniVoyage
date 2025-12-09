@@ -5,7 +5,6 @@ import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { AutoComplete, type Option } from '@/components/ui/autocomplete';
 import { COUNTRIES } from '@/lib/constants';
-import { ProfileAvatar } from './ProfileAvatar';
 import type { User as UserType } from '@/types/user';
 import { toast } from 'sonner';
 
@@ -16,17 +15,12 @@ interface ProfileHeaderCardProps {
   name: string;
   surname: string;
   country: Option | undefined;
-  imagePreview: string | null;
-  isUploadingImage: boolean;
-  fileInputRef: React.RefObject<HTMLInputElement | null>;
   onEdit: () => void;
   onCancel: () => void;
   onSave: (data: { name: string; surname?: string; countryCode?: string }) => Promise<void>;
   onNameChange: (value: string) => void;
   onSurnameChange: (value: string) => void;
   onCountryChange: (value: Option | undefined) => void;
-  onImageClick: () => void;
-  onImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 export const ProfileHeaderCard = ({
@@ -36,17 +30,12 @@ export const ProfileHeaderCard = ({
   name,
   surname,
   country,
-  imagePreview,
-  isUploadingImage,
-  fileInputRef,
   onEdit,
   onCancel,
   onSave,
   onNameChange,
   onSurnameChange,
   onCountryChange,
-  onImageClick,
-  onImageChange,
 }: ProfileHeaderCardProps) => {
   const handleSave = useCallback(async () => {
     if (!name.trim()) {
@@ -66,18 +55,20 @@ export const ProfileHeaderCard = ({
     });
   }, [name, surname, country, onSave]);
 
-  const altText = `${user.name} ${user.surname || ''}`.trim() || 'Profile picture';
-
   return (
     <Card className="mb-6 hover:shadow-lg transition-shadow duration-300">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              <User className="w-5 h-5 text-primary" />
-              Profile Information
-            </CardTitle>
-            <CardDescription>Your basic profile details</CardDescription>
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
+              <User className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                Profile Information
+              </CardTitle>
+              <CardDescription>Your basic profile details</CardDescription>
+            </div>
           </div>
           {!isEditing && (
             <Button
@@ -93,81 +84,69 @@ export const ProfileHeaderCard = ({
         </div>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-col sm:flex-row items-start gap-6">
-          <ProfileAvatar
-            imageUrl={user.profileImage}
-            imagePreview={imagePreview}
-            isUploading={isUploadingImage}
-            isEditing={isEditing}
-            onImageClick={onImageClick}
-            onImageChange={onImageChange}
-            fileInputRef={fileInputRef}
-            altText={altText}
-          />
-          <div className="flex-1 w-full">
-            {isEditing ? (
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">
-                      Name <span className="text-destructive">*</span>
-                    </label>
-                    <Input
-                      value={name}
-                      onChange={(e) => onNameChange(e.target.value)}
-                      placeholder="Enter your name"
-                      disabled={isSaving}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">
-                      Surname
-                    </label>
-                    <Input
-                      value={surname}
-                      onChange={(e) => onSurnameChange(e.target.value)}
-                      placeholder="Enter your surname"
-                      disabled={isSaving}
-                    />
-                  </div>
+        <div className="flex-1 w-full">
+          {isEditing ? (
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">
+                    Name <span className="text-destructive">*</span>
+                  </label>
+                  <Input
+                    value={name}
+                    onChange={(e) => onNameChange(e.target.value)}
+                    placeholder="Enter your name"
+                    disabled={isSaving}
+                  />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground">
-                    Country of Origin
+                    Surname
                   </label>
-                  <AutoComplete
-                    options={COUNTRIES}
-                    value={country}
-                    onValueChange={onCountryChange}
-                    placeholder="Select your country..."
-                    emptyMessage="No countries found"
+                  <Input
+                    value={surname}
+                    onChange={(e) => onSurnameChange(e.target.value)}
+                    placeholder="Enter your surname"
                     disabled={isSaving}
                   />
                 </div>
               </div>
-            ) : (
-              <>
-                <h2 className="text-2xl font-bold text-foreground mb-2">
-                  {user.name} {user.surname || ''}
-                </h2>
-                <div className="flex items-center gap-2 text-muted-foreground mb-4">
-                  <Mail className="w-4 h-4" />
-                  <span>{user.email}</span>
-                </div>
-                <div className="space-y-2">
-                  {user.countryOfOrigin && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <MapPin className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-muted-foreground">
-                        <span className="font-medium text-foreground">Country:</span>{' '}
-                        {user.countryOfOrigin.countryName}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">
+                  Country of Origin
+                </label>
+                <AutoComplete
+                  options={COUNTRIES}
+                  value={country}
+                  onValueChange={onCountryChange}
+                  placeholder="Select your country..."
+                  emptyMessage="No countries found"
+                  disabled={isSaving}
+                />
+              </div>
+            </div>
+          ) : (
+            <>
+              <h2 className="text-2xl font-bold text-foreground mb-2">
+                {user.name} {user.surname || ''}
+              </h2>
+              <div className="flex items-center gap-2 text-muted-foreground mb-4">
+                <Mail className="w-4 h-4" />
+                <span>{user.email}</span>
+              </div>
+              <div className="space-y-2">
+                {user.countryOfOrigin && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <MapPin className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-muted-foreground">
+                      <span className="font-medium text-foreground">Country:</span>{' '}
+                      {user.countryOfOrigin.countryName}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
         </div>
 
         {isEditing && (
