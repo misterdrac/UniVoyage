@@ -60,18 +60,25 @@ const ProfilePage = () => {
 
 
   const handleEditProfile = useCallback(() => {
+    // If travel info is being edited, close it before entering profile edit
+    setIsEditingInterests(false);
+    resetInterestsForm();
     setIsEditingProfile(true);
-  }, []);
+  }, [resetInterestsForm]);
 
   const handleCancelProfile = useCallback(() => {
     resetProfileForm();
     clearImagePreview();
+    toast.info('Canceled changes to profile information');
     setIsEditingProfile(false);
   }, [resetProfileForm, clearImagePreview]);
 
   const handleEditInterests = useCallback(() => {
+    // If profile info is being edited, close it before entering travel edit
+    setIsEditingProfile(false);
+    resetProfileForm();
     setIsEditingInterests(true);
-  }, []);
+  }, [resetProfileForm]);
 
   const handleCancelInterests = useCallback(() => {
     resetInterestsForm();
