@@ -10,8 +10,8 @@ public final class CookieUtils {
     public static final String CSRF_COOKIE_NAME = "csrf_token";
 
     /**
-     * HttpOnly cookie za JWT (Token A).
-     * Frontend ga NE može čitati, browser ga automatski šalje.
+     * HttpOnly cookie for the JWT (Token A).
+     * The frontend CANNOT read it; the browser sends it automatically.
      */
     public static Cookie createJwtCookie(String token, int maxAgeSeconds, boolean secure) {
         Cookie cookie = new Cookie(JWT_COOKIE_NAME, token);
@@ -19,18 +19,18 @@ public final class CookieUtils {
         cookie.setSecure(secure);
         cookie.setPath("/");
         cookie.setMaxAge(maxAgeSeconds);
-        // SameSite se ne može direktno preko Cookie API-ja u Javi,
-        // ali Spring Boot će ga dodati kad se koristi ResponseCookie.
+        // SameSite cannot be set directly through the Cookie API in Java,
+        // but Spring Boot will add it when using ResponseCookie.
         return cookie;
     }
 
     /**
-     * Readable cookie za CSRF secret (Token B).
-     * Frontend ga mora pročitati i slati u headeru X-CSRF-TOKEN.
+     * Readable cookie for the CSRF secret (Token B).
+     * The frontend must read this value and send it in the X-CSRF-TOKEN header.
      */
     public static Cookie createCsrfCookie(String csrfSecret, int maxAgeSeconds, boolean secure) {
         Cookie cookie = new Cookie(CSRF_COOKIE_NAME, csrfSecret);
-        cookie.setHttpOnly(false); // mora biti čitljiv na frontendu
+        cookie.setHttpOnly(false); // must be readable by the frontend
         cookie.setSecure(secure);
         cookie.setPath("/");
         cookie.setMaxAge(maxAgeSeconds);
@@ -38,7 +38,7 @@ public final class CookieUtils {
     }
 
     /**
-     * Expired cookie za brisanje (logout / invalid token).
+     * Expired cookie used for deletion (logout / invalid token).
      */
     public static Cookie createExpiredCookie(String name) {
         Cookie cookie = new Cookie(name, "");
