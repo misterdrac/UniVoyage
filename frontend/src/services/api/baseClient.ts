@@ -33,7 +33,6 @@ export class ApiClient {
       hobbies: user.hobbies ?? [],
       languages: user.languages ?? [],
       visitedCountries,
-      profileImage: user.profileImage,
       dateOfRegister: user.dateOfRegister,
       dateOfLastSignin: user.dateOfLastSignin,
     }

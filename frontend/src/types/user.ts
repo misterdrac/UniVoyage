@@ -29,7 +29,6 @@ export interface User {
   hobbies: HobbyDto[];
   languages: LanguageDto[];
   visitedCountries: VisitedCountryDto[];
-  profileImage?: string;
   dateOfRegister?: string;
   dateOfLastSignin?: string;
 }

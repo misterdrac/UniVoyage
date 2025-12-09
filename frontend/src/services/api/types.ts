@@ -11,7 +11,6 @@ export type BackendUserDto = {
   hobbies?: HobbyDto[]
   languages?: LanguageDto[]
   visitedCountries?: VisitedCountryDto[]
-  profileImage?: string
   dateOfRegister?: string
   dateOfLastSignin?: string
 }

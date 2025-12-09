@@ -9,11 +9,10 @@ import {
   TravelInformationCard,
   AccountInformationCard,
   useProfileForm,
-  useProfileImage,
 } from '@/components/profile';
 
 const ProfilePage = () => {
-  const { user, logout, updateProfile, uploadProfilePicture } = useAuth();
+  const { user, logout, updateProfile } = useAuth();
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isEditingInterests, setIsEditingInterests] = useState(false);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
@@ -41,17 +40,6 @@ const ProfilePage = () => {
     isEditingInterests,
   });
 
-  const {
-    isUploadingImage,
-    imagePreview,
-    fileInputRef,
-    handleImageClick,
-    handleImageChange,
-    clearImagePreview,
-  } = useProfileImage({
-    uploadProfilePicture,
-  });
-
   // Handlers
   const handleLogout = useCallback(() => {
     logout();
@@ -68,10 +56,9 @@ const ProfilePage = () => {
 
   const handleCancelProfile = useCallback(() => {
     resetProfileForm();
-    clearImagePreview();
     toast.info('Canceled changes to profile information');
     setIsEditingProfile(false);
-  }, [resetProfileForm, clearImagePreview]);
+  }, [resetProfileForm]);
 
   const handleEditInterests = useCallback(() => {
     // If profile info is being edited, close it before entering travel edit
@@ -155,17 +142,12 @@ const ProfilePage = () => {
           name={name}
           surname={surname}
           country={country}
-          imagePreview={imagePreview}
-          isUploadingImage={isUploadingImage}
-          fileInputRef={fileInputRef}
           onEdit={handleEditProfile}
           onCancel={handleCancelProfile}
           onSave={handleSaveProfile}
           onNameChange={setName}
           onSurnameChange={setSurname}
           onCountryChange={setCountry}
-          onImageClick={handleImageClick}
-          onImageChange={handleImageChange}
         />
 
         <ProfileCompletionCard user={user} />
