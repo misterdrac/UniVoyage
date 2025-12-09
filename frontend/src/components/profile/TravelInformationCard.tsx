@@ -214,7 +214,7 @@ export const TravelInformationCard = ({
   };
 
   return (
-    <Card className="mb-6 overflow-hidden border-2 hover:border-primary/30 transition-all duration-300 hover:shadow-xl bg-linear-to-br from-background to-muted/20">
+    <Card className="mb-6 overflow-visible border-2 hover:border-primary/30 transition-all duration-300 hover:shadow-xl bg-linear-to-br from-background to-muted/20">
       <CardHeader className="bg-linear-to-r from-primary/5 via-primary/3 to-transparent border-b border-border/50 pb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
