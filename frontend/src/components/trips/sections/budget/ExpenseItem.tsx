@@ -3,7 +3,7 @@ import { Edit2, Trash2 } from 'lucide-react'
 import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
 import { CATEGORY_CONFIG } from './categoryConfig'
-import type { TripBudgetExpense } from '@/hooks/useTripBudget'
+import type { TripBudgetExpense } from '@/types/budget'
 
 const formatCurrency = (amount: number): string => {
   return new Intl.NumberFormat('en-US', {

@@ -1,6 +1,7 @@
 import { API_CONFIG } from '@/config/api'
 import { API_CONSTANTS } from '@/lib/constants'
 import type { StoredItineraryPayload } from '@/types/itinerary'
+import type { TripBudgetPayload } from '@/types/budget'
 import type { User } from '@/types/user'
 import type { ApiClient } from './baseClient'
 
@@ -14,6 +15,8 @@ export interface TripsApi {
   }): Promise<{ success: boolean; trip?: any; error?: string }>
   getTrips(): Promise<{ success: boolean; trips?: any[]; error?: string }>
   deleteTrip(tripId: number): Promise<{ success: boolean; error?: string }>
+  getTripBudget(tripId: number): Promise<{ success: boolean; budget?: TripBudgetPayload; error?: string }>
+  saveTripBudget(tripId: number, payload: TripBudgetPayload): Promise<{ success: boolean; error?: string }>
 }
 
 export interface ItineraryApi {
@@ -139,6 +142,64 @@ export const tripsApi: { [K in keyof TripsApi]: (this: ApiClient, ...args: Param
       return { success: false, error: res.error ?? 'Trip deletion failed' }
     } catch (err: any) {
       return { success: false, error: err?.message ?? 'Trip deletion failed' }
+    }
+  },
+
+  async getTripBudget(this: ApiClient, tripId) {
+    if (this.useMock) {
+      // load from localStorage in mock mode
+      try {
+        const raw = localStorage.getItem(`trip-budget-${tripId}`)
+        const budget = raw ? (JSON.parse(raw) as TripBudgetPayload) : undefined
+        return { success: true, budget }
+      } catch (err: any) {
+        return { success: false, error: err?.message ?? 'Failed to load trip budget' }
+      }
+    }
+
+    try {
+      const res = await this.request<{ budget?: TripBudgetPayload }>(
+        `${API_CONFIG.ENDPOINTS.TRIPS.GET_BY_ID}/${tripId}/budget`
+      )
+
+      if (res.success) {
+        return { success: true, budget: res.data?.budget }
+      }
+
+      return { success: false, error: res.error ?? 'Failed to load trip budget' }
+    } catch (err: any) {
+      return { success: false, error: err?.message ?? 'Failed to load trip budget' }
+    }
+  },
+
+  async saveTripBudget(this: ApiClient, tripId, payload) {
+    if (this.useMock) {
+      // persist to localStorage in mock mode
+      try {
+        localStorage.setItem(`trip-budget-${tripId}`, JSON.stringify(payload))
+        return { success: true }
+      } catch (err: any) {
+        return { success: false, error: err?.message ?? 'Failed to save trip budget' }
+      }
+    }
+
+    try {
+      const res = await this.request<{ success: boolean }>(
+        `${API_CONFIG.ENDPOINTS.TRIPS.UPDATE}/${tripId}/budget`,
+        {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        }
+      )
+
+      if (res.success) {
+        return { success: true }
+      }
+
+      return { success: false, error: res.error ?? 'Failed to save trip budget' }
+    } catch (err: any) {
+      return { success: false, error: err?.message ?? 'Failed to save trip budget' }
     }
   },
 }
