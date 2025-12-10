@@ -28,7 +28,6 @@ export const API_CONFIG = {
       GET_BY_ID: '/trips',
       UPDATE: '/trips',
       DELETE: '/trips',
-      BUDGET: '/trips', // budget sub-resources
     }
   },
   

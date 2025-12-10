@@ -7,7 +7,7 @@ import {
   MoreHorizontal,
   type LucideIcon 
 } from 'lucide-react'
-import type { BudgetCategoryValue } from '@/types/budget'
+import type { BudgetCategoryValue } from '@/hooks/useTripBudget'
 
 export interface CategoryConfig {
   icon: LucideIcon

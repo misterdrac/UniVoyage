@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils'
 import { CATEGORY_CONFIG } from './categoryConfig'
 import { AddExpenseDialog } from './AddExpenseDialog'
 import { ExpenseItem } from './ExpenseItem'
-import type { TripBudgetExpense, BudgetCategoryValue } from '@/types/budget'
+import type { TripBudgetExpense, BudgetCategoryValue } from '@/hooks/useTripBudget'
 
 const formatCurrency = (amount: number): string => {
   return new Intl.NumberFormat('en-US', {

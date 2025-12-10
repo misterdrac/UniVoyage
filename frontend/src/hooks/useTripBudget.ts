@@ -1,7 +1,16 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { MAX_TOTAL_BUDGET } from '@/lib/budgeting'
-import { apiService } from '@/services/api'
-import type { BudgetCategoryValue, TripBudgetExpense, TripBudgetPayload } from '@/types/budget'
+
+export type BudgetCategoryValue = 'accommodation' | 'transportation' | 'food' | 'activities' | 'shopping' | 'misc'
+
+export interface TripBudgetExpense {
+  id: string
+  category: BudgetCategoryValue
+  description: string
+  amount: number
+  notes?: string
+  date?: string
+}
 
 export interface TripBudgetTotals {
   allocatedTotal: number
@@ -19,7 +28,7 @@ export interface CategoryTotals {
   overBudget: boolean
 }
 
-const STORAGE_PREFIX = 'trip-budget-' // localStorage key prefix for mock mode
+const STORAGE_PREFIX = 'trip-budget-'
 const DEFAULT_CATEGORIES: { value: BudgetCategoryValue; label: string; suggestion: string }[] = [
   { value: 'accommodation', label: 'Accommodation', suggestion: 'Hotels, hostels, rentals, resort fees' },
   { value: 'transportation', label: 'Transportation', suggestion: 'Flights, trains, rideshares, local transit' },
@@ -30,7 +39,13 @@ const DEFAULT_CATEGORIES: { value: BudgetCategoryValue; label: string; suggestio
 ]
 
 const getStorageKey = (tripId: number | null | undefined) =>
-  tripId == null ? null : `${STORAGE_PREFIX}${tripId}` // unique per trip
+  tripId == null ? null : `${STORAGE_PREFIX}${tripId}`
+
+interface StoredBudgetData {
+  allocations: Record<BudgetCategoryValue, number>
+  expenses: TripBudgetExpense[]
+  totalBudget: number
+}
 
 const emptyAllocations = (): Record<BudgetCategoryValue, number> =>
   DEFAULT_CATEGORIES.reduce(
@@ -41,55 +56,54 @@ const emptyAllocations = (): Record<BudgetCategoryValue, number> =>
     {} as Record<BudgetCategoryValue, number>
   )
 
-const createEmptyBudget = (): TripBudgetPayload => ({
-  allocations: emptyAllocations(),
-  expenses: [],
-  totalBudget: 0,
-})
-
-const normalizeExpenses = (rawExpenses: any[] = []): TripBudgetExpense[] =>
-  rawExpenses
-    .map((item) => ({
-      id: item?.id,
-      category: (item?.category ?? 'misc') as BudgetCategoryValue,
-      description: item?.description ?? 'Expense',
-      amount: Number(item?.amount ?? item?.actual ?? item?.planned ?? 0) || 0,
-      notes: item?.notes,
-      date: item?.date,
-    }))
-    .filter((expense) => typeof expense.id === 'string' && expense.id.length > 0)
-
-const normalizeBudgetPayload = (data?: TripBudgetPayload | null): TripBudgetPayload => {
-  if (!data) return createEmptyBudget()
-
-  return {
-    allocations: { ...emptyAllocations(), ...(data.allocations ?? {}) },
-    expenses: normalizeExpenses(data.expenses),
-    totalBudget: Math.min(Math.max(Number(data.totalBudget) || 0, 0), MAX_TOTAL_BUDGET),
+const parseBudgetData = (raw: string | null): StoredBudgetData => {
+  const fallback: StoredBudgetData = {
+    allocations: emptyAllocations(),
+    expenses: [],
+    totalBudget: 0,
   }
-}
-
-const parseBudgetData = (raw: string | null): TripBudgetPayload => {
-  const fallback = createEmptyBudget()
 
   if (!raw) return fallback
   try {
     const parsed = JSON.parse(raw)
     if (Array.isArray(parsed)) {
       // Backward compatibility with previous array-only storage
-      return normalizeBudgetPayload({
+      return {
         allocations: emptyAllocations(),
-        expenses: parsed,
+        expenses: parsed
+          .map((item) => ({
+            id: item.id,
+            category: item.category ?? 'misc',
+            description: item.description ?? 'Expense',
+            amount: Number(item.actual ?? item.planned ?? 0) || 0,
+            notes: item.notes,
+            date: item.date,
+          }))
+          .filter((expense) => typeof expense.id === 'string' && expense.id.length > 0),
         totalBudget: 0,
-      })
+      }
     }
 
-    if (parsed && typeof parsed === 'object') {
-      return normalizeBudgetPayload({
-        allocations: { ...emptyAllocations(), ...(parsed.allocations ?? {}) },
-        expenses: parsed.expenses ?? [],
-        totalBudget: parsed.totalBudget ?? 0,
-      })
+    if (
+      parsed &&
+      typeof parsed === 'object' &&
+      Array.isArray(parsed.expenses) &&
+      parsed.allocations &&
+      typeof parsed.allocations === 'object'
+    ) {
+      const allocations = { ...emptyAllocations(), ...parsed.allocations }
+      const expenses = parsed.expenses
+        .map((item: any) => ({
+          id: item.id,
+          category: item.category ?? 'misc',
+          description: item.description ?? 'Expense',
+          amount: Number(item.amount ?? 0) || 0,
+          notes: item.notes,
+          date: item.date,
+        }))
+        .filter((expense: TripBudgetExpense) => typeof expense.id === 'string' && expense.id.length > 0)
+      const totalBudget = Number(parsed.totalBudget) || 0
+      return { allocations, expenses, totalBudget }
     }
   } catch (error) {
     console.error('Failed to parse stored budget data', error)
@@ -98,15 +112,17 @@ const parseBudgetData = (raw: string | null): TripBudgetPayload => {
 }
 
 /**
- * Persists budget data to localStorage (mock mode only).
+ * Persists budget data to localStorage.
+ * This is a temporary solution until backend support is added.
  * Data is stored with key: 'trip-budget-{tripId}'
  */
-const persistBudgetData = (key: string | null, data: TripBudgetPayload) => {
+const persistBudgetData = (key: string | null, data: StoredBudgetData) => {
   if (!key) return
   try {
     localStorage.setItem(key, JSON.stringify(data))
   } catch (error) {
     console.error('Failed to persist trip budget to localStorage', error)
+    // Handle quota exceeded error
     if (error instanceof DOMException && error.name === 'QuotaExceededError') {
       console.warn('localStorage quota exceeded. Budget data may not be saved.')
     }
@@ -121,81 +137,45 @@ export const useTripBudget = (tripId: number | null | undefined) => {
 
   const storageKey = useMemo(() => getStorageKey(tripId), [tripId])
 
-  // Load budget data when the component mounts or when the trip changes
+  // Load budget data from localStorage on mount or when tripId changes
+  // This runs every time the component mounts, ensuring data is loaded when switching tabs
   useEffect(() => {
-    let isMounted = true
-
-    const applyBudget = (budget: TripBudgetPayload) => {
-      if (!isMounted) return
-      setAllocations(budget.allocations)
-      setExpenses(budget.expenses)
-      setTotalBudget(budget.totalBudget)
-    }
-
-    const loadBudget = async () => {
-      if (!tripId) {
-        applyBudget(createEmptyBudget())
-        setIsInitialized(true)
-        return
-      }
-
-      if (apiService.useMock) {
-        const stored = parseBudgetData(storageKey ? localStorage.getItem(storageKey) : null)
-        applyBudget(stored)
-        setIsInitialized(true)
-        return
-      }
-
-      try {
-        const response = await apiService.getTripBudget(tripId)
-        if (response.success) {
-          applyBudget(normalizeBudgetPayload(response.budget))
-        } else {
-          applyBudget(createEmptyBudget())
-        }
-      } catch (error) {
-        console.error('Failed to load trip budget from API', error)
-        applyBudget(createEmptyBudget())
-      } finally {
-        if (isMounted) {
-          setIsInitialized(true)
-        }
-      }
-    }
-
-    loadBudget()
-
-    return () => {
-      isMounted = false
-    }
-  }, [tripId, storageKey])
-
-  // Persist budget data whenever it changes
-  // Uses backend API when available, otherwise falls back to localStorage mock
-  useEffect(() => {
-    if (!isInitialized || !tripId) return
-
-    const payload: TripBudgetPayload = {
-      allocations,
-      expenses,
-      totalBudget,
-    }
-
-    if (apiService.useMock) {
-      persistBudgetData(storageKey, payload)
+    if (!storageKey) {
+      setExpenses([])
+      setAllocations(emptyAllocations())
+      setTotalBudget(0)
+      setIsInitialized(true)
       return
     }
 
-    const saveBudget = async () => {
-      try {
-        await apiService.saveTripBudget(tripId, payload)
-      } catch (error) {
-        console.error('Failed to save trip budget', error)
+    try {
+      const stored = parseBudgetData(localStorage.getItem(storageKey))
+      // Only update state if we have valid stored data
+      if (stored) {
+        setAllocations(stored.allocations)
+        setExpenses(stored.expenses)
+        setTotalBudget(Math.min(Math.max(stored.totalBudget || 0, 0), MAX_TOTAL_BUDGET))
       }
+      setIsInitialized(true)
+    } catch (error) {
+      console.error('Failed to load budget data from localStorage', error)
+      // Reset to defaults on error
+      setAllocations(emptyAllocations())
+      setExpenses([])
+      setTotalBudget(0)
+      setIsInitialized(true)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storageKey]) // Only depend on storageKey, not on state values
 
-    saveBudget()
-  }, [storageKey, allocations, expenses, totalBudget, isInitialized, tripId])
+  // Persist budget data to localStorage whenever it changes
+  // TODO: Replace with backend API calls when backend support is added
+  // Only persist after initial load to avoid overwriting with empty defaults
+  useEffect(() => {
+    if (!isInitialized || !storageKey) return
+    
+    persistBudgetData(storageKey, { allocations, expenses, totalBudget })
+  }, [storageKey, allocations, expenses, totalBudget, isInitialized])
 
   const updateAllocation = useCallback((category: BudgetCategoryValue, amount: number) => {
     setAllocations((prev) => ({

@@ -1,7 +1,6 @@
 import { useState } from 'react'
-import { useTripBudget } from '@/hooks/useTripBudget'
-import type { TripBudgetExpense } from '@/types/budget'
 import type { Trip } from '@/types/trip'
+import { useTripBudget, type TripBudgetExpense } from '@/hooks/useTripBudget'
 import { TotalBudgetCard } from './TotalBudgetCard'
 import { CategoryExpenseCard } from './CategoryExpenseCard'
 import { EditExpenseDialog } from './EditExpenseDialog'
