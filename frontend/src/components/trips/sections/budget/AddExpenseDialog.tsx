@@ -9,7 +9,7 @@ import { Plus } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { CATEGORY_CONFIG } from './categoryConfig'
 import { AmountInput } from './AmountInput'
-import type { BudgetCategoryValue } from '@/hooks/useTripBudget'
+import type { BudgetCategoryValue } from '@/types/budget'
 
 const formatCurrency = (amount: number): string => {
   return new Intl.NumberFormat('en-US', {
