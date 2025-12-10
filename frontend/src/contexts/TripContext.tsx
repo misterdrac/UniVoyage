@@ -40,11 +40,6 @@ export const TripProvider: React.FC<TripProviderProps> = ({ children }) => {
   const { user } = useAuth();
 
   const refreshTrips = useCallback(async () => {
-    if (!user) {
-      setTrips([]);
-      return;
-    }
-
     setIsLoading(true);
     try {
       const result = await apiService.getTrips();
@@ -59,12 +54,16 @@ export const TripProvider: React.FC<TripProviderProps> = ({ children }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [user]);
+  }, []); // Stable callback that doesn't depend on user
 
-  // Load trips when user changes
+  // Load trips when user ID changes (login/logout), not on every user update
   useEffect(() => {
-    refreshTrips();
-  }, [refreshTrips]);
+    if (user) {
+      refreshTrips();
+    } else {
+      setTrips([]);
+    }
+  }, [user?.id, refreshTrips]); // Only depend on user ID, not the entire user object
 
   const createTrip = useCallback(async (data: {
     destinationId: number;

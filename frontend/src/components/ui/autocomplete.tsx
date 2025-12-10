@@ -194,7 +194,7 @@ export const AutoComplete = ({
       <div className="relative mt-1">
         <div
           className={cn(
-            "animate-in fade-in-0 zoom-in-95 absolute top-0 z-[100] w-full rounded-md border bg-popover shadow-md",
+            "animate-in fade-in-0 zoom-in-95 absolute top-0 z-[9999] w-full rounded-md border bg-popover shadow-md",
             isOpen && filteredOptions.length > 0 ? "block" : "hidden",
           )}
         >

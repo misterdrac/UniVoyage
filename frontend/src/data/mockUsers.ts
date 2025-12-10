@@ -5,7 +5,8 @@ interface MockUser extends User {
 }
 
 const makeVisited = (country: CountryDto, date: string): VisitedCountryDto => ({
-  country,
+  isoCode: country.isoCode,
+  countryName: country.countryName,
   dateOfVisit: date,
 });
 
@@ -19,16 +20,16 @@ const cloneUser = (user: MockUser): User => ({
   hobbies: [...user.hobbies],
   languages: [...user.languages],
   visitedCountries: user.visitedCountries.map(vc => ({
-    country: { ...vc.country },
+    isoCode: vc.isoCode,
+    countryName: vc.countryName,
     dateOfVisit: vc.dateOfVisit,
   })),
-  profileImage: user.profileImage,
   dateOfRegister: user.dateOfRegister,
   dateOfLastSignin: user.dateOfLastSignin,
 });
 
-const createHobby = (id: number, name: string): HobbyDto => ({ id, name });
-const createLanguage = (code: string, name: string): LanguageDto => ({ code, name });
+const createHobby = (id: number, hobbyName: string): HobbyDto => ({ id, hobbyName });
+const createLanguage = (langCode: string, langName: string): LanguageDto => ({ langCode, langName });
 const createCountry = (isoCode: string, countryName: string): CountryDto => ({ isoCode, countryName });
 
 const us = createCountry('US', 'United States');
@@ -66,7 +67,6 @@ export const mockUsers: MockUser[] = [
       makeVisited(fr, "2023-04-20T00:00:00Z"),
       makeVisited(it, "2023-05-05T00:00:00Z"),
     ],
-    profileImage: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
     dateOfRegister: "2023-01-01T00:00:00Z",
     dateOfLastSignin: "2024-01-15T10:30:00Z",
     role: "USER",
@@ -95,7 +95,6 @@ export const mockUsers: MockUser[] = [
       makeVisited(jp, "2023-05-23T00:00:00Z"),
       makeVisited(au, "2023-06-30T00:00:00Z"),
     ],
-    profileImage: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
     dateOfRegister: "2024-01-02T00:00:00Z",
     dateOfLastSignin: "2024-01-14T15:45:00Z",
     role: "USER",
@@ -134,7 +133,6 @@ export const createUser = (
     languages: (languageCodes ?? []).map(code => createLanguage(code, code)),
     countryOfOrigin: undefined,
     visitedCountries: [],
-    profileImage: undefined,
     dateOfRegister: new Date().toISOString(),
     dateOfLastSignin: undefined,
     role: "USER",

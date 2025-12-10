@@ -250,11 +250,3 @@ export const API_CONSTANTS = {
   DEFAULT_TIMEOUT: 10000,
 } as const;
 
-// UI constants
-export const UI_CONSTANTS = {
-  PROFILE_PICTURE_SIZE: {
-    SMALL: 24, // Header profile picture
-    LARGE: 80, // Profile page picture
-  },
-  TOAST_DURATION: 4000,
-} as const;

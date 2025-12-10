@@ -1,5 +1,6 @@
 import type { CountryDto, HobbyDto, LanguageDto, VisitedCountryDto } from '@/types/user'
 
+
 export type BackendUserDto = {
   id: number
   name: string
@@ -10,7 +11,6 @@ export type BackendUserDto = {
   hobbies?: HobbyDto[]
   languages?: LanguageDto[]
   visitedCountries?: VisitedCountryDto[]
-  profileImage?: string
   dateOfRegister?: string
   dateOfLastSignin?: string
 }
