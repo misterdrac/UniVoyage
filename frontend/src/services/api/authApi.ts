@@ -178,6 +178,6 @@ export const authApi: { [K in keyof AuthApi]: (this: ApiClient, ...args: Paramet
         ? payload
         : { success: false, error: payload.error || res.error || 'Google login failed' }
     }
-
+  }
 
 
