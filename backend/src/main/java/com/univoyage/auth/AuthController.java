@@ -6,7 +6,6 @@ import com.univoyage.auth.dto.LoginRequestDto;
 import com.univoyage.auth.user.UserEntity;
 import com.univoyage.auth.user.UserRepository;
 import com.univoyage.auth.user.dto.UserDto;
-import com.univoyage.auth.GoogleOAuthService;
 import com.univoyage.common.ApiResponse;
 import com.univoyage.security.CookieUtils;
 import java.io.IOException;
