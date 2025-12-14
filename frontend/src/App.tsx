@@ -8,6 +8,7 @@ import { ProtectedRoute } from '@/guards';
 import { HomePage, AboutPage, TourPage, ContactPage, ProfilePage, MyTripsPage, TripDetailPage, PopularDestinationsPage, EuropeDestinationsPage, AmericasDestinationsPage, AsiaDestinationsPage, AfricaDestinationsPage } from '@/pages';
 import { LoginDialog, SignUpDialog } from '@/components/auth';
 import { useDestination } from '@/contexts/DestinationContext';
+import GoogleCallbackPage from "@/pages/GoogleCallbackPage"
 
 
 //todo improve this
@@ -50,6 +51,7 @@ function AppContent() {
           <Route path="/destinations/americas" element={<AmericasDestinationsPage />} />
           <Route path="/destinations/asia" element={<AsiaDestinationsPage />} />
           <Route path="/destinations/africa" element={<AfricaDestinationsPage />} />
+          <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
           <Route 
             path="/profile" 
             element={

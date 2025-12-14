@@ -19,7 +19,7 @@ export interface AuthApi {
   logout(): Promise<{ success: boolean }>
   getCurrentUser(): Promise<User | null>
   googleAuth(): Promise<void>
-  googleCallback(code: string): Promise<AuthResponse>
+  googleCallback(code: string): Promise<AuthResponse<User>>
 }
 
 export const authApi: { [K in keyof AuthApi]: (this: ApiClient, ...args: Parameters<AuthApi[K]>) => ReturnType<AuthApi[K]> } =
@@ -154,25 +154,30 @@ export const authApi: { [K in keyof AuthApi]: (this: ApiClient, ...args: Paramet
       window.location.href = `${this.baseURL}${API_CONFIG.ENDPOINTS.AUTH.GOOGLE}`
     },
 
-    async googleCallback(this: ApiClient, code) {
+    async googleCallback(this: ApiClient, code: string): Promise<AuthResponse<User>> {
       if (this.useMock) {
         throw new Error('Google auth not available in mock mode')
       }
 
-      const response = await this.request<AuthResponse>(
+      const res = await this.request<AuthResponse<BackendUserDto>>(
         API_CONFIG.ENDPOINTS.AUTH.GOOGLE_CALLBACK,
         {
           method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ code }),
         }
       )
 
-      if (response.success && response.data?.token) {
-        this.setAuthToken(response.data.token)
+      const payload = this.adaptAuthPayload(res.data)
+
+      if (payload.success && payload.token) {
+        this.setAuthToken(payload.token)
       }
 
-      return response.data || response
-    },
+      return payload.success
+        ? payload
+        : { success: false, error: payload.error || res.error || 'Google login failed' }
+    }
   }
 
 

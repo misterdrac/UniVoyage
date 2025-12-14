@@ -11,6 +11,7 @@ import com.univoyage.auth.user.UserEntity;
 import com.univoyage.auth.user.UserRepository;
 import com.univoyage.auth.user.dto.UserDto;
 import com.univoyage.auth.user.relations.*;
+import com.univoyage.auth.enumerations.Role;
 import com.univoyage.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -60,7 +61,7 @@ public class AuthService {
                 .country(country)
                 .dateOfRegister(now)
                 .dateOfLastSignin(now)
-                .role(com.univoyage.auth.Role.USER)
+                .role(Role.USER)
                 .build();
 
         // hobbies (Long IDs)

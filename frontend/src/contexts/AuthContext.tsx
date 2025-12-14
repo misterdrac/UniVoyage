@@ -27,6 +27,7 @@ interface AuthContextType {
     languageCodes?: string[];
     visitedCountryCodes?: string[];
   }) => Promise<{ success: boolean; error?: string }>;
+  loadUser: () => Promise<User | null>;
   isLoading: boolean;
 }
 
@@ -127,6 +128,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const loadUser = async (): Promise<User | null> => {
+      try {
+        const me = await apiService.getCurrentUser()
+        if (me) {
+          setUser(me)
+          localStorage.setItem(API_CONSTANTS.USER_KEY, JSON.stringify(me))
+          return me
+        }
+        setUser(null)
+        return null
+      } catch (err) {
+        console.error("loadUser error:", err)
+        setUser(null)
+        return null
+      }
+  };
+
   const logout = async () => {
     try {
       await apiService.logout();
@@ -183,6 +201,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     signup,
     logout,
     updateProfile,
+    loadUser,
     isLoading
   };
 

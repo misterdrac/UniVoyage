@@ -10,6 +10,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -40,8 +41,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     // Public endpoints that don't require authentication
     private static final String[] PUBLIC_PATHS = {
             "/api/auth/register",
-            "/api/auth/login"
+            "/api/auth/login",
+            "api/auth/google",
+            "api/auth/google/callback"
     };
+
+    private boolean csrfRequired(HttpServletRequest request){
+        String method = request.getMethod();
+        // CSRF protection is typically required for state-changing methods
+        return !(method.equals("GET") || method.equals("HEAD") || method.equals("OPTIONS"));
+    }
 
     /**
      * This filter checks for the JWT in the HttpOnly cookie and the CSRF secret in the header.
@@ -98,16 +107,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         // 4. Double Submit Cookie Check: The Core CSRF Mitigation
-        if (headerCsrfSecret == null || !headerCsrfSecret.equals(jwtCsrfSecret)) {
-            // Mismatch: CSRF attack suspected OR frontend failed to send the header.
-            response.addCookie(CookieUtils.createExpiredCookie(JWT_COOKIE_NAME));
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
+        if(csrfRequired(request)){
+            if (headerCsrfSecret == null || !headerCsrfSecret.equals(jwtCsrfSecret)) {
+                // Mismatch: CSRF attack suspected OR frontend failed to send the header.
+                response.addCookie(CookieUtils.createExpiredCookie(JWT_COOKIE_NAME));
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                return;
+            }
         }
 
         // 5. Authentication: Set Security Context
         if (userIdString != null) {
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(userIdString);
+            UserDetails userDetails;
+            // Load user details from the database, in case user was deleted after token issuance, or database reset
+            try {
+                userDetails = this.userDetailsService.loadUserByUsername(userIdString);
+            } catch (UsernameNotFoundException ex) {
+                // User was deleted (DB reset, manual delete, etc.)
+                response.addCookie(CookieUtils.createExpiredCookie(JWT_COOKIE_NAME));
+                SecurityContextHolder.clearContext();
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
+            }
 
             // Token is already verified and CSRF is checked, set the context
             // Always set authentication even if it exists (in case of token refresh)
