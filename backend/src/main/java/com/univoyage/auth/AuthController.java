@@ -6,8 +6,10 @@ import com.univoyage.auth.dto.LoginRequestDto;
 import com.univoyage.auth.user.UserEntity;
 import com.univoyage.auth.user.UserRepository;
 import com.univoyage.auth.user.dto.UserDto;
+import com.univoyage.auth.GoogleOAuthService;
 import com.univoyage.common.ApiResponse;
 import com.univoyage.security.CookieUtils;
+import java.io.IOException;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +34,7 @@ public class AuthController {
 
     private final AuthService authService;
     private final UserRepository userRepository;
+    private final GoogleOAuthService googleOAuthService;
 
     @Value("${app.jwt.ttl-seconds}")
     private long jwtTtlSeconds;
@@ -186,4 +189,11 @@ public class AuthController {
 
         return ResponseEntity.ok(ApiResponse.ok(null));
     }
+
+    @GetMapping("/google")
+    public void googleAuth(HttpServletResponse response) throws IOException {
+        String url = googleOAuthService.buildAuthorizationUrl();
+        response.sendRedirect(url);
+    }
+
 }
