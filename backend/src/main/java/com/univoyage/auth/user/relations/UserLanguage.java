@@ -6,17 +6,30 @@ import lombok.*;
 
 @Entity
 @Table(name = "user_languages")
-@IdClass(UserLanguageId.class)
-@Data @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter @Setter
+@NoArgsConstructor @AllArgsConstructor @Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class UserLanguage {
 
-    @Id
+    @EmbeddedId
+    @EqualsAndHashCode.Include
+    private UserLanguageId id;
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @MapsId("userId")
+    @JoinColumn(name="user_id", nullable = false)
     private UserEntity user;
 
-    @Id
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "lang_code", nullable = false)
+    @MapsId("langCode")
+    @JoinColumn(name="lang_code", nullable = false)
     private Language language;
+
+    public static UserLanguage of(UserEntity user, Language lang) {
+        return UserLanguage.builder()
+                .id(new UserLanguageId(user.getId(), lang.getLangCode()))
+                .user(user)
+                .language(lang)
+                .build();
+    }
 }

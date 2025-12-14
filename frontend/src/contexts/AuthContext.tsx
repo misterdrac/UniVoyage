@@ -1,16 +1,17 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import type { User } from '@/data/mockUsers';
+import type { User } from '@/types/user';
 import { apiService } from '@/services/api';
 import { API_CONSTANTS } from '@/lib/constants';
 
 interface SignupData {
   email: string;
   password: string;
-  firstName?: string;
+  name?: string;
   surname?: string;
-  hobbies?: string[];
-  languages?: string[];
-  country?: string;
+  hobbyIds?: number[];
+  languageCodes?: string[];
+  countryCode?: string;
+  visitedCountryCodes?: string[];
 }
 
 interface AuthContextType {
@@ -19,14 +20,14 @@ interface AuthContextType {
   signup: (data: SignupData) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   updateProfile: (data: {
-    firstName?: string;
+    name?: string;
     surname?: string;
-    country?: string;
-    hobbies?: string[];
-    languages?: string[];
-    visited?: string[];
+    countryCode?: string;
+    hobbyIds?: number[];
+    languageCodes?: string[];
+    visitedCountryCodes?: string[];
   }) => Promise<{ success: boolean; error?: string }>;
-  uploadProfilePicture: (file: File) => Promise<{ success: boolean; error?: string }>;
+  loadUser: () => Promise<User | null>;
   isLoading: boolean;
 }
 
@@ -127,6 +128,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const loadUser = async (): Promise<User | null> => {
+      try {
+        const me = await apiService.getCurrentUser()
+        if (me) {
+          setUser(me)
+          localStorage.setItem(API_CONSTANTS.USER_KEY, JSON.stringify(me))
+          return me
+        }
+        setUser(null)
+        return null
+      } catch (err) {
+        console.error("loadUser error:", err)
+        setUser(null)
+        return null
+      }
+  };
+
   const logout = async () => {
     try {
       await apiService.logout();
@@ -140,17 +158,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const updateProfile = async (data: {
-    firstName?: string;
+    name?: string;
     surname?: string;
-    country?: string;
-    hobbies?: string[];
-    languages?: string[];
-    visited?: string[];
+    countryCode?: string;
+    hobbyIds?: number[];
+    languageCodes?: string[];
+    visitedCountryCodes?: string[];
   }): Promise<{ success: boolean; error?: string }> => {
     try {
       setIsLoading(true);
-      
-      const result = await apiService.updateProfile(data);
+
+      const result = await apiService.updateProfile({
+        name: data.name,
+        surname: data.surname,
+        countryCode: data.countryCode,
+        hobbyIds: data.hobbyIds,
+        languageCodes: data.languageCodes,
+        visitedCountryCodes: data.visitedCountryCodes,
+      });
       
       if (result.success && result.user) {
         setUser(result.user);
@@ -170,37 +195,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const uploadProfilePicture = async (file: File): Promise<{ success: boolean; error?: string }> => {
-    try {
-      setIsLoading(true);
-      
-      const result = await apiService.uploadProfilePicture(file);
-      
-      if (result.success && result.user) {
-        setUser(result.user);
-        localStorage.setItem(API_CONSTANTS.USER_KEY, JSON.stringify(result.user));
-        return { success: true };
-      } else {
-        return { success: false, error: result.error || 'Upload failed' };
-      }
-    } catch (error) {
-      console.error('Upload profile picture error:', error);
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'An error occurred during upload' 
-      };
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const value: AuthContextType = {
     user,
     login,
     signup,
     logout,
     updateProfile,
-    uploadProfilePicture,
+    loadUser,
     isLoading
   };
 

@@ -1,12 +1,14 @@
 import React, { useState, useCallback } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, AuthProvider, DestinationProvider, TripProvider } from '@/contexts';
-import { Header, Footer } from '@/components';
+import { Header, Footer, ScrollToTop } from '@/components';
+import { AuthLoadingOverlay } from '@/components/layout/AuthLoadingOverlay';
 import { Toaster } from '@/components/ui/sonner';
 import { ProtectedRoute } from '@/guards';
 import { HomePage, AboutPage, TourPage, ContactPage, ProfilePage, MyTripsPage, TripDetailPage, PopularDestinationsPage, EuropeDestinationsPage, AmericasDestinationsPage, AsiaDestinationsPage, AfricaDestinationsPage } from '@/pages';
 import { LoginDialog, SignUpDialog } from '@/components/auth';
 import { useDestination } from '@/contexts/DestinationContext';
+import GoogleCallbackPage from "@/pages/GoogleCallbackPage"
 
 
 //todo improve this
@@ -35,7 +37,9 @@ function AppContent() {
 
   return (
     <>
+      <AuthLoadingOverlay />
       <Router>
+        <ScrollToTop />
         <Header />
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -47,6 +51,7 @@ function AppContent() {
           <Route path="/destinations/americas" element={<AmericasDestinationsPage />} />
           <Route path="/destinations/asia" element={<AsiaDestinationsPage />} />
           <Route path="/destinations/africa" element={<AfricaDestinationsPage />} />
+          <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
           <Route 
             path="/profile" 
             element={

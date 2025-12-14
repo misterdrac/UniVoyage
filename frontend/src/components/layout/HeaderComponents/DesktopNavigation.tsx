@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import { NavigationListItem } from "./NavigationListItem";
 import { DESTINATION_NAV_ITEMS } from "./constants";
-import type { User } from "@/data/mockUsers";
+import type { User } from "@/types/user";
 
 interface DesktopNavigationProps {
   user: User | null;

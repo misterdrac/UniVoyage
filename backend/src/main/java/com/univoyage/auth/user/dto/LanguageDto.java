@@ -1,16 +1,20 @@
 package com.univoyage.auth.user.dto;
 
-import lombok.Builder;
-import lombok.Data;
+import com.univoyage.auth.user.relations.Language;
+import lombok.*;
 
-@Data @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class LanguageDto {
+
     private String langCode;
     private String langName;
 
-
-    // Static method to map Entity to DTO
-    public static LanguageDto from(com.univoyage.auth.user.relations.Language entity) {
+    public static LanguageDto from(Language entity) {
+        if (entity == null) return null;
         return LanguageDto.builder()
                 .langCode(entity.getLangCode())
                 .langName(entity.getLangName())

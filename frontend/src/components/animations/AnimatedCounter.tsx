@@ -10,7 +10,7 @@ interface AnimatedCounterProps {
 export function AnimatedCounter({ end, duration = 2000, suffix = '', className = '' }: AnimatedCounterProps) {
   const [count, setCount] = useState(0);
   const hasAnimatedRef = useRef(false);
-  const counterRef = useRef<HTMLDivElement>(null);
+  const counterRef = useRef<HTMLSpanElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
 
   useEffect(() => {
@@ -69,9 +69,9 @@ export function AnimatedCounter({ end, duration = 2000, suffix = '', className =
   }, [end, duration]);
 
   return (
-    <div ref={counterRef} className={className}>
+    <span ref={counterRef} className={className}>
       {count}{suffix}
-    </div>
+    </span>
   );
 }
 

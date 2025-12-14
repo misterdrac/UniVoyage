@@ -9,11 +9,10 @@ import {
   TravelInformationCard,
   AccountInformationCard,
   useProfileForm,
-  useProfileImage,
 } from '@/components/profile';
 
 const ProfilePage = () => {
-  const { user, logout, updateProfile, uploadProfilePicture } = useAuth();
+  const { user, logout, updateProfile } = useAuth();
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isEditingInterests, setIsEditingInterests] = useState(false);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
@@ -21,8 +20,8 @@ const ProfilePage = () => {
 
   // Custom hooks for form and image management
   const {
-    firstName,
-    setFirstName,
+    name,
+    setName,
     surname,
     setSurname,
     country,
@@ -41,36 +40,32 @@ const ProfilePage = () => {
     isEditingInterests,
   });
 
-  const {
-    isUploadingImage,
-    imagePreview,
-    fileInputRef,
-    handleImageClick,
-    handleImageChange,
-    clearImagePreview,
-  } = useProfileImage({
-    uploadProfilePicture,
-  });
-
   // Handlers
   const handleLogout = useCallback(() => {
     logout();
     toast.success("You've been logged out successfully");
   }, [logout]);
 
+
   const handleEditProfile = useCallback(() => {
+    // If travel info is being edited, close it before entering profile edit
+    setIsEditingInterests(false);
+    resetInterestsForm();
     setIsEditingProfile(true);
-  }, []);
+  }, [resetInterestsForm]);
 
   const handleCancelProfile = useCallback(() => {
     resetProfileForm();
-    clearImagePreview();
+    toast.info('Canceled changes to profile information');
     setIsEditingProfile(false);
-  }, [resetProfileForm, clearImagePreview]);
+  }, [resetProfileForm]);
 
   const handleEditInterests = useCallback(() => {
+    // If profile info is being edited, close it before entering travel edit
+    setIsEditingProfile(false);
+    resetProfileForm();
     setIsEditingInterests(true);
-  }, []);
+  }, [resetProfileForm]);
 
   const handleCancelInterests = useCallback(() => {
     resetInterestsForm();
@@ -78,10 +73,14 @@ const ProfilePage = () => {
   }, [resetInterestsForm]);
 
   const handleSaveProfile = useCallback(
-    async (data: { firstName: string; surname?: string; country?: string }) => {
+    async (data: { name: string; surname?: string; countryCode?: string }) => {
       setIsSavingProfile(true);
       try {
-        const result = await updateProfile(data);
+        const result = await updateProfile({
+          name: data.name,
+          surname: data.surname,
+          countryCode: data.countryCode,
+        });
         if (result.success) {
           toast.success('Profile updated successfully!');
           setIsEditingProfile(false);
@@ -101,7 +100,14 @@ const ProfilePage = () => {
     async (data: { hobbies: string[]; languages: string[]; visited: string[] }) => {
       setIsSavingInterests(true);
       try {
-        const result = await updateProfile(data);
+        const hobbyIds = data.hobbies
+          .map(h => Number(h))
+          .filter((id): id is number => Number.isFinite(id));
+        const result = await updateProfile({
+          hobbyIds,
+          languageCodes: data.languages,
+          visitedCountryCodes: data.visited,
+        });
         if (result.success) {
           toast.success('Travel information updated successfully!');
           setIsEditingInterests(false);
@@ -125,7 +131,7 @@ const ProfilePage = () => {
   return (
     <div className="min-h-screen bg-background pt-24 pb-8 px-4 sm:px-6 lg:px-8">
       <div className="container mx-auto max-w-6xl">
-        <div className="flex items-center justify-between mb-6">
+        <div className="mb-6">
           <h1 className="text-3xl font-bold text-foreground">Profile</h1>
         </div>
 
@@ -133,20 +139,15 @@ const ProfilePage = () => {
           user={user}
           isEditing={isEditingProfile}
           isSaving={isSavingProfile}
-          firstName={firstName}
+          name={name}
           surname={surname}
           country={country}
-          imagePreview={imagePreview}
-          isUploadingImage={isUploadingImage}
-          fileInputRef={fileInputRef}
           onEdit={handleEditProfile}
           onCancel={handleCancelProfile}
           onSave={handleSaveProfile}
-          onFirstNameChange={setFirstName}
+          onNameChange={setName}
           onSurnameChange={setSurname}
           onCountryChange={setCountry}
-          onImageClick={handleImageClick}
-          onImageChange={handleImageChange}
         />
 
         <ProfileCompletionCard user={user} />

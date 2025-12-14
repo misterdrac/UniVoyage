@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { UserMenuButton } from "./UserMenuButton";
 import { DESTINATION_NAV_ITEMS } from "./constants";
-import type { User } from "@/data/mockUsers";
+import type { User } from "@/types/user";
 
 interface MobileNavigationProps {
   isOpen: boolean;

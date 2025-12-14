@@ -3,7 +3,7 @@ import { Trophy } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { calculateAchievements } from './utils/achievements';
 import { AchievementBadge } from './AchievementBadge';
-import type { User } from '@/data/mockUsers';
+import type { User } from '@/types/user';
 
 interface AchievementsSectionProps {
   user: User;
@@ -13,15 +13,17 @@ export const AchievementsSection = ({ user }: AchievementsSectionProps) => {
   const achievements = useMemo(() => {
     const stats = {
       languagesSpoken: user.languages?.length || 0,
-      countriesVisited: user.visited?.length || 0,
+      countriesVisited: user.visitedCountries?.length || 0,
       interests: user.hobbies?.length || 0,
-      memberFor: Math.floor(
-        (new Date().getTime() - new Date(user.dateOfRegister).getTime()) / (1000 * 60 * 60 * 24)
-      ),
+      memberFor: user.dateOfRegister
+        ? Math.floor(
+            (new Date().getTime() - new Date(user.dateOfRegister).getTime()) / (1000 * 60 * 60 * 24)
+          )
+        : 0,
     };
 
     return calculateAchievements(stats);
-  }, [user.languages, user.visited, user.hobbies, user.dateOfRegister]);
+  }, [user.languages, user.visitedCountries, user.hobbies, user.dateOfRegister]);
 
   return (
     <Card className="mb-6">

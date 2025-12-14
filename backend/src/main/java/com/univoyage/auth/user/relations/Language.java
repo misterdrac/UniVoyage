@@ -2,11 +2,11 @@ package com.univoyage.auth.user.relations;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.util.Set;
 
 @Entity
 @Table(name = "languages")
-@Data @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter @Setter
+@NoArgsConstructor @AllArgsConstructor @Builder
 public class Language {
 
     @Id
@@ -16,7 +16,4 @@ public class Language {
     @Column(name = "lang_name", unique = true, nullable = false, length = 50)
     private String langName;
 
-    @OneToMany(mappedBy = "language", fetch = FetchType.LAZY)
-    @ToString.Exclude
-    private Set<UserLanguage> userLanguages;
 }

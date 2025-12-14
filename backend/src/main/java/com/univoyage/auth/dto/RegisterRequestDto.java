@@ -1,21 +1,26 @@
 package com.univoyage.auth.dto;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import lombok.*;
+import lombok.Data;
+import java.util.Set;
 
-import java.util.List;
-
-
-// DTO for user registration request
-// used in AuthController
-@Data @NoArgsConstructor @AllArgsConstructor @Builder
+@Data
 public class RegisterRequestDto {
-    @Email @NotBlank private String email;
-    @NotBlank private String password;
-    @NotBlank private String name;         // required by your table
-    private String country;
-    private List<String> hobbies;
-    private List<String> languages;
-    private List<String> visited;          // optional; UI can ignore
+
+    private String email;
+    private String password;
+
+    private String name;
+    private String surname;
+
+    // country ISO code (e.g. "HR")
+    private String countryCode;
+
+    // list of IDs user selected
+    private Set<Long> hobbyIds;
+
+    // language code list (e.g. ["HR", "EN", "DE"])
+    private Set<String> languageCodes;
+
+    // visited countries as ISO codes
+    private Set<String> visitedCountryCodes;
 }

@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Globe, Languages, Award, Timer } from 'lucide-react';
 import { StatCard } from './StatCard';
-import type { User } from '@/data/mockUsers';
+import type { User } from '@/types/user';
 
 interface ProfileStatsCardsProps {
   user: User;
@@ -10,14 +10,17 @@ interface ProfileStatsCardsProps {
 export const ProfileStatsCards = ({ user }: ProfileStatsCardsProps) => {
   const stats = useMemo(
     () => ({
-      countriesVisited: user.visited?.length || 0,
+      countriesVisited: user.visitedCountries?.length || 0,
       languagesSpoken: user.languages?.length || 0,
       interests: user.hobbies?.length || 0,
-      memberFor: Math.floor(
-        (new Date().getTime() - new Date(user.dateOfRegister).getTime()) / (1000 * 60 * 60 * 24)
-      ),
+      memberFor: user.dateOfRegister
+        ? Math.floor(
+            (new Date().getTime() - new Date(user.dateOfRegister).getTime()) /
+            (1000 * 60 * 60 * 24)
+          )
+        : 0,
     }),
-    [user.visited, user.languages, user.hobbies, user.dateOfRegister]
+    [user.visitedCountries, user.languages, user.hobbies, user.dateOfRegister]
   );
 
   return (

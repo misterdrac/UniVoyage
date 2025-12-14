@@ -1,16 +1,20 @@
 package com.univoyage.auth.user.dto;
 
-import lombok.Builder;
-import lombok.Data;
+import com.univoyage.auth.user.relations.Country;
+import lombok.*;
 
-@Data @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class CountryDto {
+
     private String isoCode;
     private String countryName;
 
-
-    // Static method to map Entity to DTO
-    public static CountryDto from(com.univoyage.auth.user.relations.Country entity) {
+    public static CountryDto from(Country entity) {
+        if (entity == null) return null;
         return CountryDto.builder()
                 .isoCode(entity.getIsoCode())
                 .countryName(entity.getCountryName())

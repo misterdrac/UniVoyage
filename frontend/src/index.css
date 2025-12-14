@@ -20,6 +20,7 @@
   --accent-foreground: oklch(0.3015 0.0572 282.4176);
   --destructive: oklch(0.6861 0.2061 14.9941);
   --destructive-foreground: oklch(1.0000 0 0);
+  --info: rgb(245, 158, 11);
   --border: oklch(0.9115 0.0216 285.9625);
   --input: oklch(0.9115 0.0216 285.9625);
   --ring: oklch(0.5417 0.1790 288.0332);
@@ -108,6 +109,52 @@
   --profile-achievement-trophy: rgb(217, 119, 6); /* amber-600 */
   --profile-account-status: rgb(34, 197, 94); /* green-500 */
   --profile-account-status-text: rgb(22, 163, 74); /* green-600 */
+
+  /* Travel Information Card Colors */
+  --travel-lang-bg-from: rgba(168, 85, 247, 0.1); /* purple-500/10 */
+  --travel-lang-bg-via: rgba(168, 85, 247, 0.05); /* purple-500/5 */
+  --travel-lang-bg-to: transparent;
+  --travel-lang-border: rgba(168, 85, 247, 0.2); /* purple-500/20 */
+  --travel-lang-icon-bg: rgba(168, 85, 247, 0.2); /* purple-500/20 */
+  --travel-lang-icon: rgb(147, 51, 234); /* purple-600 */
+  --travel-lang-icon-dark: rgb(196, 181, 253); /* purple-400 */
+  --travel-lang-badge-bg: rgba(255, 255, 255, 0.5); /* white/50 */
+  --travel-lang-badge-bg-dark: rgba(31, 41, 55, 0.5); /* gray-800/50 */
+  --travel-lang-badge-text: rgb(126, 34, 206); /* purple-700 */
+  --travel-lang-badge-text-dark: rgb(196, 181, 253); /* purple-300 */
+  --travel-lang-badge-border: rgba(168, 85, 247, 0.3); /* purple-500/30 */
+  --travel-lang-button: rgb(147, 51, 234); /* purple-600 */
+  --travel-lang-button-hover: rgb(126, 34, 206); /* purple-700 */
+
+  --travel-hobby-bg-from: rgba(245, 158, 11, 0.1); /* amber-500/10 */
+  --travel-hobby-bg-via: rgba(245, 158, 11, 0.05); /* amber-500/5 */
+  --travel-hobby-bg-to: transparent;
+  --travel-hobby-border: rgba(245, 158, 11, 0.2); /* amber-500/20 */
+  --travel-hobby-icon-bg: rgba(245, 158, 11, 0.2); /* amber-500/20 */
+  --travel-hobby-icon: rgb(217, 119, 6); /* amber-600 */
+  --travel-hobby-icon-dark: rgb(251, 191, 36); /* amber-400 */
+  --travel-hobby-badge-bg: rgba(255, 255, 255, 0.5); /* white/50 */
+  --travel-hobby-badge-bg-dark: rgba(31, 41, 55, 0.5); /* gray-800/50 */
+  --travel-hobby-badge-text: rgb(180, 83, 9); /* amber-700 */
+  --travel-hobby-badge-text-dark: rgb(253, 230, 138); /* amber-300 */
+  --travel-hobby-badge-border: rgba(245, 158, 11, 0.3); /* amber-500/30 */
+  --travel-hobby-button: rgb(217, 119, 6); /* amber-600 */
+  --travel-hobby-button-hover: rgb(180, 83, 9); /* amber-700 */
+
+  --travel-country-bg-from: rgba(59, 130, 246, 0.1); /* blue-500/10 */
+  --travel-country-bg-via: rgba(59, 130, 246, 0.05); /* blue-500/5 */
+  --travel-country-bg-to: transparent;
+  --travel-country-border: rgba(59, 130, 246, 0.2); /* blue-500/20 */
+  --travel-country-icon-bg: rgba(59, 130, 246, 0.2); /* blue-500/20 */
+  --travel-country-icon: rgb(37, 99, 235); /* blue-600 */
+  --travel-country-icon-dark: rgb(96, 165, 250); /* blue-400 */
+  --travel-country-badge-bg: rgba(255, 255, 255, 0.5); /* white/50 */
+  --travel-country-badge-bg-dark: rgba(31, 41, 55, 0.5); /* gray-800/50 */
+  --travel-country-badge-text: rgb(29, 78, 216); /* blue-700 */
+  --travel-country-badge-text-dark: rgb(147, 197, 253); /* blue-300 */
+  --travel-country-badge-border: rgba(59, 130, 246, 0.3); /* blue-500/30 */
+  --travel-country-button: rgb(37, 99, 235); /* blue-600 */
+  --travel-country-button-hover: rgb(29, 78, 216); /* blue-700 */
 }
 
 .dark {
@@ -127,6 +174,7 @@
   --accent-foreground: oklch(0.9185 0.0257 285.8834);
   --destructive: oklch(0.6861 0.2061 14.9941);
   --destructive-foreground: oklch(1.0000 0 0);
+  --info: rgb(245, 158, 11);
   --border: oklch(0.3261 0.0597 282.5832);
   --input: oklch(0.3261 0.0597 282.5832);
   --ring: oklch(0.7162 0.1597 290.3962);
@@ -209,6 +257,19 @@
   --profile-achievement-trophy: rgb(251, 191, 36); /* amber-400 */
   --profile-account-status: rgb(34, 197, 94); /* green-500 */
   --profile-account-status-text: rgb(22, 163, 74); /* green-600 */
+
+  /* Travel Information Card Colors - Dark Mode */
+  --travel-lang-badge-bg: rgba(31, 41, 55, 0.5); /* gray-800/50 */
+  --travel-lang-badge-text: rgb(196, 181, 253); /* purple-300 */
+  --travel-lang-icon: rgb(196, 181, 253); /* purple-400 */
+
+  --travel-hobby-badge-bg: rgba(31, 41, 55, 0.5); /* gray-800/50 */
+  --travel-hobby-badge-text: rgb(253, 230, 138); /* amber-300 */
+  --travel-hobby-icon: rgb(251, 191, 36); /* amber-400 */
+
+  --travel-country-badge-bg: rgba(31, 41, 55, 0.5); /* gray-800/50 */
+  --travel-country-badge-text: rgb(147, 197, 253); /* blue-300 */
+  --travel-country-icon: rgb(96, 165, 250); /* blue-400 */
 }
 
 @theme inline {
@@ -228,6 +289,7 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-info: var(--info);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);

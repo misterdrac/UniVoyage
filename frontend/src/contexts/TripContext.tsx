@@ -3,6 +3,7 @@ import type { Trip } from '@/types/trip';
 import { apiService } from '@/services/api';
 import { useAuth } from './AuthContext';
 import { toast } from 'sonner';
+import { clearTripCache } from '@/lib/tripCacheUtils';
 
 interface TripContextType {
   trips: Trip[];
@@ -39,11 +40,6 @@ export const TripProvider: React.FC<TripProviderProps> = ({ children }) => {
   const { user } = useAuth();
 
   const refreshTrips = useCallback(async () => {
-    if (!user) {
-      setTrips([]);
-      return;
-    }
-
     setIsLoading(true);
     try {
       const result = await apiService.getTrips();
@@ -58,12 +54,16 @@ export const TripProvider: React.FC<TripProviderProps> = ({ children }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [user]);
+  }, []); // Stable callback that doesn't depend on user
 
-  // Load trips when user changes
+  // Load trips when user ID changes (login/logout), not on every user update
   useEffect(() => {
-    refreshTrips();
-  }, [refreshTrips]);
+    if (user) {
+      refreshTrips();
+    } else {
+      setTrips([]);
+    }
+  }, [user?.id, refreshTrips]); // Only depend on user ID, not the entire user object
 
   const createTrip = useCallback(async (data: {
     destinationId: number;
@@ -102,6 +102,18 @@ export const TripProvider: React.FC<TripProviderProps> = ({ children }) => {
       return { success: false, error: 'You must be logged in to delete a trip' };
     }
 
+    // Get trip data before deletion to clear associated cache
+    const tripToDelete = trips.find(trip => trip.id === tripId);
+    if (tripToDelete) {
+      clearTripCache(
+        tripToDelete.id,
+        tripToDelete.destinationName,
+        tripToDelete.destinationLocation,
+        tripToDelete.departureDate,
+        tripToDelete.returnDate
+      );
+    }
+
     setIsLoading(true);
     try {
       const result = await apiService.deleteTrip(tripId);
@@ -121,7 +133,7 @@ export const TripProvider: React.FC<TripProviderProps> = ({ children }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [user, refreshTrips]);
+  }, [user, refreshTrips, trips]);
 
   const getTripById = useCallback((id: number): Trip | undefined => {
     return trips.find(trip => trip.id === id);

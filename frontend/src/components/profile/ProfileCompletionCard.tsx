@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Star } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
-import type { User } from '@/data/mockUsers';
+import type { User } from '@/types/user';
 
 interface ProfileCompletionCardProps {
   user: User;
@@ -10,13 +10,12 @@ interface ProfileCompletionCardProps {
 export const ProfileCompletionCard = ({ user }: ProfileCompletionCardProps) => {
   const { profileCompletion, completedFields, totalFields } = useMemo(() => {
     const profileFields = [
-      user.firstName,
+      user.name,
       user.surname,
-      user.country,
-      user.profileImage,
-      user.languages?.length > 0,
-      user.visited?.length > 0,
-      user.hobbies?.length > 0,
+      user.countryOfOrigin,
+      (user.languages?.length ?? 0) > 0,
+      (user.visitedCountries?.length ?? 0) > 0,
+      (user.hobbies?.length ?? 0) > 0,
     ];
     const completed = profileFields.filter(Boolean).length;
     const total = profileFields.length;
@@ -25,7 +24,14 @@ export const ProfileCompletionCard = ({ user }: ProfileCompletionCardProps) => {
       completedFields: completed,
       totalFields: total,
     };
-  }, [user.firstName, user.surname, user.country, user.profileImage, user.languages, user.visited, user.hobbies]);
+  }, [
+    user.name,
+    user.surname,
+    user.countryOfOrigin,
+    user.languages,
+    user.visitedCountries,
+    user.hobbies,
+  ]);
 
   return (
     <Card className="mb-6 border-2 border-primary/20 bg-linear-to-br from-primary/5 to-transparent">

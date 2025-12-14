@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { DestinationCard } from '@/components/ui/destination-card';
 import { DestinationPicker, LoadingSpinner, DestinationFooter, useFilteredDestinations } from '@/components/destinations';
 import { useDestination } from '@/contexts/DestinationContext';
@@ -27,7 +27,6 @@ interface DestinationsPageLayoutProps {
   destinations: Destination[];
   continent?: string;
   defaultFooterText: string;
-  resetOnMount?: boolean;
 }
 
 export const DestinationsPageLayout = ({
@@ -36,7 +35,6 @@ export const DestinationsPageLayout = ({
   destinations,
   continent,
   defaultFooterText,
-  resetOnMount = true,
 }: DestinationsPageLayoutProps) => {
   const {
     selectedCountry,
@@ -44,18 +42,8 @@ export const DestinationsPageLayout = ({
     isLoading,
     loadingCountry,
     isAnimating,
-    resetAll,
     handlePlanTrip,
   } = useDestination();
-
-  // Reset all fields when page loads (if resetOnMount is true) and scroll to top
-  useEffect(() => {
-    if (resetOnMount) {
-      resetAll();
-    }
-    // Scroll to top when navigating to destinations page
-    window.scrollTo(0, 0);
-  }, [resetAll, resetOnMount]);
 
   // Shuffle destinations once per session (per page)
   const shuffledDestinations = useMemo(() => {
