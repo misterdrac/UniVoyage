@@ -16,7 +16,23 @@
 ```
 - Make sure you have Maven 3.9.6 or higher installed. If not, please install the appropriate version, you can download Maven 3.9.6 here: https://maven.apache.org/download.cgi
 
-### 1.3 (NOT IMPORTAINT NOV) Verify which Docker version do you have
+### 1.3 Google OAuth2 Setup (IMPORTANT for handling authentication)
+- To enable Google OAuth2 authentication, you need to set up a project in the Google Developers Console and obtain OAuth2 credentials.
+- Follow these steps to set up Google OAuth2:
+  1. Go to the [Google Developers Console](https://console.developers.google.com/).
+  2. Create a new project or select an existing one.
+  3. Navigate to "Credentials" and click on "Create Credentials" > "OAuth 2.0 Client ID".
+  4. Configure the consent screen and set the application type to "Web application".
+  5. Add authorized redirect URIs (for our app, this is http://localhost:5173/auth/google/callback)
+  6. Save the credentials and note down the Client ID and Client Secret.
+  7. Update the `.env` file in the `backend` directory with the following variables:
+```env
+  GOOGLE_CLIENT_ID=your_google_client_id
+  GOOGLE_CLIENT_SECRET=your_google_client_secret
+  GOOGLE_REDIRECT_URI=your_google_redirect_uri
+```
+
+### 1.4 (NOT IMPORTAINT NOV) Verify which Docker version do you have
 ```bash
   docker -v
 ```
