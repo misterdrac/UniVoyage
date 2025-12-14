@@ -1,6 +1,6 @@
 package com.univoyage.auth.user;
 
-import com.univoyage.auth.Role;
+import com.univoyage.auth.enumerations.Role;
 import com.univoyage.auth.user.relations.*;
 import jakarta.persistence.*;
 import lombok.*;

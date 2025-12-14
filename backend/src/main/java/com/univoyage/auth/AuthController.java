@@ -190,10 +190,5 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.ok(null));
     }
 
-    @GetMapping("/google")
-    public void googleAuth(HttpServletResponse response) throws IOException {
-        String url = googleOAuthService.buildAuthorizationUrl();
-        response.sendRedirect(url);
-    }
 
 }
