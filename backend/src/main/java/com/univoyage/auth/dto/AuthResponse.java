@@ -1,4 +1,4 @@
-package com.univoyage.auth;
+package com.univoyage.auth.dto;
 
 import lombok.Builder;
 import lombok.Getter;
