@@ -157,17 +157,6 @@ export const authApi: { [K in keyof AuthApi]: (this: ApiClient, ...args: Paramet
       const currentUrl = window.location.pathname + window.location.search
       sessionStorage.setItem('google_oauth_redirect', currentUrl)
 
-      // Cache trips data if available (preserve across OAuth reload)
-      try {
-        const tripsData = localStorage.getItem('trips') || sessionStorage.getItem('trips_cache');
-        if (tripsData) {
-          sessionStorage.setItem('trips_cache', tripsData);
-          sessionStorage.setItem('trips_cache_timestamp', Date.now().toString());
-        }
-      } catch (e) {
-        // Ignore cache errors
-      }
-
       window.location.href = `${this.baseURL}${API_CONFIG.ENDPOINTS.AUTH.GOOGLE}`
     },
 

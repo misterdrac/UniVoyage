@@ -34,45 +34,17 @@ interface TripProviderProps {
   children: ReactNode;
 }
 
-const TRIPS_CACHE_KEY = 'trips_cache';
-const TRIPS_CACHE_TIMESTAMP_KEY = 'trips_cache_timestamp';
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
-
 export const TripProvider: React.FC<TripProviderProps> = ({ children }) => {
   const [trips, setTrips] = useState<Trip[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
 
   const refreshTrips = useCallback(async () => {
-    // Check if we have cached trips from before OAuth
-    const cachedTrips = sessionStorage.getItem(TRIPS_CACHE_KEY);
-    const cacheTimestamp = sessionStorage.getItem(TRIPS_CACHE_TIMESTAMP_KEY);
-    
-    if (cachedTrips && cacheTimestamp) {
-      const age = Date.now() - parseInt(cacheTimestamp, 10);
-      if (age < CACHE_DURATION) {
-        // Restore from cache
-        try {
-          const trips = JSON.parse(cachedTrips);
-          setTrips(trips);
-          // Clear cache after restoring
-          sessionStorage.removeItem(TRIPS_CACHE_KEY);
-          sessionStorage.removeItem(TRIPS_CACHE_TIMESTAMP_KEY);
-          return; // Skip API call
-        } catch (e) {
-          // Invalid cache, continue to fetch
-        }
-      }
-    }
-    
     setIsLoading(true);
     try {
       const result = await apiService.getTrips();
       if (result.success && result.trips) {
         setTrips(result.trips as Trip[]);
-        // Cache trips for OAuth preservation
-        sessionStorage.setItem('trips_cache', JSON.stringify(result.trips));
-        sessionStorage.setItem('trips_cache_timestamp', Date.now().toString());
       } else {
         setTrips([]);
       }
@@ -87,16 +59,7 @@ export const TripProvider: React.FC<TripProviderProps> = ({ children }) => {
   // Load trips when user ID changes (login/logout), not on every user update
   useEffect(() => {
     if (user) {
-      // Check cache first
-      const cached = sessionStorage.getItem('trips_cache');
-      const cacheTime = sessionStorage.getItem('trips_cache_timestamp');
-      
-      if (cached && cacheTime && (Date.now() - parseInt(cacheTime)) < 300000) {
-        // Use cached data (5 min expiry)
-        setTrips(JSON.parse(cached));
-      } else {
-        refreshTrips();
-      }
+      refreshTrips();
     } else {
       setTrips([]);
     }
