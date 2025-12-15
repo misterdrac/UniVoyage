@@ -1,4 +1,4 @@
-package com.univoyage.auth;
+package com.univoyage.auth.service;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
