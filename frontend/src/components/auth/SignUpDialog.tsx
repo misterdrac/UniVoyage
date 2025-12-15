@@ -12,7 +12,7 @@ interface SignUpDialogProps {
 }
 
 export function SignUpDialog({ open, onOpenChange, onLoginClick }: SignUpDialogProps) {
-  const { signup } = useAuth();
+  const { signup, loadUser } = useAuth();
 
   const handleSuccess = useCallback(() => {
     toast.success("Account created successfully! Welcome to UniVoyage!");
@@ -49,10 +49,15 @@ export function SignUpDialog({ open, onOpenChange, onLoginClick }: SignUpDialogP
   const handleGoogleSignUp = useCallback(async () => {
     try {
       await apiService.googleAuth();
+      // Reload user after successful OAuth
+      await loadUser();
+      toast.success("Account created with Google!");
+      onOpenChange(false);
     } catch (error) {
-      toast.error("Google sign up is not available in mock mode");
+      const errorMessage = error instanceof Error ? error.message : "Google sign up failed";
+      toast.error(errorMessage);
     }
-  }, []);
+  }, [onOpenChange, loadUser]);
 
   const handleOpenChange = useCallback((newOpen: boolean) => {
     onOpenChange(newOpen);
