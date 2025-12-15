@@ -1,4 +1,4 @@
-package com.univoyage.security;
+package com.univoyage.auth.security;
 
 import com.univoyage.auth.user.UserEntity;
 import io.jsonwebtoken.*;

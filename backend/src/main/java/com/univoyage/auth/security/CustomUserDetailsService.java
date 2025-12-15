@@ -1,4 +1,4 @@
-package com.univoyage.auth.user;
+package com.univoyage.auth.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.*;

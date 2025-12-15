@@ -1,4 +1,4 @@
-package com.univoyage.security;
+package com.univoyage.auth.security;
 
 import jakarta.servlet.http.Cookie;
 
