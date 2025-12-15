@@ -21,7 +21,7 @@ export function LoginDialog({ open, onOpenChange, onSignUpClick }: LoginDialogPr
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const { login } = useAuth()
+  const { login, loadUser } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -48,9 +48,17 @@ export function LoginDialog({ open, onOpenChange, onSignUpClick }: LoginDialogPr
 
   const handleGoogleSignIn = async () => {
     try {
+      setIsLoading(true);
       await apiService.googleAuth();
+      // Reload user after successful OAuth
+      await loadUser();
+      toast.success("Signed in with Google!");
+      onOpenChange(false);
     } catch (error) {
-      toast.error("Google sign in is not available in mock mode");
+      const errorMessage = error instanceof Error ? error.message : "Google sign in failed";
+      toast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   }
 

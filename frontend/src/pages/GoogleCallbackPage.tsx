@@ -9,6 +9,7 @@ export default function GoogleCallbackPage() {
   const navigate = useNavigate()
   const { loadUser } = useAuth()
   const ran = useRef(false)
+  const isPopup = window.opener !== null
 
   useEffect(() => {
     if (ran.current) return
@@ -19,13 +20,33 @@ export default function GoogleCallbackPage() {
     const error = params.get("error")
 
     if (error) {
-      toast.error(`Google auth error: ${error}`)
-      navigate("/")
+      const errorMsg = `Google auth error: ${error}`
+      if (isPopup) {
+        // Send error to parent window
+        window.opener?.postMessage(
+          { type: 'GOOGLE_OAUTH_ERROR', error: errorMsg },
+          window.location.origin
+        )
+        window.close()
+      } else {
+        toast.error(errorMsg)
+        navigate("/")
+      }
       return
     }
+    
     if (!code) {
-      toast.error("Missing Google authorization code")
-      navigate("/")
+      const errorMsg = "Missing Google authorization code"
+      if (isPopup) {
+        window.opener?.postMessage(
+          { type: 'GOOGLE_OAUTH_ERROR', error: errorMsg },
+          window.location.origin
+        )
+        window.close()
+      } else {
+        toast.error(errorMsg)
+        navigate("/")
+      }
       return
     }
 
@@ -34,8 +55,17 @@ export default function GoogleCallbackPage() {
           const res = await apiService.googleCallback(code)
 
           if (!res.success) {
-              toast.error(res.error || "Google login failed")
-              navigate("/")
+              const errorMsg = res.error || "Google login failed"
+              if (isPopup) {
+                window.opener?.postMessage(
+                  { type: 'GOOGLE_OAUTH_ERROR', error: errorMsg },
+                  window.location.origin
+                )
+                window.close()
+              } else {
+                toast.error(errorMsg)
+                navigate("/")
+              }
               return
           }
 
@@ -45,14 +75,33 @@ export default function GoogleCallbackPage() {
           const redirectUrl = sessionStorage.getItem('google_oauth_redirect')
           sessionStorage.removeItem('google_oauth_redirect')
 
-          toast.success("Signed in with Google!")
-          navigate(redirectUrl || "/")
+          if (isPopup) {
+            // Send success to parent window
+            window.opener?.postMessage(
+              { type: 'GOOGLE_OAUTH_SUCCESS' },
+              window.location.origin
+            )
+            // Close popup immediately - parent will show success toast
+            window.close()
+          } else {
+            toast.success("Signed in with Google!")
+            navigate(redirectUrl || "/")
+          }
       } catch (e: any) {
-          toast.error(e?.message || "Google login failed")
-          navigate("/")
+          const errorMsg = e?.message || "Google login failed"
+          if (isPopup) {
+            window.opener?.postMessage(
+              { type: 'GOOGLE_OAUTH_ERROR', error: errorMsg },
+              window.location.origin
+            )
+            window.close()
+          } else {
+            toast.error(errorMsg)
+            navigate("/")
+          }
       }
     })()
-  }, [navigate, loadUser])
+  }, [navigate, loadUser, isPopup])
 
   return <div className="p-6">Signing you in with Google…</div>
 }
