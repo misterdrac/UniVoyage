@@ -1,4 +1,4 @@
-package com.univoyage.auth;
+package com.univoyage.auth.controller;
 
 import com.univoyage.auth.dto.AuthPayload;
 import com.univoyage.auth.dto.RegisterRequestDto;
