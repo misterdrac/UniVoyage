@@ -9,9 +9,9 @@ export interface AuthApi {
   register(data: {
     email: string
     password: string
-    name: string
+    name?: string
     surname?: string
-    countryCode: string
+    countryCode?: string
     hobbyIds?: number[]
     languageCodes?: string[]
     visitedCountryCodes?: string[]
@@ -63,12 +63,14 @@ export const authApi: { [K in keyof AuthApi]: (this: ApiClient, ...args: Paramet
           const user = createUser(
             data.email,
             data.password,
-            data.name,
+            data.name || '',
             data.surname,
             data.hobbyIds,
             data.languageCodes
           )
-          user.countryOfOrigin = this.resolveCountry(data.countryCode)
+          if (data.countryCode) {
+            user.countryOfOrigin = this.resolveCountry(data.countryCode)
+          }
           user.visitedCountries = this.mapVisitedCountryCodes(data.visitedCountryCodes)
 
           const token = `mock_token_${Date.now()}`
@@ -84,10 +86,10 @@ export const authApi: { [K in keyof AuthApi]: (this: ApiClient, ...args: Paramet
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            name: data.name,
+            name: data.name || '',
             surname: data.surname,
             email: data.email,
-            countryCode: data.countryCode,
+            countryCode: data.countryCode || null,
             hobbyIds: data.hobbyIds ?? [],
             languageCodes: data.languageCodes ?? [],
             password: data.password,
@@ -154,6 +156,17 @@ export const authApi: { [K in keyof AuthApi]: (this: ApiClient, ...args: Paramet
       // Store current page URL for redirect after OAuth
       const currentUrl = window.location.pathname + window.location.search
       sessionStorage.setItem('google_oauth_redirect', currentUrl)
+
+      // Cache trips data if available (preserve across OAuth reload)
+      try {
+        const tripsData = localStorage.getItem('trips') || sessionStorage.getItem('trips_cache');
+        if (tripsData) {
+          sessionStorage.setItem('trips_cache', tripsData);
+          sessionStorage.setItem('trips_cache_timestamp', Date.now().toString());
+        }
+      } catch (e) {
+        // Ignore cache errors
+      }
 
       window.location.href = `${this.baseURL}${API_CONFIG.ENDPOINTS.AUTH.GOOGLE}`
     },
