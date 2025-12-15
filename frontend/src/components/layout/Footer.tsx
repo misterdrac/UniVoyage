@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Facebook, Instagram } from "lucide-react";
 import { FaXTwitter } from "react-icons/fa6";
+import univoyageIcon from "@/assets/univoyage_icon.svg";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -11,7 +12,14 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-6">
           {/* Brand Section */}
           <div className="md:col-span-1">
-            <h3 className="text-xl font-bold text-foreground mb-2">UniVoyage</h3>
+            <Link to="/" className="flex items-center space-x-2 mb-2">
+              <img 
+                src={univoyageIcon} 
+                alt="UniVoyage Logo" 
+                className="w-8 h-8"
+              />
+              <h3 className="text-xl font-bold text-foreground">UniVoyage</h3>
+            </Link>
             <p className="text-sm text-muted-foreground max-w-md">
               Your trusted companion for student travel. Discover amazing destinations,
               plan unforgettable trips, and connect with fellow travelers.
