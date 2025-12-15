@@ -41,8 +41,12 @@ export default function GoogleCallbackPage() {
 
           await loadUser()
 
+          // Get stored redirect URL or default to home
+          const redirectUrl = sessionStorage.getItem('google_oauth_redirect')
+          sessionStorage.removeItem('google_oauth_redirect')
+
           toast.success("Signed in with Google!")
-          navigate("/profile")
+          navigate(redirectUrl || "/")
       } catch (e: any) {
           toast.error(e?.message || "Google login failed")
           navigate("/")

@@ -151,6 +151,10 @@ export const authApi: { [K in keyof AuthApi]: (this: ApiClient, ...args: Paramet
         throw new Error('Google auth not available in mock mode')
       }
 
+      // Store current page URL for redirect after OAuth
+      const currentUrl = window.location.pathname + window.location.search
+      sessionStorage.setItem('google_oauth_redirect', currentUrl)
+
       window.location.href = `${this.baseURL}${API_CONFIG.ENDPOINTS.AUTH.GOOGLE}`
     },
 
