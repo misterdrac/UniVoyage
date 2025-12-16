@@ -1,4 +1,4 @@
-package com.univoyage.auth.user;
+package com.univoyage.user.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;

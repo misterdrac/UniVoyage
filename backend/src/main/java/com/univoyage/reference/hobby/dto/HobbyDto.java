@@ -1,4 +1,4 @@
-package com.univoyage.auth.user.dto;
+package com.univoyage.reference.hobby.dto;
 
 import com.univoyage.auth.user.relations.Hobby;
 import lombok.*;

@@ -1,4 +1,4 @@
-package com.univoyage.auth.dto;
+package com.univoyage.user.dto;
 
 import com.univoyage.auth.user.dto.UserDto;
 import lombok.AllArgsConstructor;

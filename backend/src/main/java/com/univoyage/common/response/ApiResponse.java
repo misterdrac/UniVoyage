@@ -1,4 +1,4 @@
-package com.univoyage.common;
+package com.univoyage.common.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Value;

@@ -1,4 +1,4 @@
-package com.univoyage.auth.user.relations;
+package com.univoyage.user.model;
 
 import com.univoyage.auth.user.UserEntity;
 import jakarta.persistence.*;

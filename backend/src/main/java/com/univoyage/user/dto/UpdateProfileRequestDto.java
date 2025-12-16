@@ -1,4 +1,4 @@
-package com.univoyage.auth.dto;
+package com.univoyage.user.dto;
 
 import lombok.Data;
 import java.util.Set;

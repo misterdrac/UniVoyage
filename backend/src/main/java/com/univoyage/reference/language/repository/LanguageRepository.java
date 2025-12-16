@@ -1,4 +1,4 @@
-package com.univoyage.auth.repository;
+package com.univoyage.reference.language.repository;
 
 import com.univoyage.auth.user.relations.Language;
 import org.springframework.data.jpa.repository.JpaRepository;

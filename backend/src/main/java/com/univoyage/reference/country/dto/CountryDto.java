@@ -1,4 +1,4 @@
-package com.univoyage.auth.user.dto;
+package com.univoyage.reference.country.dto;
 
 import com.univoyage.auth.user.relations.Country;
 import lombok.*;

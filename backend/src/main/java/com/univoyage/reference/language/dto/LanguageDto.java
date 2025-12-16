@@ -1,4 +1,4 @@
-package com.univoyage.auth.user.dto;
+package com.univoyage.reference.language.dto;
 
 import com.univoyage.auth.user.relations.Language;
 import lombok.*;

@@ -1,4 +1,4 @@
-package com.univoyage.auth.user.relations;
+package com.univoyage.reference.hobby.model;
 
 import jakarta.persistence.*;
 import lombok.*;

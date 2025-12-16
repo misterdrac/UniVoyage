@@ -1,4 +1,4 @@
-package com.univoyage.auth.repository;
+package com.univoyage.reference.country.repository;
 
 import com.univoyage.auth.user.relations.Country;
 import org.springframework.data.jpa.repository.JpaRepository;

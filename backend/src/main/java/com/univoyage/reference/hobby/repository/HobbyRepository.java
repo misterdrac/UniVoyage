@@ -1,4 +1,4 @@
-package com.univoyage.auth.repository;
+package com.univoyage.reference.hobby.repository;
 
 import com.univoyage.auth.user.relations.Hobby;
 import org.springframework.data.jpa.repository.JpaRepository;

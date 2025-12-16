@@ -1,4 +1,4 @@
-package com.univoyage.auth.user;
+package com.univoyage.user.model;
 
 import com.univoyage.auth.enumerations.Role;
 import com.univoyage.auth.user.relations.*;

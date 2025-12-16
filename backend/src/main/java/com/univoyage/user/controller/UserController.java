@@ -1,4 +1,4 @@
-package com.univoyage.auth.user;
+package com.univoyage.user.controller;
 
 import com.univoyage.auth.AuthService;
 import com.univoyage.auth.dto.UpdateProfileRequestDto;
