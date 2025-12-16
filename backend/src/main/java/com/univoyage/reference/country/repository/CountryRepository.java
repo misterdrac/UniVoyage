@@ -1,6 +1,7 @@
 package com.univoyage.reference.country.repository;
 
-import com.univoyage.auth.user.relations.Country;
+import com.univoyage.reference.country.model.Country;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

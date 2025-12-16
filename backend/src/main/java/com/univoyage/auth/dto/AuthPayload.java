@@ -1,6 +1,7 @@
 package com.univoyage.auth.dto;
 
-import com.univoyage.auth.user.dto.UserDto;
+import com.univoyage.user.dto.UserDto;
+
 import lombok.*;
 
 @Getter

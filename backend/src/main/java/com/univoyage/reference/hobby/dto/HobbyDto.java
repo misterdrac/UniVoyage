@@ -1,6 +1,6 @@
 package com.univoyage.reference.hobby.dto;
 
-import com.univoyage.auth.user.relations.Hobby;
+import com.univoyage.reference.hobby.model.Hobby;
 import lombok.*;
 
 @Getter

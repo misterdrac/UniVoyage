@@ -1,8 +1,12 @@
 package com.univoyage.auth.security;
 
-import lombok.RequiredArgsConstructor;
+import com.univoyage.user.repository.UserRepository;
+
 import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Service;
+
+import lombok.RequiredArgsConstructor;
+
 
 @Service
 @RequiredArgsConstructor

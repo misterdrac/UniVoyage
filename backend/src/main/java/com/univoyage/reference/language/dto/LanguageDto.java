@@ -1,6 +1,6 @@
 package com.univoyage.reference.language.dto;
 
-import com.univoyage.auth.user.relations.Language;
+import com.univoyage.reference.language.model.Language;
 import lombok.*;
 
 @Getter

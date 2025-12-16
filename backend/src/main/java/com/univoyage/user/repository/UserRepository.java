@@ -1,6 +1,9 @@
 package com.univoyage.user.repository;
 
+import com.univoyage.user.model.UserEntity;
+
 import org.springframework.data.jpa.repository.JpaRepository;
+
 import java.util.Optional;
 
 // Repository interface for UserEntity - provides methods to interact with the database

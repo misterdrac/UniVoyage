@@ -2,17 +2,21 @@ package com.univoyage.auth.controller;
 
 import com.univoyage.auth.dto.GoogleCallbackRequestDto;
 import com.univoyage.auth.dto.AuthPayload;
-import com.univoyage.common.ApiResponse;
-import com.univoyage.security.CookieUtils;
+import com.univoyage.auth.security.CookieUtils;
+import com.univoyage.auth.service.GoogleOAuthService;
+import com.univoyage.common.response.ApiResponse;
+
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import lombok.RequiredArgsConstructor;
+
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+
+import lombok.RequiredArgsConstructor;
 
 /** * Controller for handling Google OAuth 2.0 authentication.
  */

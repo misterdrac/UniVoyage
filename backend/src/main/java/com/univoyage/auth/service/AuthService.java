@@ -3,24 +3,36 @@ package com.univoyage.auth.service;
 import com.univoyage.auth.dto.AuthPayload;
 import com.univoyage.auth.dto.LoginRequestDto;
 import com.univoyage.auth.dto.RegisterRequestDto;
-import com.univoyage.auth.dto.UpdateProfileRequestDto;
-import com.univoyage.auth.repository.CountryRepository;
-import com.univoyage.auth.repository.HobbyRepository;
-import com.univoyage.auth.repository.LanguageRepository;
-import com.univoyage.auth.user.UserEntity;
-import com.univoyage.auth.user.UserRepository;
-import com.univoyage.auth.user.dto.UserDto;
-import com.univoyage.auth.user.relations.*;
-import com.univoyage.auth.enumerations.Role;
-import com.univoyage.security.JwtService;
-import lombok.RequiredArgsConstructor;
+import com.univoyage.auth.security.JwtService;
+import com.univoyage.reference.country.model.Country;
+import com.univoyage.reference.country.repository.CountryRepository;
+import com.univoyage.reference.hobby.model.Hobby;
+import com.univoyage.reference.hobby.repository.HobbyRepository;
+import com.univoyage.reference.language.model.Language;
+import com.univoyage.reference.language.repository.LanguageRepository;
+import com.univoyage.user.dto.UpdateProfileRequestDto;
+import com.univoyage.user.dto.UserDto;
+import com.univoyage.user.model.Role;
+import com.univoyage.user.model.UserEntity;
+import com.univoyage.user.model.UserHobby;
+import com.univoyage.user.model.UserHobbyId;
+import com.univoyage.user.model.UserLanguage;
+import com.univoyage.user.model.UserLanguageId;
+import com.univoyage.user.model.UserVisitedCountry;
+import com.univoyage.user.model.UserVisitedCountryId;
+import com.univoyage.user.repository.UserRepository;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import lombok.RequiredArgsConstructor;
+
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -46,25 +58,23 @@ public class AuthService {
             return AuthPayload.fail("Country code is required");
         }
 
-        // home country (ISO code)
-        Country country = countryRepository.findByIsoCode(request.getCountryCode())
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Invalid country code: " + request.getCountryCode()
-                ));
+        Country homeCountry = countryRepository.findByIsoCode(request.getCountryCode())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid country code: " + request.getCountryCode()));
 
         Instant now = Instant.now();
+
         UserEntity newUser = UserEntity.builder()
                 .name(request.getName())
                 .surname(request.getSurname())
                 .email(request.getEmail())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
-                .country(country)
+                .country(homeCountry)
                 .dateOfRegister(now)
                 .dateOfLastSignin(now)
                 .role(Role.USER)
                 .build();
 
-        // hobbies (Long IDs)
+        // ---- HOBBIES ----
         Set<Hobby> hobbyEntities = Optional.ofNullable(request.getHobbyIds())
                 .orElse(Collections.emptySet())
                 .stream()
@@ -74,11 +84,18 @@ public class AuthService {
 
         newUser.setUserHobbies(
                 hobbyEntities.stream()
-                        .map(h -> UserHobby.of(newUser, h))
+                        .map(h -> {
+                            UserHobby uh = new UserHobby();
+                            uh.setUser(newUser);
+                            uh.setHobby(h);
+                            // assumes UserHobbyId(userId, hobbyId)
+                            uh.setId(new UserHobbyId(newUser.getId(), h.getId()));
+                            return uh;
+                        })
                         .collect(Collectors.toSet())
         );
 
-        // languages (ISO codes)
+        // ---- LANGUAGES ----
         Set<Language> languageEntities = Optional.ofNullable(request.getLanguageCodes())
                 .orElse(Collections.emptySet())
                 .stream()
@@ -88,23 +105,34 @@ public class AuthService {
 
         newUser.setUserLanguages(
                 languageEntities.stream()
-                        .map(lang -> UserLanguage.of(newUser, lang))
+                        .map(lang -> {
+                            UserLanguage ul = new UserLanguage();
+                            ul.setUser(newUser);
+                            ul.setLanguage(lang);
+                            // assumes UserLanguageId(userId, langCode)
+                            ul.setId(new UserLanguageId(newUser.getId(), lang.getLangCode()));
+                            return ul;
+                        })
                         .collect(Collectors.toSet())
         );
 
-        // visited countries (ISO codes)
-        Set<UserVisitedCountry> visitedCountries =
-                Optional.ofNullable(request.getVisitedCountryCodes())
-                        .orElse(Collections.emptySet())
-                        .stream()
-                        .map(code -> {
-                            Country visited = countryRepository.findByIsoCode(code)
-                                    .orElseThrow(() -> new IllegalArgumentException(
-                                            "Invalid visited country code: " + code
-                                    ));
-                            return UserVisitedCountry.of(newUser, visited, LocalDate.now());
-                        })
-                        .collect(Collectors.toSet());
+        // ---- VISITED COUNTRIES ----
+        Set<UserVisitedCountry> visitedCountries = Optional.ofNullable(request.getVisitedCountryCodes())
+                .orElse(Collections.emptySet())
+                .stream()
+                .map(code -> {
+                    Country visited = countryRepository.findByIsoCode(code)
+                            .orElseThrow(() -> new IllegalArgumentException("Invalid visited country code: " + code));
+
+                    UserVisitedCountry uvc = new UserVisitedCountry();
+                    uvc.setUser(newUser);
+                    uvc.setCountry(visited);
+                    uvc.setDateOfVisit(LocalDate.now());
+                    // assumes UserVisitedCountryId(userId, isoCode)
+                    uvc.setId(new UserVisitedCountryId(newUser.getId(), visited.getIsoCode()));
+                    return uvc;
+                })
+                .collect(Collectors.toSet());
 
         newUser.setVisitedCountries(visitedCountries);
 
@@ -124,7 +152,6 @@ public class AuthService {
             return AuthPayload.fail("Invalid credentials");
         }
 
-        // Update last sign in date
         user.setDateOfLastSignin(Instant.now());
         userRepository.save(user);
 
@@ -135,10 +162,11 @@ public class AuthService {
 
     @Transactional
     public UserDto updateProfile(Long userId, UpdateProfileRequestDto request) {
+
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
 
-        // Update basic fields if provided
+        // ---- BASIC FIELDS ----
         if (request.getName() != null && !request.getName().isBlank()) {
             user.setName(request.getName());
         }
@@ -146,26 +174,23 @@ public class AuthService {
             user.setSurname(request.getSurname());
         }
 
-        // Update country if provided
+        // ---- COUNTRY ----
         if (request.getCountryCode() != null && !request.getCountryCode().isBlank()) {
             Country country = countryRepository.findByIsoCode(request.getCountryCode())
-                    .orElseThrow(() -> new IllegalArgumentException(
-                            "Invalid country code: " + request.getCountryCode()
-                    ));
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid country code: " + request.getCountryCode()));
             user.setCountry(country);
         }
 
-        // Update hobbies if provided
+        // ---- HOBBIES ----
         if (request.getHobbyIds() != null) {
-            // Remove existing hobbies that are not in the new list
             Set<Long> newHobbyIds = request.getHobbyIds();
+
             user.getUserHobbies().removeIf(uh -> !newHobbyIds.contains(uh.getHobby().getId()));
-            
-            // Add new hobbies that don't exist yet
+
             Set<Long> existingHobbyIds = user.getUserHobbies().stream()
                     .map(uh -> uh.getHobby().getId())
                     .collect(Collectors.toSet());
-            
+
             Set<Hobby> newHobbies = newHobbyIds.stream()
                     .filter(id -> !existingHobbyIds.contains(id))
                     .map(id -> hobbyRepository.findById(id)
@@ -173,21 +198,24 @@ public class AuthService {
                     .collect(Collectors.toSet());
 
             for (Hobby hobby : newHobbies) {
-                user.getUserHobbies().add(UserHobby.of(user, hobby));
+                UserHobby uh = new UserHobby();
+                uh.setUser(user);
+                uh.setHobby(hobby);
+                uh.setId(new UserHobbyId(user.getId(), hobby.getId()));
+                user.getUserHobbies().add(uh);
             }
         }
 
-        // Update languages if provided
+        // ---- LANGUAGES ----
         if (request.getLanguageCodes() != null) {
-            // Remove existing languages that are not in the new list
             Set<String> newLanguageCodes = request.getLanguageCodes();
+
             user.getUserLanguages().removeIf(ul -> !newLanguageCodes.contains(ul.getLanguage().getLangCode()));
-            
-            // Add new languages that don't exist yet
+
             Set<String> existingLanguageCodes = user.getUserLanguages().stream()
                     .map(ul -> ul.getLanguage().getLangCode())
                     .collect(Collectors.toSet());
-            
+
             Set<Language> newLanguages = newLanguageCodes.stream()
                     .filter(code -> !existingLanguageCodes.contains(code))
                     .map(code -> languageRepository.findById(code)
@@ -195,29 +223,36 @@ public class AuthService {
                     .collect(Collectors.toSet());
 
             for (Language language : newLanguages) {
-                user.getUserLanguages().add(UserLanguage.of(user, language));
+                UserLanguage ul = new UserLanguage();
+                ul.setUser(user);
+                ul.setLanguage(language);
+                ul.setId(new UserLanguageId(user.getId(), language.getLangCode()));
+                user.getUserLanguages().add(ul);
             }
         }
 
-        // Update visited countries if provided
+        // ---- VISITED COUNTRIES ----
         if (request.getVisitedCountryCodes() != null) {
-            // Remove existing visited countries that are not in the new list
             Set<String> newCountryCodes = request.getVisitedCountryCodes();
+
             user.getVisitedCountries().removeIf(uvc -> !newCountryCodes.contains(uvc.getCountry().getIsoCode()));
-            
-            // Add new visited countries that don't exist yet
+
             Set<String> existingCountryCodes = user.getVisitedCountries().stream()
                     .map(uvc -> uvc.getCountry().getIsoCode())
                     .collect(Collectors.toSet());
-            
+
             Set<UserVisitedCountry> newVisitedCountries = newCountryCodes.stream()
                     .filter(code -> !existingCountryCodes.contains(code))
                     .map(code -> {
                         Country visited = countryRepository.findByIsoCode(code)
-                                .orElseThrow(() -> new IllegalArgumentException(
-                                        "Invalid visited country code: " + code
-                                ));
-                        return UserVisitedCountry.of(user, visited, LocalDate.now());
+                                .orElseThrow(() -> new IllegalArgumentException("Invalid visited country code: " + code));
+
+                        UserVisitedCountry uvc = new UserVisitedCountry();
+                        uvc.setUser(user);
+                        uvc.setCountry(visited);
+                        uvc.setDateOfVisit(LocalDate.now());
+                        uvc.setId(new UserVisitedCountryId(user.getId(), visited.getIsoCode()));
+                        return uvc;
                     })
                     .collect(Collectors.toSet());
 

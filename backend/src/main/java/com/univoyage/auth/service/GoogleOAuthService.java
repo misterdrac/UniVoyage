@@ -1,5 +1,12 @@
 package com.univoyage.auth.service;
 
+import com.univoyage.auth.dto.AuthPayload;
+import com.univoyage.auth.security.JwtService;
+import com.univoyage.user.dto.UserDto;
+import com.univoyage.user.model.Role;
+import com.univoyage.user.model.UserEntity;
+import com.univoyage.user.repository.UserRepository;
+
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -10,13 +17,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import com.univoyage.auth.dto.AuthPayload;
-import com.univoyage.auth.user.dto.UserDto;
-import com.univoyage.auth.enumerations.Role;
-import com.univoyage.auth.user.UserEntity;
-import com.univoyage.auth.user.UserRepository;
-import com.univoyage.security.JwtService;
 
 import lombok.RequiredArgsConstructor;
 

@@ -1,18 +1,22 @@
 package com.univoyage.user.controller;
 
-import com.univoyage.auth.AuthService;
-import com.univoyage.auth.dto.UpdateProfileRequestDto;
-import com.univoyage.auth.dto.UpdateProfileResponseDto;
-import com.univoyage.auth.user.dto.UserDto;
-import com.univoyage.common.ApiResponse;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+import com.univoyage.auth.service.AuthService;
+import com.univoyage.user.dto.UpdateProfileRequestDto;
+import com.univoyage.user.dto.UpdateProfileResponseDto;
+import com.univoyage.user.dto.UserDto;
+import com.univoyage.user.model.UserEntity;
+import com.univoyage.common.response.ApiResponse;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+
 
 @CrossOrigin(
         origins = {"http://localhost:5173","http://127.0.0.1:5173"},

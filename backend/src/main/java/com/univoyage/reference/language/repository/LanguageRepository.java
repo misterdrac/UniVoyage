@@ -1,6 +1,7 @@
 package com.univoyage.reference.language.repository;
 
-import com.univoyage.auth.user.relations.Language;
+import com.univoyage.reference.language.model.Language;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,6 +1,6 @@
 package com.univoyage.user.dto;
 
-import com.univoyage.auth.user.relations.UserVisitedCountry;
+import com.univoyage.user.model.UserVisitedCountry;
 import lombok.*;
 
 import java.time.LocalDate;

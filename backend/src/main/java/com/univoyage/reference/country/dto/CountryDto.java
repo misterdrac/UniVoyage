@@ -1,6 +1,6 @@
 package com.univoyage.reference.country.dto;
 
-import com.univoyage.auth.user.relations.Country;
+import com.univoyage.reference.country.model.Country;
 import lombok.*;
 
 @Getter

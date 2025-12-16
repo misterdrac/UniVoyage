@@ -1,6 +1,10 @@
-package com.univoyage.auth.user.dto;
+package com.univoyage.user.dto;
 
-import com.univoyage.auth.user.UserEntity;
+import com.univoyage.user.model.UserEntity;
+import com.univoyage.reference.country.dto.CountryDto;
+import com.univoyage.reference.hobby.dto.HobbyDto;
+import com.univoyage.reference.language.dto.LanguageDto;
+
 import lombok.*;
 
 import java.time.Instant;

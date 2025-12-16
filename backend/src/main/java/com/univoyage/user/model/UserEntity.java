@@ -1,12 +1,16 @@
 package com.univoyage.user.model;
 
-import com.univoyage.auth.enumerations.Role;
-import com.univoyage.auth.user.relations.*;
-import jakarta.persistence.*;
-import lombok.*;
+import com.univoyage.user.model.Role;
+import com.univoyage.reference.language.model.Language;
+import com.univoyage.reference.hobby.model.Hobby;
+import com.univoyage.reference.country.model.Country;
+
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
+import jakarta.persistence.*;
+import lombok.*;
 
 import java.time.Instant;
 import java.util.*;

@@ -3,7 +3,6 @@ package com.univoyage.common.response;
 import lombok.AllArgsConstructor;
 import lombok.Value;
 
-
 @Value @AllArgsConstructor(staticName = "of")
 public class ApiResponse<T> {
     boolean success;

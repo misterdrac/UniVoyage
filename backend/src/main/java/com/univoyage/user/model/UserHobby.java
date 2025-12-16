@@ -1,6 +1,8 @@
 package com.univoyage.user.model;
 
-import com.univoyage.auth.user.UserEntity;
+import com.univoyage.user.model.UserEntity;
+import com.univoyage.reference.hobby.model.Hobby;
+
 import jakarta.persistence.*;
 import lombok.*;
 

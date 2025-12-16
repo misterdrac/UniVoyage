@@ -3,14 +3,13 @@ package com.univoyage.auth.controller;
 import com.univoyage.auth.dto.AuthPayload;
 import com.univoyage.auth.dto.RegisterRequestDto;
 import com.univoyage.auth.dto.LoginRequestDto;
-import com.univoyage.auth.user.UserEntity;
-import com.univoyage.auth.user.UserRepository;
-import com.univoyage.auth.user.dto.UserDto;
-import com.univoyage.common.ApiResponse;
-import com.univoyage.security.CookieUtils;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+import com.univoyage.auth.service.AuthService;
+import com.univoyage.auth.security.CookieUtils;
+import com.univoyage.user.model.UserEntity;
+import com.univoyage.user.dto.UserDto;
+import com.univoyage.user.repository.UserRepository;
+import com.univoyage.common.response.ApiResponse;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -20,6 +19,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
+
+import lombok.RequiredArgsConstructor;
+
 
 @CrossOrigin(
         origins = {"http://localhost:5173","http://127.0.0.1:5173"},
