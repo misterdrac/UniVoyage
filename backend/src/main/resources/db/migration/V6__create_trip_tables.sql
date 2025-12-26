@@ -3,8 +3,6 @@ CREATE TABLE trips (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
     destination_id BIGINT NOT NULL,
-    destination_name VARCHAR(200) NOT NULL,
-    destination_location VARCHAR(200) NOT NULL,
     departure_date DATE NOT NULL,
     return_date DATE NOT NULL,
     status VARCHAR(30) NOT NULL DEFAULT 'planned',

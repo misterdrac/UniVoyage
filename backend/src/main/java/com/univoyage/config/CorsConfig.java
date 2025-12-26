@@ -14,42 +14,46 @@ import java.io.IOException;
 import java.util.Set;
 
 @Component
-@Order(Ordered.HIGHEST_PRECEDENCE) // run before Spring Security
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class CorsConfig extends OncePerRequestFilter {
 
-    // Only allow your Vite dev origins (adjust if needed)
     private static final Set<String> ALLOWED = Set.of(
             "http://localhost:5173",
             "http://127.0.0.1:5173"
     );
 
-    // For production, configure CORS properly in Spring Security or via a dedicated CORS filter.
-    // This is a simple dev-time filter to allow Vite to access the backend.
-    // created before Spring Security to ensure CORS headers are set correctly
-    // CORS header made some problems with Spring Security defaults
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain
+    ) throws ServletException, IOException {
 
-        // DEV: allow your Vite origins; to unblock quickly you can allow all:
         String origin = request.getHeader("Origin");
-        if (origin == null) {
-            origin = "http://localhost:5173"; // fallback so browser sees header
+
+        // Only set CORS headers for allowed origins
+        if (origin != null && ALLOWED.contains(origin)) {
+            response.setHeader("Access-Control-Allow-Origin", origin);
+            response.setHeader("Vary", "Origin");
+            response.setHeader("Access-Control-Allow-Credentials", "true");
+
+            response.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,PATCH,OPTIONS");
+
+            // include your CSRF header + anything fetch might send
+            response.setHeader(
+                    "Access-Control-Allow-Headers",
+                    "Authorization,Content-Type,Accept,Origin,X-Requested-With,X-CSRF-TOKEN"
+            );
+
+            // expose if you need to read something from response headers
+            response.setHeader("Access-Control-Expose-Headers", "Authorization,Content-Type");
+            response.setHeader("Access-Control-Max-Age", "3600");
         }
 
-        response.setHeader("Access-Control-Allow-Origin", origin);
-        response.setHeader("Vary", "Origin");
-        // If you plan to send cookies, keep true. If you later use wildcard origin, MUST set this to false.
-        response.setHeader("Access-Control-Allow-Credentials", "true");
-        response.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,PATCH,OPTIONS");
-        response.setHeader("Access-Control-Allow-Headers", "Authorization,Content-Type,Accept,Origin,X-Requested-With,X-CSRF-TOKEN");
-        response.setHeader("Access-Control-Expose-Headers", "Authorization,Content-Type");
-        response.setHeader("Access-Control-Max-Age", "3600");
-
+        // Preflight must be answered even when not authenticated
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             response.setStatus(HttpServletResponse.SC_OK);
-            return; // short-circuit preflight
+            return;
         }
 
         filterChain.doFilter(request, response);
