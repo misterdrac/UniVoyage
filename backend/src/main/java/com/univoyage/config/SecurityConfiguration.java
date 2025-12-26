@@ -45,6 +45,8 @@ public class SecurityConfiguration {
                         .requestMatchers("/api/auth/google", "/api/auth/google/callback").permitAll()
                         // Destinations endpoints are publicly accessible (GET only)
                         .requestMatchers(HttpMethod.GET, "/api/destinations", "/api/destinations/**").permitAll()
+                        // Weather endpoints require authentication (used in trip context)
+                        .requestMatchers("/api/weather/**").authenticated()
                         // /api/auth/me and other auth endpoints require authentication
                         .requestMatchers("/api/auth/me").authenticated()
                         .requestMatchers("/api/auth/**").authenticated()

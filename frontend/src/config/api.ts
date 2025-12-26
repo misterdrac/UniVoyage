@@ -30,11 +30,15 @@ export const API_CONFIG = {
       DELETE: '/trips',
       BUDGET: '/trips', // budget sub-resources
     },
-    DESTINATIONS: {
-      GET_ALL: '/destinations',
-      SEARCH: '/destinations/search',
-    }
-  },
+            DESTINATIONS: {
+              GET_ALL: '/destinations',
+              SEARCH: '/destinations/search',
+            },
+            WEATHER: {
+              CURRENT: '/weather/current',
+              FORECAST: '/weather/forecast',
+            }
+          },
   
   // Request timeout
   TIMEOUT: 10000,

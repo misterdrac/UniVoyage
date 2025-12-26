@@ -49,9 +49,6 @@ const TRIP_SECTIONS: TripSectionDefinition<Section>[] = [
 // Valid section IDs for quick lookup - constant
 const VALID_SECTION_IDS = new Set(TRIP_SECTIONS.map(s => s.id));
 
-// Weather API key - memoized at module level
-const OPENWEATHER_API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY as string | undefined;
-
 const TripDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -186,7 +183,6 @@ const TripDetailPage = () => {
                     trip={trip}
                     duration={duration}
                     currentStatus={currentStatus}
-                    openWeatherApiKey={OPENWEATHER_API_KEY}
                   />
                 )}
 
@@ -210,7 +206,6 @@ const TripDetailPage = () => {
                   <TripWeatherSection
                     trip={trip}
                     currentStatus={currentStatus}
-                    openWeatherApiKey={OPENWEATHER_API_KEY}
                   />
                 )}
 
