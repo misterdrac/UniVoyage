@@ -13,10 +13,14 @@ CREATE TABLE trips (
     CONSTRAINT fk_trips_user
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
 
+    CONSTRAINT fk_trips_destination
+            FOREIGN KEY (destination_id) REFERENCES destinations(id) ON DELETE RESTRICT,
+
     CONSTRAINT trips_dates_chk CHECK (return_date >= departure_date)
 );
 
 CREATE INDEX idx_trips_user_id ON trips(user_id);
+CREATE INDEX idx_trips_destination_id ON trips(destination_id);
 
 -- trip budgets table (1:1)
 CREATE TABLE trip_budgets (
