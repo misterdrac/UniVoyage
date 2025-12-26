@@ -1,6 +1,6 @@
 package com.univoyage.destination.controller;
 
-import com.univoyage.common.ApiResponse;
+import com.univoyage.common.response.ApiResponse;
 import com.univoyage.destination.dto.CreateDestinationRequest;
 import com.univoyage.destination.dto.DestinationResponse;
 import com.univoyage.destination.service.DestinationService;

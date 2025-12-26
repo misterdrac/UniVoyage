@@ -73,7 +73,7 @@ public class UserEntity implements UserDetails {
 
     // UserDetails interface methods
     @Override public String getPassword()  { return passwordHash; }
-    @Override public String getUsername()  { return email; }
+    @Override public String getUsername() { return String.valueOf(id);}
     // Spring Security account status methods, Spring Boot expects them to be true unless we implement logic to handle these states
     @Override public boolean isAccountNonExpired()    { return true; }
     @Override public boolean isAccountNonLocked()     { return true; }

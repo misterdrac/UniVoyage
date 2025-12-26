@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class DestinationResponseDto {
+public class DestinationResponse {
     private Long id;
     private String name;
     private String location;

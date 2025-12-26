@@ -7,7 +7,7 @@ import java.time.Instant;
 
 @Entity
 @Table(
-        name = "destinations"
+        name = "destinations",
         uniqueConstraints = @UniqueConstraint(name = "uq_destinations_name_location", columnNames = {"name", "location"})
 )
 @Getter
