@@ -29,6 +29,10 @@ export const API_CONFIG = {
       UPDATE: '/trips',
       DELETE: '/trips',
       BUDGET: '/trips', // budget sub-resources
+    },
+    DESTINATIONS: {
+      GET_ALL: '/destinations',
+      SEARCH: '/destinations/search',
     }
   },
   

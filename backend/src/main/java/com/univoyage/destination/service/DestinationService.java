@@ -47,8 +47,15 @@ public class DestinationService {
     private DestinationResponse toDto(DestinationEntity d) {
         return DestinationResponse.builder()
                 .id(d.getId())
-                .name(d.getName())
+                .title(d.getName())
                 .location(d.getLocation())
+                .continent(d.getContinent())
+                .imageUrl(d.getImageUrl())
+                .imageAlt(d.getImageAlt())
+                .overview(d.getOverview())
+                .budgetPerDay(d.getBudgetPerDay())
+                .whyVisit(d.getWhyVisit())
+                .studentPerks(d.getStudentPerks())
                 .build();
     }
 }

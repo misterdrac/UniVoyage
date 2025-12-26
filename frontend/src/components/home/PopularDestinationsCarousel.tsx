@@ -9,11 +9,16 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { getPopularDestinations } from "@/data/destinations";
+import { useDestinations } from "@/hooks/useDestinations";
 
 export function PopularDestinationsCarousel() {
   const navigate = useNavigate();
+  const { destinations: apiDestinations } = useDestinations();
 
-  const popularDestinations = useMemo(() => getPopularDestinations().slice(0, 12), []);
+  const popularDestinations = useMemo(() => 
+    getPopularDestinations(apiDestinations).slice(0, 12), 
+    [apiDestinations]
+  );
 
   return (
     <section className="pt-32 pb-32">
@@ -41,12 +46,12 @@ export function PopularDestinationsCarousel() {
                 className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3"
               >
                 <DestinationCard
-                  imageUrl={destination.imageUrl || ''}
+                  imageUrl={destination.imageUrl!}
                   imageAlt={destination.imageAlt || destination.title}
                   title={destination.title}
                   location={destination.location}
-                  overview={destination.overview || ''}
-                  budgetPerDay={destination.budgetPerDay || 0}
+                  overview={destination.overview!}
+                  budgetPerDay={destination.budgetPerDay!}
                   onPlanTrip={() => navigate('/destinations')}
                   className="h-[350px] hover:-translate-y-2"
                   hideOverview={true}

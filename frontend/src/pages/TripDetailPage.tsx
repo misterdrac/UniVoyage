@@ -17,6 +17,7 @@ import {
 import { calculateTripStatus } from '@/lib/tripUtils';
 import { calculateDurationInDays } from '@/lib/dateUtils';
 import { getDestinationImageById } from '@/lib/destinationUtils';
+import { useDestinations } from '@/hooks/useDestinations';
 import {
   TripHeroSection,
   TripSectionTabs,
@@ -56,6 +57,7 @@ const TripDetailPage = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { getTripById, isLoading, deleteTrip } = useTrips();
+  const { destinations: allDestinations } = useDestinations();
   const tripId = id ? parseInt(id, 10) : null;
   const trip = tripId ? getTripById(tripId) : undefined;
 
@@ -84,9 +86,9 @@ const TripDetailPage = () => {
     return {
       currentStatus: calculateTripStatus(trip.departureDate, trip.returnDate),
       duration: calculateDurationInDays(trip.departureDate, trip.returnDate),
-      imageUrl: getDestinationImageById(trip.destinationId),
+      imageUrl: getDestinationImageById(trip.destinationId, allDestinations),
     };
-  }, [trip]);
+  }, [trip, allDestinations]);
 
   const activeSectionData = TRIP_SECTIONS.find((s) => s.id === activeSection);
 

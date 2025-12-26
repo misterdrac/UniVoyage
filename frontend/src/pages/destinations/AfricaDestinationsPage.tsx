@@ -1,8 +1,25 @@
-import { DestinationsPageLayout } from '@/components/destinations';
+import { useMemo } from 'react';
+import { DestinationsPageLayout, LoadingSpinner } from '@/components/destinations';
 import { getDestinationsByContinent } from '@/data/destinations';
+import { useDestinations } from '@/hooks/useDestinations';
 
 const AfricaDestinationsPage = () => {
-  const africaDestinations = getDestinationsByContinent('Africa');
+  const { destinations: apiDestinations, isLoading } = useDestinations();
+  
+  const africaDestinations = useMemo(() => 
+    getDestinationsByContinent(apiDestinations, 'Africa'),
+    [apiDestinations]
+  );
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background pt-20 sm:pt-24 pb-8 px-4 sm:px-6 lg:px-8">
+        <div className="container mx-auto">
+          <LoadingSpinner loadingCountry="" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <DestinationsPageLayout
