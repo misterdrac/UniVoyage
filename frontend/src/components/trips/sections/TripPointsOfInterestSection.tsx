@@ -2,6 +2,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { MapPin, ExternalLink, Loader2, AlertCircle, RefreshCw, Globe, BookOpen, Landmark, Camera, Compass, ChevronDown } from 'lucide-react'
 import type { Trip } from '@/types/trip'
 import { usePointsOfInterest } from '@/hooks/usePointsOfInterest'
+import { usePaginatedItems } from '@/hooks/usePaginatedItems'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { useState, useEffect } from 'react'
@@ -93,7 +94,6 @@ function LoadingState({ cityName }: { cityName: string }) {
 
 export function TripPointsOfInterestSection({ trip }: TripPointsOfInterestSectionProps) {
   const cityName = trip.destinationName || trip.destinationLocation
-  const [displayCount, setDisplayCount] = useState(10)
   
   const { places: allPlaces, isLoading, error, refetch } = usePointsOfInterest({
     city: cityName,
@@ -103,16 +103,8 @@ export function TripPointsOfInterestSection({ trip }: TripPointsOfInterestSectio
 
   const places = allPlaces.filter(poi => poi.name?.trim() && poi.name.trim() !== 'Unknown Place')
   
-  useEffect(() => {
-    setDisplayCount(10)
-  }, [places.length])
-  
-  const displayedPlaces = places.slice(0, displayCount)
-  const canLoadMore = displayCount < 22 && places.length > displayCount
-
-  const handleLoadMore = () => {
-    setDisplayCount(prev => Math.min(prev + 6, 22))
-  }
+  // Paginate places with load more functionality (10 initially, 6 per load)
+  const { displayedItems: displayedPlaces, hasMore: canLoadMore, loadMore: handleLoadMore } = usePaginatedItems(places, 10, 6)
 
   const getCategoryVarName = (category: string): string => {
     const map: Record<string, string> = {

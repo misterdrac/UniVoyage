@@ -2,10 +2,11 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Hotel, Loader2, AlertCircle, RefreshCw, Building, ExternalLink, MapPin, Star, Users, Phone, Save, Check } from 'lucide-react'
 import type { Trip } from '@/types/trip'
 import { useHotels } from '@/hooks/useHotels'
+import { usePaginatedItems } from '@/hooks/usePaginatedItems'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { toast } from 'sonner'
 import { apiService } from '@/services/api'
 
@@ -24,7 +25,6 @@ interface BookingPartner {
 
 export function TripAccommodationSection({ trip }: TripAccommodationSectionProps) {
   const cityName = trip.destinationName || trip.destinationLocation
-  const [displayCount, setDisplayCount] = useState(6)
   
   // State for user's saved accommodation details
   const [accommodationName, setAccommodationName] = useState('')
@@ -42,19 +42,8 @@ export function TripAccommodationSection({ trip }: TripAccommodationSectionProps
     enabled: !!cityName,
   })
 
-  // Reset display count when hotels list changes
-  useEffect(() => {
-    setDisplayCount(6)
-  }, [hotels.length])
-
-  // Slice hotels array to show only displayed count
-  const displayedHotels = hotels.slice(0, displayCount)
-  const canLoadMore = hotels.length > displayCount
-
-  // Load more hotels incrementally
-  const handleLoadMore = () => {
-    setDisplayCount((prev) => Math.min(prev + 6, hotels.length))
-  }
+  // Paginate hotels with load more functionality
+  const { displayedItems: displayedHotels, hasMore: canLoadMore, loadMore: handleLoadMore } = usePaginatedItems(hotels, 6, 6)
 
   const formatDateForBooking = (dateStr: string | undefined) => {
     return dateStr || ''
