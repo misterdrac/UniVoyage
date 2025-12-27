@@ -17,7 +17,7 @@ interface PackingSuggestionsSectionProps {
 }
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY ?? ''
-const GEMINI_MODEL = import.meta.env.VITE_GEMINI_MODEL ?? 'gemini-3.5-flash'
+const GEMINI_MODEL = import.meta.env.VITE_GEMINI_MODEL ?? ''
 
 const geminiClient = GEMINI_API_KEY
   ? new GoogleGenAI({
@@ -139,18 +139,13 @@ Rules:
       return
     }
 
-    if (!GEMINI_API_KEY) {
-      setError("Missing Gemini API key. Set VITE_GEMINI_API_KEY to enable packing suggestions.")
-      return
-    }
-
-    if (!GEMINI_MODEL) {
-      setError("Missing Gemini model. Set VITE_GEMINI_MODEL (e.g., gemini-3.5-flash).")
+    if (!GEMINI_API_KEY || !GEMINI_MODEL) {
+      setError("AI features are temporarily unavailable. Please try again later.")
       return
     }
 
     if (!geminiClient) {
-      setError("Gemini client is not initialized. Check your API key.")
+      setError("AI features are temporarily unavailable. Please try again later.")
       return
     }
 
