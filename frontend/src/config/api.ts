@@ -37,6 +37,9 @@ export const API_CONFIG = {
             WEATHER: {
               CURRENT: '/weather/current',
               FORECAST: '/weather/forecast',
+            },
+            PLACES: {
+              SEARCH: '/places/search',
             }
           },
   

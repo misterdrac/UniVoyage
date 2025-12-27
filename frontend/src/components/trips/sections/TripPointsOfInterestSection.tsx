@@ -1,138 +1,313 @@
-import { useMemo } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
-import { MapPin, Star, ExternalLink } from 'lucide-react'
+import { MapPin, ExternalLink, Loader2, AlertCircle, RefreshCw, Globe, BookOpen, Landmark, Camera, Compass, ChevronDown } from 'lucide-react'
 import type { Trip } from '@/types/trip'
-import { getPointsOfInterestForCity, type PointOfInterest } from '@/data/pointsOfInterest'
+import { usePointsOfInterest } from '@/hooks/usePointsOfInterest'
 import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import { useState, useEffect } from 'react'
 
 interface TripPointsOfInterestSectionProps {
   trip: Trip
 }
 
-export function TripPointsOfInterestSection({ trip }: TripPointsOfInterestSectionProps) {
-  const pointsOfInterest = useMemo(() => {
-    const cityName = trip.destinationName || trip.destinationLocation
-    return getPointsOfInterestForCity(cityName)
-  }, [trip.destinationName, trip.destinationLocation])
+function LoadingState({ cityName }: { cityName: string }) {
+  const icons = [
+    { Icon: MapPin, label: 'Finding locations' },
+    { Icon: Landmark, label: 'Discovering landmarks' },
+    { Icon: Camera, label: 'Exploring attractions' },
+    { Icon: Compass, label: 'Mapping points of interest' },
+  ] as const
+  
+  const [currentIconIndex, setCurrentIconIndex] = useState(0)
 
-  const getCategoryColor = (category: string): string => {
-    const colors: Record<string, string> = {
-      'Landmark': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-      'Museum': 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
-      'Park': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-      'Religious Site': 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
-      'Neighborhood': 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200',
-      'Beach': 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200',
-      'Market': 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
-      'Entertainment': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
-      'Activity': 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200',
-      'Street': 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
-      'Shopping & Dining': 'bg-rose-100 text-rose-800 dark:bg-rose-900 dark:text-rose-200'
-    }
-    return colors[category] || 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200'
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIconIndex((prev) => (prev + 1) % icons.length)
+    }, 1500)
+
+    return () => clearInterval(interval)
+  }, [icons.length])
+
+  const { label } = icons[currentIconIndex]
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-xl font-semibold text-foreground mb-2">
+          Points of Interest in {cityName}
+        </h3>
+        <p className="text-sm text-muted-foreground">
+          Discover interesting places to visit during your trip
+        </p>
+      </div>
+      <Card className="border-2 border-dashed">
+        <CardContent className="py-16">
+          <div className="flex flex-col items-center justify-center space-y-6">
+            <div className="relative h-20 w-20">
+              {icons.map(({ Icon: IconComponent }, index) => (
+                <div
+                  key={index}
+                  className={cn(
+                    'absolute inset-0 flex items-center justify-center transition-all duration-500',
+                    index === currentIconIndex
+                      ? 'opacity-100 scale-100 rotate-0'
+                      : 'opacity-0 scale-75 rotate-12'
+                  )}
+                >
+                  <IconComponent className="h-12 w-12 text-primary animate-pulse" />
+                </div>
+              ))}
+            </div>
+
+            <div className="text-center space-y-2">
+              <p className="text-lg font-medium text-foreground animate-pulse">
+                {label}...
+              </p>
+              <div className="flex items-center justify-center gap-1">
+                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">
+                  Please wait while we gather the best places to visit
+                </span>
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              {icons.map((_, index) => (
+                <div
+                  key={index}
+                  className={cn(
+                    'h-2 w-2 rounded-full transition-all duration-500',
+                    index === currentIconIndex
+                      ? 'bg-primary scale-125'
+                      : 'bg-muted-foreground/30 scale-100'
+                  )}
+                />
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
+export function TripPointsOfInterestSection({ trip }: TripPointsOfInterestSectionProps) {
+  const cityName = trip.destinationName || trip.destinationLocation
+  const [displayCount, setDisplayCount] = useState(10)
+  
+  const { places: allPlaces, isLoading, error, refetch } = usePointsOfInterest({
+    city: cityName,
+    limit: 22,
+    enabled: !!cityName,
+  })
+
+  const places = allPlaces.filter(poi => poi.name?.trim() && poi.name.trim() !== 'Unknown Place')
+  
+  useEffect(() => {
+    setDisplayCount(10)
+  }, [places.length])
+  
+  const displayedPlaces = places.slice(0, displayCount)
+  const canLoadMore = displayCount < 22 && places.length > displayCount
+
+  const handleLoadMore = () => {
+    setDisplayCount(prev => Math.min(prev + 6, 22))
   }
 
-  const getCategoryBorderColor = (category: string): string => {
-    const borderColors: Record<string, string> = {
-      'Landmark': 'border-blue-500',
-      'Museum': 'border-purple-500',
-      'Park': 'border-green-500',
-      'Religious Site': 'border-amber-500',
-      'Neighborhood': 'border-pink-500',
-      'Beach': 'border-cyan-500',
-      'Market': 'border-orange-500',
-      'Entertainment': 'border-red-500',
-      'Activity': 'border-indigo-500',
-      'Street': 'border-gray-500',
-      'Shopping & Dining': 'border-rose-500'
+  const getCategoryVarName = (category: string): string => {
+    const map: Record<string, string> = {
+      'Castle': 'castle',
+      'Monument': 'monument',
+      'Museum': 'museum',
+      'Religious Site': 'religious',
+      'Park': 'park',
+      'Tower': 'tower',
+      'Square': 'square',
+      'Memorial': 'memorial',
+      'Attraction': 'attraction',
+      'Artwork': 'artwork',
+      'Fort': 'fort',
+      'City Gate': 'city-gate',
+      'Historic Site': 'historic',
+      'Landmark': 'landmark',
     }
-    return borderColors[category] || 'border-gray-500'
+    return map[category] || 'default'
+  }
+
+  const getCategoryStyle = (category: string): React.CSSProperties => {
+    const varName = getCategoryVarName(category)
+    return {
+      backgroundColor: `var(--place-category-${varName}-bg)`,
+      color: `var(--place-category-${varName}-text)`,
+    }
+  }
+
+  const getCategoryBorderStyle = (category: string): React.CSSProperties => {
+    const varName = getCategoryVarName(category)
+    return {
+      borderColor: `var(--place-category-${varName}-border)`,
+    }
+  }
+
+
+  if (isLoading) {
+    return <LoadingState cityName={cityName} />
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h3 className="text-xl font-semibold text-foreground mb-2">
+            Points of Interest in {cityName}
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            Discover interesting places to visit during your trip
+          </p>
+        </div>
+        <Card className="border-destructive/50 bg-destructive/5">
+          <CardContent className="py-8 text-center">
+            <AlertCircle className="h-10 w-10 text-destructive mx-auto mb-3" />
+            <p className="text-destructive font-medium mb-2">Failed to load places</p>
+            <p className="text-sm text-muted-foreground mb-4">{error}</p>
+            <Button variant="outline" size="sm" onClick={refetch}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Try again
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  if (places.length === 0) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h3 className="text-xl font-semibold text-foreground mb-2">
+            Points of Interest in {cityName}
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            Discover interesting places to visit during your trip
+          </p>
+        </div>
+        <Card>
+          <CardContent className="py-12 text-center">
+            <MapPin className="h-10 w-10 text-muted-foreground/50 mx-auto mb-3" />
+            <p className="text-muted-foreground">
+              No points of interest found for {cityName}
+            </p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Try searching for a different destination
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   return (
     <div className="space-y-6">
       <div>
         <h3 className="text-xl font-semibold text-foreground mb-2">
-          Points of Interest in {trip.destinationName || trip.destinationLocation}
+          Points of Interest in {cityName}
         </h3>
         <p className="text-sm text-muted-foreground">
-          Discover interesting places to visit during your trip
+          We think these places are worth checking out
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {pointsOfInterest.map((poi) => (
+        {displayedPlaces.map((poi) => (
           <Card
             key={poi.id}
             className={cn(
               'overflow-hidden border-2 transition-all duration-300',
               'hover:shadow-lg hover:shadow-primary/5 hover:scale-[1.02]',
-              'bg-card',
-              getCategoryBorderColor(poi.category)
+              'bg-card'
             )}
+            style={getCategoryBorderStyle(poi.category)}
           >
             <CardContent className="p-5">
-              {/* Header with title and category */}
               <div className="flex items-start justify-between gap-3 mb-3">
                 <div className="flex-1 min-w-0">
                   <h4 className="text-base font-semibold text-foreground mb-2">
                     {poi.name}
                   </h4>
-                  <span className={cn(
-                    'text-xs px-2 py-1 rounded-md font-medium inline-block',
-                    getCategoryColor(poi.category)
-                  )}>
+                  <span 
+                    className="text-xs px-2 py-1 rounded-md font-medium inline-block"
+                    style={getCategoryStyle(poi.category)}
+                  >
                     {poi.category}
                   </span>
                 </div>
-                
-                {/* Rating */}
-                {poi.rating && (
-                  <div className="flex items-center gap-1 shrink-0">
-                    <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
-                    <span className="text-sm font-semibold text-foreground">
-                      {poi.rating.toFixed(1)}
-                    </span>
-                  </div>
-                )}
               </div>
 
-              {/* Description */}
               {poi.description && (
                 <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
                   {poi.description}
                 </p>
               )}
 
-              {/* Address */}
-              <div className="flex items-start gap-2 text-xs text-muted-foreground mb-4">
-                <MapPin className="h-3.5 w-3.5 mt-0.5 shrink-0 text-muted-foreground/70" />
-                <span className="line-clamp-2 flex-1">{poi.address}</span>
-              </div>
-
-              {/* Website link */}
-              {poi.website && (
-                <a
-                  href={poi.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline font-medium"
-                >
-                  <ExternalLink className="h-3.5 w-3.5" />
-                  Visit website
-                </a>
+              {poi.address && (
+                <div className="flex items-start gap-2 text-xs text-muted-foreground mb-4">
+                  <MapPin className="h-3.5 w-3.5 mt-0.5 shrink-0 text-muted-foreground/70" />
+                  <span className="line-clamp-2 flex-1">{poi.address}</span>
+                </div>
               )}
+
+              <div className="flex flex-wrap gap-3">
+                {poi.website && (
+                  <a
+                    href={poi.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline font-medium"
+                  >
+                    <Globe className="h-3.5 w-3.5" />
+                    Website
+                  </a>
+                )}
+                {poi.wikipedia && (
+                  <a
+                    href={poi.wikipedia}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline font-medium"
+                  >
+                    <BookOpen className="h-3.5 w-3.5" />
+                    Wikipedia
+                  </a>
+                )}
+                {poi.latitude && poi.longitude && (
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${poi.latitude},${poi.longitude}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline font-medium"
+                  >
+                    <ExternalLink className="h-3.5 w-3.5" />
+                    View on Map
+                  </a>
+                )}
+              </div>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      <div className="pt-4 border-t">
-        <p className="text-xs text-muted-foreground text-center">
-          💡 Points of interest are curated for popular destinations. More locations coming soon!
-        </p>
-      </div>
+      {canLoadMore && (
+        <div className="flex justify-center pt-4">
+          <Button
+            variant="outline"
+            onClick={handleLoadMore}
+            className="gap-2"
+          >
+            <ChevronDown className="h-4 w-4" />
+            Load More
+          </Button>
+        </div>
+      )}
     </div>
   )
 }
-

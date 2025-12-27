@@ -2,6 +2,8 @@
  * Utility functions to clear trip-related cache data when a trip is deleted
  */
 
+import { clearPlacesCacheForCity } from './placesCache'
+
 /**
  * Clear packing suggestions cache for a specific trip
  */
@@ -59,6 +61,18 @@ export const clearWeatherForecastCache = (
 }
 
 /**
+ * Clear POI cache for a specific city
+ */
+export const clearPlacesCache = (cityName: string): void => {
+  try {
+    if (typeof window === 'undefined') return
+    clearPlacesCacheForCity(cityName)
+  } catch (error) {
+    console.error('Error clearing POI cache:', error)
+  }
+}
+
+/**
  * Clear all cache data associated with a trip
  */
 export const clearTripCache = (
@@ -71,5 +85,11 @@ export const clearTripCache = (
   clearPackingSuggestionsCache(tripId)
   clearItineraryPlanCache(tripId)
   clearWeatherForecastCache(cityName, locationName, departureDate, returnDate)
+  // Clear POI cache for the destination city
+  clearPlacesCache(cityName)
+  // Also clear for locationName if it's different from cityName
+  if (locationName && locationName.trim() && locationName !== cityName) {
+    clearPlacesCache(locationName)
+  }
 }
 

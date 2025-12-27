@@ -91,12 +91,12 @@ export function Footer() {
                 Weather API
               </a>
               <a
-                href="https://tripadvisor.com"
+                href="https://geoapify.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
-                TripAdvisor
+                Geoapify
               </a>
               <a
                 href="https://booking.com"

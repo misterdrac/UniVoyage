@@ -155,6 +155,67 @@
   --travel-country-badge-border: rgba(59, 130, 246, 0.3); /* blue-500/30 */
   --travel-country-button: rgb(37, 99, 235); /* blue-600 */
   --travel-country-button-hover: rgb(29, 78, 216); /* blue-700 */
+
+  /* Place Category Colors */
+  --place-category-castle-bg: rgb(254, 243, 199); /* amber-100 */
+  --place-category-castle-text: rgb(146, 64, 14); /* amber-800 */
+  --place-category-castle-border: rgb(245, 158, 11); /* amber-500 */
+  
+  --place-category-monument-bg: rgb(241, 245, 249); /* slate-100 */
+  --place-category-monument-text: rgb(30, 41, 59); /* slate-800 */
+  --place-category-monument-border: rgb(100, 116, 139); /* slate-500 */
+  
+  --place-category-museum-bg: rgb(243, 232, 255); /* purple-100 */
+  --place-category-museum-text: rgb(107, 33, 168); /* purple-800 */
+  --place-category-museum-border: rgb(168, 85, 247); /* purple-500 */
+  
+  --place-category-religious-bg: rgb(253, 244, 255); /* fuchsia-100 */
+  --place-category-religious-text: rgb(162, 28, 175); /* fuchsia-800 */
+  --place-category-religious-border: rgb(217, 70, 239); /* fuchsia-500 */
+  
+  --place-category-park-bg: rgb(220, 252, 231); /* green-100 */
+  --place-category-park-text: rgb(22, 101, 52); /* green-800 */
+  --place-category-park-border: rgb(34, 197, 94); /* green-500 */
+  
+  --place-category-tower-bg: rgb(219, 234, 254); /* blue-100 */
+  --place-category-tower-text: rgb(30, 64, 175); /* blue-800 */
+  --place-category-tower-border: rgb(59, 130, 246); /* blue-500 */
+  
+  --place-category-square-bg: rgb(252, 231, 243); /* pink-100 */
+  --place-category-square-text: rgb(157, 23, 77); /* pink-800 */
+  --place-category-square-border: rgb(236, 72, 153); /* pink-500 */
+  
+  --place-category-memorial-bg: rgb(243, 244, 246); /* gray-100 */
+  --place-category-memorial-text: rgb(31, 41, 55); /* gray-800 */
+  --place-category-memorial-border: rgb(107, 114, 128); /* gray-500 */
+  
+  --place-category-attraction-bg: rgb(255, 228, 230); /* rose-100 */
+  --place-category-attraction-text: rgb(159, 18, 57); /* rose-800 */
+  --place-category-attraction-border: rgb(244, 63, 94); /* rose-500 */
+  
+  --place-category-artwork-bg: rgb(245, 243, 255); /* violet-100 */
+  --place-category-artwork-text: rgb(109, 40, 217); /* violet-800 */
+  --place-category-artwork-border: rgb(139, 92, 246); /* violet-500 */
+  
+  --place-category-fort-bg: rgb(255, 237, 213); /* orange-100 */
+  --place-category-fort-text: rgb(154, 52, 18); /* orange-800 */
+  --place-category-fort-border: rgb(249, 115, 22); /* orange-500 */
+  
+  --place-category-city-gate-bg: rgb(204, 251, 241); /* teal-100 */
+  --place-category-city-gate-text: rgb(17, 94, 89); /* teal-800 */
+  --place-category-city-gate-border: rgb(20, 184, 166); /* teal-500 */
+  
+  --place-category-historic-bg: rgb(251, 207, 232); /* pink-200 */
+  --place-category-historic-text: rgb(131, 24, 67); /* pink-900 */
+  --place-category-historic-border: rgb(236, 72, 153); /* pink-500 */
+  
+  --place-category-landmark-bg: rgb(224, 231, 255); /* indigo-100 */
+  --place-category-landmark-text: rgb(55, 48, 163); /* indigo-800 */
+  --place-category-landmark-border: rgb(99, 102, 241); /* indigo-500 */
+  
+  --place-category-default-bg: rgb(243, 244, 246); /* gray-100 */
+  --place-category-default-text: rgb(31, 41, 55); /* gray-800 */
+  --place-category-default-border: rgb(107, 114, 128); /* gray-500 */
 }
 
 .dark {
@@ -270,6 +331,67 @@
   --travel-country-badge-bg: rgba(31, 41, 55, 0.5); /* gray-800/50 */
   --travel-country-badge-text: rgb(147, 197, 253); /* blue-300 */
   --travel-country-icon: rgb(96, 165, 250); /* blue-400 */
+
+  /* Place Category Colors (Dark Mode) */
+  --place-category-castle-bg: rgb(120, 53, 15); /* amber-900 */
+  --place-category-castle-text: rgb(253, 230, 138); /* amber-200 */
+  --place-category-castle-border: rgb(245, 158, 11); /* amber-500 */
+  
+  --place-category-monument-bg: rgb(30, 41, 59); /* slate-800 */
+  --place-category-monument-text: rgb(226, 232, 240); /* slate-200 */
+  --place-category-monument-border: rgb(100, 116, 139); /* slate-500 */
+  
+  --place-category-museum-bg: rgb(88, 28, 135); /* purple-900 */
+  --place-category-museum-text: rgb(233, 213, 255); /* purple-200 */
+  --place-category-museum-border: rgb(168, 85, 247); /* purple-500 */
+  
+  --place-category-religious-bg: rgb(112, 26, 117); /* fuchsia-900 */
+  --place-category-religious-text: rgb(250, 232, 255); /* fuchsia-200 */
+  --place-category-religious-border: rgb(217, 70, 239); /* fuchsia-500 */
+  
+  --place-category-park-bg: rgb(20, 83, 45); /* green-900 */
+  --place-category-park-text: rgb(187, 247, 208); /* green-200 */
+  --place-category-park-border: rgb(34, 197, 94); /* green-500 */
+  
+  --place-category-tower-bg: rgb(30, 58, 138); /* blue-900 */
+  --place-category-tower-text: rgb(191, 219, 254); /* blue-200 */
+  --place-category-tower-border: rgb(59, 130, 246); /* blue-500 */
+  
+  --place-category-square-bg: rgb(131, 24, 67); /* pink-900 */
+  --place-category-square-text: rgb(252, 231, 243); /* pink-200 */
+  --place-category-square-border: rgb(236, 72, 153); /* pink-500 */
+  
+  --place-category-memorial-bg: rgb(55, 65, 81); /* gray-700 */
+  --place-category-memorial-text: rgb(229, 231, 235); /* gray-200 */
+  --place-category-memorial-border: rgb(107, 114, 128); /* gray-500 */
+  
+  --place-category-attraction-bg: rgb(159, 18, 57); /* rose-900 */
+  --place-category-attraction-text: rgb(255, 228, 230); /* rose-200 */
+  --place-category-attraction-border: rgb(244, 63, 94); /* rose-500 */
+  
+  --place-category-artwork-bg: rgb(91, 33, 182); /* violet-900 */
+  --place-category-artwork-text: rgb(237, 233, 254); /* violet-200 */
+  --place-category-artwork-border: rgb(139, 92, 246); /* violet-500 */
+  
+  --place-category-fort-bg: rgb(154, 52, 18); /* orange-900 */
+  --place-category-fort-text: rgb(255, 237, 213); /* orange-200 */
+  --place-category-fort-border: rgb(249, 115, 22); /* orange-500 */
+  
+  --place-category-city-gate-bg: rgb(19, 78, 74); /* teal-900 */
+  --place-category-city-gate-text: rgb(153, 246, 228); /* teal-200 */
+  --place-category-city-gate-border: rgb(20, 184, 166); /* teal-500 */
+  
+  --place-category-historic-bg: rgb(80, 7, 36); /* pink-950 */
+  --place-category-historic-text: rgb(252, 231, 243); /* pink-200 */
+  --place-category-historic-border: rgb(236, 72, 153); /* pink-500 */
+  
+  --place-category-landmark-bg: rgb(55, 48, 163); /* indigo-900 */
+  --place-category-landmark-text: rgb(224, 231, 255); /* indigo-200 */
+  --place-category-landmark-border: rgb(99, 102, 241); /* indigo-500 */
+  
+  --place-category-default-bg: rgb(31, 41, 55); /* gray-800 */
+  --place-category-default-text: rgb(229, 231, 235); /* gray-200 */
+  --place-category-default-border: rgb(107, 114, 128); /* gray-500 */
 }
 
 @theme inline {
