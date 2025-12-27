@@ -7,10 +7,7 @@ import type { TripStatus } from '@/lib/tripStatusUtils'
 import { apiService } from '@/services/api'
 import type { Trip } from '@/types/trip'
 import type { NormalizedItinerary, StoredItineraryPayload } from '@/types/itinerary'
-import { geminiClient, GEMINI_API_KEY, GEMINI_MODEL } from './utils/geminiClient'
 import {
-  buildGeminiPrompt,
-  handleGeminiError,
   LOADING_STEPS,
   normalizeGeminiItinerary,
   type GeminiItinerary,
@@ -234,44 +231,29 @@ export function useTripItinerary({ trip, currentStatus }: UseTripItineraryArgs):
     return () => window.clearInterval(interval)
   }, [isLoading])
 
-  const buildPrompt = useCallback(() => {
-    return buildGeminiPrompt({
-      itineraryDates,
-      locationLabel,
-      departureDate: trip.departureDate,
-      returnDate: trip.returnDate,
-      userHobbies,
-    })
-  }, [itineraryDates, locationLabel, trip.departureDate, trip.returnDate, userHobbies])
-
   const generateItinerary = useCallback(async () => {
-    if (!GEMINI_API_KEY || !GEMINI_MODEL) {
-      setError('AI features are temporarily unavailable. Please try again later.')
-      return
-    }
-
-    if (!geminiClient) {
-      setError('AI features are temporarily unavailable. Please try again later.')
-      return
-    }
-
     try {
       setIsLoading(true)
       setError(null)
       setStructuredItinerary(null)
       setRawItinerary(null)
 
-      const response = await geminiClient.models.generateContent({
-        model: GEMINI_MODEL,
-        contents: buildPrompt(),
+      const response = await apiService.generateItinerary({
+        locationLabel,
+        departureDate: trip.departureDate,
+        returnDate: trip.returnDate,
+        itineraryDates: itineraryDates.map(d => ({ iso: d.iso, label: d.label })),
+        userHobbies,
       })
 
-      const text = response.text?.trim()
-      if (!text) {
-        throw new Error('Gemini returned an empty response. Please try again.')
+      if (!response.success || !response.content) {
+        const errorMsg = response.error || 'AI features are temporarily unavailable. Please try again later.'
+        setError(errorMsg)
+        toast.error(errorMsg)
+        return
       }
 
-      const cleaned = text.replace(/```json/gi, '').replace(/```/g, '').trim()
+      const cleaned = response.content.replace(/```json/gi, '').replace(/```/g, '').trim()
 
       try {
         const parsed = JSON.parse(cleaned) as GeminiItinerary
@@ -291,13 +273,14 @@ export function useTripItinerary({ trip, currentStatus }: UseTripItineraryArgs):
         await persistItinerary({ structured: null, raw: cleaned })
       }
     } catch (err) {
-      const userMessage = handleGeminiError(err)
-      setError(userMessage)
-      toast.error(userMessage)
+      console.error('[Itinerary Generation Error]', err)
+      const errorMsg = 'Oops! Something went wrong while generating your itinerary. Please try again in a moment.'
+      setError(errorMsg)
+      toast.error(errorMsg)
     } finally {
       setIsLoading(false)
     }
-  }, [buildPrompt, normalizeItinerary, persistItinerary])
+  }, [locationLabel, trip.departureDate, trip.returnDate, itineraryDates, userHobbies, normalizeItinerary, persistItinerary])
 
   const hasExistingPlan = Boolean(structuredItinerary || rawItinerary)
   const hasStalePlan = Boolean(cachedSignature && fullSignature && cachedSignature !== fullSignature)

@@ -40,7 +40,12 @@ export const API_CONFIG = {
             },
             PLACES: {
               SEARCH: '/places/search',
-            }
+            },
+            AI: {
+              ITINERARY: '/ai/itinerary',
+              PACKING: '/ai/packing',
+              STATUS: '/ai/status',
+            },
           },
   
   // Request timeout

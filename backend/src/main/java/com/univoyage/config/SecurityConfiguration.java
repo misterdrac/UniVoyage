@@ -47,6 +47,8 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.GET, "/api/destinations", "/api/destinations/**").permitAll()
                         // Weather endpoints require authentication (used in trip context)
                         .requestMatchers("/api/weather/**").authenticated()
+                        // AI endpoints require authentication
+                        .requestMatchers("/api/ai/**").authenticated()
                         // /api/auth/me and other auth endpoints require authentication
                         .requestMatchers("/api/auth/me").authenticated()
                         .requestMatchers("/api/auth/**").authenticated()
