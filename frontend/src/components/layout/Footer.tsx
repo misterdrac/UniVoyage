@@ -99,12 +99,20 @@ export function Footer() {
                 Geoapify
               </a>
               <a
-                href="https://booking.com"
+                href="https://amadeus.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
-                Booking.com
+                Amadeus
+              </a>
+              <a
+                href="https://hostelworld.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Hostelworld
               </a>
             </nav>
           </div>

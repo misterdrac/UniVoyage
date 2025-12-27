@@ -46,6 +46,10 @@ export const API_CONFIG = {
               PACKING: '/ai/packing',
               STATUS: '/ai/status',
             },
+            HOTELS: {
+              SEARCH: '/hotels/search',
+              STATUS: '/hotels/status',
+            },
           },
   
   // Request timeout
