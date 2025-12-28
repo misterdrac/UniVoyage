@@ -531,4 +531,42 @@
   .animate-bounce-once {
     animation: bounce-once 0.3s ease-in-out;
   }
+
+  /* Custom Scrollbar for Dropdown Menus */
+  .dropdown-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: oklch(0.5 0.15 288 / 0.3) transparent;
+  }
+
+  .dropdown-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .dropdown-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 3px;
+  }
+
+  .dropdown-scrollbar::-webkit-scrollbar-thumb {
+    background: oklch(0.5 0.15 288 / 0.3);
+    border-radius: 3px;
+    transition: background 0.2s ease;
+  }
+
+  .dropdown-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: oklch(0.5 0.15 288 / 0.5);
+  }
+
+  .dark .dropdown-scrollbar {
+    scrollbar-color: oklch(0.7162 0.1597 290.3962 / 0.3) transparent;
+  }
+
+  .dark .dropdown-scrollbar::-webkit-scrollbar-thumb {
+    background: oklch(0.7162 0.1597 290.3962 / 0.3);
+  }
+
+  .dark .dropdown-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: oklch(0.7162 0.1597 290.3962 / 0.5);
+  }
 }
