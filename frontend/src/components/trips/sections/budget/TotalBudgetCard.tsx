@@ -194,7 +194,7 @@ export function TotalBudgetCard({
               '[&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:bg-primary [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-background [&::-moz-range-thumb]:shadow-lg'
             )}
             style={{
-              background: `linear-gradient(to right, rgb(59 130 246) 0%, rgb(59 130 246) ${(totalBudget / 10000) * 100}%, rgb(229 231 235) ${(totalBudget / 10000) * 100}%, rgb(229 231 235) 100%)`
+              background: `linear-gradient(to right, var(--place-category-landmark-border) 0%, var(--place-category-landmark-border) ${(totalBudget / 10000) * 100}%, var(--border) ${(totalBudget / 10000) * 100}%, var(--border) 100%)`
             }}
           />
           <div className="flex items-center justify-between text-xs text-muted-foreground">
@@ -205,15 +205,21 @@ export function TotalBudgetCard({
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 gap-4">
-          <div className={cn(
-            'p-4 rounded-lg border',
-            'bg-blue-500/10 border-blue-500/30'
-          )}>
+          <div 
+            className="p-4 rounded-lg border"
+            style={{
+              backgroundColor: 'color-mix(in oklch, var(--spent) 10%, transparent)',
+              borderColor: 'color-mix(in oklch, var(--spent) 30%, transparent)',
+            }}
+          >
             <div className="flex items-center gap-2 mb-2">
-              <TrendingUp className="h-4 w-4 text-blue-600" />
+              <TrendingUp 
+                className="h-4 w-4" 
+                style={{ color: 'var(--spent)' }}
+              />
               <span className="text-xs text-muted-foreground font-medium">Spent</span>
             </div>
-            <p className="text-lg font-bold text-blue-600">
+            <p className="text-lg font-bold" style={{ color: 'var(--spent)' }}>
               {formatCurrency(totals.actualTotal)}
             </p>
             {totalBudget > 0 && (
@@ -223,24 +229,34 @@ export function TotalBudgetCard({
             )}
           </div>
 
-          <div className={cn(
-            'p-4 rounded-lg border',
-            remainingBudget < 0 
-              ? 'bg-destructive/10 border-destructive/30'
-              : 'bg-green-500/10 border-green-500/30'
-          )}>
+          <div 
+            className={cn(
+              'p-4 rounded-lg border',
+              remainingBudget < 0 && 'bg-destructive/10 border-destructive/30'
+            )}
+            style={remainingBudget >= 0 ? {
+              backgroundColor: 'color-mix(in oklch, var(--success) 10%, transparent)',
+              borderColor: 'color-mix(in oklch, var(--success) 30%, transparent)',
+            } : undefined}
+          >
             <div className="flex items-center gap-2 mb-2">
               {remainingBudget < 0 ? (
                 <TrendingDown className="h-4 w-4 text-destructive" />
               ) : (
-                <TrendingUp className="h-4 w-4 text-green-600" />
+                <TrendingUp 
+                  className="h-4 w-4" 
+                  style={{ color: 'var(--success)' }}
+                />
               )}
               <span className="text-xs text-muted-foreground font-medium">Remaining</span>
             </div>
-            <p className={cn(
-              'text-lg font-bold',
-              remainingBudget < 0 ? 'text-destructive' : 'text-green-600'
-            )}>
+            <p 
+              className={cn(
+                'text-lg font-bold',
+                remainingBudget < 0 && 'text-destructive'
+              )}
+              style={remainingBudget >= 0 ? { color: 'var(--success)' } : undefined}
+            >
               {formatCurrency(remainingBudget)}
             </p>
             {totalBudget > 0 && remainingBudget >= 0 && (
