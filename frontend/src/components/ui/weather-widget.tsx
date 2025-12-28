@@ -123,7 +123,7 @@ export function WeatherWidget({
       
     } catch (err) {
       console.error('Error fetching weather:', err)
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch weather data'
+      const errorMessage = 'Failed to fetch weather data'
       setError(errorMessage)
       onError?.(errorMessage)
     } finally {
@@ -236,7 +236,13 @@ export function WeatherWidget({
       setIsTooFarAway(false)
     } catch (err) {
       console.error('Error fetching weather forecast:', err)
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch weather forecast'
+      let errorMessage = err instanceof Error ? err.message : 'Failed to fetch weather forecast'
+      // Transform error message to be more user-friendly for city not found errors
+      if (errorMessage.toLowerCase().includes('city not found') || 
+          errorMessage.toLowerCase().includes('404') ||
+          (errorMessage.toLowerCase().includes('not found') && errorMessage.toLowerCase().includes('weather'))) {
+        errorMessage = 'Weather forecast is not available for this location. Please check the city name and try again.'
+      }
       setError(errorMessage)
       setIsTooFarAway(false)
       onError?.(errorMessage)
