@@ -1,7 +1,9 @@
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Wallet, TrendingUp, TrendingDown, ChevronUp, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useState, useEffect } from 'react'
 
 const formatCurrency = (amount: number): string => {
   return new Intl.NumberFormat('en-US', {
@@ -27,6 +29,58 @@ export function TotalBudgetCard({
   totals,
   remainingBudget,
 }: TotalBudgetCardProps) {
+  const [inputValue, setInputValue] = useState(totalBudget.toString())
+  const [isFocused, setIsFocused] = useState(false)
+
+  // Sync input value when totalBudget changes externally (only when not focused)
+  useEffect(() => {
+    if (!isFocused) {
+      setInputValue(totalBudget.toString())
+    }
+  }, [totalBudget, isFocused])
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    
+    // Allow empty input while typing
+    if (value === '') {
+      setInputValue('')
+      return
+    }
+
+    // Only allow numbers
+    if (!/^\d+$/.test(value)) {
+      return
+    }
+
+    const numValue = Number(value)
+    
+    // Limit to 10k
+    if (numValue > 10000) {
+      setInputValue('10000')
+      updateTotalBudget(10000)
+      return
+    }
+
+    setInputValue(value)
+    updateTotalBudget(numValue)
+  }
+
+  const handleInputBlur = () => {
+    setIsFocused(false)
+    // Ensure input shows current budget value on blur
+    if (inputValue === '' || isNaN(Number(inputValue))) {
+      setInputValue(totalBudget.toString())
+    } else {
+      // Ensure it matches the actual budget (in case user typed invalid value)
+      setInputValue(totalBudget.toString())
+    }
+  }
+
+  const handleInputFocus = () => {
+    setIsFocused(true)
+  }
+
   return (
     <div className={cn(
       'p-6 rounded-lg border-2 transition-all',
@@ -51,42 +105,32 @@ export function TotalBudgetCard({
           </div>
         </div>
 
-        {/* Budget Slider */}
+        {/* Budget Input and Slider */}
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="total-budget" className="text-sm font-medium text-muted-foreground">
+          <div className="space-y-3">
+            <Label htmlFor="total-budget-input" className="text-sm font-medium text-muted-foreground">
               Budget Amount
             </Label>
-            <div className="flex items-center gap-1.5">
-              <div className="text-right">
-                <p className="text-2xl font-bold text-foreground">
-                  {formatCurrency(totalBudget)}
-                </p>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Max: {formatCurrency(10000)}
-                </p>
+            <div className="flex items-center gap-3">
+              <div className="relative flex-1">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">
+                  $
+                </span>
+                <Input
+                  id="total-budget-input"
+                  type="text"
+                  inputMode="numeric"
+                  value={inputValue}
+                  onChange={handleInputChange}
+                  onFocus={handleInputFocus}
+                  onBlur={handleInputBlur}
+                  placeholder="0"
+                  className="pl-8 text-lg font-semibold h-12"
+                  maxLength={6}
+                />
               </div>
-              <div className="flex flex-col gap-0 shrink-0">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="h-5 w-5 p-0 hover:bg-muted rounded-b-none"
-                  onClick={() => updateTotalBudget(Math.min(10000, totalBudget + 1))}
-                  disabled={totalBudget >= 10000}
-                >
-                  <ChevronUp className="h-2.5 w-2.5" />
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="h-5 w-5 p-0 hover:bg-muted rounded-t-none"
-                  onClick={() => updateTotalBudget(Math.max(0, totalBudget - 1))}
-                  disabled={totalBudget <= 0}
-                >
-                  <ChevronDown className="h-2.5 w-2.5" />
-                </Button>
+              <div className="text-xs text-muted-foreground shrink-0">
+                Max: {formatCurrency(10000)}
               </div>
             </div>
           </div>
