@@ -45,35 +45,80 @@ export function TotalBudgetCard({
     // Allow empty input while typing
     if (value === '') {
       setInputValue('')
+      updateTotalBudget(0)
       return
     }
 
-    // Only allow numbers
-    if (!/^\d+$/.test(value)) {
+    // Allow numbers with optional decimal point and digits (e.g., "123.45", "123.", "123")
+    if (!/^\d*\.?\d*$/.test(value)) {
       return
     }
 
-    const numValue = Number(value)
+    // Don't allow multiple decimal points
+    if ((value.match(/\./g) || []).length > 1) {
+      return
+    }
+
+    // Don't allow leading zeros (except "0" itself or "0." or "0.xx")
+    // This prevents things like "0123" but allows "0", "0.5", "0.12"
+    if (value.length > 1 && value[0] === '0' && value[1] !== '.') {
+      // If it starts with 0 and second char is not decimal, reject it
+      // But allow if it's just "0"
+      return
+    }
+
+    // Limit decimal places to 2
+    const decimalIndex = value.indexOf('.')
+    if (decimalIndex !== -1) {
+      const decimalPart = value.substring(decimalIndex + 1)
+      if (decimalPart.length > 2) {
+        return
+      }
+    }
+
+    const numValue = parseFloat(value)
     
-    // Limit to 10k
-    if (numValue > 10000) {
-      setInputValue('10000')
-      updateTotalBudget(10000)
-      return
+    // If it's a valid number, validate range
+    if (!isNaN(numValue)) {
+      // Don't allow negative values
+      if (numValue < 0) {
+        setInputValue('0')
+        updateTotalBudget(0)
+        return
+      }
+      
+      // Limit to 10k
+      if (numValue > 10000) {
+        setInputValue('10000')
+        updateTotalBudget(10000)
+        return
+      }
+
+      // Update budget with the numeric value
+      updateTotalBudget(numValue)
     }
 
+    // Always update input value to allow typing (even if it ends with a decimal point)
     setInputValue(value)
-    updateTotalBudget(numValue)
   }
 
   const handleInputBlur = () => {
     setIsFocused(false)
-    // Ensure input shows current budget value on blur
-    if (inputValue === '' || isNaN(Number(inputValue))) {
-      setInputValue(totalBudget.toString())
+    // On blur, ensure input shows a valid number
+    if (inputValue === '' || inputValue === '.' || isNaN(Number(inputValue))) {
+      setInputValue('0')
+      updateTotalBudget(0)
     } else {
-      // Ensure it matches the actual budget (in case user typed invalid value)
-      setInputValue(totalBudget.toString())
+      // Format to 2 decimal places if it's a decimal, otherwise show as integer
+      const numValue = parseFloat(inputValue)
+      if (!isNaN(numValue)) {
+        const formatted = numValue % 1 === 0 ? numValue.toString() : numValue.toFixed(2)
+        setInputValue(formatted)
+        updateTotalBudget(numValue)
+      } else {
+        setInputValue('0')
+        updateTotalBudget(0)
+      }
     }
   }
 
@@ -119,14 +164,14 @@ export function TotalBudgetCard({
                 <Input
                   id="total-budget-input"
                   type="text"
-                  inputMode="numeric"
+                  inputMode="decimal"
                   value={inputValue}
                   onChange={handleInputChange}
                   onFocus={handleInputFocus}
                   onBlur={handleInputBlur}
                   placeholder="0"
                   className="pl-8 text-lg font-semibold h-12"
-                  maxLength={6}
+                  maxLength={8}
                 />
               </div>
               <div className="text-xs text-muted-foreground shrink-0">
