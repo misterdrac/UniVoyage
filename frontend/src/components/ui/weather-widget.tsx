@@ -241,7 +241,7 @@ export function WeatherWidget({
       if (errorMessage.toLowerCase().includes('city not found') || 
           errorMessage.toLowerCase().includes('404') ||
           (errorMessage.toLowerCase().includes('not found') && errorMessage.toLowerCase().includes('weather'))) {
-        errorMessage = 'Weather forecast is not available for this location. Please check the city name and try again.'
+        errorMessage = 'Weather forecast is not available for this location.'
       }
       setError(errorMessage)
       setIsTooFarAway(false)
