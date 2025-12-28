@@ -1,5 +1,5 @@
 import { Card, CardContent } from '@/components/ui/card'
-import { MapPin, ExternalLink, Loader2, AlertCircle, RefreshCw, Globe, BookOpen, Landmark, Camera, Compass, ChevronDown } from 'lucide-react'
+import { MapPin, ExternalLink, Loader2, AlertCircle, RefreshCw, Globe, BookOpen, Landmark, Camera, Compass, ChevronDown, Church, TreePine, TowerControl, Square, Flower2, Star, Palette, Shield, Castle, Amphora, BrickWall, University } from 'lucide-react'
 import type { Trip } from '@/types/trip'
 import { usePointsOfInterest } from '@/hooks/usePointsOfInterest'
 import { usePaginatedItems } from '@/hooks/usePaginatedItems'
@@ -141,6 +141,26 @@ export function TripPointsOfInterestSection({ trip }: TripPointsOfInterestSectio
     }
   }
 
+  const getCategoryIcon = (category: string) => {
+    const iconMap: Record<string, typeof Castle> = {
+      'Castle': Castle,
+      'Monument': University,
+      'Museum': Amphora,
+      'Religious Site': Church,
+      'Park': TreePine,
+      'Tower': TowerControl,
+      'Square': Square,
+      'Memorial': Flower2,
+      'Attraction': Star,
+      'Artwork': Palette,
+      'Fort': Shield,
+      'City Gate': BrickWall,
+      'Historic Site': Landmark,
+      'Landmark': MapPin,
+    }
+    return iconMap[category] || MapPin
+  }
+
 
   if (isLoading) {
     return <LoadingState cityName={cityName} />
@@ -210,18 +230,35 @@ export function TripPointsOfInterestSection({ trip }: TripPointsOfInterestSectio
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {displayedPlaces.map((poi) => (
-          <Card
-            key={poi.id}
-            className={cn(
-              'overflow-hidden border-2 transition-all duration-300',
-              'hover:shadow-lg hover:shadow-primary/5 hover:scale-[1.02]',
-              'bg-card'
-            )}
-            style={getCategoryBorderStyle(poi.category)}
-          >
-            <CardContent className="p-5">
-              <div className="flex items-start justify-between gap-3 mb-3">
+        {displayedPlaces.map((poi) => {
+          const CategoryIcon = getCategoryIcon(poi.category)
+          return (
+            <Card
+              key={poi.id}
+              className={cn(
+                'overflow-hidden border-2 transition-all duration-300',
+                'hover:shadow-lg hover:shadow-primary/5 hover:scale-[1.02]',
+                'bg-card'
+              )}
+              style={getCategoryBorderStyle(poi.category)}
+            >
+            <CardContent className="p-5 relative">
+              <div className="absolute top-5 right-5">
+                <div 
+                  className="p-2.5 rounded-lg"
+                  style={{ 
+                    backgroundColor: `var(--place-category-${getCategoryVarName(poi.category)}-bg, rgba(0,0,0,0.1))` 
+                  }}
+                >
+                  <CategoryIcon 
+                    className="h-6 w-6" 
+                    style={{ 
+                      color: `var(--place-category-${getCategoryVarName(poi.category)}-text, currentColor)` 
+                    }} 
+                  />
+                </div>
+              </div>
+              <div className="flex items-start justify-between gap-3 mb-3 pr-16">
                 <div className="flex-1 min-w-0">
                   <h4 className="text-base font-semibold text-foreground mb-2">
                     {poi.name}
@@ -285,7 +322,8 @@ export function TripPointsOfInterestSection({ trip }: TripPointsOfInterestSectio
               </div>
             </CardContent>
           </Card>
-        ))}
+          )
+        })}
       </div>
 
       {canLoadMore && (
