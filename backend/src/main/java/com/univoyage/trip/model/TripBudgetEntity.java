@@ -2,6 +2,8 @@ package com.univoyage.trip.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
 
@@ -15,8 +17,8 @@ public class TripBudgetEntity {
     @Column(name = "trip_id")
     private Long tripId;
 
-    @Lob
-    @Column(columnDefinition = "jsonb", nullable = false)
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "payload", columnDefinition = "jsonb", nullable = false)
     private String payload;
 
     @Column(name="updated_at", nullable = false)
