@@ -39,3 +39,20 @@ CREATE TABLE trip_itineraries (
     CONSTRAINT fk_trip_itineraries_trip
         FOREIGN KEY (trip_id) REFERENCES trips(id) ON DELETE CASCADE
 );
+
+CREATE TABLE trip_accommodations {
+    trip_id BIGINT PRIMARY KEY,
+
+    accommodation_name    VARCHAR(200),
+    accommodation_address TEXT,
+    accommodation_phone   VARCHAR(50),
+
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_trip_accommodations_trip
+        FOREIGN KEY (trip_id) REFERENCES trips(id)
+        ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_trip_accommodations_name
+    ON trip_accommodations (accommodation_name);}

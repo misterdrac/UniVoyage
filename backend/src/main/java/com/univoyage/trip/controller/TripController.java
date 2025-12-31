@@ -70,4 +70,24 @@ public class TripController {
         tripService.saveItinerary(userId, tripId, payload);
         return ResponseEntity.ok(ApiResponse.ok(null));
     }
+
+    @PutMapping("/{tripId}/accommodation")
+    public ResponseEntity<ApiResponse<Void>> saveAccommodation(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable Long tripId,
+            @RequestBody TripAccommodationRequest req
+    ) {
+        tripService.saveAccommodation(userId, tripId, req);
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    @GetMapping("/{tripId}/accommodation")
+    public ResponseEntity<ApiResponse<TripAccommodationResponse>> getAccommodation(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable Long tripId
+    ) {
+        TripAccommodationResponse acc = tripService.getAccommodation(userId, tripId);
+        return ResponseEntity.ok(ApiResponse.success(acc));
+    }
+
 }

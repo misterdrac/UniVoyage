@@ -28,6 +28,7 @@ public class TripService {
     private final DestinationRepository destinationRepository;
     private final TripBudgetRepository tripBudgetRepository;
     private final TripItineraryRepository tripItineraryRepository;
+    private final TripAccommodationRepository tripAccommodationRepository;
     private final ObjectMapper objectMapper;
 
     @Transactional
@@ -101,6 +102,39 @@ public class TripService {
                         .updatedAt(Instant.now())
                         .build()
         );
+    }
+    @Transactional(readOnly = true)
+    public TripAccommodationResponse getAccommodation(Long userId, Long tripId) {
+        ensureOwner(userId, tripId);
+
+        return tripAccommodationRepository.findById(tripId)
+                .map(e -> TripAccommodationResponse.builder()
+                        .accommodationName(e.getAccommodationName())
+                        .accommodationAddress(e.getAccommodationAddress())
+                        .accommodationPhone(e.getAccommodationPhone())
+                        .build())
+                .orElse(null);
+    }
+
+    @Transactional
+    public void saveAccommodation(Long userId, Long tripId, TripAccommodationRequest req) {
+        ensureOwner(userId, tripId);
+
+        tripAccommodationRepository.save(
+                TripAccommodationEntity.builder()
+                        .tripId(tripId)
+                        .accommodationName(trimToNull(req.getAccommodationName()))
+                        .accommodationAddress(trimToNull(req.getAccommodationAddress()))
+                        .accommodationPhone(trimToNull(req.getAccommodationPhone()))
+                        .updatedAt(Instant.now())
+                        .build()
+        );
+    }
+
+    private String trimToNull(String s) {
+        if (s == null) return null;
+        String t = s.trim();
+        return t.isEmpty() ? null : t;
     }
 
     private void ensureOwner(Long userId, Long tripId) {
