@@ -17,6 +17,7 @@ import {
 import { calculateTripStatus } from '@/lib/tripUtils';
 import { calculateDurationInDays } from '@/lib/dateUtils';
 import { getDestinationImageById } from '@/lib/destinationUtils';
+import { useDestinations } from '@/hooks/useDestinations';
 import {
   TripHeroSection,
   TripSectionTabs,
@@ -27,6 +28,7 @@ import {
   TripPlaceholderSection,
   TripItinerarySection,
   TripPointsOfInterestSection,
+  TripAccommodationSection,
 } from '@/components/trips';
 import type { TripSectionDefinition } from '@/components/trips';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -48,14 +50,12 @@ const TRIP_SECTIONS: TripSectionDefinition<Section>[] = [
 // Valid section IDs for quick lookup - constant
 const VALID_SECTION_IDS = new Set(TRIP_SECTIONS.map(s => s.id));
 
-// Weather API key - memoized at module level
-const OPENWEATHER_API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY as string | undefined;
-
 const TripDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { getTripById, isLoading, deleteTrip } = useTrips();
+  const { destinations: allDestinations } = useDestinations();
   const tripId = id ? parseInt(id, 10) : null;
   const trip = tripId ? getTripById(tripId) : undefined;
 
@@ -84,9 +84,9 @@ const TripDetailPage = () => {
     return {
       currentStatus: calculateTripStatus(trip.departureDate, trip.returnDate),
       duration: calculateDurationInDays(trip.departureDate, trip.returnDate),
-      imageUrl: getDestinationImageById(trip.destinationId),
+      imageUrl: getDestinationImageById(trip.destinationId, allDestinations),
     };
-  }, [trip]);
+  }, [trip, allDestinations]);
 
   const activeSectionData = TRIP_SECTIONS.find((s) => s.id === activeSection);
 
@@ -184,7 +184,6 @@ const TripDetailPage = () => {
                     trip={trip}
                     duration={duration}
                     currentStatus={currentStatus}
-                    openWeatherApiKey={OPENWEATHER_API_KEY}
                   />
                 )}
 
@@ -193,7 +192,7 @@ const TripDetailPage = () => {
                 )}
 
                 {activeSection === 'accommodation' && (
-                  <TripPlaceholderSection message="Accommodation details will be available here." />
+                  <TripAccommodationSection trip={trip} />
                 )}
 
                 {activeSection === 'things-to-visit' && (
@@ -208,7 +207,6 @@ const TripDetailPage = () => {
                   <TripWeatherSection
                     trip={trip}
                     currentStatus={currentStatus}
-                    openWeatherApiKey={OPENWEATHER_API_KEY}
                   />
                 )}
 

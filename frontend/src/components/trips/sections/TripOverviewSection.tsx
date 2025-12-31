@@ -10,7 +10,6 @@ interface TripOverviewSectionProps {
   trip: Trip
   duration: number
   currentStatus: string
-  openWeatherApiKey: string | undefined
 }
 
 const formatCurrency = (amount: number): string => {
@@ -26,7 +25,6 @@ export function TripOverviewSection({
   trip,
   duration,
   currentStatus,
-  openWeatherApiKey,
 }: TripOverviewSectionProps) {
   const { totalBudget, totals } = useTripBudget(trip.id)
   const remainingBudget = totalBudget - totals.actualTotal
@@ -140,7 +138,6 @@ export function TripOverviewSection({
               Current Weather Conditions
             </p>
             <WeatherWidget
-              apiKey={openWeatherApiKey}
               cityName={trip.destinationName}
               locationName={trip.destinationLocation}
               width="100%"
@@ -151,7 +148,6 @@ export function TripOverviewSection({
           <div className="space-y-3">
             <p className="text-sm text-muted-foreground">Weather Forecast for Your Trip</p>
             <WeatherWidget
-              apiKey={openWeatherApiKey}
               forecastMode={{
                 cityName: trip.destinationName,
                 locationName: trip.destinationLocation,

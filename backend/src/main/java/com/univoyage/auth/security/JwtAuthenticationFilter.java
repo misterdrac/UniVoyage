@@ -20,13 +20,6 @@ import lombok.RequiredArgsConstructor;
 
 import java.io.IOException;
 
-/**
- * JwtAuthenticationFilter is a Spring Security filter that processes JWT authentication.
- * It checks for a JWT in an HttpOnly cookie and a CSRF secret in a custom header.
- * If both are valid, it sets the authentication in the SecurityContext.
- * This filter is applied to all requests except public endpoints like register and login.
- */
-
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -35,7 +28,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
 
     // Cookie name for the HttpOnly JWT (Token A)
-    private static final String JWT_COOKIE_NAME = "auth_token";
+    private static final String JWT_COOKIE_NAME = CookieUtils.JWT_COOKIE_NAME;
 
     // Header name for the client-sent CSRF secret (Token B)
     private static final String CSRF_HEADER_NAME = "X-CSRF-TOKEN";
@@ -44,25 +37,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final String[] PUBLIC_PATHS = {
             "/api/auth/register",
             "/api/auth/login",
-            "api/auth/google",
-            "api/auth/google/callback"
+            "/api/auth/google",
+            "/api/auth/google/callback"
     };
 
-    private boolean csrfRequired(HttpServletRequest request){
+    private boolean csrfRequired(HttpServletRequest request) {
         String method = request.getMethod();
-        // CSRF protection is typically required for state-changing methods
         return !(method.equals("GET") || method.equals("HEAD") || method.equals("OPTIONS"));
     }
 
-    /**
-     * This filter checks for the JWT in the HttpOnly cookie and the CSRF secret in the header.
-     * It performs the following steps:
-     * 1. Checks if the request is for a public path (register/login).
-     * 2. Extracts the JWT from the HttpOnly cookie.
-     * 3. Extracts the CSRF secret from the custom header.
-     * 4. Validates the JWT and checks if the CSRF secret matches.
-     * 5. Sets the authentication in the SecurityContext if valid.
-     */
+    private void clearAuthCookies(HttpServletResponse response) {
+        // Expire both cookies so FE doesn't keep stale CSRF/JWT pair
+        response.addCookie(CookieUtils.createExpiredCookie(CookieUtils.JWT_COOKIE_NAME));
+        response.addCookie(CookieUtils.createExpiredCookie(CookieUtils.CSRF_COOKIE_NAME));
+    }
+
     @Override
     protected void doFilterInternal(
             @SuppressWarnings("null") HttpServletRequest request,
@@ -70,9 +59,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @SuppressWarnings("null") FilterChain filterChain
     ) throws ServletException, IOException {
 
-        // 1. Check for public paths (only register and login, NOT /api/auth/me)
+        // 1) Public paths bypass
         String servletPath = request.getServletPath();
-        
         for (String publicPath : PUBLIC_PATHS) {
             if (servletPath.equals(publicPath)) {
                 filterChain.doFilter(request, response);
@@ -80,60 +68,47 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         }
 
-        // 2. Extract JWT (Token A) from the HttpOnly Cookie
+        // 2) Extract JWT from HttpOnly cookie
         Cookie jwtCookie = WebUtils.getCookie(request, JWT_COOKIE_NAME);
         final String jwt = (jwtCookie != null) ? jwtCookie.getValue() : null;
 
-        if (jwt == null) {
+        if (jwt == null || jwt.isBlank()) {
             // No JWT present - let Spring Security handle the 401/403
             filterChain.doFilter(request, response);
             return;
         }
 
-        // 3. Extract CSRF Secret (Token B) from the custom header
+        // 3) Extract CSRF secret from header
         final String headerCsrfSecret = request.getHeader(CSRF_HEADER_NAME);
 
-        String userIdString = null;
-        String jwtCsrfSecret = null;
+        final String userIdString;
+        final String jwtCsrfSecret;
 
         try {
-            // Parse JWT, handles signature validation and expiration check internally
             userIdString = jwtService.extractSubject(jwt);
             jwtCsrfSecret = jwtService.extractCsrfSecret(jwt);
-
         } catch (IllegalArgumentException e) {
-            // Invalid token (expired, tampered, or malformed)
-            response.addCookie(CookieUtils.createExpiredCookie(JWT_COOKIE_NAME));
-            filterChain.doFilter(request, response);
+            // Invalid token (expired, tampered, malformed)
+            clearAuthCookies(response);
+            SecurityContextHolder.clearContext();
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
 
-        // 4. Double Submit Cookie Check: The Core CSRF Mitigation
-        if(csrfRequired(request)){
+        // 4) Double submit CSRF check (only for state-changing)
+        if (csrfRequired(request)) {
             if (headerCsrfSecret == null || !headerCsrfSecret.equals(jwtCsrfSecret)) {
-                // Mismatch: CSRF attack suspected OR frontend failed to send the header.
-                response.addCookie(CookieUtils.createExpiredCookie(JWT_COOKIE_NAME));
+                clearAuthCookies(response);
+                SecurityContextHolder.clearContext();
                 response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                 return;
             }
         }
 
-        // 5. Authentication: Set Security Context
-        if (userIdString != null) {
-            UserDetails userDetails;
-            // Load user details from the database, in case user was deleted after token issuance, or database reset
-            try {
-                userDetails = this.userDetailsService.loadUserByUsername(userIdString);
-            } catch (UsernameNotFoundException ex) {
-                // User was deleted (DB reset, manual delete, etc.)
-                response.addCookie(CookieUtils.createExpiredCookie(JWT_COOKIE_NAME));
-                SecurityContextHolder.clearContext();
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                return;
-            }
+        // 5) Authenticate (load user by ID)
+        try {
+            UserDetails userDetails = this.userDetailsService.loadUserByUsername(userIdString);
 
-            // Token is already verified and CSRF is checked, set the context
-            // Always set authentication even if it exists (in case of token refresh)
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                     userDetails,
                     null,
@@ -141,7 +116,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             );
             authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authToken);
+
             System.out.println("Authentication set for user [" + userIdString + "] with authorities: " + userDetails.getAuthorities());
+        } catch (UsernameNotFoundException ex) {
+            // user deleted / db reset / stale token
+            clearAuthCookies(response);
+            SecurityContextHolder.clearContext();
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
         }
 
         filterChain.doFilter(request, response);

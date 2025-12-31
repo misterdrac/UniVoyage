@@ -3,9 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import type { ForecastDay } from '@/components/ui/weather-widget'
 import type { TripStatus } from '@/lib/tripStatusUtils'
-import { GoogleGenAI } from '@google/genai'
 import { cn } from '@/lib/utils'
 import { Loader2, Sparkles, AlertTriangle } from 'lucide-react'
+import { apiService } from '@/services/api'
 
 interface PackingSuggestionsSectionProps {
   tripId: number
@@ -15,15 +15,6 @@ interface PackingSuggestionsSectionProps {
   forecast: ForecastDay[] | null
   currentStatus: TripStatus
 }
-
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY ?? ''
-const GEMINI_MODEL = import.meta.env.VITE_GEMINI_MODEL ?? 'gemini-3.5-flash'
-
-const geminiClient = GEMINI_API_KEY
-  ? new GoogleGenAI({
-      apiKey: GEMINI_API_KEY,
-    })
-  : null
 
 interface SuggestionCategory {
   title: string
@@ -102,55 +93,9 @@ export function PackingSuggestionsSection({
     }
   }, [storageKey])
 
-  const buildPrompt = () => {
-    return `
-You are a concise travel packing assistant.
-Destination: ${destinationName}
-Trip dates: ${departureDate} to ${returnDate}
-
-Weather forecast (max/min in °C):
-${forecastSummary}
-
-Return a tailored packing plan in valid JSON ONLY using this schema:
-{
-  "summary": "short overview sentence",
-  "categories": [
-    { "title": "Clothing", "icon": "emoji", "items": [ "Item with explanation" ] },
-    { "title": "Accessories", "icon": "emoji", "items": [ "Item with explanation" ] },
-    { "title": "Documents & Electronics", "icon": "emoji", "items": [ "Item with explanation" ] },
-    { "title": "Toiletries & Health", "icon": "emoji", "items": [ "Item with explanation" ] }
-  ],
-  "reminders": [
-    "Short reminder"
-  ]
-}
-
-Rules:
-- Use exactly the four categories above in that order, 3-4 items each.
-- Documents & Electronics must mention local plug type and voltage requirements.
-- Toiletries & Health must mention disease-related precautions (e.g., malaria prophylaxis or vaccinations) if relevant to the region.
-- Always include at least one reminder about documents or medications.
-- Do not add markdown, commentary, triple backticks, or extra keys—JSON string only.`
-  }
-
   const generateSuggestions = useCallback(async () => {
     if (!forecastSummary) {
       setError("Packing advice will appear once a forecast is available.")
-      return
-    }
-
-    if (!GEMINI_API_KEY) {
-      setError("Missing Gemini API key. Set VITE_GEMINI_API_KEY to enable packing suggestions.")
-      return
-    }
-
-    if (!GEMINI_MODEL) {
-      setError("Missing Gemini model. Set VITE_GEMINI_MODEL (e.g., gemini-3.5-flash).")
-      return
-    }
-
-    if (!geminiClient) {
-      setError("Gemini client is not initialized. Check your API key.")
       return
     }
 
@@ -160,18 +105,19 @@ Rules:
       setStructuredSuggestions(null)
       setRawSuggestions(null)
 
-      const response = await geminiClient.models.generateContent({
-        model: GEMINI_MODEL,
-        contents: buildPrompt(),
+      const response = await apiService.generatePackingSuggestions({
+        destinationName,
+        departureDate,
+        returnDate,
+        forecastSummary,
       })
 
-      const text = response.text?.trim()
-
-      if (!text) {
-        throw new Error("Gemini returned an empty response. Please try again.")
+      if (!response.success || !response.content) {
+        setError(response.error || 'AI features are temporarily unavailable. Please try again later.')
+        return
       }
 
-      const cleaned = text
+      const cleaned = response.content
         .replace(/```json/gi, '')
         .replace(/```/g, '')
         .trim()
@@ -199,12 +145,12 @@ Rules:
         persistSuggestions({ structured: null, raw: cleaned, forecastSummary: forecastSummary ?? null })
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to generate packing suggestions.'
-      setError(message)
+      console.error('[Packing Suggestions Error]', err)
+      setError('Failed to generate packing suggestions. Please try again.')
     } finally {
       setIsLoading(false)
     }
-  }, [forecastSummary, persistSuggestions])
+  }, [forecastSummary, destinationName, departureDate, returnDate, persistSuggestions])
 
   const renderFallbackJson = () => {
     if (!rawSuggestions) return null

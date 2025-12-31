@@ -29,8 +29,28 @@ export const API_CONFIG = {
       UPDATE: '/trips',
       DELETE: '/trips',
       BUDGET: '/trips', // budget sub-resources
-    }
-  },
+    },
+            DESTINATIONS: {
+              GET_ALL: '/destinations',
+              SEARCH: '/destinations/search',
+            },
+            WEATHER: {
+              CURRENT: '/weather/current',
+              FORECAST: '/weather/forecast',
+            },
+            PLACES: {
+              SEARCH: '/places/search',
+            },
+            AI: {
+              ITINERARY: '/ai/itinerary',
+              PACKING: '/ai/packing',
+              STATUS: '/ai/status',
+            },
+            HOTELS: {
+              SEARCH: '/hotels/search',
+              STATUS: '/hotels/status',
+            },
+          },
   
   // Request timeout
   TIMEOUT: 10000,

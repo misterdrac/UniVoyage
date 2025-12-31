@@ -56,10 +56,6 @@ export interface WeatherApiResponse {
 
 export interface WeatherWidgetProps {
   /**
-   * API key for OpenWeather API
-   */
-  apiKey?: string
-  /**
    * Custom fetch function (optional)
    */
   onFetchWeather?: (lat: number, lng: number) => Promise<WeatherData>
@@ -83,7 +79,7 @@ export interface WeatherWidgetProps {
    */
   cityName?: string
   /**
-   * Location/country name to improve API accuracy (e.g., "Paris, France")
+   * Location/country name (optional)
    */
   locationName?: string
   /**

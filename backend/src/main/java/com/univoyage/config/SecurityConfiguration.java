@@ -13,6 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import jakarta.servlet.http.HttpServletResponse;
 
 import lombok.RequiredArgsConstructor;
 
@@ -42,11 +43,20 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
                         .requestMatchers("/api/auth/google", "/api/auth/google/callback").permitAll()
+                        // Destinations endpoints are publicly accessible (GET only)
+                        .requestMatchers(HttpMethod.GET, "/api/destinations", "/api/destinations/**").permitAll()
+                        // Weather endpoints require authentication (used in trip context)
+                        .requestMatchers("/api/weather/**").authenticated()
+                        // AI endpoints require authentication
+                        .requestMatchers("/api/ai/**").authenticated()
                         // /api/auth/me and other auth endpoints require authentication
                         .requestMatchers("/api/auth/me").authenticated()
                         .requestMatchers("/api/auth/**").authenticated()
                         // sve ostalo traži validan JWT + CSRF header
                         .anyRequest().authenticated()
+                )
+                .exceptionHandling(eh -> eh
+                        .authenticationEntryPoint((req, res, ex) -> res.sendError(HttpServletResponse.SC_UNAUTHORIZED))
                 )
                 // ubaci filter prije standardnog username-pass auth filtera
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

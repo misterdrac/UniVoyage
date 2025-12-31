@@ -5,7 +5,8 @@ import { type Option } from '@/components/ui/autocomplete';
 import { DestinationAutoComplete } from '@/components/ui/destination-autocomplete';
 import { Button } from '@/components/ui/button';
 import { DateRangePicker } from './DateRangePicker';
-import { destinations, getPopularDestinations, getPopularCountries } from '@/data/destinations';
+import { getPopularDestinations, getPopularCountries } from '@/data/destinations';
+import { useDestinations } from '@/hooks/useDestinations';
 import type { DateRange } from 'react-day-picker';
 import { useDestination } from '@/contexts/DestinationContext';
 import { cn } from '@/lib/utils';
@@ -26,22 +27,22 @@ export const DestinationPicker = ({ continent }: DestinationPickerProps) => {
   } = useDestination();
   const navigate = useNavigate();
   const [isCreatingTrip, setIsCreatingTrip] = useState(false);
-
+  const { destinations: apiDestinations } = useDestinations();
 
   // Popular countries - major countries with multiple destinations
   const popularCountries: Option[] = useMemo(() => {
-    return getPopularCountries(continent).map(location => ({
+    return getPopularCountries(apiDestinations, continent).map(location => ({
       value: location,
       label: location,
       location: location
     }));
-  }, [continent]);
+  }, [apiDestinations, continent]);
 
   // Get unique countries from destinations, filtered by continent if provided
   const countryOptions: Option[] = useMemo(() => {
     const filteredDestinations = continent 
-      ? destinations.filter(dest => dest.continent === continent)
-      : destinations;
+      ? apiDestinations.filter(dest => dest.continent === continent)
+      : apiDestinations;
     
     const uniqueCountries = Array.from(new Set(filteredDestinations.map(dest => dest.location)));
     return uniqueCountries
@@ -51,22 +52,22 @@ export const DestinationPicker = ({ continent }: DestinationPickerProps) => {
         label: location,
         location: location
       }));
-  }, [continent]);
+  }, [apiDestinations, continent]);
 
   // Popular destinations - major destinations from all continents
   const popularDestinations: Option[] = useMemo(() => {
-    return getPopularDestinations(continent).map(dest => ({
+    return getPopularDestinations(apiDestinations, continent).map(dest => ({
       value: dest.id.toString(),
       label: dest.title,
       location: dest.location
     }));
-  }, [continent]);
+  }, [apiDestinations, continent]);
 
   // Convert destinations to options for autocomplete, filtered by continent and selected country
   const destinationOptions: Option[] = useMemo(() => {
     let filtered = continent 
-      ? destinations.filter(dest => dest.continent === continent)
-      : destinations;
+      ? apiDestinations.filter(dest => dest.continent === continent)
+      : apiDestinations;
     
     if (selectedCountry) {
       filtered = filtered.filter(dest => dest.location === selectedCountry.label);
@@ -77,7 +78,7 @@ export const DestinationPicker = ({ continent }: DestinationPickerProps) => {
       label: dest.title,
       location: dest.location
     }));
-  }, [selectedCountry, continent]);
+  }, [apiDestinations, selectedCountry, continent]);
 
   // Reset destination when country changes
   const handleCountryChange = (option: Option | undefined) => {

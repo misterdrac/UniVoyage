@@ -9,10 +9,9 @@ import { PackingSuggestionsSection } from './PackingSuggestionsSection'
 interface TripWeatherSectionProps {
   trip: Trip
   currentStatus: TripStatus
-  openWeatherApiKey: string | undefined
 }
 
-export function TripWeatherSection({ trip, currentStatus, openWeatherApiKey }: TripWeatherSectionProps) {
+export function TripWeatherSection({ trip, currentStatus }: TripWeatherSectionProps) {
   const isOngoing = currentStatus === 'ongoing'
   const isCompleted = currentStatus === 'completed'
   const isPlanned = currentStatus === 'planned'
@@ -27,20 +26,7 @@ export function TripWeatherSection({ trip, currentStatus, openWeatherApiKey }: T
     returnDate: trip.returnDate,
   }), [trip.destinationName, trip.destinationLocation, trip.departureDate, trip.returnDate])
 
-  if (!openWeatherApiKey) {
-    return (
-      <Card className="p-6 border-2 border-dashed">
-        <CardContent className="p-0">
-          <p className="text-sm text-muted-foreground text-center">
-            Weather data is currently unavailable. Add an OpenWeather API key to enable live trip forecasts.
-          </p>
-        </CardContent>
-      </Card>
-    )
-  }
-
   const widgetBaseProps = {
-    apiKey: openWeatherApiKey,
     width: "100%" as const,
     animated: true,
   }

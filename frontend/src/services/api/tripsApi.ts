@@ -17,6 +17,11 @@ export interface TripsApi {
   deleteTrip(tripId: number): Promise<{ success: boolean; error?: string }>
   getTripBudget(tripId: number): Promise<{ success: boolean; budget?: TripBudgetPayload; error?: string }>
   saveTripBudget(tripId: number, payload: TripBudgetPayload): Promise<{ success: boolean; error?: string }>
+  saveTripAccommodation(tripId: number, data: {
+    accommodationName?: string
+    accommodationAddress?: string
+    accommodationPhone?: string
+  }): Promise<{ success: boolean; error?: string }>
 }
 
 export interface ItineraryApi {
@@ -200,6 +205,44 @@ export const tripsApi: { [K in keyof TripsApi]: (this: ApiClient, ...args: Param
       return { success: false, error: res.error ?? 'Failed to save trip budget' }
     } catch (err: any) {
       return { success: false, error: err?.message ?? 'Failed to save trip budget' }
+    }
+  },
+
+  async saveTripAccommodation(this: ApiClient, tripId, data) {
+    if (this.useMock) {
+      try {
+        const trips = this.getMockTrips()
+        const trip = trips.find((t: any) => t.id === tripId)
+        if (trip) {
+          trip.accommodationName = data.accommodationName
+          trip.accommodationAddress = data.accommodationAddress
+          trip.accommodationPhone = data.accommodationPhone
+          localStorage.setItem('mock_trips', JSON.stringify(trips))
+        }
+        return { success: true }
+      } catch (err: any) {
+        return { success: false, error: err?.message ?? 'Failed to save accommodation' }
+      }
+    }
+
+    // TODO Backend: Implement PUT /api/trips/{tripId}/accommodation endpoint to save accommodationName, accommodationAddress, and accommodationPhone to Trip entity
+    try {
+      const res = await this.request<{ success: boolean }>(
+        `${API_CONFIG.ENDPOINTS.TRIPS.UPDATE}/${tripId}/accommodation`,
+        {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        }
+      )
+
+      if (res.success) {
+        return { success: true }
+      }
+
+      return { success: false, error: res.error ?? 'Failed to save accommodation' }
+    } catch (err: any) {
+      return { success: false, error: err?.message ?? 'Failed to save accommodation' }
     }
   },
 }

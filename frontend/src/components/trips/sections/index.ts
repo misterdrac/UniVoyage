@@ -4,4 +4,5 @@ export * from './TripPlaceholderSection'
 export * from './TripBudgetSection'
 export * from './TripItinerarySection'
 export * from './TripPointsOfInterestSection'
+export * from './TripAccommodationSection'
 

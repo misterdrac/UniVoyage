@@ -32,7 +32,7 @@ export function TripForecastPanel({
           <div className="text-center py-8">
             <p className="text-sm text-destructive mb-2">{error}</p>
             <p className="text-xs text-muted-foreground">
-              Please check your API key or try again later.
+              Please try again later.
             </p>
           </div>
         ) : isTooFarAway ? (

@@ -144,7 +144,7 @@ export const DestinationsPageLayout = ({
                         <div>
                           <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2 sm:mb-3">Student Perks</h3>
                           <ul className="space-y-2">
-                            {destination.studentPerks!.map((perk, perkIndex) => (
+                            {(destination.studentPerks || []).map((perk, perkIndex) => (
                               <li key={perkIndex} className="flex items-start gap-2 text-muted-foreground text-sm sm:text-base">
                                 <span className="text-primary mt-1 shrink-0">•</span>
                                 <span>{perk}</span>
@@ -167,7 +167,7 @@ export const DestinationsPageLayout = ({
                         <div>
                           <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2 sm:mb-3">Student Perks</h3>
                           <ul className="space-y-2">
-                            {destination.studentPerks!.map((perk, perkIndex) => (
+                            {(destination.studentPerks || []).map((perk, perkIndex) => (
                               <li key={perkIndex} className="flex items-start gap-2 text-muted-foreground text-sm sm:text-base">
                                 <span className="text-primary mt-1 shrink-0">•</span>
                                 <span>{perk}</span>

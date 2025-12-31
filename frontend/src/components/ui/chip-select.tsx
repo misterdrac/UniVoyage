@@ -126,7 +126,7 @@ export function ChipSelect({
       {/* Dropdown */}
       <div className="relative">
         {isOpen && !disabled && filteredOptions.length > 0 && (
-          <div className="absolute top-0 z-10 w-full rounded-md border bg-popover shadow-md animate-in fade-in-0 zoom-in-95 max-h-[200px] overflow-y-auto">
+          <div className="absolute top-0 z-10 w-full rounded-md border bg-popover shadow-md animate-in fade-in-0 zoom-in-95 max-h-[200px] overflow-y-auto dropdown-scrollbar">
             <div className="p-1">
               {filteredOptions.map((option) => (
                 <div

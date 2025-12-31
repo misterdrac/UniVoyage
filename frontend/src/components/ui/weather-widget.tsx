@@ -36,7 +36,6 @@ export type {
  
 
 export function WeatherWidget({
-  apiKey,
   onFetchWeather,
   refreshInterval = 15 * 60 * 1000,
   width = "16rem",
@@ -74,23 +73,19 @@ export function WeatherWidget({
         // Use custom fetch function if provided (requires coordinates)
         weatherData = await onFetchWeather(latitude, longitude)
       } else {
-        if (!apiKey) {
-          throw new Error("API key is required when custom fetch function is not provided")
-        }
-
-        // Determine cache key and API URL based on available data
+        const { apiService } = await import('@/services/api')
         let cacheKey: string
-        let apiUrl: string
+        let result: { success: boolean; weather?: WeatherData; error?: string }
         
         if (city) {
           // Use city name for API call
           const queryLocation = locationName ? `${city}, ${locationName}` : city
           cacheKey = queryLocation
-          apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(queryLocation)}&APPID=${apiKey}&units=metric`
+          result = await apiService.getCurrentWeather(city, locationName || undefined)
         } else if (latitude !== undefined && longitude !== undefined) {
           // Use coordinates for API call
           cacheKey = `${latitude},${longitude}`
-          apiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&APPID=${apiKey}&units=metric`
+          result = await apiService.getCurrentWeatherByCoordinates(latitude, longitude)
         } else {
           throw new Error("Either coordinates or city name must be provided")
         }
@@ -105,35 +100,11 @@ export function WeatherWidget({
           return
         }
 
-        const response = await fetch(apiUrl)
-
-        if (!response.ok) {
-          const statusCode = response.status;
-          if (statusCode === 401) {
-            throw new Error("Invalid API key. Please check your OpenWeather API credentials")
-          } else if (statusCode === 404) {
-            throw new Error(city ? `Location "${city}" not found` : "Location not found. Please try different coordinates")
-          } else if (statusCode === 429) {
-            throw new Error("API call limit exceeded. Please try again later")
-          } else {
-            throw new Error(`Weather API error (${statusCode}): ${response.statusText}`)
-          }
+        if (!result.success || !result.weather) {
+          throw new Error(result.error || "Failed to fetch weather data")
         }
 
-        const data: WeatherApiResponse = await response.json()
-        const timezoneOffsetSeconds = data.timezone
-
-        // Check if it's day or night from icon code (icon codes ending with 'd' are day)
-        const isDay = data.weather[0].icon.includes('d')
-
-        weatherData = {
-          city: data.name,
-          temperature: Math.round(data.main.temp),
-          weatherType: mapWeatherType(data.weather[0].main),
-          dateTime: formatDateTimeForTimezone(timezoneOffsetSeconds),
-          isDay,
-          timezoneOffsetSeconds
-        }
+        weatherData = result.weather
 
         // Cache the result
         setCachedWeather(cacheKey, 'current', weatherData)
@@ -152,18 +123,18 @@ export function WeatherWidget({
       
     } catch (err) {
       console.error('Error fetching weather:', err)
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch weather data'
+      const errorMessage = 'Failed to fetch weather data'
       setError(errorMessage)
       onError?.(errorMessage)
     } finally {
       setLoading(false)
       setInitialLoad(false)
     }
-  }, [apiKey, locationName, onFetchWeather, onWeatherLoaded, onError])
+  }, [locationName, onFetchWeather, onWeatherLoaded, onError])
 
   // Fetch forecast for trip dates
   const fetchForecast = React.useCallback(async () => {
-    if (!forecastMode || !apiKey) return
+    if (!forecastMode) return
 
     const { cityName, locationName, departureDate, returnDate } = forecastMode
 
@@ -211,25 +182,14 @@ export function WeatherWidget({
         }
       }
 
-      // Fetch forecast from API
-      const response = await fetch(
-        `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(queryLocation)}&APPID=${apiKey}&units=metric`
-      )
-
-      if (!response.ok) {
-        const statusCode = response.status
-        if (statusCode === 401) {
-          throw new Error("Invalid API key. Please check your OpenWeather API credentials")
-        } else if (statusCode === 404) {
-          throw new Error(`Location "${queryLocation}" not found`)
-        } else if (statusCode === 429) {
-          throw new Error("API call limit exceeded. Please try again later")
-        } else {
-          throw new Error(`Weather API error (${statusCode}): ${response.statusText}`)
-        }
+      const { apiService } = await import('@/services/api')
+      const result = await apiService.getForecast(cityName, locationName || undefined)
+      
+      if (!result.success || !result.forecast) {
+        throw new Error(result.error || "Failed to fetch forecast data")
       }
 
-      const data: ForecastApiResponse = await response.json()
+      const data: ForecastApiResponse = result.forecast
       const timezoneOffsetSeconds = data.city?.timezone ?? 0
       const offsetMs = timezoneOffsetSeconds * 1000
       const todayDayNumber = getTimezoneDayNumber(Date.now(), offsetMs)
@@ -276,7 +236,13 @@ export function WeatherWidget({
       setIsTooFarAway(false)
     } catch (err) {
       console.error('Error fetching weather forecast:', err)
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch weather forecast'
+      let errorMessage = err instanceof Error ? err.message : 'Failed to fetch weather forecast'
+      // Transform error message to be more user-friendly for city not found errors
+      if (errorMessage.toLowerCase().includes('city not found') || 
+          errorMessage.toLowerCase().includes('404') ||
+          (errorMessage.toLowerCase().includes('not found') && errorMessage.toLowerCase().includes('weather'))) {
+        errorMessage = 'Weather forecast is not available for this location.'
+      }
       setError(errorMessage)
       setIsTooFarAway(false)
       onError?.(errorMessage)
@@ -284,7 +250,7 @@ export function WeatherWidget({
       setLoading(false)
       setInitialLoad(false)
     }
-  }, [forecastMode, apiKey, onError, emitForecast])
+  }, [forecastMode, onError, emitForecast])
 
   // Check permission status
   const checkPermissionStatus = React.useCallback(async () => {

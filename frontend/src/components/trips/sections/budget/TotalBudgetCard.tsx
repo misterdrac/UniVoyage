@@ -1,7 +1,9 @@
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Wallet, TrendingUp, TrendingDown, ChevronUp, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useState, useEffect } from 'react'
 
 const formatCurrency = (amount: number): string => {
   return new Intl.NumberFormat('en-US', {
@@ -27,6 +29,103 @@ export function TotalBudgetCard({
   totals,
   remainingBudget,
 }: TotalBudgetCardProps) {
+  const [inputValue, setInputValue] = useState(totalBudget.toString())
+  const [isFocused, setIsFocused] = useState(false)
+
+  // Sync input value when totalBudget changes externally (only when not focused)
+  useEffect(() => {
+    if (!isFocused) {
+      setInputValue(totalBudget.toString())
+    }
+  }, [totalBudget, isFocused])
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    
+    // Allow empty input while typing
+    if (value === '') {
+      setInputValue('')
+      updateTotalBudget(0)
+      return
+    }
+
+    // Allow numbers with optional decimal point and digits (e.g., "123.45", "123.", "123")
+    if (!/^\d*\.?\d*$/.test(value)) {
+      return
+    }
+
+    // Don't allow multiple decimal points
+    if ((value.match(/\./g) || []).length > 1) {
+      return
+    }
+
+    // Don't allow leading zeros (except "0" itself or "0." or "0.xx")
+    // This prevents things like "0123" but allows "0", "0.5", "0.12"
+    if (value.length > 1 && value[0] === '0' && value[1] !== '.') {
+      // If it starts with 0 and second char is not decimal, reject it
+      // But allow if it's just "0"
+      return
+    }
+
+    // Limit decimal places to 2
+    const decimalIndex = value.indexOf('.')
+    if (decimalIndex !== -1) {
+      const decimalPart = value.substring(decimalIndex + 1)
+      if (decimalPart.length > 2) {
+        return
+      }
+    }
+
+    const numValue = parseFloat(value)
+    
+    // If it's a valid number, validate range
+    if (!isNaN(numValue)) {
+      // Don't allow negative values
+      if (numValue < 0) {
+        setInputValue('0')
+        updateTotalBudget(0)
+        return
+      }
+      
+      // Limit to 10k
+      if (numValue > 10000) {
+        setInputValue('10000')
+        updateTotalBudget(10000)
+        return
+      }
+
+      // Update budget with the numeric value
+      updateTotalBudget(numValue)
+    }
+
+    // Always update input value to allow typing (even if it ends with a decimal point)
+    setInputValue(value)
+  }
+
+  const handleInputBlur = () => {
+    setIsFocused(false)
+    // On blur, ensure input shows a valid number
+    if (inputValue === '' || inputValue === '.' || isNaN(Number(inputValue))) {
+      setInputValue('0')
+      updateTotalBudget(0)
+    } else {
+      // Format to 2 decimal places if it's a decimal, otherwise show as integer
+      const numValue = parseFloat(inputValue)
+      if (!isNaN(numValue)) {
+        const formatted = numValue % 1 === 0 ? numValue.toString() : numValue.toFixed(2)
+        setInputValue(formatted)
+        updateTotalBudget(numValue)
+      } else {
+        setInputValue('0')
+        updateTotalBudget(0)
+      }
+    }
+  }
+
+  const handleInputFocus = () => {
+    setIsFocused(true)
+  }
+
   return (
     <div className={cn(
       'p-6 rounded-lg border-2 transition-all',
@@ -51,42 +150,32 @@ export function TotalBudgetCard({
           </div>
         </div>
 
-        {/* Budget Slider */}
+        {/* Budget Input and Slider */}
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="total-budget" className="text-sm font-medium text-muted-foreground">
+          <div className="space-y-3">
+            <Label htmlFor="total-budget-input" className="text-sm font-medium text-muted-foreground">
               Budget Amount
             </Label>
-            <div className="flex items-center gap-1.5">
-              <div className="text-right">
-                <p className="text-2xl font-bold text-foreground">
-                  {formatCurrency(totalBudget)}
-                </p>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Max: {formatCurrency(10000)}
-                </p>
+            <div className="flex items-center gap-3">
+              <div className="relative flex-1">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">
+                  $
+                </span>
+                <Input
+                  id="total-budget-input"
+                  type="text"
+                  inputMode="decimal"
+                  value={inputValue}
+                  onChange={handleInputChange}
+                  onFocus={handleInputFocus}
+                  onBlur={handleInputBlur}
+                  placeholder="0"
+                  className="pl-8 text-lg font-semibold h-12"
+                  maxLength={8}
+                />
               </div>
-              <div className="flex flex-col gap-0 shrink-0">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="h-5 w-5 p-0 hover:bg-muted rounded-b-none"
-                  onClick={() => updateTotalBudget(Math.min(10000, totalBudget + 1))}
-                  disabled={totalBudget >= 10000}
-                >
-                  <ChevronUp className="h-2.5 w-2.5" />
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="h-5 w-5 p-0 hover:bg-muted rounded-t-none"
-                  onClick={() => updateTotalBudget(Math.max(0, totalBudget - 1))}
-                  disabled={totalBudget <= 0}
-                >
-                  <ChevronDown className="h-2.5 w-2.5" />
-                </Button>
+              <div className="text-xs text-muted-foreground shrink-0">
+                Max: {formatCurrency(10000)}
               </div>
             </div>
           </div>
@@ -105,7 +194,7 @@ export function TotalBudgetCard({
               '[&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:bg-primary [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-background [&::-moz-range-thumb]:shadow-lg'
             )}
             style={{
-              background: `linear-gradient(to right, rgb(59 130 246) 0%, rgb(59 130 246) ${(totalBudget / 10000) * 100}%, rgb(229 231 235) ${(totalBudget / 10000) * 100}%, rgb(229 231 235) 100%)`
+              background: `linear-gradient(to right, var(--place-category-landmark-border) 0%, var(--place-category-landmark-border) ${(totalBudget / 10000) * 100}%, var(--border) ${(totalBudget / 10000) * 100}%, var(--border) 100%)`
             }}
           />
           <div className="flex items-center justify-between text-xs text-muted-foreground">
@@ -116,15 +205,21 @@ export function TotalBudgetCard({
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 gap-4">
-          <div className={cn(
-            'p-4 rounded-lg border',
-            'bg-blue-500/10 border-blue-500/30'
-          )}>
+          <div 
+            className="p-4 rounded-lg border"
+            style={{
+              backgroundColor: 'color-mix(in oklch, var(--spent) 10%, transparent)',
+              borderColor: 'color-mix(in oklch, var(--spent) 30%, transparent)',
+            }}
+          >
             <div className="flex items-center gap-2 mb-2">
-              <TrendingUp className="h-4 w-4 text-blue-600" />
+              <TrendingUp 
+                className="h-4 w-4" 
+                style={{ color: 'var(--spent)' }}
+              />
               <span className="text-xs text-muted-foreground font-medium">Spent</span>
             </div>
-            <p className="text-lg font-bold text-blue-600">
+            <p className="text-lg font-bold" style={{ color: 'var(--spent)' }}>
               {formatCurrency(totals.actualTotal)}
             </p>
             {totalBudget > 0 && (
@@ -134,24 +229,34 @@ export function TotalBudgetCard({
             )}
           </div>
 
-          <div className={cn(
-            'p-4 rounded-lg border',
-            remainingBudget < 0 
-              ? 'bg-destructive/10 border-destructive/30'
-              : 'bg-green-500/10 border-green-500/30'
-          )}>
+          <div 
+            className={cn(
+              'p-4 rounded-lg border',
+              remainingBudget < 0 && 'bg-destructive/10 border-destructive/30'
+            )}
+            style={remainingBudget >= 0 ? {
+              backgroundColor: 'color-mix(in oklch, var(--success) 10%, transparent)',
+              borderColor: 'color-mix(in oklch, var(--success) 30%, transparent)',
+            } : undefined}
+          >
             <div className="flex items-center gap-2 mb-2">
               {remainingBudget < 0 ? (
                 <TrendingDown className="h-4 w-4 text-destructive" />
               ) : (
-                <TrendingUp className="h-4 w-4 text-green-600" />
+                <TrendingUp 
+                  className="h-4 w-4" 
+                  style={{ color: 'var(--success)' }}
+                />
               )}
               <span className="text-xs text-muted-foreground font-medium">Remaining</span>
             </div>
-            <p className={cn(
-              'text-lg font-bold',
-              remainingBudget < 0 ? 'text-destructive' : 'text-green-600'
-            )}>
+            <p 
+              className={cn(
+                'text-lg font-bold',
+                remainingBudget < 0 && 'text-destructive'
+              )}
+              style={remainingBudget >= 0 ? { color: 'var(--success)' } : undefined}
+            >
               {formatCurrency(remainingBudget)}
             </p>
             {totalBudget > 0 && remainingBudget >= 0 && (

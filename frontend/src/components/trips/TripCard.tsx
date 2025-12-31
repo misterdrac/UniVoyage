@@ -5,6 +5,7 @@ import { getDestinationImageById } from '@/lib/destinationUtils'
 import { formatDateShort, formatDateLong, calculateDurationInDays } from '@/lib/dateUtils'
 import { getStatusConfig } from '@/lib/tripStatusUtils'
 import { cn } from '@/lib/utils'
+import { useDestinations } from '@/hooks/useDestinations'
 import type { Trip } from '@/types/trip'
 import { Calendar, Clock, MapPin, ArrowRight, Trash2, Loader2 } from 'lucide-react'
 
@@ -16,6 +17,7 @@ interface TripCardProps {
 }
 
 export function TripCard({ trip, isDeleting = false, onDelete, onView }: TripCardProps) {
+  const { destinations: allDestinations } = useDestinations()
   const status = useMemo(
     () => calculateTripStatus(trip.departureDate, trip.returnDate),
     [trip.departureDate, trip.returnDate]
@@ -25,7 +27,10 @@ export function TripCard({ trip, isDeleting = false, onDelete, onView }: TripCar
     () => calculateDurationInDays(trip.departureDate, trip.returnDate),
     [trip.departureDate, trip.returnDate]
   )
-  const imageUrl = useMemo(() => getDestinationImageById(trip.destinationId), [trip.destinationId])
+  const imageUrl = useMemo(
+    () => getDestinationImageById(trip.destinationId, allDestinations),
+    [trip.destinationId, allDestinations]
+  )
 
   const handleDelete = useCallback(
     (event: MouseEvent<HTMLButtonElement>) => {

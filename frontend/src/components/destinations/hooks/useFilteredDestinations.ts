@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import type { Option } from '@/components/ui/autocomplete';
 import type { Destination } from '@/data/destinations';
+import { hasFullDestinationDetails } from '@/data/destinations';
 
 interface UseFilteredDestinationsParams {
   destinations: Destination[];
@@ -34,7 +35,8 @@ export const useFilteredDestinations = ({
     }
 
     // Filter out minimal destinations (only show destinations with full details)
-    filtered = filtered.filter(dest => dest.imageUrl !== undefined);
+    // A destination needs imageUrl, overview, and budgetPerDay to display a card
+    filtered = filtered.filter(hasFullDestinationDetails);
 
     return filtered;
   }, [destinations, selectedCountry, selectedDestination]);
