@@ -40,7 +40,8 @@ CREATE TABLE trip_itineraries (
         FOREIGN KEY (trip_id) REFERENCES trips(id) ON DELETE CASCADE
 );
 
-CREATE TABLE trip_accommodations {
+-- trip accommodations table (1:1)
+CREATE TABLE trip_accommodations (
     trip_id BIGINT PRIMARY KEY,
 
     accommodation_name    VARCHAR(200),
@@ -50,9 +51,9 @@ CREATE TABLE trip_accommodations {
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_trip_accommodations_trip
-        FOREIGN KEY (trip_id) REFERENCES trips(id)
-        ON DELETE CASCADE
+        FOREIGN KEY (trip_id) REFERENCES trips(id) ON DELETE CASCADE
 );
 
-CREATE INDEX IF NOT EXISTS idx_trip_accommodations_name
-    ON trip_accommodations (accommodation_name);}
+
+CREATE INDEX idx_trip_accommodations_name ON trip_accommodations(accommodation_name);
+

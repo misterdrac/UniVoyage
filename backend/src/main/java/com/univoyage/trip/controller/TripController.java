@@ -5,6 +5,8 @@ import com.univoyage.trip.dto.CreateTripRequest;
 import com.univoyage.trip.dto.TripResponse;
 import com.univoyage.trip.service.TripService;
 import com.univoyage.auth.security.CurrentUser;
+import com.univoyage.trip.dto.TripAccommodationRequest;
+import com.univoyage.trip.dto.TripAccommodationResponse;
 
 import jakarta.validation.Valid;
 
@@ -72,22 +74,21 @@ public class TripController {
     }
 
     @PutMapping("/{tripId}/accommodation")
-    public ResponseEntity<ApiResponse<Void>> saveAccommodation(
-            @AuthenticationPrincipal Long userId,
+    public ResponseEntity<ApiResponse<Object>> saveAccommodation(
             @PathVariable Long tripId,
             @RequestBody TripAccommodationRequest req
     ) {
+        Long userId = currentUser.id();
         tripService.saveAccommodation(userId, tripId, req);
-        return ResponseEntity.ok(ApiResponse.success(null));
+        return ResponseEntity.ok(ApiResponse.ok(null));
     }
 
     @GetMapping("/{tripId}/accommodation")
-    public ResponseEntity<ApiResponse<TripAccommodationResponse>> getAccommodation(
-            @AuthenticationPrincipal Long userId,
-            @PathVariable Long tripId
-    ) {
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getAccommodation(@PathVariable Long tripId) {
+        Long userId = currentUser.id();
         TripAccommodationResponse acc = tripService.getAccommodation(userId, tripId);
-        return ResponseEntity.ok(ApiResponse.success(acc));
+        return ResponseEntity.ok(ApiResponse.ok(Map.of("accommodation", acc)));
     }
+
 
 }

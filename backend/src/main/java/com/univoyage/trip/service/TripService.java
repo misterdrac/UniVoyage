@@ -6,12 +6,17 @@ import com.univoyage.destination.repository.DestinationRepository;
 import com.univoyage.exception.ResourceNotFoundException;
 import com.univoyage.trip.dto.CreateTripRequest;
 import com.univoyage.trip.dto.TripResponse;
+import com.univoyage.trip.dto.TripAccommodationRequest;
+import com.univoyage.trip.dto.TripAccommodationResponse;
 import com.univoyage.trip.model.TripBudgetEntity;
 import com.univoyage.trip.model.TripEntity;
 import com.univoyage.trip.model.TripItineraryEntity;
+import com.univoyage.trip.model.TripAccommodationEntity;
 import com.univoyage.trip.repository.TripBudgetRepository;
 import com.univoyage.trip.repository.TripItineraryRepository;
+import com.univoyage.trip.repository.TripAccommodationRepository;
 import com.univoyage.trip.repository.TripRepository;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -103,39 +108,39 @@ public class TripService {
                         .build()
         );
     }
+
     @Transactional(readOnly = true)
     public TripAccommodationResponse getAccommodation(Long userId, Long tripId) {
         ensureOwner(userId, tripId);
 
         return tripAccommodationRepository.findById(tripId)
                 .map(e -> TripAccommodationResponse.builder()
+                        .tripId(tripId)
                         .accommodationName(e.getAccommodationName())
                         .accommodationAddress(e.getAccommodationAddress())
                         .accommodationPhone(e.getAccommodationPhone())
-                        .build())
+                        .updatedAt(e.getUpdatedAt())
+                        .build()
+                )
                 .orElse(null);
     }
+
 
     @Transactional
     public void saveAccommodation(Long userId, Long tripId, TripAccommodationRequest req) {
         ensureOwner(userId, tripId);
 
-        tripAccommodationRepository.save(
-                TripAccommodationEntity.builder()
-                        .tripId(tripId)
-                        .accommodationName(trimToNull(req.getAccommodationName()))
-                        .accommodationAddress(trimToNull(req.getAccommodationAddress()))
-                        .accommodationPhone(trimToNull(req.getAccommodationPhone()))
-                        .updatedAt(Instant.now())
-                        .build()
-        );
+        TripAccommodationEntity entity = TripAccommodationEntity.builder()
+                .tripId(tripId)
+                .accommodationName(req.getAccommodationName())
+                .accommodationAddress(req.getAccommodationAddress())
+                .accommodationPhone(req.getAccommodationPhone())
+                .updatedAt(Instant.now())
+                .build();
+
+        tripAccommodationRepository.save(entity);
     }
 
-    private String trimToNull(String s) {
-        if (s == null) return null;
-        String t = s.trim();
-        return t.isEmpty() ? null : t;
-    }
 
     private void ensureOwner(Long userId, Long tripId) {
         if (!tripRepository.existsByIdAndUserId(tripId, userId)) {
