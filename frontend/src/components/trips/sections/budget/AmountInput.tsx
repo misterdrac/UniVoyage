@@ -44,7 +44,7 @@ export function AmountInput({
           variant="ghost"
           size="icon"
           className="h-4 w-4 sm:h-5 sm:w-5 p-0 hover:bg-muted rounded-b-none"
-          onClick={() => onChange(parseFloat(((value || 0) + 0.01).toFixed(2)))}
+          onClick={() => onChange(parseFloat(((value || 0) + 1.00).toFixed(2)))}
         >
           <ChevronUp className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
         </Button>
@@ -53,7 +53,7 @@ export function AmountInput({
           variant="ghost"
           size="icon"
           className="h-4 w-4 sm:h-5 sm:w-5 p-0 hover:bg-muted rounded-t-none"
-          onClick={() => onChange(Math.max(0, parseFloat(((value || 0) - 0.01).toFixed(2))))}
+          onClick={() => onChange(Math.max(0, parseFloat(((value || 0) - 1.00).toFixed(2))))}
         >
           <ChevronDown className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
         </Button>

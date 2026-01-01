@@ -6,6 +6,7 @@ import { CATEGORY_CONFIG } from './categoryConfig'
 import { AddExpenseDialog } from './AddExpenseDialog'
 import { ExpenseItem } from './ExpenseItem'
 import type { TripBudgetExpense, BudgetCategoryValue } from '@/types/budget'
+import { toast } from 'sonner'
 
 const formatCurrency = (amount: number): string => {
   return new Intl.NumberFormat('en-US', {
@@ -35,7 +36,6 @@ export function CategoryExpenseCard({
   totalBudget,
   remainingBudget,
   onAddExpense,
-  onEditExpense,
   onDeleteExpense,
   onStartEdit,
   editingExpenseId,
@@ -89,6 +89,7 @@ export function CategoryExpenseCard({
           onOpenChange={setAddDialogOpen}
           onSubmit={(expense) => {
             onAddExpense({ ...expense, category: category.value })
+            toast.success('Expense added successfully')
           }}
           totalBudget={totalBudget}
           remainingBudget={remainingBudget}
@@ -108,7 +109,9 @@ export function CategoryExpenseCard({
                 key={expense.id}
                 expense={expense}
                 onEdit={() => onStartEdit(expense)}
-                onDelete={() => onDeleteExpense(expense.id)}
+                onDelete={() => {
+                  onDeleteExpense(expense.id)
+                }}
               />
             ))}
           </div>

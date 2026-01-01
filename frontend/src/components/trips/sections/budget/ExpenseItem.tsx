@@ -1,6 +1,8 @@
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Edit2, Trash2 } from 'lucide-react'
+import { Edit2, Trash2, Undo2, Shredder } from 'lucide-react'
 import { format } from 'date-fns'
+import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { CATEGORY_CONFIG } from './categoryConfig'
 import type { TripBudgetExpense } from '@/types/budget'
@@ -21,7 +23,22 @@ interface ExpenseItemProps {
 }
 
 export function ExpenseItem({ expense, onEdit, onDelete }: ExpenseItemProps) {
+  const [isDeleting, setIsDeleting] = useState(false)
   const expenseConfig = CATEGORY_CONFIG[expense.category]
+
+  const handleDeleteClick = () => {
+    setIsDeleting(true)
+  }
+
+  const handleConfirmDelete = () => {
+    onDelete()
+    setIsDeleting(false)
+    toast.success('Expense deleted successfully')
+  }
+
+  const handleCancelDelete = () => {
+    setIsDeleting(false)
+  }
 
   return (
     <div className={cn(
@@ -59,14 +76,35 @@ export function ExpenseItem({ expense, onEdit, onDelete }: ExpenseItemProps) {
           >
             <Edit2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7 sm:h-8 sm:w-8 text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0"
-            onClick={onDelete}
-          >
-            <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-          </Button>
+          {isDeleting ? (
+            <>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 sm:h-8 sm:w-8 text-muted-foreground hover:text-foreground shrink-0"
+                onClick={handleCancelDelete}
+              >
+                <Undo2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 sm:h-8 sm:w-8 text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0"
+                onClick={handleConfirmDelete}
+              >
+                <Shredder className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              </Button>
+            </>
+          ) : (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 sm:h-8 sm:w-8 text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0"
+              onClick={handleDeleteClick}
+            >
+              <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            </Button>
+          )}
         </div>
       </div>
     </div>
