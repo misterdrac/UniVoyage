@@ -6,7 +6,7 @@ import { usePaginatedItems } from '@/hooks/usePaginatedItems'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import { apiService } from '@/services/api'
 
@@ -26,14 +26,48 @@ interface BookingPartner {
 export function TripAccommodationSection({ trip }: TripAccommodationSectionProps) {
   const cityName = trip.destinationName || trip.destinationLocation
   
-  // State for user's saved accommodation details
+  // State for user's saved accommodation details - single source of truth
   const [accommodationName, setAccommodationName] = useState('')
   const [accommodationAddress, setAccommodationAddress] = useState('')
   const [accommodationPhone, setAccommodationPhone] = useState('')
   const [isSaved, setIsSaved] = useState(false)
+  const [isLoadingAccommodation, setIsLoadingAccommodation] = useState(true)
 
   const checkIn = trip.departureDate
   const checkOut = trip.returnDate
+
+  // Load accommodation data from backend on mount - single source of truth
+  useEffect(() => {
+    let isMounted = true
+
+    const loadAccommodation = async () => {
+      setIsLoadingAccommodation(true)
+      try {
+        const result = await apiService.getTripAccommodation(trip.id)
+        if (isMounted && result.success && result.accommodation) {
+          setAccommodationName(result.accommodation.accommodationName || '')
+          setAccommodationAddress(result.accommodation.accommodationAddress || '')
+          setAccommodationPhone(result.accommodation.accommodationPhone || '')
+          // Mark as saved if any data exists
+          if (result.accommodation.accommodationName || result.accommodation.accommodationAddress || result.accommodation.accommodationPhone) {
+            setIsSaved(true)
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load accommodation:', err)
+      } finally {
+        if (isMounted) {
+          setIsLoadingAccommodation(false)
+        }
+      }
+    }
+
+    loadAccommodation()
+
+    return () => {
+      isMounted = false
+    }
+  }, [trip.id])
 
   // Fetch hotel suggestions for the destination city
   const { hotels, isLoading, error, refetch } = useHotels({
@@ -128,12 +162,14 @@ export function TripAccommodationSection({ trip }: TripAccommodationSectionProps
                 onChange={(e) => { setAccommodationName(e.target.value); setIsSaved(false) }}
                 placeholder="Hotel / Hostel name"
                 className="h-9 text-sm"
+                disabled={isLoadingAccommodation}
               />
               <Input
                 value={accommodationAddress}
                 onChange={(e) => { setAccommodationAddress(e.target.value); setIsSaved(false) }}
                 placeholder="Address"
                 className="h-9 text-sm"
+                disabled={isLoadingAccommodation}
               />
               <div className="flex gap-2">
                 <div className="relative flex-1">
@@ -144,12 +180,13 @@ export function TripAccommodationSection({ trip }: TripAccommodationSectionProps
                     placeholder="Phone"
                     type="tel"
                     className="h-9 text-sm pl-8"
+                    disabled={isLoadingAccommodation}
                   />
                 </div>
                 <Button 
                   size="sm" 
                   onClick={handleSave}
-                  disabled={!hasAccommodationInfo || isSaved}
+                  disabled={!hasAccommodationInfo || isSaved || isLoadingAccommodation}
                   className="h-9 px-3"
                 >
                   {isSaved ? <Check className="h-4 w-4" /> : <Save className="h-4 w-4" />}
