@@ -49,7 +49,7 @@ export const tripsApi: { [K in keyof TripsApi]: (this: ApiClient, ...args: Param
 
         const user = JSON.parse(savedUser) as User
         const trips = this.getMockTrips()
-
+        //todo remove mock after everything is working
         const newTrip = {
           id: trips.length > 0 ? Math.max(...trips.map((t: any) => t.id)) + 1 : 1,
           userId: user.id,

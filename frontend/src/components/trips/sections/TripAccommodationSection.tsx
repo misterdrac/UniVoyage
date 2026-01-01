@@ -1,5 +1,5 @@
 import { Card, CardContent } from '@/components/ui/card'
-import { Hotel, Loader2, AlertCircle, RefreshCw, Building, ExternalLink, MapPin, Star, Users, Phone, Save, Check } from 'lucide-react'
+import { Hotel, Loader2, AlertCircle, RefreshCw, Building, ExternalLink, MapPin, Star, Users, Phone, Save, Check, Trash2 } from 'lucide-react'
 import type { Trip } from '@/types/trip'
 import { useHotels } from '@/hooks/useHotels'
 import { usePaginatedItems } from '@/hooks/usePaginatedItems'
@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import { apiService } from '@/services/api'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 
 interface TripAccommodationSectionProps {
   trip: Trip
@@ -32,6 +33,7 @@ export function TripAccommodationSection({ trip }: TripAccommodationSectionProps
   const [accommodationPhone, setAccommodationPhone] = useState('')
   const [isSaved, setIsSaved] = useState(false)
   const [isLoadingAccommodation, setIsLoadingAccommodation] = useState(true)
+  const [showClearDialog, setShowClearDialog] = useState(false)
 
   const checkIn = trip.departureDate
   const checkOut = trip.returnDate
@@ -126,6 +128,29 @@ export function TripAccommodationSection({ trip }: TripAccommodationSectionProps
 
   const hasAccommodationInfo = accommodationName.trim() || accommodationAddress.trim() || accommodationPhone.trim()
 
+  const handleClear = async () => {
+    try {
+      const result = await apiService.saveTripAccommodation(trip.id, {
+        accommodationName: undefined,
+        accommodationAddress: undefined,
+        accommodationPhone: undefined,
+      })
+
+      if (result.success) {
+        setAccommodationName('')
+        setAccommodationAddress('')
+        setAccommodationPhone('')
+        setIsSaved(false)
+        setShowClearDialog(false)
+        toast.success('Accommodation details cleared')
+      } else {
+        toast.error(result.error || 'Failed to clear accommodation details')
+      }
+    } catch (err) {
+      toast.error('Failed to clear accommodation details')
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -144,12 +169,25 @@ export function TripAccommodationSection({ trip }: TripAccommodationSectionProps
             <div className="bg-gradient-to-r from-primary to-primary/80 p-5 text-white">
               <div className="flex items-center justify-between">
                 <Hotel className="h-8 w-8" />
-                {isSaved && (
-                  <span className="flex items-center gap-1 text-xs bg-white/20 px-2 py-0.5 rounded-full">
-                    <Check className="h-3 w-3" />
-                    Saved
-                  </span>
-                )}
+                <div className="flex items-center gap-2">
+                  {isSaved && (
+                    <span className="flex items-center gap-1 text-xs bg-white/20 px-2 py-0.5 rounded-full">
+                      <Check className="h-3 w-3" />
+                      Saved
+                    </span>
+                  )}
+                  {isSaved && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowClearDialog(true)}
+                      className="h-7 w-7 p-0 text-white/80 hover:text-white hover:bg-white/20"
+                      title="Clear accommodation details"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  )}
+                </div>
               </div>
               <h4 className="text-lg font-bold mt-3">My Accommodation</h4>
               <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full mt-2 inline-block">
@@ -389,6 +427,17 @@ export function TripAccommodationSection({ trip }: TripAccommodationSectionProps
           </div>
         </CardContent>
       </Card>
+
+      <ConfirmDialog
+        open={showClearDialog}
+        title="Clear Accommodation Details"
+        description="Are you sure you want to delete all accommodation information? This action cannot be undone."
+        confirmLabel="Clear"
+        cancelLabel="Cancel"
+        confirmVariant="destructive"
+        onConfirm={handleClear}
+        onCancel={() => setShowClearDialog(false)}
+      />
     </div>
   )
 }
