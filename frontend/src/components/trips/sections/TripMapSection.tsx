@@ -1,11 +1,13 @@
 import { useEffect, useState, useMemo } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
-import { Icon, DivIcon, LatLngExpression } from 'leaflet'
+import { Icon, DivIcon } from 'leaflet'
+import type { LatLngExpression } from 'leaflet'
 import { Card, CardContent } from '@/components/ui/card'
 import { MapPin, Loader2, AlertCircle } from 'lucide-react'
 import type { Trip } from '@/types/trip'
 import { cn } from '@/lib/utils'
 import { usePointsOfInterest } from '@/hooks/usePointsOfInterest'
+import { PlacesLoadingCard } from './PlacesLoadingCard'
 
 // Import Leaflet CSS
 import 'leaflet/dist/leaflet.css'
@@ -233,13 +235,16 @@ export function TripMapSection({ trip }: TripMapSectionProps) {
               • {poisWithCoords.length} place{poisWithCoords.length !== 1 ? 's' : ''} to visit
             </span>
           )}
-          {isLoadingPoi && (
-            <span className="ml-2 text-muted-foreground/70">
-              • Loading places...
-            </span>
-          )}
         </p>
       </div>
+
+      {/* Show loading card while POIs are loading */}
+      {isLoadingPoi && (
+        <PlacesLoadingCard
+          message="Loading places to show on map"
+          compact
+        />
+      )}
 
       <Card className="overflow-hidden">
         <div
