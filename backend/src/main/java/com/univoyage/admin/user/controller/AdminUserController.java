@@ -1,7 +1,8 @@
-package com.univoyage.admin.user;
+package com.univoyage.admin.user.controller;
 
 import com.univoyage.admin.user.dto.AdminUserResponse;
 import com.univoyage.admin.user.dto.UpdateUserRoleRequest;
+import com.univoyage.admin.user.service.AdminUserService;
 import com.univoyage.common.response.ApiResponse;
 import com.univoyage.user.model.UserEntity;
 import jakarta.validation.Valid;

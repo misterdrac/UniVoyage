@@ -1,4 +1,4 @@
-package com.univoyage.admin.user;
+package com.univoyage.admin.user.service;
 
 import com.univoyage.admin.user.dto.AdminUserResponse;
 import com.univoyage.exception.ResourceNotFoundException;

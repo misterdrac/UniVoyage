@@ -1,4 +1,4 @@
-package com.univoyage.admin.destination;
+package com.univoyage.admin.destination.service;
 
 import com.univoyage.admin.destination.dto.*;
 import com.univoyage.exception.ResourceNotFoundException;

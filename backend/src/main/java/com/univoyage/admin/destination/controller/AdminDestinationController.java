@@ -1,6 +1,7 @@
-package com.univoyage.admin.destination;
+package com.univoyage.admin.destination.controller;
 
 import com.univoyage.admin.destination.dto.*;
+import com.univoyage.admin.destination.service.AdminDestinationService;
 import com.univoyage.common.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
