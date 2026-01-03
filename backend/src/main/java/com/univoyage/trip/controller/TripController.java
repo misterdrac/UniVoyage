@@ -63,7 +63,8 @@ public class TripController {
     @GetMapping("/{tripId}/itinerary")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getItinerary(@PathVariable Long tripId) {
         Long userId = currentUser.id();
-        return ResponseEntity.ok(ApiResponse.ok(Map.of("itinerary", tripService.getItinerary(userId, tripId))));
+        Object itinerary = tripService.getItinerary(userId, tripId);
+        return ResponseEntity.ok(ApiResponse.ok(Map.of("itinerary", itinerary == null ? Map.of() : itinerary)));
     }
 
     @PutMapping("/{tripId}/itinerary")
