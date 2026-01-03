@@ -1,7 +1,7 @@
 package com.univoyage.admin.user;
 
 import com.univoyage.admin.user.dto.AdminUserResponse;
-import com.univoyage.common.exception.ResourceNotFoundException;
+import com.univoyage.exception.ResourceNotFoundException;
 import com.univoyage.user.model.Role;
 import com.univoyage.user.model.UserEntity;
 import com.univoyage.user.repository.UserRepository;
