@@ -10,6 +10,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 
 @RestController
 @RequestMapping("/api/admin/users")
@@ -20,12 +23,12 @@ public class AdminUserController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<Page<AdminUserResponse>>> list(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
-            @RequestParam(required = false) String search
+            @RequestParam(required = false) String search,
+            @PageableDefault(size = 20, sort = "dateOfRegister", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        return ResponseEntity.ok(ApiResponse.ok(adminUserService.listUsers(page, size, search)));
+        return ResponseEntity.ok(ApiResponse.ok(adminUserService.listUsers(search, pageable)));
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<AdminUserResponse>> get(@PathVariable long id) {

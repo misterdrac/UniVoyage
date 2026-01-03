@@ -2,11 +2,25 @@ package com.univoyage.destination.repository;
 
 import com.univoyage.destination.model.DestinationEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface DestinationRepository extends JpaRepository<DestinationEntity, Long> {
+
     Optional<DestinationEntity> findByNameAndLocation(String name, String location);
+
     List<DestinationEntity> findTop25ByNameContainingIgnoreCaseOrLocationContainingIgnoreCase(String name, String location);
+
+    @Query("""
+    SELECT d FROM DestinationEntity d
+    WHERE lower(d.name) LIKE concat('%', :q, '%')
+       OR lower(d.location) LIKE concat('%', :q, '%')
+       OR lower(d.continent) LIKE concat('%', :q, '%')
+    """)
+    Page<DestinationEntity> searchAdminDestinations(@Param("q") String q, Pageable pageable);
 }

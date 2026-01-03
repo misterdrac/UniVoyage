@@ -7,6 +7,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+
 
 @RestController
 @RequestMapping("/api/admin/destinations")
@@ -17,10 +21,10 @@ public class AdminDestinationController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<Page<AdminDestinationResponse>>> list(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
+            @RequestParam(required = false) String search,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        return ResponseEntity.ok(ApiResponse.ok(adminDestinationService.list(page, size)));
+        return ResponseEntity.ok(ApiResponse.ok(adminDestinationService.list(search, pageable)));
     }
 
     @GetMapping("/{id}")

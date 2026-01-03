@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Pageable;
 
 @Service
 @RequiredArgsConstructor
@@ -16,8 +17,7 @@ public class AdminUserService {
 
     private final UserRepository userRepository;
 
-    public Page<AdminUserResponse> listUsers(int page, int size, String search) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "dateOfRegister"));
+    public Page<AdminUserResponse> listUsers(String search, Pageable pageable) {
 
         Page<UserEntity> users;
         if (search == null || search.isBlank()) {

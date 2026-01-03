@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
 
@@ -17,10 +18,19 @@ public class AdminDestinationService {
 
     private final DestinationRepository destinationRepository;
 
-    public Page<AdminDestinationResponse> list(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        return destinationRepository.findAll(pageable).map(this::toDto);
+    public Page<AdminDestinationResponse> list(String search, Pageable pageable) {
+
+        Page<DestinationEntity> page;
+        if (search == null || search.isBlank()) {
+            page = destinationRepository.findAll(pageable);
+        } else {
+            // treba metoda u repo (ispod ti dajem)
+            page = destinationRepository.searchAdminDestinations(search.toLowerCase(), pageable);
+        }
+
+        return page.map(this::toDto);
     }
+
 
     public AdminDestinationResponse get(long id) {
         return destinationRepository.findById(id)
