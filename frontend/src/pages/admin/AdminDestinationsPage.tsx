@@ -1,6 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useTheme } from '@/contexts/ThemeContext';
 import { apiService } from '@/services/api';
 import type { AdminDestination, CreateDestinationRequest } from '@/services/api/adminApi';
 import { Button } from '@/components/ui/button';
@@ -15,12 +13,17 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {
-  Home,
-  Sun,
-  Moon,
-  Search,
-  ChevronUp,
-  ChevronDown,
+  AdminHeader,
+  AdminSearchBar,
+  AdminPagination,
+  AdminLoadingState,
+  AdminEmptyState,
+  AdminEmptySelection,
+  SortableTableHeader,
+} from '@/components/admin';
+import { useAdminTable } from '@/hooks/useAdminTable';
+import { formatDateShort } from '@/lib/dateUtils';
+import {
   Save,
   Loader2,
   MapPin,
@@ -28,53 +31,57 @@ import {
   DollarSign,
   Image,
   FileText,
-  ChevronLeft,
-  ChevronRight,
   Plus,
   Trash2,
   X,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-type SortField = 'name' | 'location' | 'continent' | 'budgetPerDay' | 'createdAt' | 'updatedAt';
-type SortDirection = 'asc' | 'desc';
+type DestinationSortField = 'name' | 'location' | 'continent' | 'budgetPerDay' | 'createdAt' | 'updatedAt';
+
+const DESTINATION_TABLE_COLUMNS: { field: DestinationSortField; label: string }[] = [
+  { field: 'name', label: 'Name' },
+  { field: 'location', label: 'Location' },
+  { field: 'continent', label: 'Continent' },
+  { field: 'budgetPerDay', label: 'Budget/Day' },
+  { field: 'createdAt', label: 'Created' },
+  { field: 'updatedAt', label: 'Updated' },
+];
 
 const CONTINENTS = ['Europe', 'Asia', 'Africa', 'North America', 'South America', 'Oceania', 'Antarctica'];
 const MAX_PERKS = 5;
 
-const AdminDestinationsPage: React.FC = () => {
-  const navigate = useNavigate();
-  const { theme, toggleTheme } = useTheme();
+const EMPTY_FORM: CreateDestinationRequest = {
+  name: '',
+  location: '',
+  continent: '',
+  imageUrl: '',
+  imageAlt: '',
+  overview: '',
+  budgetPerDay: 0,
+  whyVisit: '',
+  studentPerks: [],
+};
 
+const AdminDestinationsPage: React.FC = () => {
   // Data state
   const [destinations, setDestinations] = useState<AdminDestination[]>([]);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Pagination & sorting state
-  const [page, setPage] = useState(0);
-  const [pageSize] = useState(10);
-  const [sortField, setSortField] = useState<SortField>('createdAt');
-  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
-  const [searchQuery, setSearchQuery] = useState('');
+  // Table state
+  const table = useAdminTable<DestinationSortField>({
+    defaultSortField: 'createdAt',
+    defaultSortDirection: 'desc',
+  });
 
   // Selection state
   const [selectedDestination, setSelectedDestination] = useState<AdminDestination | null>(null);
   const [isCreating, setIsCreating] = useState(false);
 
   // Edit form state
-  const [formData, setFormData] = useState<CreateDestinationRequest>({
-    name: '',
-    location: '',
-    continent: '',
-    imageUrl: '',
-    imageAlt: '',
-    overview: '',
-    budgetPerDay: 0,
-    whyVisit: '',
-    studentPerks: [],
-  });
+  const [formData, setFormData] = useState<CreateDestinationRequest>(EMPTY_FORM);
   const [newPerk, setNewPerk] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -84,10 +91,10 @@ const AdminDestinationsPage: React.FC = () => {
     setIsLoading(true);
     try {
       const result = await apiService.getAdminDestinations({
-        page,
-        size: pageSize,
-        sort: `${sortField},${sortDirection}`,
-        search: searchQuery || undefined,
+        page: table.page,
+        size: table.pageSize,
+        sort: table.sortString,
+        search: table.searchQuery || undefined,
       });
       setDestinations(result.content);
       setTotalPages(result.totalPages);
@@ -98,24 +105,12 @@ const AdminDestinationsPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [page, pageSize, sortField, sortDirection, searchQuery]);
+  }, [table.page, table.pageSize, table.sortString, table.searchQuery]);
 
   useEffect(() => {
     fetchDestinations();
   }, [fetchDestinations]);
 
-  // Handle sort
-  const handleSort = (field: SortField) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortDirection('asc');
-    }
-    setPage(0);
-  };
-
-  // Handle destination selection
   const handleSelectDestination = (destination: AdminDestination) => {
     setSelectedDestination(destination);
     setIsCreating(false);
@@ -132,24 +127,12 @@ const AdminDestinationsPage: React.FC = () => {
     });
   };
 
-  // Handle create new
   const handleCreateNew = () => {
     setSelectedDestination(null);
     setIsCreating(true);
-    setFormData({
-      name: '',
-      location: '',
-      continent: '',
-      imageUrl: '',
-      imageAlt: '',
-      overview: '',
-      budgetPerDay: 0,
-      whyVisit: '',
-      studentPerks: [],
-    });
+    setFormData(EMPTY_FORM);
   };
 
-  // Add perk
   const handleAddPerk = () => {
     const currentPerks = formData.studentPerks || [];
     if (currentPerks.length >= MAX_PERKS) {
@@ -157,15 +140,11 @@ const AdminDestinationsPage: React.FC = () => {
       return;
     }
     if (newPerk.trim()) {
-      setFormData({
-        ...formData,
-        studentPerks: [...currentPerks, newPerk.trim()],
-      });
+      setFormData({ ...formData, studentPerks: [...currentPerks, newPerk.trim()] });
       setNewPerk('');
     }
   };
 
-  // Remove perk
   const handleRemovePerk = (index: number) => {
     setFormData({
       ...formData,
@@ -173,7 +152,6 @@ const AdminDestinationsPage: React.FC = () => {
     });
   };
 
-  // Handle save changes
   const handleSaveChanges = async () => {
     if (!formData.name || !formData.location || !formData.continent) {
       toast.error('Name, Location, and Continent are required');
@@ -202,28 +180,15 @@ const AdminDestinationsPage: React.FC = () => {
     }
   };
 
-  // Handle delete
   const handleDelete = async () => {
-    if (!selectedDestination) return;
-    
-    if (!confirm('Are you sure you want to delete this destination?')) return;
+    if (!selectedDestination || !confirm('Are you sure you want to delete this destination?')) return;
 
     setIsDeleting(true);
     try {
       await apiService.deleteDestination(selectedDestination.id);
       setDestinations(destinations.filter(d => d.id !== selectedDestination.id));
       setSelectedDestination(null);
-      setFormData({
-        name: '',
-        location: '',
-        continent: '',
-        imageUrl: '',
-        imageAlt: '',
-        overview: '',
-        budgetPerDay: 0,
-        whyVisit: '',
-        studentPerks: [],
-      });
+      setFormData(EMPTY_FORM);
       toast.success('Destination deleted successfully');
     } catch (error) {
       console.error('Failed to delete destination:', error);
@@ -233,179 +198,69 @@ const AdminDestinationsPage: React.FC = () => {
     }
   };
 
-  // Format date
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
-
-  // Render sort indicator
-  const SortIndicator = ({ field }: { field: SortField }) => {
-    if (sortField !== field) return null;
-    return sortDirection === 'asc' ? (
-      <ChevronUp className="w-4 h-4" />
-    ) : (
-      <ChevronDown className="w-4 h-4" />
-    );
+  const updateField = <K extends keyof CreateDestinationRequest>(field: K, value: CreateDestinationRequest[K]) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const currentPerksCount = formData.studentPerks?.length || 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="outline"
-              onClick={() => navigate('/admin/dashboard')}
-              className="gap-2"
-            >
-              <Home className="w-4 h-4" />
-              Main Page
-            </Button>
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(to bottom right, var(--admin-gradient-start), var(--admin-gradient-end))' }}>
-                <MapPin className="w-4 h-4 text-white" />
-              </div>
-              <h1 className="text-xl font-bold text-foreground">Destination Management</h1>
-            </div>
-          </div>
+      <AdminHeader
+        title="Destination Management"
+        icon={<MapPin className="w-4 h-4 text-white" />}
+        gradientStyle={{ background: 'linear-gradient(to bottom right, var(--admin-gradient-start), var(--admin-gradient-end))' }}
+        actions={
+          <Button
+            onClick={handleCreateNew}
+            className="gap-2"
+            style={{ background: 'linear-gradient(to right, var(--admin-gradient-start), var(--admin-gradient-end))' }}
+          >
+            <Plus className="w-4 h-4" />
+            Add Destination
+          </Button>
+        }
+      />
 
-          <div className="flex items-center gap-3">
-            <Button
-              onClick={handleCreateNew}
-              className="gap-2"
-              style={{ background: 'linear-gradient(to right, var(--admin-gradient-start), var(--admin-gradient-end))' }}
-            >
-              <Plus className="w-4 h-4" />
-              Add Destination
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleTheme}
-              className="rounded-full"
-            >
-              {theme === 'dark' ? (
-                <Sun className="h-5 w-5 text-amber-500" />
-              ) : (
-                <Moon className="h-5 w-5 text-slate-600" />
-              )}
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
       <main className="p-6">
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-stretch">
           {/* Left Side - Destinations Table */}
           <div className="xl:col-span-2 bg-card rounded-2xl border shadow-lg overflow-hidden flex flex-col h-[calc(100vh-180px)]">
-            {/* Search Bar */}
-            <div className="p-4 border-b bg-muted/30 flex-shrink-0">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <Input
-                  placeholder="Search destinations by name, location..."
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    setPage(0);
-                  }}
-                  className="pl-10 bg-background"
-                />
-              </div>
-            </div>
+            <AdminSearchBar
+              value={table.searchQuery}
+              onChange={table.handleSearchChange}
+              placeholder="Search destinations by name, location..."
+            />
 
-            {/* Table */}
             <div className="overflow-x-auto flex-1 overflow-y-auto dropdown-scrollbar">
               <table className="w-full">
                 <thead className="bg-muted/50">
                   <tr>
-                    <th
-                      className="px-3 py-3 text-left text-sm font-semibold text-foreground cursor-pointer hover:bg-muted/70 transition-colors"
-                      onClick={() => handleSort('name')}
-                    >
-                      <div className="flex items-center gap-1">
-                        Name
-                        <SortIndicator field="name" />
-                      </div>
-                    </th>
-                    <th
-                      className="px-3 py-3 text-left text-sm font-semibold text-foreground cursor-pointer hover:bg-muted/70 transition-colors"
-                      onClick={() => handleSort('location')}
-                    >
-                      <div className="flex items-center gap-1">
-                        Location
-                        <SortIndicator field="location" />
-                      </div>
-                    </th>
-                    <th
-                      className="px-3 py-3 text-left text-sm font-semibold text-foreground cursor-pointer hover:bg-muted/70 transition-colors"
-                      onClick={() => handleSort('continent')}
-                    >
-                      <div className="flex items-center gap-1">
-                        Continent
-                        <SortIndicator field="continent" />
-                      </div>
-                    </th>
-                    <th
-                      className="px-3 py-3 text-left text-sm font-semibold text-foreground cursor-pointer hover:bg-muted/70 transition-colors"
-                      onClick={() => handleSort('budgetPerDay')}
-                    >
-                      <div className="flex items-center gap-1">
-                        Budget/Day
-                        <SortIndicator field="budgetPerDay" />
-                      </div>
-                    </th>
-                    <th
-                      className="px-3 py-3 text-left text-sm font-semibold text-foreground cursor-pointer hover:bg-muted/70 transition-colors"
-                      onClick={() => handleSort('createdAt')}
-                    >
-                      <div className="flex items-center gap-1">
-                        Created
-                        <SortIndicator field="createdAt" />
-                      </div>
-                    </th>
-                    <th
-                      className="px-3 py-3 text-left text-sm font-semibold text-foreground cursor-pointer hover:bg-muted/70 transition-colors"
-                      onClick={() => handleSort('updatedAt')}
-                    >
-                      <div className="flex items-center gap-1">
-                        Updated
-                        <SortIndicator field="updatedAt" />
-                      </div>
-                    </th>
+                    {DESTINATION_TABLE_COLUMNS.map(({ field, label }) => (
+                      <SortableTableHeader
+                        key={field}
+                        field={field}
+                        label={label}
+                        currentSortField={table.sortField}
+                        sortDirection={table.sortDirection}
+                        onSort={table.handleSort}
+                        className="px-3 py-3"
+                      />
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
                   {isLoading ? (
-                    <tr>
-                      <td colSpan={6} className="px-4 py-12 text-center">
-                        <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
-                        <p className="mt-2 text-muted-foreground">Loading destinations...</p>
-                      </td>
-                    </tr>
+                    <AdminLoadingState colSpan={6} message="Loading destinations..." />
                   ) : destinations.length === 0 ? (
-                    <tr>
-                      <td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">
-                        No destinations found
-                      </td>
-                    </tr>
+                    <AdminEmptyState colSpan={6} message="No destinations found" />
                   ) : (
                     destinations.map((destination) => (
                       <tr
                         key={destination.id}
                         onClick={() => handleSelectDestination(destination)}
                         className={`cursor-pointer border-b transition-colors ${
-                          selectedDestination?.id === destination.id
-                            ? 'bg-primary/10'
-                            : 'hover:bg-muted/50'
+                          selectedDestination?.id === destination.id ? 'bg-primary/10' : 'hover:bg-muted/50'
                         }`}
                       >
                         <td className="px-3 py-3 text-sm text-foreground font-medium">{destination.name}</td>
@@ -415,14 +270,12 @@ const AdminDestinationsPage: React.FC = () => {
                             {destination.continent}
                           </span>
                         </td>
-                        <td className="px-3 py-3 text-sm text-foreground">
-                          ${destination.budgetPerDay || 0}
+                        <td className="px-3 py-3 text-sm text-foreground">${destination.budgetPerDay || 0}</td>
+                        <td className="px-3 py-3 text-sm text-muted-foreground">
+                          {destination.createdAt ? formatDateShort(destination.createdAt, 'en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '-'}
                         </td>
                         <td className="px-3 py-3 text-sm text-muted-foreground">
-                          {destination.createdAt ? formatDate(destination.createdAt) : '-'}
-                        </td>
-                        <td className="px-3 py-3 text-sm text-muted-foreground">
-                          {destination.updatedAt ? formatDate(destination.updatedAt) : '-'}
+                          {destination.updatedAt ? formatDateShort(destination.updatedAt, 'en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '-'}
                         </td>
                       </tr>
                     ))
@@ -431,33 +284,14 @@ const AdminDestinationsPage: React.FC = () => {
               </table>
             </div>
 
-            {/* Pagination */}
-            <div className="p-4 border-t bg-muted/30 flex items-center justify-between flex-shrink-0">
-              <p className="text-sm text-muted-foreground">
-                Showing {destinations.length} of {totalElements} destinations
-              </p>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage(page - 1)}
-                  disabled={page === 0}
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </Button>
-                <span className="text-sm text-muted-foreground px-2">
-                  Page {page + 1} of {totalPages || 1}
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage(page + 1)}
-                  disabled={page >= totalPages - 1}
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
+            <AdminPagination
+              currentCount={destinations.length}
+              totalCount={totalElements}
+              page={table.page}
+              totalPages={totalPages}
+              onPageChange={table.setPage}
+              itemLabel="destinations"
+            />
           </div>
 
           {/* Right Side - Edit Form */}
@@ -469,56 +303,29 @@ const AdminDestinationsPage: React.FC = () => {
 
             {selectedDestination || isCreating ? (
               <div className="space-y-5 flex-1 overflow-y-auto">
-                {/* Name Field */}
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4" />
-                    Name *
-                  </Label>
-                  <Input
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="e.g., Paris"
-                  />
-                </div>
-
-                {/* Location Field */}
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2">
-                    <Globe className="w-4 h-4" />
-                    Location *
-                  </Label>
-                  <Input
-                    value={formData.location}
-                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                    placeholder="e.g., France"
-                  />
-                </div>
-
-                {/* Continent Field */}
+                {/* Basic Fields */}
+                <FormField icon={<MapPin />} label="Name *" value={formData.name} onChange={(v) => updateField('name', v)} placeholder="e.g., Paris" />
+                <FormField icon={<Globe />} label="Location *" value={formData.location} onChange={(v) => updateField('location', v)} placeholder="e.g., France" />
+                
+                {/* Continent Select */}
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
                     <Globe className="w-4 h-4" />
                     Continent *
                   </Label>
-                  <Select
-                    value={formData.continent}
-                    onValueChange={(value) => setFormData({ ...formData, continent: value })}
-                  >
+                  <Select value={formData.continent} onValueChange={(v) => updateField('continent', v)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select continent" />
                     </SelectTrigger>
                     <SelectContent>
-                      {CONTINENTS.map((continent) => (
-                        <SelectItem key={continent} value={continent}>
-                          {continent}
-                        </SelectItem>
+                      {CONTINENTS.map((c) => (
+                        <SelectItem key={c} value={c}>{c}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
 
-                {/* Budget Per Day Field */}
+                {/* Budget */}
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
                     <DollarSign className="w-4 h-4" />
@@ -527,67 +334,21 @@ const AdminDestinationsPage: React.FC = () => {
                   <Input
                     type="number"
                     value={formData.budgetPerDay || ''}
-                    onChange={(e) => setFormData({ ...formData, budgetPerDay: parseInt(e.target.value) || 0 })}
+                    onChange={(e) => updateField('budgetPerDay', parseInt(e.target.value) || 0)}
                     placeholder="e.g., 100"
                     className="no-spinners"
                   />
                 </div>
 
-                {/* Image URL Field */}
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2">
-                    <Image className="w-4 h-4" />
-                    Image URL
-                  </Label>
-                  <Input
-                    value={formData.imageUrl || ''}
-                    onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                    placeholder="https://..."
-                  />
-                </div>
+                {/* Image Fields */}
+                <FormField icon={<Image />} label="Image URL" value={formData.imageUrl || ''} onChange={(v) => updateField('imageUrl', v)} placeholder="https://..." />
+                <FormField icon={<Image />} label="Image Alt Text" value={formData.imageAlt || ''} onChange={(v) => updateField('imageAlt', v)} placeholder="Description of the image" />
 
-                {/* Image Alt Field */}
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2">
-                    <Image className="w-4 h-4" />
-                    Image Alt Text
-                  </Label>
-                  <Input
-                    value={formData.imageAlt || ''}
-                    onChange={(e) => setFormData({ ...formData, imageAlt: e.target.value })}
-                    placeholder="Description of the image"
-                  />
-                </div>
+                {/* Text Areas */}
+                <TextAreaField icon={<FileText />} label="Overview" value={formData.overview || ''} onChange={(v) => updateField('overview', v)} placeholder="Brief overview of the destination..." />
+                <TextAreaField icon={<FileText />} label="Why Visit" value={formData.whyVisit || ''} onChange={(v) => updateField('whyVisit', v)} placeholder="Why should students visit this destination..." />
 
-                {/* Overview Field */}
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2">
-                    <FileText className="w-4 h-4" />
-                    Overview
-                  </Label>
-                  <Textarea
-                    value={formData.overview || ''}
-                    onChange={(e) => setFormData({ ...formData, overview: e.target.value })}
-                    placeholder="Brief overview of the destination..."
-                    rows={3}
-                  />
-                </div>
-
-                {/* Why Visit Field */}
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2">
-                    <FileText className="w-4 h-4" />
-                    Why Visit
-                  </Label>
-                  <Textarea
-                    value={formData.whyVisit || ''}
-                    onChange={(e) => setFormData({ ...formData, whyVisit: e.target.value })}
-                    placeholder="Why should students visit this destination..."
-                    rows={3}
-                  />
-                </div>
-
-                {/* Student Perks Field */}
+                {/* Student Perks */}
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
                     <FileText className="w-4 h-4" />
@@ -602,30 +363,17 @@ const AdminDestinationsPage: React.FC = () => {
                       disabled={currentPerksCount >= MAX_PERKS}
                     />
                     <div className="flex justify-center">
-                      <Button
-                        type="button"
-                        size="sm"
-                        onClick={handleAddPerk}
-                        disabled={currentPerksCount >= MAX_PERKS || !newPerk.trim()}
-                        className="gap-1"
-                      >
+                      <Button type="button" size="sm" onClick={handleAddPerk} disabled={currentPerksCount >= MAX_PERKS || !newPerk.trim()} className="gap-1">
                         <Plus className="w-4 h-4" />
                         Add Perk
                       </Button>
                     </div>
                     {currentPerksCount > 0 && (
                       <div className="flex flex-wrap gap-2">
-                        {(formData.studentPerks || []).map((perk, index) => (
-                          <span
-                            key={index}
-                            className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded-full text-sm"
-                          >
+                        {(formData.studentPerks || []).map((perk, i) => (
+                          <span key={i} className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded-full text-sm">
                             {perk}
-                            <button
-                              type="button"
-                              onClick={() => handleRemovePerk(index)}
-                              className="hover:text-destructive"
-                            >
+                            <button type="button" onClick={() => handleRemovePerk(i)} className="hover:text-destructive">
                               <X className="w-3 h-3" />
                             </button>
                           </span>
@@ -644,60 +392,36 @@ const AdminDestinationsPage: React.FC = () => {
                     style={{ background: 'linear-gradient(to right, var(--admin-gradient-start), var(--admin-gradient-end))' }}
                   >
                     {isSaving ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Saving...
-                      </>
+                      <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</>
                     ) : (
-                      <>
-                        <Save className="w-4 h-4 mr-2" />
-                        {isCreating ? 'CREATE DESTINATION' : 'SAVE CHANGES'}
-                      </>
+                      <><Save className="w-4 h-4 mr-2" />{isCreating ? 'CREATE DESTINATION' : 'SAVE CHANGES'}</>
                     )}
                   </Button>
 
                   {selectedDestination && !isCreating && (
-                    <Button
-                      variant="destructive"
-                      onClick={handleDelete}
-                      disabled={isDeleting}
-                      className="w-full"
-                    >
+                    <Button variant="destructive" onClick={handleDelete} disabled={isDeleting} className="w-full">
                       {isDeleting ? (
-                        <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Deleting...
-                        </>
+                        <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Deleting...</>
                       ) : (
-                        <>
-                          <Trash2 className="w-4 h-4 mr-2" />
-                          DELETE DESTINATION
-                        </>
+                        <><Trash2 className="w-4 h-4 mr-2" />DELETE DESTINATION</>
                       )}
                     </Button>
                   )}
                 </div>
 
-                <p className="text-xs text-muted-foreground text-center">
-                  Fields marked with * are required.
-                </p>
+                <p className="text-xs text-muted-foreground text-center">Fields marked with * are required.</p>
               </div>
             ) : (
-              <div className="text-center py-12 flex-1 flex flex-col items-center justify-center">
-                <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                  <MapPin className="w-8 h-8 text-muted-foreground" />
-                </div>
-                <p className="text-muted-foreground mb-4">
-                  Select a destination from the table to edit
-                </p>
-                <Button
-                  onClick={handleCreateNew}
-                  className="gap-2"
-                >
-                  <Plus className="w-4 h-4" />
-                  Create New Destination
-                </Button>
-              </div>
+              <AdminEmptySelection
+                icon={<MapPin className="w-8 h-8 text-muted-foreground" />}
+                message="Select a destination from the table to edit"
+                action={
+                  <Button onClick={handleCreateNew} className="gap-2">
+                    <Plus className="w-4 h-4" />
+                    Create New Destination
+                  </Button>
+                }
+              />
             )}
           </div>
         </div>
@@ -705,5 +429,38 @@ const AdminDestinationsPage: React.FC = () => {
     </div>
   );
 };
+
+// Reusable form field components
+const FormField: React.FC<{
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+}> = ({ icon, label, value, onChange, placeholder }) => (
+  <div className="space-y-2">
+    <Label className="flex items-center gap-2">
+      <span className="w-4 h-4 [&>svg]:w-4 [&>svg]:h-4">{icon}</span>
+      {label}
+    </Label>
+    <Input value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} />
+  </div>
+);
+
+const TextAreaField: React.FC<{
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+}> = ({ icon, label, value, onChange, placeholder }) => (
+  <div className="space-y-2">
+    <Label className="flex items-center gap-2">
+      <span className="w-4 h-4 [&>svg]:w-4 [&>svg]:h-4">{icon}</span>
+      {label}
+    </Label>
+    <Textarea value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} rows={3} />
+  </div>
+);
 
 export default AdminDestinationsPage;
