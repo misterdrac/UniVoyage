@@ -52,6 +52,7 @@ public class SecurityConfiguration {
                         // /api/auth/me and other auth endpoints require authentication
                         .requestMatchers("/api/auth/me").authenticated()
                         .requestMatchers("/api/auth/**").authenticated()
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         // sve ostalo traži validan JWT + CSRF header
                         .anyRequest().authenticated()
                 )
