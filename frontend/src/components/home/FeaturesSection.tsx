@@ -1,4 +1,4 @@
-import { MapPin, Calendar, Plane } from "lucide-react";
+import { MapPin, Sparkles, LayoutDashboard } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 const features = [
@@ -8,14 +8,14 @@ const features = [
     description: "Handpicked locations perfect for student travelers on any budget",
   },
   {
-    icon: Calendar,
-    title: "Flexible Booking",
-    description: "Easy scheduling that works around your academic calendar",
+    icon: Sparkles,
+    title: "AI-Powered Itineraries",
+    description: "Smart trip planning that considers your hobbies, interests, and weather conditions",
   },
   {
-    icon: Plane,
-    title: "Group Travel",
-    description: "Connect with other students and travel together for better experiences",
+    icon: LayoutDashboard,
+    title: "All-in-One Trip Hub",
+    description: "Budget tracking, accommodation details, places to visit, and weather — everything in one place",
   },
 ];
 

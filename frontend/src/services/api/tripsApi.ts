@@ -17,6 +17,15 @@ export interface TripsApi {
   deleteTrip(tripId: number): Promise<{ success: boolean; error?: string }>
   getTripBudget(tripId: number): Promise<{ success: boolean; budget?: TripBudgetPayload; error?: string }>
   saveTripBudget(tripId: number, payload: TripBudgetPayload): Promise<{ success: boolean; error?: string }>
+  getTripAccommodation(tripId: number): Promise<{ 
+    success: boolean
+    accommodation?: {
+      accommodationName?: string
+      accommodationAddress?: string
+      accommodationPhone?: string
+    }
+    error?: string 
+  }>
   saveTripAccommodation(tripId: number, data: {
     accommodationName?: string
     accommodationAddress?: string
@@ -40,7 +49,7 @@ export const tripsApi: { [K in keyof TripsApi]: (this: ApiClient, ...args: Param
 
         const user = JSON.parse(savedUser) as User
         const trips = this.getMockTrips()
-
+        //todo remove mock after everything is working
         const newTrip = {
           id: trips.length > 0 ? Math.max(...trips.map((t: any) => t.id)) + 1 : 1,
           userId: user.id,
@@ -208,6 +217,42 @@ export const tripsApi: { [K in keyof TripsApi]: (this: ApiClient, ...args: Param
     }
   },
 
+  async getTripAccommodation(this: ApiClient, tripId) {
+    if (this.useMock) {
+      try {
+        const trips = this.getMockTrips()
+        const trip = trips.find((t: any) => t.id === tripId)
+        if (trip && (trip.accommodationName || trip.accommodationAddress || trip.accommodationPhone)) {
+          return {
+            success: true,
+            accommodation: {
+              accommodationName: trip.accommodationName,
+              accommodationAddress: trip.accommodationAddress,
+              accommodationPhone: trip.accommodationPhone,
+            },
+          }
+        }
+        return { success: true }
+      } catch (err: any) {
+        return { success: false, error: err?.message ?? 'Failed to load accommodation' }
+      }
+    }
+
+    try {
+      const res = await this.request<{ accommodation?: { accommodationName?: string; accommodationAddress?: string; accommodationPhone?: string } }>(
+        `${API_CONFIG.ENDPOINTS.TRIPS.GET_BY_ID}/${tripId}/accommodation`
+      )
+
+      if (res.success) {
+        return { success: true, accommodation: res.data?.accommodation }
+      }
+
+      return { success: false, error: res.error ?? 'Failed to load accommodation' }
+    } catch (err: any) {
+      return { success: false, error: err?.message ?? 'Failed to load accommodation' }
+    }
+  },
+
   async saveTripAccommodation(this: ApiClient, tripId, data) {
     if (this.useMock) {
       try {
@@ -225,7 +270,6 @@ export const tripsApi: { [K in keyof TripsApi]: (this: ApiClient, ...args: Param
       }
     }
 
-    // TODO Backend: Implement PUT /api/trips/{tripId}/accommodation endpoint to save accommodationName, accommodationAddress, and accommodationPhone to Trip entity
     try {
       const res = await this.request<{ success: boolean }>(
         `${API_CONFIG.ENDPOINTS.TRIPS.UPDATE}/${tripId}/accommodation`,

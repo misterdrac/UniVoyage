@@ -78,43 +78,76 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Powered By */}
+          {/* Powered By & Booking Partners */}
           <div className="md:col-span-1">
-            <h4 className="text-sm font-semibold text-foreground mb-3">Powered By</h4>
-            <nav className="space-y-1">
-              <a
-                href="https://openweathermap.org"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Weather API
-              </a>
-              <a
-                href="https://geoapify.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Geoapify
-              </a>
-              <a
-                href="https://amadeus.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Amadeus
-              </a>
-              <a
-                href="https://hostelworld.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Hostelworld
-              </a>
-            </nav>
+            <div className="grid grid-cols-2 gap-6">
+              <div>
+                <h4 className="text-sm font-semibold text-foreground mb-3">Powered By</h4>
+                <nav className="space-y-1">
+                  <a
+                    href="https://openweathermap.org"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    OpenWeather
+                  </a>
+                  <a
+                    href="https://geoapify.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Geoapify
+                  </a>
+                  <a
+                    href="https://amadeus.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Amadeus
+                  </a>
+                  <a
+                    href="https://openstreetmap.org"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    OpenStreetMap
+                  </a>
+                  <a
+                    href="https://gemini.google.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Google Gemini
+                  </a>
+                </nav>
+              </div>
+              <div>
+                <h4 className="text-sm font-semibold text-foreground mb-3">Booking Partners</h4>
+                <nav className="space-y-1">
+                  <a
+                    href="https://booking.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Booking.com
+                  </a>
+                  <a
+                    href="https://hostelworld.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Hostelworld
+                  </a>
+                </nav>
+              </div>
+            </div>
           </div>
 
           {/* Social Media */}

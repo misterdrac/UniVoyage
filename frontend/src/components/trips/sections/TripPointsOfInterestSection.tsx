@@ -1,95 +1,14 @@
 import { Card, CardContent } from '@/components/ui/card'
-import { MapPin, ExternalLink, Loader2, AlertCircle, RefreshCw, Globe, BookOpen, Landmark, Camera, Compass, ChevronDown, Church, TreePine, TowerControl, Square, Flower2, Star, Palette, Shield, Castle, Amphora, BrickWall, University } from 'lucide-react'
+import { MapPin, ExternalLink, AlertCircle, RefreshCw, ChevronDown, Church, TreePine, TowerControl, Square, Flower2, Star, Palette, Shield, Castle, Amphora, BrickWall, University, Landmark, Camera, Globe, BookOpen } from 'lucide-react'
 import type { Trip } from '@/types/trip'
 import { usePointsOfInterest } from '@/hooks/usePointsOfInterest'
 import { usePaginatedItems } from '@/hooks/usePaginatedItems'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { useState, useEffect } from 'react'
+import { PlacesLoadingCard } from './PlacesLoadingCard'
 
 interface TripPointsOfInterestSectionProps {
   trip: Trip
-}
-
-function LoadingState({ cityName }: { cityName: string }) {
-  const icons = [
-    { Icon: MapPin, label: 'Finding locations' },
-    { Icon: Landmark, label: 'Discovering landmarks' },
-    { Icon: Camera, label: 'Exploring attractions' },
-    { Icon: Compass, label: 'Mapping points of interest' },
-  ] as const
-  
-  const [currentIconIndex, setCurrentIconIndex] = useState(0)
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentIconIndex((prev) => (prev + 1) % icons.length)
-    }, 1500)
-
-    return () => clearInterval(interval)
-  }, [icons.length])
-
-  const { label } = icons[currentIconIndex]
-
-  return (
-    <div className="space-y-6">
-      <div>
-        <h3 className="text-xl font-semibold text-foreground mb-2">
-          Points of Interest in {cityName}
-        </h3>
-        <p className="text-sm text-muted-foreground">
-          Discover interesting places to visit during your trip
-        </p>
-      </div>
-      <Card className="border-2 border-dashed">
-        <CardContent className="py-16">
-          <div className="flex flex-col items-center justify-center space-y-6">
-            <div className="relative h-20 w-20">
-              {icons.map(({ Icon: IconComponent }, index) => (
-                <div
-                  key={index}
-                  className={cn(
-                    'absolute inset-0 flex items-center justify-center transition-all duration-500',
-                    index === currentIconIndex
-                      ? 'opacity-100 scale-100 rotate-0'
-                      : 'opacity-0 scale-75 rotate-12'
-                  )}
-                >
-                  <IconComponent className="h-12 w-12 text-primary animate-pulse" />
-                </div>
-              ))}
-            </div>
-
-            <div className="text-center space-y-2">
-              <p className="text-lg font-medium text-foreground animate-pulse">
-                {label}...
-              </p>
-              <div className="flex items-center justify-center gap-1">
-                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">
-                  Please wait while we gather the best places to visit
-                </span>
-              </div>
-            </div>
-
-            <div className="flex gap-2">
-              {icons.map((_, index) => (
-                <div
-                  key={index}
-                  className={cn(
-                    'h-2 w-2 rounded-full transition-all duration-500',
-                    index === currentIconIndex
-                      ? 'bg-primary scale-125'
-                      : 'bg-muted-foreground/30 scale-100'
-                  )}
-                />
-              ))}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  )
 }
 
 export function TripPointsOfInterestSection({ trip }: TripPointsOfInterestSectionProps) {
@@ -163,7 +82,12 @@ export function TripPointsOfInterestSection({ trip }: TripPointsOfInterestSectio
 
 
   if (isLoading) {
-    return <LoadingState cityName={cityName} />
+    return (
+      <PlacesLoadingCard
+        title={`Points of Interest in ${cityName}`}
+        subtitle="Discover interesting places to visit during your trip"
+      />
+    )
   }
 
   if (error) {

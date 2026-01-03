@@ -1,10 +1,12 @@
 import { Card } from '@/components/ui/card'
 import type { Trip } from '@/types/trip'
-import { Clock, MapPin, Wallet, TrendingUp, TrendingDown } from 'lucide-react'
+import { Clock, MapPin, Wallet, TrendingUp, TrendingDown, Hotel, Building2, Phone } from 'lucide-react'
 import { WeatherWidget } from '@/components/ui/weather-widget'
 import { formatDateLong } from '@/lib/dateUtils'
 import { useTripBudget } from '@/hooks/useTripBudget'
+import { apiService } from '@/services/api'
 import { cn } from '@/lib/utils'
+import { useEffect, useState } from 'react'
 
 interface TripOverviewSectionProps {
   trip: Trip
@@ -27,8 +29,38 @@ export function TripOverviewSection({
   currentStatus,
 }: TripOverviewSectionProps) {
   const { totalBudget, totals } = useTripBudget(trip.id)
+  const [accommodation, setAccommodation] = useState<{
+    accommodationName?: string
+    accommodationAddress?: string
+    accommodationPhone?: string
+  } | null>(null)
+
   const remainingBudget = totalBudget - totals.actualTotal
   const budgetPercentage = totalBudget > 0 ? (totals.actualTotal / totalBudget) * 100 : 0
+
+  // Load accommodation data
+  useEffect(() => {
+    let isMounted = true
+
+    const loadAccommodation = async () => {
+      try {
+        const result = await apiService.getTripAccommodation(trip.id)
+        if (isMounted && result.success && result.accommodation) {
+          setAccommodation(result.accommodation)
+        }
+      } catch (err) {
+        console.error('Failed to load accommodation:', err)
+      }
+    }
+
+    loadAccommodation()
+
+    return () => {
+      isMounted = false
+    }
+  }, [trip.id])
+
+  const hasAccommodation = accommodation && (accommodation.accommodationName || accommodation.accommodationAddress || accommodation.accommodationPhone)
 
   return (
     <div className="space-y-8">
@@ -42,22 +74,87 @@ export function TripOverviewSection({
 
       <div>
         <h3 className="text-xl font-semibold text-foreground mb-4">Quick Details</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Card className="p-5 rounded-xl border bg-card hover:shadow-md transition-shadow">
+              <div className="flex items-center gap-3 mb-2">
+                <Clock className="size-5 text-primary" />
+                <p className="text-sm text-muted-foreground">Duration</p>
+              </div>
+              <p className="text-2xl font-bold text-foreground">
+                {duration} day{duration !== 1 ? 's' : ''}
+              </p>
+            </Card>
+            <Card className="p-5 rounded-xl border bg-card hover:shadow-md transition-shadow">
+              <div className="flex items-center gap-3 mb-2">
+                <MapPin className="size-5 text-primary" />
+                <p className="text-sm text-muted-foreground">Destination</p>
+              </div>
+              <p className="text-2xl font-bold text-foreground">{trip.destinationLocation}</p>
+            </Card>
+          </div>
           <Card className="p-5 rounded-xl border bg-card hover:shadow-md transition-shadow">
-            <div className="flex items-center gap-3 mb-2">
-              <Clock className="size-5 text-primary" />
-              <p className="text-sm text-muted-foreground">Duration</p>
+            <div className="flex items-center gap-3 mb-4">
+              <Hotel className="size-5 text-primary" />
+              <p className="text-sm text-muted-foreground">Accommodation</p>
             </div>
-            <p className="text-2xl font-bold text-foreground">
-              {duration} day{duration !== 1 ? 's' : ''}
-            </p>
-          </Card>
-          <Card className="p-5 rounded-xl border bg-card hover:shadow-md transition-shadow">
-            <div className="flex items-center gap-3 mb-2">
-              <MapPin className="size-5 text-primary" />
-              <p className="text-sm text-muted-foreground">Destination</p>
-            </div>
-            <p className="text-2xl font-bold text-foreground">{trip.destinationLocation}</p>
+            {hasAccommodation ? (
+              <div className="space-y-3">
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 border border-border/50">
+                  <div className="shrink-0 w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center">
+                    <Building2 className="size-4 text-primary" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-medium text-muted-foreground mb-1">Name</p>
+                    <p className={cn(
+                      "text-sm font-semibold text-foreground line-clamp-2",
+                      !accommodation?.accommodationName && "text-muted-foreground font-normal"
+                    )}>
+                      {accommodation?.accommodationName || "Not set"}
+                    </p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 border border-border/50">
+                    <div className="shrink-0 w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center">
+                      <MapPin className="size-4 text-primary" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium text-muted-foreground mb-1">Address</p>
+                      <p className={cn(
+                        "text-sm text-foreground line-clamp-2",
+                        !accommodation?.accommodationAddress && "text-muted-foreground"
+                      )}>
+                        {accommodation?.accommodationAddress || "Not set"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 border border-border/50">
+                    <div className="shrink-0 w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center">
+                      <Phone className="size-4 text-primary" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium text-muted-foreground mb-1">Phone</p>
+                      <p className={cn(
+                        "text-sm text-foreground",
+                        !accommodation?.accommodationPhone && "text-muted-foreground"
+                      )}>
+                        {accommodation?.accommodationPhone || "Not set"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">
+                  No accommodation details saved yet
+                </p>
+                <p className="text-xs text-muted-foreground/80">
+                  Add your booking details in the Accommodation section
+                </p>
+              </div>
+            )}
           </Card>
         </div>
       </div>

@@ -5,6 +5,7 @@ import type { Trip } from '@/types/trip'
 import { TotalBudgetCard } from './TotalBudgetCard'
 import { CategoryExpenseCard } from './CategoryExpenseCard'
 import { EditExpenseDialog } from './EditExpenseDialog'
+import { toast } from 'sonner'
 
 export function TripBudgetSection({ trip }: { trip: Trip }) {
   const {
@@ -34,6 +35,7 @@ export function TripBudgetSection({ trip }: { trip: Trip }) {
       updateExpense(editingExpense.id, updates)
       setEditingExpense(null)
       setEditExpenseDialogOpen(false)
+      toast.success('Expense updated successfully')
     }
   }
 

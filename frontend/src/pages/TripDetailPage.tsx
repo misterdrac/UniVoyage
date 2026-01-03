@@ -29,6 +29,7 @@ import {
   TripItinerarySection,
   TripPointsOfInterestSection,
   TripAccommodationSection,
+  TripMapSection,
 } from '@/components/trips';
 import type { TripSectionDefinition } from '@/components/trips';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -200,7 +201,7 @@ const TripDetailPage = () => {
                 )}
 
                 {activeSection === 'map' && (
-                  <TripPlaceholderSection message="Interactive map will be displayed here." />
+                  <TripMapSection trip={trip} />
                 )}
 
                 {activeSection === 'weather' && (
