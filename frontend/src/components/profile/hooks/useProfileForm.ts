@@ -14,6 +14,7 @@ export const useProfileForm = ({ user, isEditingProfile, isEditingInterests }: U
   const [name, setName] = useState('');
   const [surname, setSurname] = useState('');
   const [country, setCountry] = useState<Option | undefined>(undefined);
+  const [profileImagePath, setProfileImagePath] = useState<string | undefined>(undefined);
 
   // Form state for interests
   const [hobbies, setHobbies] = useState<string[]>([]);
@@ -28,6 +29,7 @@ export const useProfileForm = ({ user, isEditingProfile, isEditingInterests }: U
       setCountry(
         user.countryOfOrigin ? COUNTRIES.find(c => c.value === user.countryOfOrigin?.isoCode) : undefined
       );
+      setProfileImagePath(user.profileImagePath);
       setHobbies(user.hobbies?.map(h => h.id.toString()) || []);
       setLanguages(user.languages?.map(l => l.langCode) || []);
       setVisited(
@@ -44,6 +46,7 @@ export const useProfileForm = ({ user, isEditingProfile, isEditingInterests }: U
       setCountry(
         user.countryOfOrigin ? COUNTRIES.find(c => c.value === user.countryOfOrigin?.isoCode) : undefined
       );
+      setProfileImagePath(user.profileImagePath);
     }
   }, [user, isEditingProfile]);
 
@@ -65,6 +68,7 @@ export const useProfileForm = ({ user, isEditingProfile, isEditingInterests }: U
       setCountry(
         user.countryOfOrigin ? COUNTRIES.find(c => c.value === user.countryOfOrigin?.isoCode) : undefined
       );
+      setProfileImagePath(user.profileImagePath);
     }
   }, [user]);
 
@@ -86,6 +90,8 @@ export const useProfileForm = ({ user, isEditingProfile, isEditingInterests }: U
     setSurname,
     country,
     setCountry,
+    profileImagePath,
+    setProfileImagePath,
     resetProfileForm,
     // Interests form state
     hobbies,

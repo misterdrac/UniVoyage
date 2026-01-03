@@ -1,8 +1,8 @@
 import { useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { User as UserType } from "@/types/user";
+import { Avatar } from "@/components/profile/Avatar";
 
 interface UserMenuButtonProps {
   user: UserType;
@@ -28,8 +28,8 @@ export const UserMenuButton = ({ user, variant = "desktop" }: UserMenuButtonProp
         onClick={handleProfileClick}
         className="w-full justify-start rounded-md"
       >
-        <User className="w-4 h-4 mr-2" />
-        <span className="font-medium">{userDisplayName}</span>
+        <Avatar src={user.profileImagePath} alt="Profile" size="sm" />
+        <span className="font-medium ml-2">{userDisplayName}</span>
       </Button>
     );
   }
@@ -40,7 +40,7 @@ export const UserMenuButton = ({ user, variant = "desktop" }: UserMenuButtonProp
       onClick={handleProfileClick}
       className="hidden sm:flex items-center gap-2 rounded-md"
     >
-      <User className="w-4 h-4" />
+      <Avatar src={user.profileImagePath} alt="Profile" size="sm" />
       <span className="hidden sm:inline font-medium">{userDisplayName}</span>
     </Button>
   );

@@ -24,6 +24,7 @@ const cloneUser = (user: MockUser): User => ({
     countryName: vc.countryName,
     dateOfVisit: vc.dateOfVisit,
   })),
+  profileImagePath: user.profileImagePath,
   dateOfRegister: user.dateOfRegister,
   dateOfLastSignin: user.dateOfLastSignin,
 });

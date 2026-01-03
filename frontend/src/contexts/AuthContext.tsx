@@ -164,6 +164,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     hobbyIds?: number[];
     languageCodes?: string[];
     visitedCountryCodes?: string[];
+    profileImagePath?: string;
   }): Promise<{ success: boolean; error?: string }> => {
     try {
       setIsLoading(true);
@@ -175,6 +176,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         hobbyIds: data.hobbyIds,
         languageCodes: data.languageCodes,
         visitedCountryCodes: data.visitedCountryCodes,
+        profileImagePath: data.profileImagePath,
       });
       
       if (result.success && result.user) {

@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { User, Edit2, Save, X, Mail, MapPin } from 'lucide-react';
+import { Edit2, Save, X, Mail, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
@@ -7,6 +7,8 @@ import { AutoComplete, type Option } from '@/components/ui/autocomplete';
 import { COUNTRIES } from '@/lib/constants';
 import type { User as UserType } from '@/types/user';
 import { toast } from 'sonner';
+import { AvatarPicker } from './AvatarPicker';
+import { Avatar } from './Avatar';
 
 interface ProfileHeaderCardProps {
   user: UserType;
@@ -15,12 +17,14 @@ interface ProfileHeaderCardProps {
   name: string;
   surname: string;
   country: Option | undefined;
+  profileImagePath?: string;
   onEdit: () => void;
   onCancel: () => void;
-  onSave: (data: { name: string; surname?: string; countryCode?: string }) => Promise<void>;
+  onSave: (data: { name: string; surname?: string; countryCode?: string; profileImagePath?: string }) => Promise<void>;
   onNameChange: (value: string) => void;
   onSurnameChange: (value: string) => void;
   onCountryChange: (value: Option | undefined) => void;
+  onProfileImagePathChange: (value: string) => void;
 }
 
 export const ProfileHeaderCard = ({
@@ -30,12 +34,14 @@ export const ProfileHeaderCard = ({
   name,
   surname,
   country,
+  profileImagePath,
   onEdit,
   onCancel,
   onSave,
   onNameChange,
   onSurnameChange,
   onCountryChange,
+  onProfileImagePathChange,
 }: ProfileHeaderCardProps) => {
   const handleSave = useCallback(async () => {
     if (!name.trim()) {
@@ -52,17 +58,16 @@ export const ProfileHeaderCard = ({
       name: name.trim(),
       surname: surname.trim() || undefined,
       countryCode: country?.value || undefined,
+      profileImagePath: profileImagePath || undefined,
     });
-  }, [name, surname, country, onSave]);
+  }, [name, surname, country, profileImagePath, onSave]);
 
   return (
     <Card className="mb-6 hover:shadow-lg transition-shadow duration-300">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
-              <User className="w-6 h-6 text-primary" />
-            </div>
+            <Avatar src={user.profileImagePath} alt="Profile" size="md" />
             <div>
               <CardTitle className="flex items-center gap-2">
                 Profile Information
@@ -87,6 +92,11 @@ export const ProfileHeaderCard = ({
         <div className="flex-1 w-full">
           {isEditing ? (
             <div className="space-y-4">
+              <AvatarPicker
+                currentAvatarPath={profileImagePath}
+                onAvatarChange={onProfileImagePathChange}
+                disabled={isSaving}
+              />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground">

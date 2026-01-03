@@ -12,6 +12,7 @@ export interface ProfileApi {
     hobbyIds?: number[]
     languageCodes?: string[]
     visitedCountryCodes?: string[]
+    profileImagePath?: string
   }): Promise<{ success: boolean; user?: User; error?: string }>
 }
 
@@ -25,6 +26,7 @@ export const profileApi: { [K in keyof ProfileApi]: (this: ApiClient, ...args: P
         hobbyIds: data.hobbyIds,
         languageCodes: data.languageCodes,
         visitedCountryCodes: data.visitedCountryCodes,
+        profileImagePath: data.profileImagePath,
       }
 
       if (this.useMock) {
@@ -48,6 +50,7 @@ export const profileApi: { [K in keyof ProfileApi]: (this: ApiClient, ...args: P
             visitedCountries: normalized.visitedCountryCodes
             ? this.mapVisitedCountryCodes(normalized.visitedCountryCodes)
               : user.visitedCountries,
+            profileImagePath: normalized.profileImagePath ?? user.profileImagePath,
           }
 
           localStorage.setItem(API_CONSTANTS.USER_KEY, JSON.stringify(updatedUser))
@@ -69,6 +72,7 @@ export const profileApi: { [K in keyof ProfileApi]: (this: ApiClient, ...args: P
             hobbyIds: normalized.hobbyIds ?? null, // -> ?? [] changed to ?? null, same for languageCodes and visitedCountryCodes
             languageCodes: normalized.languageCodes ?? null,
             visitedCountryCodes: normalized.visitedCountryCodes ?? null,
+            profileImagePath: normalized.profileImagePath ?? null,
           }),
         })
 

@@ -27,6 +27,7 @@ public class UserDto {
     private List<HobbyDto> hobbies;
     private List<LanguageDto> languages;
     private List<VisitedCountryDto> visitedCountries;
+    private String profileImagePath;
     private Instant dateOfRegister;
     private Instant dateOfLastSignin;
 
@@ -53,6 +54,7 @@ public class UserDto {
                 .visitedCountries(entity.getVisitedCountries().stream()
                         .map(VisitedCountryDto::from)
                         .collect(Collectors.toList()))
+                .profileImagePath(entity.getProfileImagePath())
                 .dateOfRegister(entity.getDateOfRegister())
                 .dateOfLastSignin(entity.getDateOfLastSignin())
                 .build();

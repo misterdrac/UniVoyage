@@ -26,6 +26,8 @@ const ProfilePage = () => {
     setSurname,
     country,
     setCountry,
+    profileImagePath,
+    setProfileImagePath,
     resetProfileForm,
     hobbies,
     setHobbies,
@@ -73,13 +75,14 @@ const ProfilePage = () => {
   }, [resetInterestsForm]);
 
   const handleSaveProfile = useCallback(
-    async (data: { name: string; surname?: string; countryCode?: string }) => {
+    async (data: { name: string; surname?: string; countryCode?: string; profileImagePath?: string }) => {
       setIsSavingProfile(true);
       try {
         const result = await updateProfile({
           name: data.name,
           surname: data.surname,
           countryCode: data.countryCode,
+          profileImagePath: data.profileImagePath,
         });
         if (result.success) {
           toast.success('Profile updated successfully!');
@@ -142,12 +145,14 @@ const ProfilePage = () => {
           name={name}
           surname={surname}
           country={country}
+          profileImagePath={profileImagePath}
           onEdit={handleEditProfile}
           onCancel={handleCancelProfile}
           onSave={handleSaveProfile}
           onNameChange={setName}
           onSurnameChange={setSurname}
           onCountryChange={setCountry}
+          onProfileImagePathChange={setProfileImagePath}
         />
 
         <ProfileCompletionCard user={user} />
