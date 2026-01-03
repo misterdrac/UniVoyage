@@ -30,7 +30,7 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
             className="gap-2"
           >
             <Home className="w-4 h-4" />
-            Main Page
+            Dashboard
           </Button>
           <div className="flex items-center gap-2">
             <div

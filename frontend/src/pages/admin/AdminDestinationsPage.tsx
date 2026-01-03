@@ -314,7 +314,7 @@ const AdminDestinationsPage: React.FC = () => {
                     Continent *
                   </Label>
                   <Select value={formData.continent} onValueChange={(v) => updateField('continent', v)}>
-                    <SelectTrigger>
+                    <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select continent" />
                     </SelectTrigger>
                     <SelectContent>
@@ -341,7 +341,21 @@ const AdminDestinationsPage: React.FC = () => {
                 </div>
 
                 {/* Image Fields */}
-                <FormField icon={<Image />} label="Image URL" value={formData.imageUrl || ''} onChange={(v) => updateField('imageUrl', v)} placeholder="https://..." />
+                <div className="space-y-2">
+                  <FormField icon={<Image />} label="Image URL" value={formData.imageUrl || ''} onChange={(v) => updateField('imageUrl', v)} placeholder="https://..." />
+                  {formData.imageUrl && (
+                    <div className="mt-2">
+                      <img
+                        src={formData.imageUrl}
+                        alt={formData.imageAlt || 'Preview'}
+                        className="w-full h-48 object-cover rounded-xl border border-input"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
                 <FormField icon={<Image />} label="Image Alt Text" value={formData.imageAlt || ''} onChange={(v) => updateField('imageAlt', v)} placeholder="Description of the image" />
 
                 {/* Text Areas */}
