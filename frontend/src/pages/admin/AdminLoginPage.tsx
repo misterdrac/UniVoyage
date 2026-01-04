@@ -50,10 +50,10 @@ const AdminLoginPage: React.FC = () => {
   // Show message if user is logged in but not admin
   if (user && user.role !== 'ADMIN' && user.role !== 'HEAD_ADMIN') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 flex items-center justify-center p-4">
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(to bottom right, var(--admin-decorative-emerald), var(--admin-decorative-teal), var(--background))' }}>
         <div className="max-w-md w-full bg-card/95 backdrop-blur-xl rounded-3xl shadow-2xl border p-8 text-center">
-          <div className="w-20 h-20 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Shield className="w-10 h-10 text-amber-600 dark:text-amber-400" />
+          <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: 'var(--admin-badge-admin-bg)' }}>
+            <Shield className="w-10 h-10" style={{ color: 'var(--admin-badge-admin-text)' }} />
           </div>
           <h1 className="text-2xl font-bold text-foreground mb-2">Admin Access Required</h1>
           <p className="text-muted-foreground mb-6">
@@ -82,7 +82,7 @@ const AdminLoginPage: React.FC = () => {
           alt="Travel destination"
           className="absolute inset-0 w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-emerald-600/80 via-teal-600/70 to-transparent" />
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, var(--admin-overlay-start), var(--admin-overlay-end), transparent)' }} />
         
         {/* Decorative Wave Shape */}
         <svg
@@ -90,6 +90,7 @@ const AdminLoginPage: React.FC = () => {
           viewBox="0 0 100 800"
           preserveAspectRatio="none"
           fill="currentColor"
+          style={{ right: '-1px' }}
         >
           <path d="M100 0 L100 800 L0 800 Q50 600 30 400 Q10 200 50 0 Z" />
         </svg>
@@ -97,15 +98,15 @@ const AdminLoginPage: React.FC = () => {
         {/* Content on Image */}
         <div className="relative z-10 flex flex-col justify-center p-12 max-w-xl">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-              <Shield className="w-7 h-7 text-white" />
+            <div className="w-12 h-12 backdrop-blur-sm rounded-xl flex items-center justify-center" style={{ backgroundColor: 'color-mix(in srgb, var(--ds-contrast-fg) 20%, transparent)' }}>
+              <Shield className="w-7 h-7" style={{ color: 'var(--ds-contrast-fg)' }} />
             </div>
-            <span className="text-white text-xl font-semibold">UniVoyage Admin</span>
+            <span className="text-xl font-semibold" style={{ color: 'var(--ds-contrast-fg)' }}>UniVoyage Admin</span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 leading-tight">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight" style={{ color: 'var(--ds-contrast-fg)' }}>
             Content Management System
           </h1>
-          <p className="text-white/90 text-lg">
+          <p className="text-lg" style={{ color: 'color-mix(in srgb, var(--ds-contrast-fg) 90%, transparent)' }}>
             Manage users, destinations, and content for the UniVoyage travel platform.
           </p>
         </div>
@@ -122,9 +123,9 @@ const AdminLoginPage: React.FC = () => {
             className="rounded-full bg-card/80 backdrop-blur-sm border shadow-sm hover:bg-card"
           >
             {theme === 'dark' ? (
-              <Sun className="h-5 w-5 text-amber-500" />
+              <Sun className="h-5 w-5" style={{ color: 'var(--admin-badge-admin-text)' }} />
             ) : (
-              <Moon className="h-5 w-5 text-slate-600" />
+              <Moon className="h-5 w-5" style={{ color: 'var(--muted-foreground)' }} />
             )}
           </Button>
         </div>
@@ -199,7 +200,18 @@ const AdminLoginPage: React.FC = () => {
 
               <Button
                 type="submit"
-                className="w-full h-14 text-base font-semibold bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/25 transition-all duration-300"
+                className="w-full h-14 text-base font-semibold transition-all duration-300"
+                style={{ 
+                  color: 'var(--ds-contrast-fg)',
+                  background: 'linear-gradient(to right, var(--admin-gradient-start), var(--admin-gradient-end))',
+                  boxShadow: '0 10px 15px -3px rgba(16, 185, 129, 0.25), 0 4px 6px -4px rgba(16, 185, 129, 0.25)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(to right, var(--admin-gradient-start-hover), var(--admin-gradient-end-hover))';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(to right, var(--admin-gradient-start), var(--admin-gradient-end))';
+                }}
                 disabled={isLoading || authLoading}
               >
                 {isLoading || authLoading ? (

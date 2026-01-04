@@ -114,10 +114,10 @@ const AdminUsersPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+    <div className="min-h-screen" style={{ background: 'var(--admin-bg-gradient)' }}>
       <AdminHeader
         title="User Management"
-        icon={<UsersIcon className="w-4 h-4 text-white" />}
+        icon={<UsersIcon className="w-4 h-4" style={{ color: 'var(--ds-contrast-fg)' }} />}
         gradientStyle={{ background: 'linear-gradient(to bottom right, var(--admin-users-gradient-start), var(--admin-users-gradient-end))' }}
       />
 
@@ -197,7 +197,7 @@ const AdminUsersPage: React.FC = () => {
 
           {/* Right Side - Edit Form */}
           <div className="bg-card rounded-2xl border shadow-lg p-6 overflow-y-auto dropdown-scrollbar flex flex-col h-[calc(100vh-180px)]">
-            <h2 className="text-lg font-semibold text-foreground mb-6 flex items-center gap-2 flex-shrink-0">
+            <h2 className="text-lg font-semibold text-foreground mb-6 flex items-center gap-2 shrink-0">
               <Shield className="w-5 h-5 text-primary" />
               Edit User
             </h2>

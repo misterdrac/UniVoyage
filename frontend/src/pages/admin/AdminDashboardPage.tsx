@@ -16,7 +16,7 @@ const AdminDashboardPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 relative overflow-hidden">
+    <div className="min-h-screen relative overflow-hidden" style={{ background: 'var(--admin-bg-gradient)' }}>
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,var(--admin-decorative-purple),transparent_50%),radial-gradient(circle_at_70%_80%,var(--admin-decorative-purple-light),transparent_50%)]" />
       
@@ -27,8 +27,8 @@ const AdminDashboardPage: React.FC = () => {
       {/* Header */}
       <header className="relative z-10 p-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg" style={{ background: 'linear-gradient(to bottom right, var(--admin-gradient-start), var(--admin-gradient-end))', boxShadow: '0 10px 15px -3px rgba(16, 185, 129, 0.25)' }}>
-            <Shield className="w-5 h-5 text-white" />
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg" style={{ background: 'linear-gradient(to bottom right, var(--admin-gradient-start), var(--admin-gradient-end))', boxShadow: `0 10px 15px -3px var(--admin-shadow-emerald-25)` }}>
+            <Shield className="w-5 h-5" style={{ color: 'var(--ds-contrast-fg)' }} />
           </div>
           <div>
             <h1 className="font-bold text-foreground">UniVoyage Admin</h1>
@@ -44,9 +44,9 @@ const AdminDashboardPage: React.FC = () => {
             className="rounded-full bg-card/80 backdrop-blur-sm border shadow-sm hover:bg-card"
           >
             {theme === 'dark' ? (
-              <Sun className="h-5 w-5 text-amber-500" />
+              <Sun className="h-5 w-5" style={{ color: 'var(--admin-badge-admin-text)' }} />
             ) : (
-              <Moon className="h-5 w-5 text-slate-600" />
+              <Moon className="h-5 w-5" style={{ color: 'var(--muted-foreground)' }} />
             )}
           </Button>
         </div>
@@ -55,8 +55,8 @@ const AdminDashboardPage: React.FC = () => {
       {/* Main Content */}
       <main className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-200px)] px-4">
         <div className="text-center mb-12">
-          <div className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl" style={{ background: 'linear-gradient(to bottom right, var(--admin-gradient-start), var(--admin-gradient-end))', boxShadow: '0 20px 25px -5px rgba(16, 185, 129, 0.3)' }}>
-            <Settings className="w-10 h-10 text-white" />
+          <div className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl" style={{ background: 'linear-gradient(to bottom right, var(--admin-gradient-start), var(--admin-gradient-end))', boxShadow: `0 20px 25px -5px var(--admin-shadow-emerald-30)` }}>
+            <Settings className="w-10 h-10" style={{ color: 'var(--ds-contrast-fg)' }} />
           </div>
           <h2 className="text-4xl font-bold text-foreground mb-3">Admin Dashboard</h2>
           <p className="text-muted-foreground text-lg max-w-md">
@@ -70,8 +70,8 @@ const AdminDashboardPage: React.FC = () => {
             onClick={() => navigate('/admin/users')}
             className="group flex-1 bg-card hover:bg-card/80 rounded-2xl p-8 border shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 text-left"
           >
-            <div className="w-16 h-16 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform" style={{ background: 'linear-gradient(to bottom right, var(--admin-users-gradient-start), var(--admin-users-gradient-end))', boxShadow: '0 10px 15px -3px rgba(59, 130, 246, 0.3)' }}>
-              <Users className="w-8 h-8 text-white" />
+            <div className="w-16 h-16 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform" style={{ background: 'linear-gradient(to bottom right, var(--admin-users-gradient-start), var(--admin-users-gradient-end))', boxShadow: `0 10px 15px -3px var(--admin-shadow-blue-30)` }}>
+              <Users className="w-8 h-8" style={{ color: 'var(--ds-contrast-fg)' }} />
             </div>
             <h3 className="text-2xl font-bold text-foreground mb-2">USERS</h3>
             <p className="text-muted-foreground">
@@ -84,8 +84,8 @@ const AdminDashboardPage: React.FC = () => {
             onClick={() => navigate('/admin/destinations')}
             className="group flex-1 bg-card hover:bg-card/80 rounded-2xl p-8 border shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 text-left"
           >
-            <div className="w-16 h-16 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform" style={{ background: 'linear-gradient(to bottom right, var(--admin-gradient-start), var(--admin-gradient-end))', boxShadow: '0 10px 15px -3px rgba(16, 185, 129, 0.3)' }}>
-              <MapPin className="w-8 h-8 text-white" />
+            <div className="w-16 h-16 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform" style={{ background: 'linear-gradient(to bottom right, var(--admin-gradient-start), var(--admin-gradient-end))', boxShadow: `0 10px 15px -3px var(--admin-shadow-emerald-30)` }}>
+              <MapPin className="w-8 h-8" style={{ color: 'var(--ds-contrast-fg)' }} />
             </div>
             <h3 className="text-2xl font-bold text-foreground mb-2">DESTINATIONS</h3>
             <p className="text-muted-foreground">
