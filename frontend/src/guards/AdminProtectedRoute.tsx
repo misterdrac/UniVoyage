@@ -29,7 +29,7 @@ const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({ children }) =
   }
 
   // Show access denied if not an admin
-  if (user.role !== 'ADMIN') {
+  if (user.role !== 'ADMIN' && user.role !== 'HEAD_ADMIN') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-950/20 dark:to-orange-950/20 flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-card rounded-2xl shadow-2xl border border-red-200 dark:border-red-800 p-8 text-center">

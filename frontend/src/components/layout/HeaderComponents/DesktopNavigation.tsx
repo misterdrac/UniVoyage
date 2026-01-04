@@ -63,6 +63,14 @@ export const DesktopNavigation = ({ user }: DesktopNavigationProps) => {
               <Link to="/contact">Contact</Link>
             </NavigationMenuLink>
           </NavigationMenuItem>
+
+          {user && (user.role === 'ADMIN' || user.role === 'HEAD_ADMIN') && (
+            <NavigationMenuItem>
+              <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+                <Link to="/admin/dashboard">Admin</Link>
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+          )}
         </NavigationMenuList>
       </NavigationMenu>
     </div>

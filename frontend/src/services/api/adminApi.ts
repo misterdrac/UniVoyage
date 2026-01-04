@@ -6,7 +6,7 @@ export interface AdminUser {
   name: string
   surname: string
   email: string
-  role: 'USER' | 'ADMIN'
+  role: 'USER' | 'ADMIN' | 'HEAD_ADMIN'
   dateOfRegister: string
   dateOfLastSignin: string
 }
@@ -61,7 +61,7 @@ export interface AdminApi {
   // Users
   getUsers(params?: { page?: number; size?: number; sort?: string; search?: string }): Promise<AdminUserPage>
   getUser(id: number): Promise<AdminUser>
-  updateUserRole(id: number, role: 'USER' | 'ADMIN'): Promise<AdminUser>
+  updateUserRole(id: number, role: 'USER' | 'ADMIN' | 'HEAD_ADMIN'): Promise<AdminUser>
   
   // Destinations
   getAdminDestinations(params?: { page?: number; size?: number; sort?: string; search?: string }): Promise<AdminDestinationPage>
@@ -91,7 +91,7 @@ export const adminApi: { [K in keyof AdminApi]: (this: ApiClient, ...args: Param
     return response.data!
   },
 
-  async updateUserRole(this: ApiClient, id: number, role: 'USER' | 'ADMIN') {
+  async updateUserRole(this: ApiClient, id: number, role: 'USER' | 'ADMIN' | 'HEAD_ADMIN') {
     const response = await this.request<AdminUser>(`/admin/users/${id}/role`, {
       method: 'PATCH',
       body: JSON.stringify({ role }),

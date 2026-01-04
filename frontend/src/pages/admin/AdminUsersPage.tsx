@@ -51,7 +51,7 @@ const AdminUsersPage: React.FC = () => {
 
   // Selection state
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
-  const [editRole, setEditRole] = useState<'USER' | 'ADMIN'>('USER');
+  const [editRole, setEditRole] = useState<'USER' | 'ADMIN' | 'HEAD_ADMIN'>('USER');
   const [isSaving, setIsSaving] = useState(false);
 
   // Fetch users
@@ -164,8 +164,8 @@ const AdminUsersPage: React.FC = () => {
                           <span
                             className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium"
                             style={{
-                              backgroundColor: user.role === 'ADMIN' ? 'var(--admin-badge-admin-bg)' : 'var(--admin-badge-user-bg)',
-                              color: user.role === 'ADMIN' ? 'var(--admin-badge-admin-text)' : 'var(--admin-badge-user-text)',
+                              backgroundColor: (user.role === 'ADMIN' || user.role === 'HEAD_ADMIN') ? 'var(--admin-badge-admin-bg)' : 'var(--admin-badge-user-bg)',
+                              color: (user.role === 'ADMIN' || user.role === 'HEAD_ADMIN') ? 'var(--admin-badge-admin-text)' : 'var(--admin-badge-user-text)',
                             }}
                           >
                             {user.role}
@@ -211,7 +211,7 @@ const AdminUsersPage: React.FC = () => {
                     Role
                   </Label>
                   <div className="flex gap-2">
-                    {(['USER', 'ADMIN'] as const).map((role) => (
+                    {(['USER', 'ADMIN', 'HEAD_ADMIN'] as const).map((role) => (
                       <Button
                         key={role}
                         type="button"

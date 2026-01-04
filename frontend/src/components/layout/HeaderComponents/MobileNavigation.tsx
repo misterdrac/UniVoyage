@@ -97,6 +97,16 @@ export const MobileNavigation = ({
           Contact
         </Link>
 
+        {user && (user.role === 'ADMIN' || user.role === 'HEAD_ADMIN') && (
+          <Link
+            to="/admin/dashboard"
+            className="px-3 py-2 text-sm font-medium text-foreground hover:bg-accent hover:text-accent-foreground rounded-md transition-colors"
+            onClick={handleLinkClick}
+          >
+            Admin
+          </Link>
+        )}
+
         {/* Mobile Auth Section */}
         <div className="pt-4 border-t border-border">
           {user ? (

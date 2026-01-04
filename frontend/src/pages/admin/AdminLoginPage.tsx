@@ -21,7 +21,7 @@ const AdminLoginPage: React.FC = () => {
 
   // Redirect if already logged in as admin
   useEffect(() => {
-    if (user && user.role === 'ADMIN') {
+    if (user && (user.role === 'ADMIN' || user.role === 'HEAD_ADMIN')) {
       navigate('/admin/dashboard');
     }
   }, [user, navigate]);
@@ -48,7 +48,7 @@ const AdminLoginPage: React.FC = () => {
   };
 
   // Show message if user is logged in but not admin
-  if (user && user.role !== 'ADMIN') {
+  if (user && user.role !== 'ADMIN' && user.role !== 'HEAD_ADMIN') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-card/95 backdrop-blur-xl rounded-3xl shadow-2xl border p-8 text-center">
