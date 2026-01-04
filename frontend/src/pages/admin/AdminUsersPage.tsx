@@ -4,6 +4,7 @@ import type { AdminUser } from '@/services/api/adminApi';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   AdminHeader,
   AdminSearchBar,
@@ -37,6 +38,8 @@ const USER_TABLE_COLUMNS: { field: UserSortField; label: string }[] = [
 ];
 
 const AdminUsersPage: React.FC = () => {
+  const { user: currentUser } = useAuth();
+  
   // Data state
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [totalPages, setTotalPages] = useState(0);
@@ -51,7 +54,7 @@ const AdminUsersPage: React.FC = () => {
 
   // Selection state
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
-  const [editRole, setEditRole] = useState<'USER' | 'ADMIN' | 'HEAD_ADMIN'>('USER');
+  const [editRole, setEditRole] = useState<'USER' | 'ADMIN'>('USER');
   const [isSaving, setIsSaving] = useState(false);
 
   // Fetch users
@@ -81,7 +84,8 @@ const AdminUsersPage: React.FC = () => {
 
   const handleSelectUser = (user: AdminUser) => {
     setSelectedUser(user);
-    setEditRole(user.role);
+    // Only allow USER or ADMIN roles in the UI, HEAD_ADMIN is set manually in DB
+    setEditRole(user.role === 'HEAD_ADMIN' ? 'ADMIN' : (user.role === 'USER' || user.role === 'ADMIN' ? user.role : 'USER'));
   };
 
   const handleSaveChanges = async () => {
@@ -211,18 +215,34 @@ const AdminUsersPage: React.FC = () => {
                     Role
                   </Label>
                   <div className="flex gap-2">
-                    {(['USER', 'ADMIN', 'HEAD_ADMIN'] as const).map((role) => (
-                      <Button
-                        key={role}
-                        type="button"
-                        variant={editRole === role ? 'default' : 'outline'}
-                        onClick={() => setEditRole(role)}
-                        className="flex-1"
-                      >
-                        {role}
-                      </Button>
-                    ))}
+                    {(['USER', 'ADMIN'] as const).map((role) => {
+                      const isEditingSelf = currentUser?.id === selectedUser.id;
+                      const isAdminBlocked = currentUser?.role === 'ADMIN' && (selectedUser.role === 'ADMIN' || selectedUser.role === 'HEAD_ADMIN');
+                      const isDisabled = isEditingSelf || isAdminBlocked;
+                      return (
+                        <Button
+                          key={role}
+                          type="button"
+                          variant={editRole === role ? 'default' : 'outline'}
+                          onClick={() => setEditRole(role)}
+                          disabled={isDisabled}
+                          className="flex-1"
+                        >
+                          {role}
+                        </Button>
+                      );
+                    })}
                   </div>
+                  {currentUser?.id === selectedUser.id && (
+                    <p className="text-xs text-muted-foreground mt-2">
+                      You cannot change your own role.
+                    </p>
+                  )}
+                  {currentUser?.role === 'ADMIN' && currentUser?.id !== selectedUser.id && (selectedUser.role === 'ADMIN' || selectedUser.role === 'HEAD_ADMIN') && (
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Admins cannot modify other admin accounts. Contact the head admin to change the role.
+                    </p>
+                  )}
                 </div>
 
                 <FormField
@@ -234,7 +254,12 @@ const AdminUsersPage: React.FC = () => {
 
                 <Button
                   onClick={handleSaveChanges}
-                  disabled={isSaving || editRole === selectedUser.role}
+                  disabled={
+                    isSaving || 
+                    editRole === selectedUser.role ||
+                    currentUser?.id === selectedUser.id ||
+                    (currentUser?.role === 'ADMIN' && (selectedUser.role === 'ADMIN' || selectedUser.role === 'HEAD_ADMIN'))
+                  }
                   className="w-full mt-6"
                   style={{ background: 'linear-gradient(to right, var(--admin-users-gradient-start), var(--admin-users-gradient-end))' }}
                 >
