@@ -242,7 +242,7 @@ const AdminUsersPage: React.FC = () => {
           </div>
 
           {/* Right Side - Edit Form */}
-          <div ref={editorCardRef} className="bg-card rounded-2xl border shadow-lg overflow-hidden flex flex-col min-h-170">
+          <div ref={editorCardRef} className="bg-card rounded-2xl border shadow-lg overflow-hidden flex flex-col min-h-[50vh]">
             <div className="p-6 pb-4 shrink-0">
               <h2 className="text-lg font-semibold text-foreground mb-6 flex items-center gap-2">
                 <Shield className="w-5 h-5 text-primary" />
