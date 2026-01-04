@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { apiService } from '@/services/api';
 import type { AdminDestination, CreateDestinationRequest } from '@/services/api/adminApi';
 import { Button } from '@/components/ui/button';
@@ -85,6 +85,40 @@ const AdminDestinationsPage: React.FC = () => {
   const [newPerk, setNewPerk] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Refs for matching heights
+  const tableCardRef = useRef<HTMLDivElement>(null);
+  const editorCardRef = useRef<HTMLDivElement>(null);
+
+  // Match editor height to table height
+  useEffect(() => {
+    const matchHeights = () => {
+      if (tableCardRef.current && editorCardRef.current) {
+        editorCardRef.current.style.height = `${tableCardRef.current.offsetHeight}px`;
+      }
+    };
+
+    // Use setTimeout to ensure DOM has updated
+    const timeoutId = setTimeout(matchHeights, 0);
+    window.addEventListener('resize', matchHeights);
+    
+    // Use MutationObserver to watch for DOM changes
+    const observer = new MutationObserver(matchHeights);
+    if (tableCardRef.current) {
+      observer.observe(tableCardRef.current, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['style', 'class']
+      });
+    }
+
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener('resize', matchHeights);
+      observer.disconnect();
+    };
+  }, [destinations, selectedDestination, isCreating, table.page]);
 
   // Fetch destinations
   const fetchDestinations = useCallback(async () => {
@@ -222,19 +256,28 @@ const AdminDestinationsPage: React.FC = () => {
         }
       />
 
-      <main className="p-6">
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-stretch">
+      <main className="p-4 sm:p-6">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
           {/* Left Side - Destinations Table */}
-          <div className="xl:col-span-2 bg-card rounded-2xl border shadow-lg overflow-hidden flex flex-col h-[calc(100vh-180px)]">
+          <div ref={tableCardRef} className="xl:col-span-2 bg-card rounded-2xl border shadow-lg">
             <AdminSearchBar
               value={table.searchQuery}
               onChange={table.handleSearchChange}
               placeholder="Search destinations by name, location..."
             />
 
-            <div className="overflow-x-auto flex-1 overflow-y-auto dropdown-scrollbar">
-              <table className="w-full">
-                <thead className="bg-muted/50">
+            <div className="overflow-x-auto max-h-[calc(100vh-260px)] overflow-y-auto dropdown-scrollbar -mx-4 sm:mx-0">
+              <div className="min-w-[800px] sm:min-w-0">
+                <table className="w-full border-collapse table-fixed">
+                <colgroup>
+                  <col className="w-[20%]" />
+                  <col className="w-[20%]" />
+                  <col className="w-[15%]" />
+                  <col className="w-[15%]" />
+                  <col className="w-[15%]" />
+                  <col className="w-[15%]" />
+                </colgroup>
+                <thead className="bg-muted/50 sticky top-0 z-10">
                   <tr>
                     {DESTINATION_TABLE_COLUMNS.map(({ field, label }) => (
                       <SortableTableHeader
@@ -243,13 +286,13 @@ const AdminDestinationsPage: React.FC = () => {
                         label={label}
                         currentSortField={table.sortField}
                         sortDirection={table.sortDirection}
+                        isUsingDefaultSort={table.isUsingDefaultSort}
                         onSort={table.handleSort}
-                        className="px-3 py-3"
                       />
                     ))}
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-border">
                   {isLoading ? (
                     <AdminLoadingState colSpan={6} message="Loading destinations..." />
                   ) : destinations.length === 0 ? (
@@ -259,22 +302,27 @@ const AdminDestinationsPage: React.FC = () => {
                       <tr
                         key={destination.id}
                         onClick={() => handleSelectDestination(destination)}
-                        className={`cursor-pointer border-b transition-colors ${
-                          selectedDestination?.id === destination.id ? 'bg-primary/10' : 'hover:bg-muted/50'
+                        className={`cursor-pointer transition-colors ${
+                          selectedDestination?.id === destination.id 
+                            ? 'bg-primary/10 hover:bg-primary/15' 
+                            : 'hover:bg-muted/50 active:bg-muted/70'
                         }`}
                       >
-                        <td className="px-3 py-3 text-sm text-foreground font-medium">{destination.name}</td>
-                        <td className="px-3 py-3 text-sm text-foreground">{destination.location}</td>
-                        <td className="px-3 py-3">
-                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: 'var(--admin-decorative-emerald)', color: 'var(--admin-gradient-start)' }}>
+                        <td className="px-4 py-3 text-sm text-foreground font-medium text-center">{destination.name}</td>
+                        <td className="px-4 py-3 text-sm text-foreground text-center">{destination.location}</td>
+                        <td className="px-4 py-3 text-center">
+                          <span 
+                            className="inline-flex items-center justify-center px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap" 
+                            style={{ backgroundColor: 'var(--admin-decorative-emerald)', color: 'var(--admin-gradient-start)' }}
+                          >
                             {destination.continent}
                           </span>
                         </td>
-                        <td className="px-3 py-3 text-sm text-foreground">${destination.budgetPerDay || 0}</td>
-                        <td className="px-3 py-3 text-sm text-muted-foreground">
+                        <td className="px-4 py-3 text-sm text-foreground whitespace-nowrap text-center">${destination.budgetPerDay || 0}</td>
+                        <td className="px-4 py-3 text-sm text-muted-foreground whitespace-nowrap text-center">
                           {destination.createdAt ? formatDateShort(destination.createdAt, 'en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '-'}
                         </td>
-                        <td className="px-3 py-3 text-sm text-muted-foreground">
+                        <td className="px-4 py-3 text-sm text-muted-foreground whitespace-nowrap text-center">
                           {destination.updatedAt ? formatDateShort(destination.updatedAt, 'en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '-'}
                         </td>
                       </tr>
@@ -282,6 +330,7 @@ const AdminDestinationsPage: React.FC = () => {
                   )}
                 </tbody>
               </table>
+              </div>
             </div>
 
             <AdminPagination
@@ -295,14 +344,17 @@ const AdminDestinationsPage: React.FC = () => {
           </div>
 
           {/* Right Side - Edit Form */}
-          <div className="bg-card rounded-2xl border shadow-lg p-6 overflow-y-auto dropdown-scrollbar flex flex-col h-[calc(100vh-180px)]">
-            <h2 className="text-lg font-semibold text-foreground mb-6 flex items-center gap-2 shrink-0">
-              <MapPin className="w-5 h-5 text-primary" />
-              {isCreating ? 'Create Destination' : 'Edit Destination'}
-            </h2>
+          <div ref={editorCardRef} className="bg-card rounded-2xl border shadow-lg overflow-hidden flex flex-col min-h-170">
+            <div className="p-6 pb-4 shrink-0">
+              <h2 className="text-lg font-semibold text-foreground mb-6 flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-primary" />
+                {isCreating ? 'Create Destination' : 'Edit Destination'}
+              </h2>
+            </div>
 
             {selectedDestination || isCreating ? (
-              <div className="space-y-5 flex-1 overflow-y-auto">
+              <div className="px-6 pb-6 overflow-y-auto dropdown-scrollbar flex-1 min-h-0">
+                <div className="space-y-5">
                 {/* Basic Fields */}
                 <FormField icon={<MapPin />} label="Name *" value={formData.name} onChange={(v) => updateField('name', v)} placeholder="e.g., Paris" />
                 <FormField icon={<Globe />} label="Location *" value={formData.location} onChange={(v) => updateField('location', v)} placeholder="e.g., France" />
@@ -424,18 +476,21 @@ const AdminDestinationsPage: React.FC = () => {
                 </div>
 
                 <p className="text-xs text-muted-foreground text-center">Fields marked with * are required.</p>
+                </div>
               </div>
             ) : (
-              <AdminEmptySelection
-                icon={<MapPin className="w-8 h-8 text-muted-foreground" />}
-                message="Select a destination from the table to edit"
-                action={
-                  <Button onClick={handleCreateNew} className="gap-2">
-                    <Plus className="w-4 h-4" />
-                    Create New Destination
-                  </Button>
-                }
-              />
+              <div className="flex-1 flex items-center justify-center p-6">
+                <AdminEmptySelection
+                  icon={<MapPin className="w-8 h-8 text-muted-foreground" />}
+                  message="Select a destination from the table to edit"
+                  action={
+                    <Button onClick={handleCreateNew} className="gap-2">
+                      <Plus className="w-4 h-4" />
+                      Create New Destination
+                    </Button>
+                  }
+                />
+              </div>
             )}
           </div>
         </div>
