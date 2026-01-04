@@ -83,12 +83,18 @@ export const adminApi: { [K in keyof AdminApi]: (this: ApiClient, ...args: Param
     const endpoint = `/admin/users${query ? `?${query}` : ''}`
     
     const response = await this.request<AdminUserPage>(endpoint)
-    return response.data!
+    if (!response.success || !response.data) {
+      throw new Error(response.error || 'Failed to fetch users')
+    }
+    return response.data
   },
 
   async getUser(this: ApiClient, id: number) {
     const response = await this.request<AdminUser>(`/admin/users/${id}`)
-    return response.data!
+    if (!response.success || !response.data) {
+      throw new Error(response.error || 'Failed to fetch user')
+    }
+    return response.data
   },
 
   async updateUserRole(this: ApiClient, id: number, role: 'USER' | 'ADMIN' | 'HEAD_ADMIN') {
@@ -96,7 +102,10 @@ export const adminApi: { [K in keyof AdminApi]: (this: ApiClient, ...args: Param
       method: 'PATCH',
       body: JSON.stringify({ role }),
     })
-    return response.data!
+    if (!response.success || !response.data) {
+      throw new Error(response.error || 'Failed to update user role')
+    }
+    return response.data
   },
 
   async getAdminDestinations(this: ApiClient, params = {}) {
@@ -110,12 +119,18 @@ export const adminApi: { [K in keyof AdminApi]: (this: ApiClient, ...args: Param
     const endpoint = `/admin/destinations${query ? `?${query}` : ''}`
     
     const response = await this.request<AdminDestinationPage>(endpoint)
-    return response.data!
+    if (!response.success || !response.data) {
+      throw new Error(response.error || 'Failed to fetch destinations')
+    }
+    return response.data
   },
 
   async getDestination(this: ApiClient, id: number) {
     const response = await this.request<AdminDestination>(`/admin/destinations/${id}`)
-    return response.data!
+    if (!response.success || !response.data) {
+      throw new Error(response.error || 'Failed to fetch destination')
+    }
+    return response.data
   },
 
   async createDestination(this: ApiClient, data: CreateDestinationRequest) {
@@ -123,7 +138,10 @@ export const adminApi: { [K in keyof AdminApi]: (this: ApiClient, ...args: Param
       method: 'POST',
       body: JSON.stringify(data),
     })
-    return response.data!
+    if (!response.success || !response.data) {
+      throw new Error(response.error || 'Failed to create destination')
+    }
+    return response.data
   },
 
   async updateDestination(this: ApiClient, id: number, data: UpdateDestinationRequest) {
@@ -131,7 +149,10 @@ export const adminApi: { [K in keyof AdminApi]: (this: ApiClient, ...args: Param
       method: 'PUT',
       body: JSON.stringify(data),
     })
-    return response.data!
+    if (!response.success || !response.data) {
+      throw new Error(response.error || 'Failed to update destination')
+    }
+    return response.data
   },
 
   async deleteDestination(this: ApiClient, id: number) {
