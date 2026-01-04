@@ -36,20 +36,51 @@ public class AdminUserService {
     }
 
     @Transactional
-    public AdminUserResponse updateRole(long targetUserId, Role newRole, Long actingAdminId) {
-        // Safety: admin cant remove his own admin role
-        if (actingAdminId != null && actingAdminId.equals(targetUserId) && newRole != Role.ADMIN) {
-            throw new IllegalArgumentException("You cannot remove your own admin role.");
+    public AdminUserResponse updateRole(long targetUserId, Role newRole, Long actingUserId) {
+        if (actingUserId == null) {
+            throw new IllegalArgumentException("Missing acting user id.");
         }
 
-        UserEntity user = userRepository.findById(targetUserId)
+        UserEntity actor = userRepository.findById(actingUserId)
+                .orElseThrow(() -> new ResourceNotFoundException("Acting user not found: " + actingUserId));
+
+        UserEntity target = userRepository.findById(targetUserId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + targetUserId));
 
-        user.setRole(newRole);
-        userRepository.save(user);
+        // Nobody can change their own role
+        if (actingUserId.equals(targetUserId)) {
+            throw new IllegalArgumentException("You cannot change your own role.");
+        }
 
-        return toDto(user);
+        Role actorRole = actor.getRole();
+        Role targetRole = target.getRole();
+
+        // HEAD_ADMIN: can change anyone except himself (already blocked above)
+        if (actorRole == Role.HEAD_ADMIN) {
+            if (targetRole == newRole) return toDto(target);
+            target.setRole(newRole);
+            userRepository.save(target);
+            return toDto(target);
+        }
+
+        // ADMIN: can ONLY promote USER -> ADMIN
+        if (actorRole == Role.ADMIN) {
+            if (targetRole != Role.USER) {
+                throw new IllegalArgumentException("Admin can modify only USER accounts.");
+            }
+            if (newRole != Role.ADMIN) {
+                throw new IllegalArgumentException("Admin can only promote USER to ADMIN.");
+            }
+
+            target.setRole(Role.ADMIN);
+            userRepository.save(target);
+            return toDto(target);
+        }
+
+        // USER (or anything else): no permissions
+        throw new IllegalArgumentException("You are not allowed to change roles.");
     }
+
 
     private AdminUserResponse toDto(UserEntity u) {
         return new AdminUserResponse(

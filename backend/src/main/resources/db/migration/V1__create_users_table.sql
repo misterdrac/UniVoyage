@@ -15,7 +15,7 @@ CREATE TABLE users (
     password_hash TEXT NOT NULL,
 
     role VARCHAR(20) NOT NULL DEFAULT 'USER'
-        CHECK (role IN ('USER', 'ADMIN')),
+        CHECK (role IN ('USER', 'ADMIN', 'HEAD_ADMIN')),
 
     country_of_origin_code VARCHAR(2),
 
