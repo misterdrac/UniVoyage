@@ -34,6 +34,7 @@ import {
   Plus,
   Trash2,
   X,
+  Info,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -358,6 +359,19 @@ const AdminDestinationsPage: React.FC = () => {
             {selectedDestination || isCreating ? (
               <div className="px-6 pb-6 overflow-y-auto dropdown-scrollbar flex-1 min-h-0">
                 <div className="space-y-5">
+                {/* Important Note */}
+                <div className="bg-primary/10 border-2 border-primary/30 rounded-lg p-4 mb-2">
+                  <div className="flex items-start gap-3">
+                    <Info className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-foreground mb-1">Card Display Requirements</p>
+                      <p className="text-xs text-muted-foreground">
+                        For a destination to appear as a card on the destination pages, it must have an <strong className="text-foreground">Image URL</strong>, <strong className="text-foreground">Overview</strong>, and <strong className="text-foreground">Budget Per Day</strong> filled in.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Basic Fields */}
                 <FormField icon={<MapPin />} label="Name *" value={formData.name} onChange={(v) => updateField('name', v)} placeholder="e.g., Paris" />
                 <FormField icon={<Globe />} label="Location *" value={formData.location} onChange={(v) => updateField('location', v)} placeholder="e.g., France" />
@@ -478,7 +492,7 @@ const AdminDestinationsPage: React.FC = () => {
                   )}
                 </div>
 
-                <p className="text-xs text-muted-foreground text-center">Fields marked with * are required.</p>
+                <p className="text-xs text-muted-foreground text-center pt-2">Fields marked with * are required.</p>
                 </div>
               </div>
             ) : (
