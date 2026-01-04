@@ -199,14 +199,14 @@ const AdminDestinationsPage: React.FC = () => {
         setDestinations([newDestination, ...destinations]);
         setSelectedDestination(newDestination);
         setIsCreating(false);
-        toast.success('Destination created successfully');
         await fetchDestinations();
+        toast.success('Destination created successfully');
       } else if (selectedDestination) {
         const updatedDestination = await apiService.updateDestination(selectedDestination.id, formData);
         setDestinations(destinations.map(d => d.id === updatedDestination.id ? updatedDestination : d));
         setSelectedDestination(updatedDestination);
-        toast.success('Destination updated successfully');
         await fetchDestinations();
+        toast.success('Destination updated successfully');
       }
     } catch (error) {
       console.error('Failed to save destination:', error);
@@ -225,8 +225,8 @@ const AdminDestinationsPage: React.FC = () => {
       setDestinations(destinations.filter(d => d.id !== selectedDestination.id));
       setSelectedDestination(null);
       setFormData(EMPTY_FORM);
-      toast.success('Destination deleted successfully');
       await fetchDestinations();
+      toast.success('Destination deleted successfully');
     } catch (error) {
       console.error('Failed to delete destination:', error);
       toast.error('Failed to delete destination');
