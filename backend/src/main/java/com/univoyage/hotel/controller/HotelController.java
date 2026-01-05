@@ -11,6 +11,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * REST controller for hotel-related endpoints.
+ * Provides endpoints to search for hotels and check service status.
+ */
 @RestController
 @RequestMapping("/api/hotels")
 @RequiredArgsConstructor
