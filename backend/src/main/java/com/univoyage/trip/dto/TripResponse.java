@@ -3,6 +3,9 @@ package com.univoyage.trip.dto;
 import lombok.Builder;
 import lombok.Data;
 
+/**
+ * Response DTO for trip details.
+ */
 @Data
 @Builder
 public class TripResponse {

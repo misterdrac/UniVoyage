@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Controller for searching places using Geoapify API.
+ */
 @RestController
 @RequestMapping("/api/places")
 @RequiredArgsConstructor

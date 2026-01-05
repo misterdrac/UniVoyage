@@ -170,7 +170,7 @@ public class GeoapifyService {
         return null;
     }
 
-    // ===== Response DTOs =====
+    // RESPONSE DTOs
 
     @Data
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -252,7 +252,7 @@ public class GeoapifyService {
         private String castleType;
     }
 
-    // ===== Public DTO =====
+    // PUBLIC DTO
 
     @Data
     public static class PointOfInterest {

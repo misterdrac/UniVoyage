@@ -7,6 +7,9 @@ import lombok.*;
 import java.time.Instant;
 import java.time.LocalDate;
 
+/**
+ * Entity representing a trip.
+ */
 @Entity
 @Table(name = "trips")
 @Getter @Setter

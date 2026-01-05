@@ -17,6 +17,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Service for fetching weather data from OpenWeather API
+ */
 @Slf4j
 @Service
 public class WeatherService {

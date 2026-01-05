@@ -5,6 +5,9 @@ import lombok.*;
 
 import java.time.Instant;
 
+/**
+ * Entity representing accommodation details for a trip.
+ */
 @Entity
 @Table(name = "trip_accommodations")
 @Getter @Setter

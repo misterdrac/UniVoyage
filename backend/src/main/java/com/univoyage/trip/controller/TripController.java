@@ -19,6 +19,9 @@ import java.util.Map;
 import java.util.List;
 
 
+/**
+ * Controller for managing trips.
+ */
 @RestController
 @RequestMapping("/api/trips")
 @RequiredArgsConstructor
