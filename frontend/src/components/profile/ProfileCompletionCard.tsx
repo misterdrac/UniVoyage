@@ -44,7 +44,7 @@ export const ProfileCompletionCard = ({ user }: ProfileCompletionCardProps) => {
           <span className="text-2xl font-bold text-primary">{profileCompletion}%</span>
         </CardTitle>
         <CardDescription>
-          Complete your profile so we can give you personalized suggestions and recommendations
+          Complete your profile info, add hobbies, languages you speak and countries you have visited to get more personalized suggestions and recommendations
         </CardDescription>
       </CardHeader>
       <CardContent>
