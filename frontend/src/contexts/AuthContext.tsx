@@ -26,6 +26,7 @@ interface AuthContextType {
     hobbyIds?: number[];
     languageCodes?: string[];
     visitedCountryCodes?: string[];
+    profileImagePath?: string;
   }) => Promise<{ success: boolean; error?: string }>;
   loadUser: () => Promise<User | null>;
   isLoading: boolean;
