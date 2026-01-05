@@ -5,7 +5,7 @@ import { Header, Footer, ScrollToTop } from '@/components';
 import { AuthLoadingOverlay } from '@/components/layout/AuthLoadingOverlay';
 import { Toaster } from '@/components/ui/sonner';
 import { ProtectedRoute, AdminProtectedRoute } from '@/guards';
-import { HomePage, AboutPage, TourPage, ContactPage, ProfilePage, MyTripsPage, TripDetailPage, PopularDestinationsPage, EuropeDestinationsPage, NorthAmericaDestinationsPage, SouthAmericaDestinationsPage, AsiaDestinationsPage, AfricaDestinationsPage, OceaniaDestinationsPage } from '@/pages';
+import { HomePage, AboutPage, ContactPage, ProfilePage, MyTripsPage, TripDetailPage, PopularDestinationsPage, EuropeDestinationsPage, NorthAmericaDestinationsPage, SouthAmericaDestinationsPage, AsiaDestinationsPage, AfricaDestinationsPage, OceaniaDestinationsPage } from '@/pages';
 import { AdminLoginPage, AdminDashboardPage, AdminUsersPage, AdminDestinationsPage } from '@/pages/admin';
 import { LoginDialog, SignUpDialog } from '@/components/auth';
 import { useDestination } from '@/contexts/DestinationContext';
@@ -60,7 +60,6 @@ function AppRoutes() {
       {/* Main App Routes - With Header/Footer */}
       <Route path="/" element={<MainLayout><HomePage /></MainLayout>} />
       <Route path="/about" element={<MainLayout><AboutPage /></MainLayout>} />
-      <Route path="/tour" element={<MainLayout><TourPage /></MainLayout>} />
       <Route path="/contact" element={<MainLayout><ContactPage /></MainLayout>} />
       <Route path="/destinations" element={<MainLayout><PopularDestinationsPage /></MainLayout>} />
       <Route path="/destinations/europe" element={<MainLayout><EuropeDestinationsPage /></MainLayout>} />
