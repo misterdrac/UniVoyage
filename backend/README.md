@@ -1,13 +1,13 @@
 # **How to run back-end?**
-## 1. Pre-requisites
-## Before running the back-end of this project, ensure you have the following software installed on your machine
 
+## 1. Pre-requisites
+Before running the back-end of this project, ensure you have the following software installed on your machine.
 
 ### 1.1 Verify which Java version do you have
 ```bash
   java -version
 ```
-- Make sure you have Java 23 or higher installed. If not, please install the appropriate version, you can download Java 23 here: https://www.oracle.com/java/technologies/javase/jdk23-archive-downloads.html , downloading this you download Java 23 SDK. 
+- Make sure you have Java 23 or higher installed. If not, please install the appropriate version, you can download Java 23 here: https://www.oracle.com/java/technologies/javase/jdk23-archive-downloads.html , downloading this you download Java 23 SDK.
 - Java SDK includes JRE (Java Runtime Environment) which is required to run Java applications. Also it includes JVM (Java Virtual Machine) which is the engine that runs Java applications. All necessary components are included in the Java SDK to run this application.
 
 ### 1.2 Verify which Maven version do you have
@@ -16,23 +16,76 @@
 ```
 - Make sure you have Maven 3.9.6 or higher installed. If not, please install the appropriate version, you can download Maven 3.9.6 here: https://maven.apache.org/download.cgi
 
-### 1.3 Google OAuth2 Setup (IMPORTANT for handling authentication)
+### 1.3 API Keys, Authentication & JWT Setup (IMPORTANT)
+- This project relies on several external services and secure token authentication. You need to obtain API keys and generate secrets to configure your `.env` file in the `backend` directory.
+
+#### **A. Google OAuth2 Setup**
 - To enable Google OAuth2 authentication, you need to set up a project in the Google Developers Console and obtain OAuth2 credentials.
 - Follow these steps to set up Google OAuth2:
-  1. Go to the [Google Developers Console](https://console.developers.google.com/).
-  2. Create a new project or select an existing one.
-  3. Navigate to "Credentials" and click on "Create Credentials" > "OAuth 2.0 Client ID".
-  4. Configure the consent screen and set the application type to "Web application".
-  5. Add authorized redirect URIs (for our app, this is http://localhost:5173/auth/google/callback)
-  6. Save the credentials and note down the Client ID and Client Secret.
-  7. Update the `.env` file in the `backend` directory with the following variables:
+    1. Go to the [Google Developers Console](https://console.developers.google.com/).
+    2. Create a new project or select an existing one.
+    3. Navigate to "Credentials" and click on "Create Credentials" > "OAuth 2.0 Client ID".
+    4. Configure the consent screen and set the application type to "Web application".
+    5. Add authorized redirect URIs (for our app, this is http://localhost:5173/auth/google/callback)
+    6. Save the credentials and note down the Client ID and Client Secret.
+
+#### **B. OpenWeather API Setup**
+- Required for fetching weather forecasts for destinations.
+    1. Go to [OpenWeatherMap](https://openweathermap.org/api) and sign up.
+    2. Navigate to "My API Keys".
+    3. Generate a new key and copy it.
+
+#### **C. Geoapify API Setup**
+- Required for location services and autocomplete features.
+    1. Register at [Geoapify](https://www.geoapify.com/).
+    2. Go to the "Projects" dashboard.
+    3. Create a new project and copy the API Key.
+
+#### **D. Google Gemini API Setup**
+- Required for AI-powered travel recommendations.
+    1. Visit [Google AI Studio](https://aistudio.google.com/).
+    2. Click on "Get API key".
+    3. Create an API key in a new or existing project and copy it.
+
+#### **E. Amadeus Hotel API Setup**
+- Required for searching hotels and accommodations.
+    1. Register for a developer account at [Amadeus for Developers](https://developers.amadeus.com/).
+    2. Create a new "Self-Service" app in your workspace.
+    3. You will receive an **API Key** (Client ID) and an **API Secret** (Client Secret).
+
+#### **F. JWT Secret Generation**
+- The application uses JSON Web Tokens (JWT) for security. You need a strong, random 256-bit (32-byte) secret key.
+- You can generate one quickly using the terminal (requires OpenSSL, usually installed by default on Git Bash or Mac/Linux):
+```bash
+  openssl rand -base64 32
+```
+- Alternatively, you can use an online generator like [GenerateRandomStrings](https://www.random.org/strings/) (make sure it is long and random).
+- Copy the generated string.
+
+#### **G. Configure .env file**
+- Recommended: Check the `.env.example` file in the `backend` directory for reference.
+- Create or update the `.env` file in the `backend` directory with all the keys you obtained:
 ```env
+  # Google OAuth2
   GOOGLE_CLIENT_ID=your_google_client_id
   GOOGLE_CLIENT_SECRET=your_google_client_secret
   GOOGLE_REDIRECT_URI=your_google_redirect_uri
+
+  # JWT Configuration
+  JWT_SECRET=your_generated_jwt_secret_string
+  JWT_EXPIRATION=86400000
+
+  # External APIs
+  OPENWEATHER_API_KEY=your_openweather_key
+  GEOAPIFY_API_KEY=your_geoapify_key
+  GEMINI_API_KEY=your_gemini_key
+  
+  # Amadeus API
+  AMADEUS_CLIENT_ID=your_amadeus_client_id
+  AMADEUS_CLIENT_SECRET=your_amadeus_client_secret
 ```
 
-### 1.4 (NOT IMPORTAINT NOV) Verify which Docker version do you have
+### 1.4 (NOT IMPORTAINT NOW) Verify which Docker version do you have
 ```bash
   docker -v
 ```
@@ -99,5 +152,5 @@ spring.datasource.password=${DB_PASSWORD}
 2025-11-27T15:38:18.698+01:00  INFO 17384 --- [UniVoyage] [  restartedMain] c.u.univoyage.UniVoyageApplication       : Started UniVoyageApplication in 7.912 seconds (process running for 8.52
   ...
 ```
-- You should be able to access the application at `http://localhost:8080` but you can't since our front-end is hosted in another port (5173) and it will communicate with the back-end through that port. 
+- You should be able to access the application at `http://localhost:8080` but you can't since our front-end is hosted in another port (5173) and it will communicate with the back-end through that port.
 - You as a user should not be able to access the back-end directly through the browser.
