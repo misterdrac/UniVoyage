@@ -10,19 +10,29 @@ export const DESTINATION_NAV_ITEMS = [
     description: "Explore historic cities and cultural landmarks across Europe.",
   },
   {
+    title: "North America",
+    href: "/destinations/north-america",
+    description: "Experience diverse landscapes from the USA to Canada and Mexico.",
+  },
+  {
+    title: "South America",
+    href: "/destinations/south-america",
+    description: "Discover vibrant cultures and breathtaking landscapes across South America.",
+  },
+  {
     title: "Asia",
     href: "/destinations/asia",
     description: "Discover ancient traditions and modern metropolises in Asia.",
   },
   {
-    title: "Americas",
-    href: "/destinations/americas",
-    description: "Experience diverse landscapes from North to South America.",
-  },
-  {
     title: "Africa",
     href: "/destinations/africa",
     description: "Immerse yourself in rich cultures and stunning wildlife.",
+  },
+  {
+    title: "Oceania",
+    href: "/destinations/oceania",
+    description: "Explore stunning beaches and landscapes in sunny Oceania.",
   },
 ] as const;
 

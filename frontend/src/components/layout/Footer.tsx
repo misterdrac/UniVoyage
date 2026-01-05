@@ -45,16 +45,16 @@ export function Footer() {
                     Europe
                   </Link>
                   <Link
+                    to="/destinations/north-america"
+                    className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    N. America
+                  </Link>
+                  <Link
                     to="/destinations/asia"
                     className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
                     Asia
-                  </Link>
-                  <Link
-                    to="/destinations/americas"
-                    className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    Americas
                   </Link>
                 </nav>
               </div>

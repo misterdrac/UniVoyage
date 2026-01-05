@@ -3,11 +3,11 @@ import { DestinationsPageLayout, LoadingSpinner } from '@/components/destination
 import { getDestinationsByContinent } from '@/data/destinations';
 import { useDestinations } from '@/hooks/useDestinations';
 
-const AmericasDestinationsPage = () => {
+const OceaniaDestinationsPage = () => {
   const { destinations: apiDestinations, isLoading } = useDestinations();
   
-  const americasDestinations = useMemo(() => 
-    getDestinationsByContinent(apiDestinations, 'Americas'),
+  const oceaniaDestinations = useMemo(() => 
+    getDestinationsByContinent(apiDestinations, 'Oceania'),
     [apiDestinations]
   );
 
@@ -23,20 +23,20 @@ const AmericasDestinationsPage = () => {
 
   return (
     <DestinationsPageLayout
-      title="Explore the Americas"
+      title="Explore Oceania"
       description={
         <p className="text-center text-lg sm:text-xl text-muted-foreground">
-          From the bustling streets of New York to the sandy beaches of Dominican Republic, the Americas 
-          offer diverse landscapes, cultures, and experiences. Explore iconic cities, stunning 
-          natural beauty, and endless opportunities for adventure and discovery across North 
-          and South America.
+          From the stunning beaches of Australia to the breathtaking landscapes of New Zealand, Oceania 
+          offers incredible natural beauty, unique wildlife, and vibrant cultures. Experience world-class 
+          cities, pristine coastlines, and unforgettable adventures across the Pacific.
         </p>
       }
-      destinations={americasDestinations}
-      continent="Americas"
-      defaultFooterText="Ready to explore the Americas? Use our Trip Planner to create your perfect itinerary!"
+      destinations={oceaniaDestinations}
+      continent="Oceania"
+      defaultFooterText="Ready to explore Oceania? Use our Trip Planner to create your perfect itinerary!"
     />
   );
 };
 
-export default AmericasDestinationsPage;
+export default OceaniaDestinationsPage;
+

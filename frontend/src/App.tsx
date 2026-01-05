@@ -5,7 +5,7 @@ import { Header, Footer, ScrollToTop } from '@/components';
 import { AuthLoadingOverlay } from '@/components/layout/AuthLoadingOverlay';
 import { Toaster } from '@/components/ui/sonner';
 import { ProtectedRoute, AdminProtectedRoute } from '@/guards';
-import { HomePage, AboutPage, TourPage, ContactPage, ProfilePage, MyTripsPage, TripDetailPage, PopularDestinationsPage, EuropeDestinationsPage, AmericasDestinationsPage, AsiaDestinationsPage, AfricaDestinationsPage } from '@/pages';
+import { HomePage, AboutPage, TourPage, ContactPage, ProfilePage, MyTripsPage, TripDetailPage, PopularDestinationsPage, EuropeDestinationsPage, NorthAmericaDestinationsPage, SouthAmericaDestinationsPage, AsiaDestinationsPage, AfricaDestinationsPage, OceaniaDestinationsPage } from '@/pages';
 import { AdminLoginPage, AdminDashboardPage, AdminUsersPage, AdminDestinationsPage } from '@/pages/admin';
 import { LoginDialog, SignUpDialog } from '@/components/auth';
 import { useDestination } from '@/contexts/DestinationContext';
@@ -64,9 +64,11 @@ function AppRoutes() {
       <Route path="/contact" element={<MainLayout><ContactPage /></MainLayout>} />
       <Route path="/destinations" element={<MainLayout><PopularDestinationsPage /></MainLayout>} />
       <Route path="/destinations/europe" element={<MainLayout><EuropeDestinationsPage /></MainLayout>} />
-      <Route path="/destinations/americas" element={<MainLayout><AmericasDestinationsPage /></MainLayout>} />
+      <Route path="/destinations/north-america" element={<MainLayout><NorthAmericaDestinationsPage /></MainLayout>} />
+      <Route path="/destinations/south-america" element={<MainLayout><SouthAmericaDestinationsPage /></MainLayout>} />
       <Route path="/destinations/asia" element={<MainLayout><AsiaDestinationsPage /></MainLayout>} />
       <Route path="/destinations/africa" element={<MainLayout><AfricaDestinationsPage /></MainLayout>} />
+      <Route path="/destinations/oceania" element={<MainLayout><OceaniaDestinationsPage /></MainLayout>} />
       <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
       <Route 
         path="/profile" 
