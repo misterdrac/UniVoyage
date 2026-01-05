@@ -31,10 +31,10 @@ const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({ children }) =
   // Show access denied if not an admin
   if (user.role !== 'ADMIN' && user.role !== 'HEAD_ADMIN') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-950/20 dark:to-orange-950/20 flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-card rounded-2xl shadow-2xl border border-red-200 dark:border-red-800 p-8 text-center">
-          <div className="w-20 h-20 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
-            <AlertTriangle className="w-10 h-10 text-red-600 dark:text-red-400" />
+      <div className="min-h-screen bg-linear-to-br from-destructive/5 to-destructive/10 dark:from-destructive/10 dark:to-destructive/5 flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-card rounded-2xl shadow-2xl border border-destructive/20 dark:border-destructive/30 p-8 text-center">
+          <div className="w-20 h-20 bg-destructive/10 dark:bg-destructive/20 rounded-full flex items-center justify-center mx-auto mb-6">
+            <AlertTriangle className="w-10 h-10 text-destructive" />
           </div>
           <h1 className="text-2xl font-bold text-foreground mb-2">Access Denied</h1>
           <p className="text-muted-foreground mb-6">
