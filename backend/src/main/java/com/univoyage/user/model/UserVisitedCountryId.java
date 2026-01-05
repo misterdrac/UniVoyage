@@ -6,6 +6,9 @@ import lombok.*;
 
 import java.io.Serializable;
 
+/**
+ * Composite key class for UserHobby entity.
+ */
 @Embeddable
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor

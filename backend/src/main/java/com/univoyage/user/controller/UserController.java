@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-
+/**
+ * Controller for user-related operations.
+ */
 @CrossOrigin(
         origins = {"http://localhost:5173","http://127.0.0.1:5173"},
         allowCredentials = "true"

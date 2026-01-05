@@ -10,8 +10,9 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
-// Repository interface for UserEntity - provides methods to interact with the database
-// methods are called on Service layer to check for existing users and retrieve user data
+/**
+ * Repository interface for UserEntity.
+ */
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     Optional<UserEntity> findByEmail(String email);

@@ -4,6 +4,9 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 import java.util.Set;
 
+/**
+ * Request DTO for updating user profile information.
+ */
 @Data
 public class UpdateProfileRequestDto {
 

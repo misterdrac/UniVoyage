@@ -5,6 +5,9 @@ import lombok.*;
 
 import java.io.Serializable;
 
+/**
+ * Composite key class for UserLanguage entity.
+ */
 @Embeddable
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor

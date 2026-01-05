@@ -5,6 +5,9 @@ import lombok.*;
 
 import java.time.LocalDate;
 
+/**
+ * Data Transfer Object for a country visited by a user.
+ */
 @Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
