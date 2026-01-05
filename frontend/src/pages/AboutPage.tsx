@@ -14,7 +14,7 @@ export default function AboutPage() {
               alt="UniVoyage Logo" 
               className="w-12 h-12 sm:w-16 sm:h-16"
             />
-            <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+            <h1 className="text-4xl sm:text-5xl font-bold bg-linear-to-r from-primary to-primary/70 bg-clip-text text-transparent">
               About UniVoyage
             </h1>
           </div>
@@ -24,7 +24,7 @@ export default function AboutPage() {
         </div>
 
         {/* Mission Section */}
-        <Card className="border-2 mb-12 bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+        <Card className="border-2 mb-12 bg-linear-to-br from-primary/5 to-primary/10 border-primary/20">
           <CardHeader>
             <div className="flex items-center gap-3 mb-2">
               <div className="p-3 rounded-lg bg-primary/20">
@@ -118,7 +118,7 @@ export default function AboutPage() {
           <h2 className="text-3xl font-bold text-center mb-8">Our Story</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="border-2 hover:shadow-lg transition-shadow bg-gradient-to-br from-primary/5 to-transparent">
+            <Card className="border-2 hover:shadow-lg transition-shadow bg-linear-to-br from-primary/5 to-transparent">
               <CardHeader>
                 <div className="flex items-center gap-3 mb-3">
                   <div className="p-2 rounded-lg bg-primary/20">
@@ -134,7 +134,7 @@ export default function AboutPage() {
               </CardContent>
             </Card>
 
-            <Card className="border-2 hover:shadow-lg transition-shadow bg-gradient-to-br from-primary/5 to-transparent">
+            <Card className="border-2 hover:shadow-lg transition-shadow bg-linear-to-br from-primary/5 to-transparent">
               <CardHeader>
                 <div className="flex items-center gap-3 mb-3">
                   <div className="p-2 rounded-lg bg-primary/20">
@@ -150,7 +150,7 @@ export default function AboutPage() {
               </CardContent>
             </Card>
 
-            <Card className="border-2 hover:shadow-lg transition-shadow bg-gradient-to-br from-primary/5 to-transparent">
+            <Card className="border-2 hover:shadow-lg transition-shadow bg-linear-to-br from-primary/5 to-transparent">
               <CardHeader>
                 <div className="flex items-center gap-3 mb-3">
                   <div className="p-2 rounded-lg bg-primary/20">
@@ -175,7 +175,7 @@ export default function AboutPage() {
             <Card className="border-2 hover:shadow-lg transition-shadow">
               <CardHeader className="text-center">
                 <div className="flex justify-center mb-4">
-                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center overflow-hidden relative">
+                  <div className="w-24 h-24 rounded-full bg-linear-to-br from-primary/20 to-primary/10 flex items-center justify-center overflow-hidden relative">
                     <img 
                       src="/placeholder-team-1.jpg" 
                       alt="Team Member 1"
@@ -201,7 +201,7 @@ export default function AboutPage() {
             <Card className="border-2 hover:shadow-lg transition-shadow">
               <CardHeader className="text-center">
                 <div className="flex justify-center mb-4">
-                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center overflow-hidden relative">
+                  <div className="w-24 h-24 rounded-full bg-linear-to-br from-primary/20 to-primary/10 flex items-center justify-center overflow-hidden relative">
                     <img 
                       src="/placeholder-team-2.jpg" 
                       alt="Team Member 2"
@@ -227,7 +227,7 @@ export default function AboutPage() {
             <Card className="border-2 hover:shadow-lg transition-shadow">
               <CardHeader className="text-center">
                 <div className="flex justify-center mb-4">
-                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center overflow-hidden relative">
+                  <div className="w-24 h-24 rounded-full bg-linear-to-br from-primary/20 to-primary/10 flex items-center justify-center overflow-hidden relative">
                     <img 
                       src="/placeholder-team-3.jpg" 
                       alt="Team Member 3"
@@ -253,7 +253,7 @@ export default function AboutPage() {
             <Card className="border-2 hover:shadow-lg transition-shadow">
               <CardHeader className="text-center">
                 <div className="flex justify-center mb-4">
-                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center overflow-hidden relative">
+                  <div className="w-24 h-24 rounded-full bg-linear-to-br from-primary/20 to-primary/10 flex items-center justify-center overflow-hidden relative">
                     <img 
                       src="/placeholder-team-4.jpg" 
                       alt="Team Member 4"
