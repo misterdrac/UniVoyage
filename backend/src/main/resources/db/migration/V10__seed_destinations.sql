@@ -108,7 +108,7 @@ VALUES
    'Budget-friendly ramen and street food'
  ]),
 
-(8, 'New York City', 'USA', 'Americas',
+(8, 'New York City', 'USA', 'North America',
  'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170',
  'New York City, USA',
  'The city that never sleeps offers world-class museums, Broadway shows, and diverse neighborhoods. Experience the energy of the Big Apple.',
@@ -122,7 +122,7 @@ VALUES
    'Free events and concerts in parks'
  ]),
 
-(9, 'Los Angeles', 'USA', 'Americas',
+(9, 'Los Angeles', 'USA', 'North America',
  'https://images.unsplash.com/flagged/photo-1575555201693-7cd442b8023f?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1632',
  'Los Angeles, USA',
  'Sunny beaches, Hollywood dreams, and diverse cultures. LA offers incredible food, iconic landmarks, and endless entertainment.',
@@ -136,7 +136,7 @@ VALUES
    'Free beach access and outdoor activities'
  ]),
 
-(10, 'Toronto', 'Canada', 'Americas',
+(10, 'Toronto', 'Canada', 'North America',
  'https://images.unsplash.com/photo-1543962226-818f4301073f?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1907',
  'Toronto, Canada',
  'Canada''s largest city offers incredible diversity, world-class museums, and a welcoming atmosphere for international students.',
@@ -150,7 +150,7 @@ VALUES
    'Discounted public transit with student card'
  ]),
 
-(11, 'Rio de Janeiro', 'Brazil', 'Americas',
+(11, 'Rio de Janeiro', 'Brazil', 'South America',
  'https://images.unsplash.com/photo-1483729558449-99ef09a8c325?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170',
  'Rio de Janeiro, Brazil',
  'The Marvelous City with stunning beaches, vibrant samba culture, and iconic landmarks. Experience the energy of Carnival''s hometown.',
@@ -164,7 +164,7 @@ VALUES
    'Discounted public transport passes'
  ]),
 
-(12, 'Mexico City', 'Mexico', 'Americas',
+(12, 'Mexico City', 'Mexico', 'North America',
  'https://images.unsplash.com/photo-1585464231875-d9ef1f5ad396?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170',
  'Mexico City, Mexico',
  'A vibrant metropolis rich in history, art, and incredible cuisine. Explore ancient Aztec temples, world-class museums, and bustling markets.',
@@ -178,7 +178,7 @@ VALUES
    'Budget-friendly public transport'
  ]),
 
-(13, 'Punta Cana', 'Dominican Republic', 'Americas',
+(13, 'Punta Cana', 'Dominican Republic', 'North America',
  'https://images.unsplash.com/photo-1569700946659-fe1941c71fe4?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170',
  'Punta Cana, Dominican Republic',
  'Paradise beaches, turquoise waters, and all-inclusive resorts. Perfect for students seeking sun, sand, and tropical adventures.',
@@ -402,7 +402,7 @@ VALUES
    'Student-friendly hostels and accommodations'
  ]),
 
-(29, 'São Paulo', 'Brazil', 'Americas',
+(29, 'São Paulo', 'Brazil', 'South America',
  'https://images.unsplash.com/photo-1543059080-f9b1272213d5?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1074',
  'São Paulo, Brazil',
  'South America''s largest city offers incredible diversity, world-class food, and vibrant nightlife. Experience authentic Brazilian culture at great prices.',
@@ -416,7 +416,7 @@ VALUES
    'Student discounts at museums and attractions'
  ]),
 
-(30, 'Buenos Aires', 'Argentina', 'Americas',
+(30, 'Buenos Aires', 'Argentina', 'South America',
  'https://plus.unsplash.com/premium_photo-1697729901052-fe8900e24993?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1633',
  'Buenos Aires, Argentina',
  'The Paris of South America with stunning architecture, incredible tango culture, and amazing food. Experience vibrant street life and rich culture.',
@@ -727,7 +727,7 @@ VALUES
    'Cheap and delicious Sri Lankan cuisine'
  ]),
 
-(108, 'Vancouver', 'Canada', 'Americas',
+(108, 'Vancouver', 'Canada', 'North America',
  'https://images.unsplash.com/photo-1559511260-66a654ae982a?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1518',
  'Vancouver, Canada',
  'A stunning coastal city surrounded by mountains and ocean. Experience incredible natural beauty, diverse culture, and world-class quality of life.',
@@ -741,7 +741,7 @@ VALUES
    'Student-friendly food options'
  ]),
 
-(109, 'Montreal', 'Canada', 'Americas',
+(109, 'Montreal', 'Canada', 'North America',
  'https://images.unsplash.com/photo-1613060600794-b4d20def8e02?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1194',
  'Montreal, Canada',
  'A vibrant French-Canadian city with incredible food, rich culture, and beautiful architecture. Experience European charm in North America.',
@@ -755,7 +755,7 @@ VALUES
    'Student-friendly food markets and cafes'
  ]),
 
-(110, 'Sydney', 'Australia', 'Asia',
+(110, 'Sydney', 'Australia', 'Oceania',
  'https://images.unsplash.com/photo-1528072164453-f4e8ef0d475a?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1171',
  'Sydney, Australia',
  'A stunning harbor city with iconic landmarks, beautiful beaches, and incredible quality of life. Experience outdoor lifestyle and vibrant culture.',
@@ -769,7 +769,7 @@ VALUES
    'Student-friendly food markets'
  ]),
 
-(111, 'Melbourne', 'Australia', 'Asia',
+(111, 'Melbourne', 'Australia', 'Oceania',
  'https://plus.unsplash.com/premium_photo-1733317293766-5606f74b765b?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1074',
  'Melbourne, Australia',
  'A cultural capital known for incredible food, street art, and vibrant arts scene. Experience coffee culture, festivals, and world-class quality of life.',
@@ -783,7 +783,7 @@ VALUES
    'Student-friendly food markets and cafes'
  ]),
 
-(112, 'Auckland', 'New Zealand', 'Asia',
+(112, 'Auckland', 'New Zealand', 'Oceania',
  'https://images.unsplash.com/photo-1515248027005-c33283ec3fba?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1168',
  'Auckland, New Zealand',
  'A stunning harbor city surrounded by volcanoes and islands. Experience incredible natural beauty, outdoor activities, and friendly Kiwi culture.',
@@ -797,7 +797,7 @@ VALUES
    'Student-friendly food options'
  ]),
 
-(113, 'Santiago', 'Chile', 'Americas',
+(113, 'Santiago', 'Chile', 'South America',
  'https://images.unsplash.com/photo-1647618920221-43306af5c58d?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1074',
  'Santiago, Chile',
  'A modern capital with stunning mountain views, incredible wine, and vibrant culture. Experience the gateway to Chilean adventures.',
@@ -811,7 +811,7 @@ VALUES
    'Affordable Chilean cuisine and wine'
  ]),
 
-(114, 'Bogota', 'Colombia', 'Americas',
+(114, 'Bogota', 'Colombia', 'South America',
  'https://images.unsplash.com/photo-1512617835784-a92626c0a554?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1074',
  'Bogota, Colombia',
  'A vibrant capital at high altitude with incredible food, rich culture, and friendly locals. Experience authentic Colombian culture and amazing value.',
@@ -825,7 +825,7 @@ VALUES
    'Very cheap and delicious Colombian cuisine'
  ]),
 
-(115, 'Lima', 'Peru', 'Americas',
+(115, 'Lima', 'Peru', 'South America',
  'https://images.unsplash.com/photo-1580530719837-952e0515b69a?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170',
  'Lima, Peru',
  'A coastal capital known for world-class cuisine, rich history, and vibrant culture. Experience the gateway to Machu Picchu and incredible food.',
@@ -839,7 +839,7 @@ VALUES
    'Affordable world-class Peruvian cuisine'
  ]),
 
-(116, 'Havana', 'Cuba', 'Americas',
+(116, 'Havana', 'Cuba', 'North America',
  'https://images.unsplash.com/photo-1500759285222-a95626b934cb?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170',
  'Havana, Cuba',
  'A time-capsule capital with colorful colonial architecture, vintage cars, and incredible music. Experience authentic Cuban culture and unique atmosphere.',
@@ -1317,7 +1317,7 @@ VALUES
    'Cheap public transport and metro'
  ]),
 
-(61, 'Calgary', 'Canada', 'Americas',
+(61, 'Calgary', 'Canada', 'North America',
  'https://images.unsplash.com/photo-1526863336296-fac32d550655?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Calgary, Canada',
  'Gateway to the Canadian Rockies with modern skyline, cowboy culture, and outdoor adventures. Experience the famous Stampede, nearby mountain access, and friendly western hospitality.',
@@ -1331,7 +1331,7 @@ VALUES
    'Student deals at Stampede events'
  ]),
 
-(62, 'Ottawa', 'Canada', 'Americas',
+(62, 'Ottawa', 'Canada', 'North America',
  'https://plus.unsplash.com/premium_photo-1697730030448-fbfa52261ab6?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Ottawa, Canada',
  'Canada''s beautiful capital with stunning Parliament, world-class museums, and Rideau Canal. Experience bilingual culture, historic architecture, and seasonal festivals.',
@@ -1345,7 +1345,7 @@ VALUES
    'Free skating on Rideau Canal in winter'
  ]),
 
-(63, 'Quebec City', 'Canada', 'Americas',
+(63, 'Quebec City', 'Canada', 'North America',
  'https://images.unsplash.com/photo-1710881710078-d25d578fedc3?q=80&w=3132&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Quebec City, Canada',
  'North America''s most European city with stunning old town, French culture, and winter magic. Experience cobblestone streets, Château Frontenac, and authentic Québécois culture.',
@@ -1359,7 +1359,7 @@ VALUES
    'Discounted public transport passes'
  ]),
 
-(64, 'Guadalajara', 'Mexico', 'Americas',
+(64, 'Guadalajara', 'Mexico', 'North America',
  'https://images.unsplash.com/photo-1565670105658-ea35d27f7de7?q=80&w=2225&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Guadalajara, Mexico',
  'Mexico''s cultural heart with mariachi, tequila, and stunning colonial architecture. Experience authentic Mexican culture, vibrant arts scene, and incredible food.',
@@ -1373,7 +1373,7 @@ VALUES
    'Budget-friendly public transport'
  ]),
 
-(65, 'Cancun', 'Mexico', 'Americas',
+(65, 'Cancun', 'Mexico', 'North America',
  'https://images.unsplash.com/photo-1630252421399-ddde79af47b3?q=80&w=2274&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Cancun, Mexico',
  'Caribbean paradise with turquoise waters, white sand beaches, and vibrant nightlife. Experience Mayan ruins, cenotes, and all-inclusive beach resorts.',
@@ -1387,7 +1387,7 @@ VALUES
    'Cheap buses to Mayan ruins'
  ]),
 
-(66, 'Cusco', 'Peru', 'Americas',
+(66, 'Cusco', 'Peru', 'South America',
  'https://images.unsplash.com/photo-1593494441374-bad54249d0e8?q=80&w=2673&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Cusco, Peru',
  'Gateway to Machu Picchu with stunning Inca heritage, colonial architecture, and high-altitude beauty. Experience ancient history, vibrant markets, and Andean culture.',
@@ -1401,7 +1401,7 @@ VALUES
    'Affordable local transport and buses'
  ]),
 
-(67, 'Valparaiso', 'Chile', 'Americas',
+(67, 'Valparaiso', 'Chile', 'South America',
  'https://images.unsplash.com/photo-1566275163755-bbb09bbc5a13?q=80&w=2274&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Valparaiso, Chile',
  'Chile''s colorful port city with stunning street art, funiculars, and bohemian culture. Experience vibrant hills, artistic atmosphere, and Pacific Ocean views.',
@@ -1415,7 +1415,7 @@ VALUES
    'Affordable buses to Santiago and beaches'
  ]),
 
-(68, 'Barranquilla', 'Colombia', 'Americas',
+(68, 'Barranquilla', 'Colombia', 'South America',
  'https://images.unsplash.com/photo-1587332064870-7ccfa02a94ad?q=80&w=2274&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Barranquilla, Colombia',
  'Colombia''s Caribbean gateway with vibrant carnival culture, beautiful beaches, and warm hospitality. Experience coastal lifestyle, festive atmosphere, and authentic Colombian culture.',
@@ -1429,7 +1429,7 @@ VALUES
    'Cheap public transport'
  ]),
 
-(69, 'Cartagena', 'Colombia', 'Americas',
+(69, 'Cartagena', 'Colombia', 'South America',
  'https://images.unsplash.com/photo-1583531352515-8884af319dc1?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Cartagena, Colombia',
  'Colombia''s Caribbean jewel with stunning colonial old town, beautiful beaches, and vibrant nightlife. Experience colorful architecture, island hopping, and romantic atmosphere.',
@@ -1443,7 +1443,7 @@ VALUES
    'Budget-friendly island day trips'
  ]),
 
-(70, 'Cali', 'Colombia', 'Americas',
+(70, 'Cali', 'Colombia', 'South America',
  'https://images.unsplash.com/photo-1728588519059-a62e06050425?q=80&w=2262&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Cali, Colombia',
  'The world capital of salsa with incredible dance culture, warm weather, and vibrant nightlife. Experience authentic Colombian rhythm, friendly locals, and energetic atmosphere.',
@@ -1456,7 +1456,7 @@ VALUES
    'Free salsa in parks and plazas',
    'Cheap public transport and taxis'
  ]),
-(71, 'Quito', 'Ecuador', 'Americas',
+(71, 'Quito', 'Ecuador', 'South America',
  'https://images.unsplash.com/photo-1610226977124-9fd2755d09f2?q=80&w=2274&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Quito, Ecuador',
  'The world''s highest capital with stunning colonial center, surrounding volcanoes, and gateway to Galapagos. Experience UNESCO heritage, equator line, and Andean culture.',
@@ -1470,7 +1470,7 @@ VALUES
    'Budget-friendly day trips to volcanoes'
  ]),
 
-(72, 'Montevideo', 'Uruguay', 'Americas',
+(72, 'Montevideo', 'Uruguay', 'South America',
  'https://plus.unsplash.com/premium_photo-1742457604656-b9feed9543f1?q=80&w=2290&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Montevideo, Uruguay',
  'Uruguay''s relaxed capital with beautiful beaches, vibrant culture, and European charm. Experience tango, mate culture, and one of South America''s safest cities.',
@@ -1484,7 +1484,7 @@ VALUES
    'Affordable public transport'
  ]),
 
-(73, 'La Paz', 'Bolivia', 'Americas',
+(73, 'La Paz', 'Bolivia', 'South America',
  'https://images.unsplash.com/photo-1544142447-e43d0fe04bf2?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'La Paz, Bolivia',
  'The world''s highest administrative capital with stunning mountain views, cable cars, and indigenous culture. Experience dramatic landscapes, witches'' market, and Death Road.',
@@ -1498,7 +1498,7 @@ VALUES
    'Cheap local transport'
  ]),
 
-(74, 'Asunción', 'Paraguay', 'Americas',
+(74, 'Asunción', 'Paraguay', 'South America',
  'https://images.unsplash.com/photo-1655425541685-c3d9b0672d9f?q=80&w=3132&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Asunción, Paraguay',
  'Paraguay''s riverside capital with colonial charm, warm hospitality, and incredibly affordable prices. Experience authentic culture away from tourist trails.',
@@ -1512,7 +1512,7 @@ VALUES
    'Cheap public transport and taxis'
  ]),
 
-(75, 'San Juan', 'Puerto Rico', 'Americas',
+(75, 'San Juan', 'Puerto Rico', 'North America',
  'https://images.unsplash.com/photo-1625642471723-12744e6e4211?q=80&w=1760&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'San Juan, Puerto Rico',
  'Caribbean paradise with stunning colonial old town, beautiful beaches, and vibrant culture. Experience colorful architecture, bioluminescent bays, and tropical beauty.',
@@ -1526,7 +1526,7 @@ VALUES
    'Affordable public buses and ferries'
  ]),
 
-(76, 'Trinidad', 'Cuba', 'Americas',
+(76, 'Trinidad', 'Cuba', 'North America',
  'https://images.unsplash.com/photo-1621458425208-b65bc41f82ae?q=80&w=3131&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Trinidad, Cuba',
  'Cuba''s colonial gem with colorful streets, stunning architecture, and nearby beaches. Experience preserved Spanish colonial heritage, tobacco farms, and authentic Cuban life.',
