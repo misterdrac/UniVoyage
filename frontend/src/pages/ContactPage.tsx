@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import univoyageIcon from '@/assets/univoyage_icon.svg';
 
 export default function ContactPage() {
   return (
@@ -12,9 +13,16 @@ export default function ContactPage() {
       <div className="max-w-6xl mx-auto">
         {/* Header Section */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl sm:text-5xl font-bold mb-4 bg-linear-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-            Get in Touch
-          </h1>
+          <div className="flex justify-center items-center gap-3 mb-4">
+            <img 
+              src={univoyageIcon} 
+              alt="UniVoyage Logo" 
+              className="w-12 h-12 sm:w-16 sm:h-16"
+            />
+            <h1 className="text-4xl sm:text-5xl font-bold bg-linear-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+              Get in Touch
+            </h1>
+          </div>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Have questions, feedback, or just want to say hello? We'd love to hear from you!
           </p>
