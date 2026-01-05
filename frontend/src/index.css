@@ -220,6 +220,30 @@
   --place-category-default-bg: rgb(243, 244, 246); /* gray-100 */
   --place-category-default-text: rgb(31, 41, 55); /* gray-800 */
   --place-category-default-border: rgb(107, 114, 128); /* gray-500 */
+
+  /* Admin CMS Colors */
+  --admin-gradient-start: rgb(16, 185, 129); /* emerald-500 */
+  --admin-gradient-end: rgb(13, 148, 136); /* teal-600 */
+  --admin-gradient-start-hover: rgb(5, 150, 105); /* emerald-600 */
+  --admin-gradient-end-hover: rgb(15, 118, 110); /* teal-700 */
+  --admin-users-gradient-start: rgb(59, 130, 246); /* blue-500 */
+  --admin-users-gradient-end: rgb(79, 70, 229); /* indigo-600 */
+  --admin-users-gradient-start-hover: rgb(37, 99, 235); /* blue-600 */
+  --admin-users-gradient-end-hover: rgb(67, 56, 202); /* indigo-700 */
+  --admin-badge-admin-bg: rgb(254, 243, 199); /* amber-100 */
+  --admin-badge-admin-text: rgb(146, 64, 14); /* amber-800 */
+  --admin-badge-user-bg: rgb(219, 234, 254); /* blue-100 */
+  --admin-badge-user-text: rgb(30, 64, 175); /* blue-800 */
+  --admin-decorative-emerald: rgba(16, 185, 129, 0.1); /* emerald-500/10 */
+  --admin-decorative-teal: rgba(13, 148, 136, 0.1); /* teal-500/10 */
+  --admin-decorative-purple: rgba(120, 119, 198, 0.1);
+  --admin-decorative-purple-light: rgba(120, 119, 198, 0.08);
+  --admin-overlay-start: rgba(16, 185, 129, 0.8); /* emerald-500/80 */
+  --admin-overlay-end: rgba(13, 148, 136, 0.7); /* teal-600/70 */
+  --admin-shadow-emerald-25: rgba(16, 185, 129, 0.25); /* emerald-500/25 */
+  --admin-shadow-emerald-30: rgba(16, 185, 129, 0.3); /* emerald-500/30 */
+  --admin-shadow-blue-30: rgba(59, 130, 246, 0.3); /* blue-500/30 */
+  --admin-bg-gradient: linear-gradient(to bottom right, var(--muted), var(--background), var(--muted));
 }
 
 .dark {
@@ -400,6 +424,30 @@
   --place-category-default-bg: rgb(31, 41, 55); /* gray-800 */
   --place-category-default-text: rgb(229, 231, 235); /* gray-200 */
   --place-category-default-border: rgb(107, 114, 128); /* gray-500 */
+
+  /* Admin CMS Colors (Dark Mode) */
+  --admin-gradient-start: rgb(52, 211, 153); /* emerald-400 */
+  --admin-gradient-end: rgb(45, 212, 191); /* teal-400 */
+  --admin-gradient-start-hover: rgb(16, 185, 129); /* emerald-500 */
+  --admin-gradient-end-hover: rgb(20, 184, 166); /* teal-500 */
+  --admin-users-gradient-start: rgb(96, 165, 250); /* blue-400 */
+  --admin-users-gradient-end: rgb(129, 140, 248); /* indigo-400 */
+  --admin-users-gradient-start-hover: rgb(59, 130, 246); /* blue-500 */
+  --admin-users-gradient-end-hover: rgb(99, 102, 241); /* indigo-500 */
+  --admin-badge-admin-bg: rgba(217, 119, 6, 0.3); /* amber-600/30 */
+  --admin-badge-admin-text: rgb(251, 191, 36); /* amber-400 */
+  --admin-badge-user-bg: rgba(59, 130, 246, 0.3); /* blue-500/30 */
+  --admin-badge-user-text: rgb(96, 165, 250); /* blue-400 */
+  --admin-decorative-emerald: rgba(16, 185, 129, 0.05); /* emerald-500/5 */
+  --admin-decorative-teal: rgba(13, 148, 136, 0.05); /* teal-500/5 */
+  --admin-overlay-start: rgba(52, 211, 153, 0.8); /* emerald-400/80 */
+  --admin-overlay-end: rgba(45, 212, 191, 0.7); /* teal-400/70 */
+  --admin-decorative-purple: rgba(120, 119, 198, 0.1);
+  --admin-decorative-purple-light: rgba(120, 119, 198, 0.08);
+  --admin-shadow-emerald-25: rgba(52, 211, 153, 0.25); /* emerald-400/25 */
+  --admin-shadow-emerald-30: rgba(52, 211, 153, 0.3); /* emerald-400/30 */
+  --admin-shadow-blue-30: rgba(96, 165, 250, 0.3); /* blue-400/30 */
+  --admin-bg-gradient: linear-gradient(to bottom right, var(--muted), var(--background), var(--muted));
 }
 
 @theme inline {
@@ -576,5 +624,15 @@
 
   .dark .dropdown-scrollbar::-webkit-scrollbar-thumb:hover {
     background: oklch(0.7162 0.1597 290.3962 / 0.5);
+  }
+
+  /* Hide number input spinners */
+  .no-spinners::-webkit-outer-spin-button,
+  .no-spinners::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  .no-spinners[type="number"] {
+    -moz-appearance: textfield;
   }
 }

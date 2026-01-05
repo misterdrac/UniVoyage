@@ -1,15 +1,106 @@
 import React, { useState, useCallback } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { ThemeProvider, AuthProvider, DestinationProvider, TripProvider } from '@/contexts';
 import { Header, Footer, ScrollToTop } from '@/components';
 import { AuthLoadingOverlay } from '@/components/layout/AuthLoadingOverlay';
 import { Toaster } from '@/components/ui/sonner';
-import { ProtectedRoute } from '@/guards';
+import { ProtectedRoute, AdminProtectedRoute } from '@/guards';
 import { HomePage, AboutPage, TourPage, ContactPage, ProfilePage, MyTripsPage, TripDetailPage, PopularDestinationsPage, EuropeDestinationsPage, AmericasDestinationsPage, AsiaDestinationsPage, AfricaDestinationsPage } from '@/pages';
+import { AdminLoginPage, AdminDashboardPage, AdminUsersPage, AdminDestinationsPage } from '@/pages/admin';
 import { LoginDialog, SignUpDialog } from '@/components/auth';
 import { useDestination } from '@/contexts/DestinationContext';
 import GoogleCallbackPage from "@/pages/GoogleCallbackPage"
 
+
+// Layout component for main app (with Header/Footer)
+function MainLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <>
+      <Header />
+      {children}
+      <Footer />
+    </>
+  );
+}
+
+// Wrapper component to handle conditional layout
+function AppRoutes() {
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith('/admin');
+
+  return (
+    <Routes>
+      {/* Admin Routes - No Header/Footer */}
+      <Route path="/admin" element={<AdminLoginPage />} />
+      <Route 
+        path="/admin/dashboard" 
+        element={
+          <AdminProtectedRoute>
+            <AdminDashboardPage />
+          </AdminProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/admin/users" 
+        element={
+          <AdminProtectedRoute>
+            <AdminUsersPage />
+          </AdminProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/admin/destinations" 
+        element={
+          <AdminProtectedRoute>
+            <AdminDestinationsPage />
+          </AdminProtectedRoute>
+        } 
+      />
+
+      {/* Main App Routes - With Header/Footer */}
+      <Route path="/" element={<MainLayout><HomePage /></MainLayout>} />
+      <Route path="/about" element={<MainLayout><AboutPage /></MainLayout>} />
+      <Route path="/tour" element={<MainLayout><TourPage /></MainLayout>} />
+      <Route path="/contact" element={<MainLayout><ContactPage /></MainLayout>} />
+      <Route path="/destinations" element={<MainLayout><PopularDestinationsPage /></MainLayout>} />
+      <Route path="/destinations/europe" element={<MainLayout><EuropeDestinationsPage /></MainLayout>} />
+      <Route path="/destinations/americas" element={<MainLayout><AmericasDestinationsPage /></MainLayout>} />
+      <Route path="/destinations/asia" element={<MainLayout><AsiaDestinationsPage /></MainLayout>} />
+      <Route path="/destinations/africa" element={<MainLayout><AfricaDestinationsPage /></MainLayout>} />
+      <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
+      <Route 
+        path="/profile" 
+        element={
+          <MainLayout>
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          </MainLayout>
+        } 
+      />
+      <Route 
+        path="/my-trips" 
+        element={
+          <MainLayout>
+            <ProtectedRoute>
+              <MyTripsPage />
+            </ProtectedRoute>
+          </MainLayout>
+        } 
+      />
+      <Route 
+        path="/trips/:id" 
+        element={
+          <MainLayout>
+            <ProtectedRoute>
+              <TripDetailPage />
+            </ProtectedRoute>
+          </MainLayout>
+        } 
+      />
+    </Routes>
+  );
+}
 
 //todo improve this
 function AppContent() {
@@ -40,44 +131,7 @@ function AppContent() {
       <AuthLoadingOverlay />
       <Router>
         <ScrollToTop />
-        <Header />
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/tour" element={<TourPage />} />
-          <Route path="/contact" element={<ContactPage />} />
-          <Route path="/destinations" element={<PopularDestinationsPage />} />
-          <Route path="/destinations/europe" element={<EuropeDestinationsPage />} />
-          <Route path="/destinations/americas" element={<AmericasDestinationsPage />} />
-          <Route path="/destinations/asia" element={<AsiaDestinationsPage />} />
-          <Route path="/destinations/africa" element={<AfricaDestinationsPage />} />
-          <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
-          <Route 
-            path="/profile" 
-            element={
-              <ProtectedRoute>
-                <ProfilePage />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/my-trips" 
-            element={
-              <ProtectedRoute>
-                <MyTripsPage />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/trips/:id" 
-            element={
-              <ProtectedRoute>
-                <TripDetailPage />
-              </ProtectedRoute>
-            } 
-          />
-        </Routes>
-        <Footer />
+        <AppRoutes />
         <Toaster />
       </Router>
       

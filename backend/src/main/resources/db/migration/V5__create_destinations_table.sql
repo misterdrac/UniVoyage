@@ -17,6 +17,7 @@ CREATE TABLE destinations (
     student_perks TEXT[],
 
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT uq_destinations_title_location UNIQUE (title, location)
 );

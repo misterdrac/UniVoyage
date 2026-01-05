@@ -5,7 +5,7 @@ import { type Option } from '@/components/ui/autocomplete';
 import { DestinationAutoComplete } from '@/components/ui/destination-autocomplete';
 import { Button } from '@/components/ui/button';
 import { DateRangePicker } from './DateRangePicker';
-import { getPopularDestinations, getPopularCountries } from '@/data/destinations';
+import { getPopularDestinations } from '@/data/destinations';
 import { useDestinations } from '@/hooks/useDestinations';
 import type { DateRange } from 'react-day-picker';
 import { useDestination } from '@/contexts/DestinationContext';
@@ -28,15 +28,6 @@ export const DestinationPicker = ({ continent }: DestinationPickerProps) => {
   const navigate = useNavigate();
   const [isCreatingTrip, setIsCreatingTrip] = useState(false);
   const { destinations: apiDestinations } = useDestinations();
-
-  // Popular countries - major countries with multiple destinations
-  const popularCountries: Option[] = useMemo(() => {
-    return getPopularCountries(apiDestinations, continent).map(location => ({
-      value: location,
-      label: location,
-      location: location
-    }));
-  }, [apiDestinations, continent]);
 
   // Get unique countries from destinations, filtered by continent if provided
   const countryOptions: Option[] = useMemo(() => {
@@ -137,8 +128,7 @@ export const DestinationPicker = ({ continent }: DestinationPickerProps) => {
               emptyMessage="No countries found"
               value={selectedCountry}
               onValueChange={handleCountryChange}
-              popularOptions={popularCountries}
-              popularLabel="Popular Lately"
+              maxResults={countryOptions.length}
             />
             {selectedCountry && (
               <button

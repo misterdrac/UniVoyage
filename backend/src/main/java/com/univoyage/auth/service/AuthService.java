@@ -259,7 +259,52 @@ public class AuthService {
             user.getVisitedCountries().addAll(newVisitedCountries);
         }
 
+        // ---- PROFILE IMAGE PATH ----
+        if (request.getProfileImagePath() != null) {
+            // Validate avatar URL to prevent malicious or unauthorized image URLs
+            String avatarPath = request.getProfileImagePath();
+            if (!isValidAvatarUrl(avatarPath)) {
+                throw new IllegalArgumentException("Invalid avatar URL. Only avatar-1.png to avatar-20.png from cdn.shadcnstudio.com are allowed.");
+            }
+            user.setProfileImagePath(avatarPath);
+        }
+
         UserEntity savedUser = userRepository.save(user);
         return UserDto.from(savedUser);
+    }
+
+    /**
+     * Validates that the avatar URL is from the allowed CDN and matches the expected pattern.
+     * Only allows avatar-1.png through avatar-20.png from cdn.shadcnstudio.com
+     * 
+     * @param url The avatar URL to validate
+     * @return true if the URL is valid, false otherwise
+     */
+    private boolean isValidAvatarUrl(String url) {
+        if (url == null || url.isBlank()) {
+            return false;
+        }
+        
+        // Must start with the allowed CDN base URL
+        String allowedBaseUrl = "https://cdn.shadcnstudio.com/ss-assets/avatar/avatar-";
+        if (!url.startsWith(allowedBaseUrl)) {
+            return false;
+        }
+        
+        // Must end with .png
+        if (!url.endsWith(".png")) {
+            return false;
+        }
+        
+        // Extract the avatar number
+        String numberPart = url.substring(allowedBaseUrl.length(), url.length() - 4);
+        
+        try {
+            int avatarNumber = Integer.parseInt(numberPart);
+            // Only allow numbers 1-20
+            return avatarNumber >= 1 && avatarNumber <= 20;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 }

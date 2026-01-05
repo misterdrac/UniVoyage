@@ -168,8 +168,9 @@ export const AutoComplete = ({
     const itemHeight = hasMultiLineItems ? 56 : 36
     const bannerHeight = isShowingPopular ? 40 : 0
     const totalHeight = filteredOptions.length * itemHeight + bannerHeight
-    calculatedHeight = Math.min(totalHeight, 500)
-    listClassName = `rounded-lg overflow-hidden`
+    const maxHeightFor10Items = 10 * itemHeight + bannerHeight
+    calculatedHeight = Math.min(totalHeight, Math.min(maxHeightFor10Items, 500))
+    listClassName = `rounded-lg overflow-y-auto overflow-x-hidden`
   }
 
   return (

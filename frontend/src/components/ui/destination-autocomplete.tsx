@@ -21,6 +21,7 @@ type DestinationAutoCompleteProps = {
   placeholder?: string
   popularOptions?: Option[]
   popularLabel?: string
+  maxResults?: number
 }
 
 export const DestinationAutoComplete = ({
@@ -33,6 +34,7 @@ export const DestinationAutoComplete = ({
   isLoading = false,
   popularOptions,
   popularLabel = "Popular",
+  maxResults = 8,
 }: DestinationAutoCompleteProps) => {
   return (
     <AutoComplete
@@ -45,7 +47,7 @@ export const DestinationAutoComplete = ({
       isLoading={isLoading}
       popularOptions={popularOptions}
       popularLabel={popularLabel}
-      maxResults={8}
+      maxResults={maxResults}
       dynamicHeight={true}
     />
   )
