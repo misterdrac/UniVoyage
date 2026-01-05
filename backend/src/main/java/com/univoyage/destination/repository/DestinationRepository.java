@@ -10,6 +10,10 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Repository interface for DestinationEntity.
+ * Extends JpaRepository to provide CRUD operations and custom query methods.
+ */
 public interface DestinationRepository extends JpaRepository<DestinationEntity, Long> {
 
     Optional<DestinationEntity> findByNameAndLocation(String name, String location);

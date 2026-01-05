@@ -11,17 +11,32 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.List;
 
+/**
+ * Service for managing travel destinations.
+ * Provides methods to retrieve, search, and create destination records.
+ */
 @Service
 @RequiredArgsConstructor
 public class DestinationService {
 
     private final DestinationRepository destinationRepository;
 
+    /**
+     * Retrieve all destinations.
+     *
+     * @return A list of all DestinationResponse DTOs.
+     */
     @Transactional(readOnly = true)
     public List<DestinationResponse> getAll() {
         return destinationRepository.findAll().stream().map(this::toDto).toList();
     }
 
+    /**
+     * Search for destinations by name or location.
+     *
+     * @param query The search query string.
+     * @return A list of matching DestinationResponse DTOs.
+     */
     @Transactional(readOnly = true)
     public List<DestinationResponse> search(String query) {
         if (query == null || query.isBlank()) return List.of();
@@ -30,6 +45,12 @@ public class DestinationService {
                 .stream().map(this::toDto).toList();
     }
 
+    /**
+     * Create a new destination if it does not already exist.
+     *
+     * @param req The CreateDestinationRequest DTO containing destination details.
+     * @return The created or existing DestinationResponse DTO.
+     */
     @Transactional
     public DestinationResponse create(CreateDestinationRequest req) {
         DestinationEntity entity = destinationRepository
@@ -44,6 +65,12 @@ public class DestinationService {
         return toDto(entity);
     }
 
+    /**
+     * Convert a DestinationEntity to a DestinationResponse DTO.
+     *
+     * @param d The DestinationEntity to convert.
+     * @return The corresponding DestinationResponse DTO.
+     */
     private DestinationResponse toDto(DestinationEntity d) {
         return DestinationResponse.builder()
                 .id(d.getId())

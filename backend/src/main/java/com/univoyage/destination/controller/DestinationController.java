@@ -12,6 +12,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Controller for managing travel destinations.
+ * Provides endpoints to retrieve all destinations, search destinations,
+ * and create new destinations.
+ * All endpoints are prefixed with /api/destinations.
+ * Uses DestinationService for business logic.
+ * Returns responses wrapped in ApiResponse for consistent API structure.
+ */
 @RestController
 @RequestMapping("/api/destinations")
 @RequiredArgsConstructor
@@ -31,7 +39,6 @@ public class DestinationController {
         return ResponseEntity.ok(ApiResponse.ok(Map.of("destinations", destinations)));
     }
 
-    // Create a new destination (only for authenticated users)
     @PostMapping
     public ResponseEntity<ApiResponse<Map<String, Object>>> create(@Valid @RequestBody CreateDestinationRequest req) {
         DestinationResponse created = destinationService.create(req);

@@ -6,6 +6,9 @@ import lombok.*;
 import java.time.Instant;
 import java.util.List;
 
+/**
+ * Entity representing a travel destination.
+ */
 @Entity
 @Table(
         name = "destinations",

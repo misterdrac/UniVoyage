@@ -5,6 +5,10 @@ import lombok.Data;
 
 import java.util.List;
 
+/**
+ * Response DTO for Destination entity.
+ * Contains detailed information about a travel destination.
+ */
 @Data
 @Builder
 public class DestinationResponse {
