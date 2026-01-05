@@ -6,6 +6,10 @@ import jakarta.validation.constraints.Size;
 
 import java.util.List;
 
+/**
+ * Request DTO for updating an existing destination in the admin panel.
+ * Contains fields for destination details with validation constraints.
+ */
 public record AdminUpdateDestinationRequest(
         @NotBlank @Size(max = 200) String name,
         @NotBlank @Size(max = 100) String location,
