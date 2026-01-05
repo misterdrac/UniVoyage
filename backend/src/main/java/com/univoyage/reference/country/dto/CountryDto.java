@@ -3,6 +3,9 @@ package com.univoyage.reference.country.dto;
 import com.univoyage.reference.country.model.Country;
 import lombok.*;
 
+/**
+ * Data Transfer Object for Country entity.
+ */
 @Getter
 @Setter
 @NoArgsConstructor

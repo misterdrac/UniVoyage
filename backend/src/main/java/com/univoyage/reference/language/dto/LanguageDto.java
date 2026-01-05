@@ -3,6 +3,9 @@ package com.univoyage.reference.language.dto;
 import com.univoyage.reference.language.model.Language;
 import lombok.*;
 
+/**
+ * Data Transfer Object for Language entity.
+ */
 @Getter
 @Setter
 @NoArgsConstructor

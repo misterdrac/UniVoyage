@@ -13,6 +13,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Set;
 
+/**
+ * CORS configuration filter to handle Cross-Origin Resource Sharing (CORS) settings.
+ * Allows requests from specified origins and sets appropriate CORS headers.
+ * Responds to preflight OPTIONS requests.
+ */
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class CorsConfig extends OncePerRequestFilter {

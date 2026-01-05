@@ -11,6 +11,11 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+/**
+ * Custom AccessDeniedHandler that returns a JSON response
+ * when a user tries to access a resource they do not have permission for.
+ * Responds with HTTP 403 Forbidden status and a standardized error message.
+ */
 @Component
 public class RestAccessDeniedHandler implements AccessDeniedHandler {
 
