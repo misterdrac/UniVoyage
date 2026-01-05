@@ -50,7 +50,7 @@ export function useTripItinerary({ trip, currentStatus }: UseTripItineraryArgs):
     }
 
     return user.hobbies
-      .map((hobby) => hobby?.name?.trim())
+      .map((hobby) => hobby?.hobbyName?.trim())
       .filter((name): name is string => Boolean(name && name.length > 0))
   }, [user?.hobbies])
 

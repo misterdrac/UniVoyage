@@ -166,7 +166,7 @@ export function TripAccommodationSection({ trip }: TripAccommodationSectionProps
         {/* User's saved accommodation info card with input fields */}
         <Card className="h-full overflow-hidden border-2 border-primary/30 transition-all duration-300 hover:shadow-xl hover:border-primary/50">
           <CardContent className="p-0">
-            <div className="bg-gradient-to-r from-primary to-primary/80 p-5 text-white">
+            <div className="bg-linear-to-r from-primary to-primary/80 p-5 text-white">
               <div className="flex items-center justify-between">
                 <Hotel className="h-8 w-8" />
                 <div className="flex items-center gap-2">
@@ -243,7 +243,7 @@ export function TripAccommodationSection({ trip }: TripAccommodationSectionProps
         >
           <Card className="h-full overflow-hidden border-2 transition-all duration-300 hover:shadow-xl hover:scale-[1.02] hover:border-primary/50">
             <CardContent className="p-0 flex flex-col h-full">
-              <div className={cn('bg-gradient-to-r p-5 text-white', bookingPartners[0].color)}>
+              <div className={cn('bg-linear-to-r p-5 text-white', bookingPartners[0].color)}>
                 <div className="flex items-center justify-between">
                   {bookingPartners[0].icon}
                   <ExternalLink className="h-5 w-5 opacity-70 group-hover:opacity-100 transition-opacity" />
@@ -277,7 +277,7 @@ export function TripAccommodationSection({ trip }: TripAccommodationSectionProps
         >
           <Card className="h-full overflow-hidden border-2 transition-all duration-300 hover:shadow-xl hover:scale-[1.02] hover:border-primary/50">
             <CardContent className="p-0 flex flex-col h-full">
-              <div className={cn('bg-gradient-to-r p-5 text-white', bookingPartners[1].color)}>
+              <div className={cn('bg-linear-to-r p-5 text-white', bookingPartners[1].color)}>
                 <div className="flex items-center justify-between">
                   {bookingPartners[1].icon}
                   <ExternalLink className="h-5 w-5 opacity-70 group-hover:opacity-100 transition-opacity" />

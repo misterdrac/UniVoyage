@@ -20,7 +20,7 @@ export const AdminPagination: React.FC<AdminPaginationProps> = ({
   itemLabel = 'items',
 }) => {
   return (
-    <div className="p-4 border-t bg-muted/30 flex items-center justify-between flex-shrink-0">
+    <div className="p-4 border-t bg-muted/30 flex items-center justify-between shrink-0">
       <p className="text-sm text-muted-foreground">
         Showing {currentCount} of {totalCount} {itemLabel}
       </p>

@@ -1,5 +1,5 @@
 import { Card, CardContent } from '@/components/ui/card'
-import { MapPin, ExternalLink, AlertCircle, RefreshCw, ChevronDown, Church, TreePine, TowerControl, Square, Flower2, Star, Palette, Shield, Castle, Amphora, BrickWall, University, Landmark, Camera, Globe, BookOpen } from 'lucide-react'
+import { MapPin, ExternalLink, AlertCircle, RefreshCw, ChevronDown, Church, TreePine, TowerControl, Square, Flower2, Star, Palette, Shield, Castle, Amphora, BrickWall, University, Landmark, Globe, BookOpen } from 'lucide-react'
 import type { Trip } from '@/types/trip'
 import { usePointsOfInterest } from '@/hooks/usePointsOfInterest'
 import { usePaginatedItems } from '@/hooks/usePaginatedItems'

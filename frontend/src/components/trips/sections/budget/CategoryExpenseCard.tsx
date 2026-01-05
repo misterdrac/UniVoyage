@@ -38,7 +38,7 @@ export function CategoryExpenseCard({
   onAddExpense,
   onDeleteExpense,
   onStartEdit,
-  editingExpenseId,
+  editingExpenseId, 
 }: CategoryExpenseCardProps) {
   const [addDialogOpen, setAddDialogOpen] = useState(false)
   const config = CATEGORY_CONFIG[category.value]

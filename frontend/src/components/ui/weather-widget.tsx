@@ -8,12 +8,9 @@ import type {
   WeatherData,
   ForecastDay,
   ForecastApiResponse,
-  WeatherApiResponse,
   ForecastCachePayload,
 } from "./weather-widget/types"
 import {
-  mapWeatherType,
-  formatDateTimeForTimezone,
   groupForecastByDay,
   isFinalTripDayForToday,
   getTimezoneDayNumber,

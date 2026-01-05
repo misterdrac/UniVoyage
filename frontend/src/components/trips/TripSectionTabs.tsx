@@ -32,7 +32,7 @@ export function TripSectionTabs<T extends string>({
                 onClick={() => onSectionChange(section.id)}
                 className={cn(
                   'flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium transition-all whitespace-nowrap',
-                  'border-b-2 border-transparent flex-shrink-0',
+                  'border-b-2 border-transparent shrink-0',
                   isActive
                     ? 'text-primary border-primary bg-primary/5'
                     : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'

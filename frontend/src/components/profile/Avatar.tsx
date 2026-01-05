@@ -52,7 +52,7 @@ const AvatarComponent = ({
       <div
         className={cn(
           sizeClass,
-          'rounded-full overflow-hidden border-2 border-primary/20 bg-primary/5 flex-shrink-0',
+          'rounded-full overflow-hidden border-2 border-primary/20 bg-primary/5 shrink-0',
           className
         )}
       >
@@ -70,7 +70,7 @@ const AvatarComponent = ({
     <div
       className={cn(
         sizeClass,
-        'rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0',
+        'rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0',
         className
       )}
     >

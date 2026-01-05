@@ -25,7 +25,6 @@ import {
   TripOverviewSection,
   TripWeatherSection,
   TripBudgetSection,
-  TripPlaceholderSection,
   TripItinerarySection,
   TripPointsOfInterestSection,
   TripAccommodationSection,

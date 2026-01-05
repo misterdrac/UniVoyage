@@ -1,4 +1,3 @@
-import React from 'react';
 import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
 
 interface SortableTableHeaderProps<T extends string> {
