@@ -2,6 +2,9 @@ package com.univoyage.auth.security;
 
 import jakarta.servlet.http.Cookie;
 
+/**
+ * Utility class for creating and managing authentication-related cookies.
+ */
 public final class CookieUtils {
 
     private CookieUtils() {}

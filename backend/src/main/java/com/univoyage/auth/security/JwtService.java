@@ -20,7 +20,6 @@ import java.util.function.Function;
 /** Service for handling JWT (JSON Web Tokens) and CSRF (Cross-Site Request Forgery) tokens.
  * This service generates, validates, and extracts claims from JWTs.
  */
-
 @Service
 public class JwtService {
 
@@ -43,7 +42,6 @@ public class JwtService {
         this.audience = audience;
     }
 
-    // for current implementation, we don't need to use the token directly, because we need to implement sending it on each form
     /** Generating CSRF(Cross-Site Request Forgery) token
      * we call it Token A
      * */

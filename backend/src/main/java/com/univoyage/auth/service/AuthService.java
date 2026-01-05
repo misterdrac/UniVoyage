@@ -35,6 +35,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Service for handling authentication-related operations such as registration, login, and profile updates.
+ * Interacts with UserRepository for user data access and JwtService for token generation.
+ * Handles business logic for user management including password encoding and validation.
+ * Uses DTOs for request and response payloads.
+ * All methods that modify data are transactional.
+ */
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -47,6 +54,12 @@ public class AuthService {
     private final HobbyRepository hobbyRepository;
     private final LanguageRepository languageRepository;
 
+    /**
+     * Registers a new user with the provided registration details.
+     *
+     * @param request The registration request containing user details.
+     * @return An AuthPayload containing the registered user info and JWT tokens, or an error message.
+     */
     @Transactional
     public AuthPayload register(RegisterRequestDto request) {
 
@@ -88,7 +101,6 @@ public class AuthService {
                             UserHobby uh = new UserHobby();
                             uh.setUser(newUser);
                             uh.setHobby(h);
-                            // assumes UserHobbyId(userId, hobbyId)
                             uh.setId(new UserHobbyId(newUser.getId(), h.getId()));
                             return uh;
                         })
@@ -142,6 +154,12 @@ public class AuthService {
         return AuthPayload.ok(UserDto.from(savedUser), pair.jwt(), pair.csrfSecret());
     }
 
+    /**
+     * Authenticates a user with the provided login credentials.
+     *
+     * @param request The login request containing email and password.
+     * @return An AuthPayload containing the authenticated user info and JWT tokens, or an error message.
+     */
     @Transactional
     public AuthPayload login(LoginRequestDto request) {
 
@@ -160,13 +178,20 @@ public class AuthService {
         return AuthPayload.ok(UserDto.from(user), pair.jwt(), pair.csrfSecret());
     }
 
+    /**
+     * Updates the profile of an existing user with the provided details.
+     *
+     * @param userId  The ID of the user to update.
+     * @param request The profile update request containing new user details.
+     * @return A UserDto representing the updated user profile.
+     */
     @Transactional
     public UserDto updateProfile(Long userId, UpdateProfileRequestDto request) {
 
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
 
-        // ---- BASIC FIELDS ----
+        // BASIC FIELDS
         if (request.getName() != null && !request.getName().isBlank()) {
             user.setName(request.getName());
         }
@@ -174,14 +199,14 @@ public class AuthService {
             user.setSurname(request.getSurname());
         }
 
-        // ---- COUNTRY ----
+        // COUNTRY
         if (request.getCountryCode() != null && !request.getCountryCode().isBlank()) {
             Country country = countryRepository.findByIsoCode(request.getCountryCode())
                     .orElseThrow(() -> new IllegalArgumentException("Invalid country code: " + request.getCountryCode()));
             user.setCountry(country);
         }
 
-        // ---- HOBBIES ----
+        // HOBBIES
         if (request.getHobbyIds() != null) {
             Set<Long> newHobbyIds = request.getHobbyIds();
 
@@ -206,7 +231,7 @@ public class AuthService {
             }
         }
 
-        // ---- LANGUAGES ----
+        // LANGUAGES
         if (request.getLanguageCodes() != null) {
             Set<String> newLanguageCodes = request.getLanguageCodes();
 
@@ -231,7 +256,7 @@ public class AuthService {
             }
         }
 
-        // ---- VISITED COUNTRIES ----
+        // VISITED COUNTRIES
         if (request.getVisitedCountryCodes() != null) {
             Set<String> newCountryCodes = request.getVisitedCountryCodes();
 
@@ -259,7 +284,7 @@ public class AuthService {
             user.getVisitedCountries().addAll(newVisitedCountries);
         }
 
-        // ---- PROFILE IMAGE PATH ----
+        // PROFILE IMAGE PATH
         if (request.getProfileImagePath() != null) {
             // Validate avatar URL to prevent malicious or unauthorized image URLs
             String avatarPath = request.getProfileImagePath();

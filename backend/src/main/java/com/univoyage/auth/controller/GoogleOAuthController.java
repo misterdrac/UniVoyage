@@ -19,6 +19,13 @@ import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 
 /** * Controller for handling Google OAuth 2.0 authentication.
+ * Provides endpoints to initiate the OAuth flow and handle the callback.
+ * All endpoints are prefixed with /api/auth.
+ * Uses GoogleOAuthService for business logic.
+ * Returns responses wrapped in ApiResponse for consistent API structure.
+ * Sets HttpOnly cookies for JWT and CSRF tokens upon successful authentication.
+ * Supports CORS for specified frontend origins.
+ * Handles errors and returns appropriate HTTP status codes.
  */
 @CrossOrigin(
         origins = {"http://localhost:5173","http://127.0.0.1:5173"},
@@ -96,5 +103,4 @@ public class GoogleOAuthController {
 
         return ResponseEntity.ok(ApiResponse.ok(payload));
     }
-
 }
