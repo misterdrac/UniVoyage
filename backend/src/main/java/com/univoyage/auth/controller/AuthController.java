@@ -26,6 +26,17 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 
+/**
+ * Controller for authentication-related endpoints.
+ * Provides endpoints for user registration, login, logout, and fetching current user info.
+ * All endpoints are prefixed with /api/auth.
+ * Uses AuthService for business logic.
+ * Returns responses wrapped in ApiResponse for consistent API structure.
+ * Manages JWT and CSRF tokens via HttpOnly and readable cookies.
+ * Handles setting and deleting cookies in the HTTP response.
+ * Supports CORS for frontend applications running on localhost:5173.
+ * Validates request bodies for registration and login.
+ */
 @CrossOrigin(
         origins = {"http://localhost:5173","http://127.0.0.1:5173"},
         allowCredentials = "true"
@@ -41,7 +52,15 @@ public class AuthController {
     @Value("${app.jwt.ttl-seconds}")
     private long jwtTtlSeconds;
 
-    // POST /api/auth/register
+    /**
+     * POST /api/auth/register
+     * @param request
+     * @param response
+     * @return ResponseEntity<ApiResponse<AuthPayload>>
+     *    Registers a new user and sets JWT and CSRF cookies in the response.
+     *    On success, returns 201 Created with AuthPayload containing tokens.
+     *    On failure, returns 400 Bad Request with error message.
+     */
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<AuthPayload>> register(
             @Valid @RequestBody RegisterRequestDto request,
@@ -50,8 +69,6 @@ public class AuthController {
         AuthPayload payload = authService.register(request);
 
         if (!payload.isSuccess()) {
-            // ovdje ne znamo koje sve fieldove ima AuthPayload,
-            // pa šaljemo generičku poruku
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.fail("Registration failed"));
@@ -86,7 +103,15 @@ public class AuthController {
                 .body(ApiResponse.ok(payload));
     }
 
-    // POST /api/auth/login
+    /**
+     * POST /api/auth/login
+     * @param request
+     * @param response
+     * @return ResponseEntity<ApiResponse<AuthPayload>>
+     *    Authenticates a user and sets JWT and CSRF cookies in the response.
+     *    On success, returns 200 OK with AuthPayload containing tokens.
+     *    On failure, returns 401 Unauthorized with error message.
+     */
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<AuthPayload>> login(
             @RequestBody LoginRequestDto request,
@@ -127,8 +152,13 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.ok(payload));
     }
 
-    // GET /api/auth/me
-    // vrati trenutno autentificiranog usera, *zamotanog* u ApiResponse
+    /**
+     * GET /api/auth/me
+     * @return ResponseEntity<ApiResponse<UserDto>>
+     *     Retrieves the currently authenticated user's information.
+     *     On success, returns 200 OK with UserDto.
+     *     On failure, returns 401 Unauthorized if not authenticated.
+     */
     @GetMapping("/me")
     @Transactional(readOnly = true)
     public ResponseEntity<ApiResponse<UserDto>> me() {
@@ -166,7 +196,14 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.ok(userDto));
     }
 
-    // POST /api/auth/logout
+    /**
+     * POST /api/auth/logout
+     * @param response
+     * @return ResponseEntity<ApiResponse<Void>>
+     *    Logs out the user by deleting JWT and CSRF cookies.
+     *    On success, returns 200 OK.
+     *    On failure, returns appropriate error status.
+     */
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<Void>> logout(HttpServletResponse response) {
         // Delete JWT cookie by setting it with maxAge(0) and empty value
@@ -191,6 +228,4 @@ public class AuthController {
 
         return ResponseEntity.ok(ApiResponse.ok(null));
     }
-
-
 }
