@@ -21,7 +21,7 @@ export function TripSectionTabs<T extends string>({
   return (
     <div className="sticky top-[68px] z-40 bg-background/95 backdrop-blur-sm border-b -mt-px">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex gap-1 overflow-x-auto scrollbar-hide" role="tablist" aria-label="Trip detail sections">
+        <div className="flex flex-wrap gap-1" role="tablist" aria-label="Trip detail sections">
           {sections.map((section) => {
             const Icon = section.icon
             const isActive = activeSection === section.id
@@ -31,8 +31,8 @@ export function TripSectionTabs<T extends string>({
                 key={section.id}
                 onClick={() => onSectionChange(section.id)}
                 className={cn(
-                  'flex items-center gap-2 px-4 py-3 text-sm font-medium transition-all whitespace-nowrap',
-                  'border-b-2 border-transparent',
+                  'flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium transition-all whitespace-nowrap',
+                  'border-b-2 border-transparent flex-shrink-0',
                   isActive
                     ? 'text-primary border-primary bg-primary/5'
                     : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
@@ -43,7 +43,7 @@ export function TripSectionTabs<T extends string>({
                 tabIndex={isActive ? 0 : -1}
                 id={`${section.id}-tab`}
               >
-                <Icon className="size-4" />
+                <Icon className="size-3 sm:size-4" />
                 <span>{section.label}</span>
               </button>
             )
