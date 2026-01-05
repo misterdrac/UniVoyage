@@ -35,6 +35,7 @@ type AutoCompleteProps = {
   emptyMessage: string
   value?: Option
   onValueChange?: (value: Option) => void
+  onBlur?: () => void
   isLoading?: boolean
   disabled?: boolean
   placeholder?: string
@@ -50,6 +51,7 @@ export const AutoComplete = ({
   emptyMessage,
   value,
   onValueChange,
+  onBlur,
   disabled,
   isLoading = false,
   popularOptions,
@@ -99,11 +101,16 @@ export const AutoComplete = ({
 
   const handleBlur = useCallback(() => {
     setOpen(false)
-    // Only reset to selected label if there's a selection, otherwise keep what user typed
+    // Only reset to selected label if there's a selection, otherwise clear invalid input
     if (selected && selected.label) {
       setInputValue(selected.label)
+    } else {
+      // Clear invalid input if no valid selection
+      setInputValue('')
+      setSelected(undefined)
     }
-  }, [selected])
+    onBlur?.()
+  }, [selected, onBlur])
 
   const handleSelectOption = useCallback(
     (selectedOption: Option) => {
