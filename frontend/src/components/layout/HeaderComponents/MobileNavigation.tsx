@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Home, User as UserIcon, MapPin, Info, Mail, Shield, Globe, Star } from "lucide-react";
@@ -19,14 +19,45 @@ export const MobileNavigation = ({
   user,
   onLoginClick,
 }: MobileNavigationProps) => {
+  const navRef = useRef<HTMLDivElement>(null);
+
   const handleLinkClick = useCallback(() => {
     onClose();
   }, [onClose]);
 
+  // Close menu when clicking outside
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (navRef.current && !navRef.current.contains(event.target as Node)) {
+        // Check if click is not on the menu toggle button
+        const target = event.target as HTMLElement;
+        const menuButton = target.closest('button[aria-label="Toggle mobile menu"]');
+        if (!menuButton) {
+          onClose();
+        }
+      }
+    };
+
+    // Add event listener with a small delay to avoid immediate closure
+    const timeoutId = setTimeout(() => {
+      document.addEventListener('mousedown', handleClickOutside);
+    }, 100);
+
+    return () => {
+      clearTimeout(timeoutId);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
-    <div className="lg:hidden absolute top-full left-0 right-0 bg-background border-b border-border shadow-lg z-50 max-h-[80vh] overflow-y-auto">
+    <div 
+      ref={navRef}
+      className="lg:hidden absolute top-full left-0 right-0 bg-background border-b border-border shadow-lg z-50 max-h-[80vh] overflow-y-auto"
+    >
       <div className="container mx-auto px-4 py-3">
         {/* Main Navigation Grid */}
         <div className="grid grid-cols-2 gap-2 mb-3">
