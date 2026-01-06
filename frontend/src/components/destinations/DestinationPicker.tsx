@@ -5,7 +5,7 @@ import { type Option } from '@/components/ui/autocomplete';
 import { DestinationAutoComplete } from '@/components/ui/destination-autocomplete';
 import { Button } from '@/components/ui/button';
 import { DateRangePicker } from './DateRangePicker';
-import { getPopularDestinations } from '@/data/destinations';
+import { getPopularDestinations } from '@/lib/destinationUtils';
 import { useDestinations } from '@/hooks/useDestinations';
 import type { DateRange } from 'react-day-picker';
 import { useDestination } from '@/contexts/DestinationContext';

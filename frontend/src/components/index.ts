@@ -9,6 +9,3 @@ export * from "./layout";
 
 // Trip components
 export * from "./trips";
-
-// ScrollToTop component
-export * from "./ScrollToTop";

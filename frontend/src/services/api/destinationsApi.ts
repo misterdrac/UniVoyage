@@ -1,5 +1,5 @@
 import { API_CONFIG } from '@/config/api'
-import type { Destination } from '@/data/destinations'
+import type { Destination } from '@/types/destination'
 import type { ApiClient } from './baseClient'
 
 export interface BackendDestinationResponse {

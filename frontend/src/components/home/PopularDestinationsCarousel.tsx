@@ -8,7 +8,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { getPopularDestinations } from "@/data/destinations";
+import { getPopularDestinations } from "@/lib/destinationUtils";
 import { useDestinations } from "@/hooks/useDestinations";
 
 export function PopularDestinationsCarousel() {

@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { DestinationsPageLayout, LoadingSpinner } from '@/components/destinations';
-import { getDestinationsByContinent } from '@/data/destinations';
+import { getDestinationsByContinent } from '@/lib/destinationUtils';
 import { useDestinations } from '@/hooks/useDestinations';
 
 const NorthAmericaDestinationsPage = () => {

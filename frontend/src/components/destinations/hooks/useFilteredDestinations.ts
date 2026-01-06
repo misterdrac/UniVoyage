@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import type { Option } from '@/components/ui/autocomplete';
-import type { Destination } from '@/data/destinations';
-import { hasFullDestinationDetails } from '@/data/destinations';
+import type { Destination } from '@/types/destination';
+import { hasFullDestinationDetails } from '@/lib/destinationUtils';
 
 interface UseFilteredDestinationsParams {
   destinations: Destination[];
