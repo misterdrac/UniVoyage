@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTrips } from '@/contexts/TripContext';
 import { Card, CardContent } from '@/components/ui/card';
@@ -17,6 +17,7 @@ import {
 import { calculateTripStatus } from '@/lib/tripUtils';
 import { calculateDurationInDays } from '@/lib/dateUtils';
 import { getDestinationImageById } from '@/lib/destinationUtils';
+import { scrollToTop } from '@/lib/utils';
 import { useDestinations } from '@/hooks/useDestinations';
 import {
   TripHeroSection,
@@ -104,7 +105,14 @@ const TripDetailPage = () => {
       }
       return next;
     }, { replace: true });
+    // Scroll to top when section changes
+    scrollToTop();
   }, [setSearchParams]);
+
+  // Also scroll to top when section changes via URL (e.g., browser back/forward)
+  useEffect(() => {
+    scrollToTop();
+  }, [activeSection]);
 
   const handleConfirmDelete = useCallback(async () => {
     if (!trip) return;
