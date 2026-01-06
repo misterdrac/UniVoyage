@@ -1,3 +1,6 @@
+/**
+ * Budget category types for trip expenses
+ */
 export type BudgetCategoryValue =
   | 'accommodation'
   | 'transportation'
@@ -6,6 +9,9 @@ export type BudgetCategoryValue =
   | 'shopping'
   | 'misc'
 
+/**
+ * Individual expense entry in trip budget
+ */
 export interface TripBudgetExpense {
   id: string
   category: BudgetCategoryValue
@@ -15,6 +21,9 @@ export interface TripBudgetExpense {
   date?: string
 }
 
+/**
+ * Complete trip budget data (allocations, expenses, total)
+ */
 export interface TripBudgetPayload {
   allocations: Record<BudgetCategoryValue, number>
   expenses: TripBudgetExpense[]
