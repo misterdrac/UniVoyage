@@ -1,8 +1,10 @@
 import { Target, Users, Heart, Globe, Award, Lightbulb, Map, Calendar, CheckCircle2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import univoyageIcon from '@/assets/univoyage_icon.svg';
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 export default function AboutPage() {
+  useDocumentTitle('About');
   return (
     <div className="min-h-screen bg-background text-foreground pt-24 pb-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">

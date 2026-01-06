@@ -2,8 +2,10 @@ import { useMemo } from 'react';
 import { DestinationsPageLayout, LoadingSpinner } from '@/components/destinations';
 import { useDestinations } from '@/hooks/useDestinations';
 import { getPopularDestinations } from '@/lib/destinationUtils';
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 const PopularDestinationsPage = () => {
+  useDocumentTitle('Popular Destinations');
   const { destinations: apiDestinations, isLoading } = useDestinations();
 
   const popularDestinations = useMemo(() =>

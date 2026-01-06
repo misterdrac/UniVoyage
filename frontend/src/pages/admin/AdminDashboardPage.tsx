@@ -5,8 +5,10 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { Button } from '@/components/ui/button';
 import { Users, MapPin, LogOut, Sun, Moon, Shield, Settings, ExternalLink } from 'lucide-react';
 import { ROUTE_PATHS } from '@/config/routes';
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 const AdminDashboardPage: React.FC = () => {
+  useDocumentTitle('Admin Dashboard');
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();

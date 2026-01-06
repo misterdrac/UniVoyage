@@ -32,6 +32,7 @@ import {
   Info,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 type DestinationSortField = 'name' | 'location' | 'continent' | 'budgetPerDay' | 'createdAt' | 'updatedAt';
 
@@ -60,6 +61,7 @@ const EMPTY_FORM: CreateDestinationRequest = {
 };
 
 const AdminDestinationsPage: React.FC = () => {
+  useDocumentTitle('Admin - Destinations');
   // Data state
   const [destinations, setDestinations] = useState<AdminDestination[]>([]);
   const [totalPages, setTotalPages] = useState(0);

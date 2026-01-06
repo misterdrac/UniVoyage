@@ -26,6 +26,7 @@ import {
   Calendar,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 type UserSortField = 'name' | 'surname' | 'email' | 'role' | 'dateOfRegister';
 
@@ -38,6 +39,7 @@ const USER_TABLE_COLUMNS: { field: UserSortField; label: string }[] = [
 ];
 
 const AdminUsersPage: React.FC = () => {
+  useDocumentTitle('Admin - Users');
   const { user: currentUser } = useAuth();
   
   // Data state

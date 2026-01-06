@@ -7,9 +7,11 @@ import { Spinner } from "@/components/ui/spinner"
 import { LogIn } from "lucide-react"
 import univoyageIcon from '@/assets/univoyage_icon.svg'
 import { ROUTE_PATHS } from "@/config/routes"
+import { useDocumentTitle } from "@/hooks/useDocumentTitle"
 
 
 export default function GoogleCallbackPage() {
+  useDocumentTitle('Signing in...');
   const navigate = useNavigate()
   const { loadUser } = useAuth()
   const ran = useRef(false)

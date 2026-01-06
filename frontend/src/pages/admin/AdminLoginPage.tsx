@@ -8,8 +8,10 @@ import { Label } from '@/components/ui/label';
 import { Shield, Mail, Lock, Loader2, Sun, Moon, Eye, EyeOff } from 'lucide-react';
 import heroImage from '@/assets/images/hero.jpg';
 import { ROUTE_PATHS } from '@/config/routes';
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 const AdminLoginPage: React.FC = () => {
+  useDocumentTitle('Admin Login');
   const navigate = useNavigate();
   const { user, login, isLoading: authLoading } = useAuth();
   const { theme, toggleTheme } = useTheme();

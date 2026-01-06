@@ -6,8 +6,10 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import univoyageIcon from '@/assets/univoyage_icon.svg';
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 export default function ContactPage() {
+  useDocumentTitle('Contact');
   return (
     <div className="min-h-screen bg-background text-foreground pt-24 pb-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">

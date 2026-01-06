@@ -35,6 +35,7 @@ import {
 import type { TripSectionDefinition } from '@/components/trips';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useDeleteTrip } from '@/hooks/useDeleteTrip';
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 type Section = 'overview' | 'budget' | 'accommodation' | 'things-to-visit' | 'map' | 'weather' | 'itinerary';
 
@@ -159,6 +160,9 @@ const TripDetailPage = () => {
   }
 
   const { currentStatus, duration, imageUrl } = tripData;
+
+  // Set dynamic title based on trip destination
+  useDocumentTitle(trip.destinationName, [trip.destinationName]);
 
   return (
     <div className="min-h-screen bg-background">
