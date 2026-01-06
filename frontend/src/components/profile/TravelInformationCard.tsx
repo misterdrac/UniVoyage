@@ -233,7 +233,6 @@ export const TravelInformationCard = ({
       <CardContent className="p-6">
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* todo possible improvement? */}
             <TravelSection
             config={SECTION_CONFIG.languages}
             isActive={activeSection === 'languages'}

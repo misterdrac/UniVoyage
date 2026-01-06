@@ -127,9 +127,7 @@ export const AutoComplete = ({
     [onValueChange],
   )
 
-  // TODO: [Performance - Optional] Consider using useMemo for filtering if logic becomes more complex or options list grows very large (1000+ items)
-  // When to apply: If you notice slow filtering behavior with large datasets or during profiling
-  // Note: Current implementation is performant and not urgent
+
   const isEmpty = !inputValue || inputValue.trim() === ''
   
   // Filter options based on input value
@@ -164,10 +162,7 @@ export const AutoComplete = ({
   // Check if we're showing popular options
   const isShowingPopular = isEmpty && popularOptions && popularOptions.length > 0
   
-  // TODO: [Performance - Optional] Consider extracting height calculation to useMemo if this becomes a bottleneck
-  // When to apply: If dynamicHeight calculations cause re-render issues or if you add virtual scrolling
-  // Note: Current implementation is performant and not urgent
-  // Calculate dynamic height if enabled
+
   let listClassName = "rounded-lg max-h-[300px] overflow-y-auto overflow-x-hidden"
   let calculatedHeight = 300
   if (dynamicHeight) {
