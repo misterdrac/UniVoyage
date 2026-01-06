@@ -1,11 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 
 /**
- * Custom hook for paginating items with "load more" functionality
- * @param items - Array of items to paginate
- * @param initialPageSize - Number of items to show initially
- * @param pageSizeIncrement - Number of items to load when clicking "Load More"
- * @returns Object with paginated items and control functions
+ * Paginates items with "load more" functionality
  */
 export const usePaginatedItems = <T>(
   items: T[],

@@ -15,8 +15,7 @@ interface UseDeleteTripReturn {
 }
 
 /**
- * Custom hook to manage trip deletion state and logic
- * Extracts common delete trip functionality to avoid duplication
+ * Manages trip deletion state and confirmation flow
  */
 export function useDeleteTrip(options?: UseDeleteTripOptions): UseDeleteTripReturn {
   const { onSuccess } = options || {};

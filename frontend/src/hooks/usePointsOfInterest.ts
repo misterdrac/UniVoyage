@@ -16,6 +16,9 @@ interface UsePointsOfInterestReturn {
   refetch: () => Promise<void>
 }
 
+/**
+ * Fetches points of interest for a city with caching
+ */
 export function usePointsOfInterest({
   city,
   limit = 10,

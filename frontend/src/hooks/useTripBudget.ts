@@ -97,22 +97,10 @@ const parseBudgetData = (raw: string | null): TripBudgetPayload => {
   return fallback
 }
 
-/**
- * Persists budget data to localStorage for caching.
- * Data is stored with key: 'trip-budget-{tripId}'
- */
-const persistBudgetData = (key: string | null, data: TripBudgetPayload) => {
-  if (!key) return
-  try {
-    localStorage.setItem(key, JSON.stringify(data))
-  } catch (error) {
-    console.error('Failed to persist trip budget to localStorage', error)
-    if (error instanceof DOMException && error.name === 'QuotaExceededError') {
-      console.warn('localStorage quota exceeded. Budget data may not be saved.')
-    }
-  }
-}
 
+/**
+ * Manages trip budget state, allocations, and expenses with localStorage caching
+ */
 export const useTripBudget = (tripId: number | null | undefined) => {
   const [expenses, setExpenses] = useState<TripBudgetExpense[]>([])
   const [allocations, setAllocations] = useState<Record<BudgetCategoryValue, number>>(emptyAllocations())
