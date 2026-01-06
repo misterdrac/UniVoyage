@@ -131,7 +131,7 @@ export function useTripItinerary({ trip, currentStatus }: UseTripItineraryArgs):
 
       setCachedSignature(snapshot.signature ?? null)
 
-      if (options?.skipRemote || API_CONFIG.USE_MOCK) return
+      if (options?.skipRemote) return
 
       try {
         await apiService.saveTripItinerary(trip.id, snapshot)
@@ -190,8 +190,6 @@ export function useTripItinerary({ trip, currentStatus }: UseTripItineraryArgs):
   }, [hydrateFromSnapshot, storageKey])
 
   useEffect(() => {
-    if (API_CONFIG.USE_MOCK) return
-
     let isCancelled = false
 
     const fetchRemoteItinerary = async () => {

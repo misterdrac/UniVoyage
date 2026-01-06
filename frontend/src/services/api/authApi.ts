@@ -25,17 +25,6 @@ export interface AuthApi {
 export const authApi: { [K in keyof AuthApi]: (this: ApiClient, ...args: Parameters<AuthApi[K]>) => ReturnType<AuthApi[K]> } =
   {
     async login(this: ApiClient, email, password) {
-      if (this.useMock) {
-        const { authenticateUser } = await import('@/data/mockUsers')
-        const user = authenticateUser(email, password)
-        if (user) {
-          const token = `mock_token_${Date.now()}`
-          this.setAuthToken(token)
-          return { success: true, user, token }
-        }
-        return { success: false, error: 'Invalid email or password' }
-      }
-
       const response = await this.request<AuthResponse<BackendUserDto>>(API_CONFIG.ENDPOINTS.AUTH.LOGIN, {
         method: 'POST',
         body: JSON.stringify({ email, password }),
@@ -57,30 +46,6 @@ export const authApi: { [K in keyof AuthApi]: (this: ApiClient, ...args: Paramet
     },
 
     async register(this: ApiClient, data) {
-      if (this.useMock) {
-        try {
-          const { createUser } = await import('@/data/mockUsers')
-          const user = createUser(
-            data.email,
-            data.password,
-            data.name || '',
-            data.surname,
-            data.hobbyIds,
-            data.languageCodes
-          )
-          if (data.countryCode) {
-            user.countryOfOrigin = this.resolveCountry(data.countryCode)
-          }
-          user.visitedCountries = this.mapVisitedCountryCodes(data.visitedCountryCodes)
-
-          const token = `mock_token_${Date.now()}`
-          this.setAuthToken(token)
-          return { success: true, user, token }
-        } catch (err: any) {
-          return { success: false, error: err?.message ?? 'Registration failed' }
-        }
-      }
-
       try {
         const res = await this.request<AuthResponse<BackendUserDto>>(API_CONFIG.ENDPOINTS.AUTH.REGISTER, {
           method: 'POST',
@@ -112,11 +77,6 @@ export const authApi: { [K in keyof AuthApi]: (this: ApiClient, ...args: Paramet
     },
 
     async logout(this: ApiClient) {
-      if (this.useMock) {
-        this.removeAuthToken()
-        return { success: true }
-      }
-
       try {
         await this.request(API_CONFIG.ENDPOINTS.AUTH.LOGOUT, {
           method: 'POST',
@@ -131,14 +91,6 @@ export const authApi: { [K in keyof AuthApi]: (this: ApiClient, ...args: Paramet
     },
 
     async getCurrentUser(this: ApiClient) {
-      if (this.useMock) {
-        const token = this.getAuthToken()
-        if (!token) return null
-
-        const savedUser = localStorage.getItem(API_CONSTANTS.USER_KEY)
-        return savedUser ? JSON.parse(savedUser) : null
-      }
-
       try {
         const response = await this.request<BackendUserDto>(API_CONFIG.ENDPOINTS.AUTH.ME)
         return this.adaptUserDto(response.data) || null
@@ -149,10 +101,6 @@ export const authApi: { [K in keyof AuthApi]: (this: ApiClient, ...args: Paramet
     },
 
     async googleAuth(this: ApiClient): Promise<void> {
-      if (this.useMock) {
-        throw new Error('Google auth not available in mock mode')
-      }
-
       // Store current page URL for redirect after OAuth
       const currentUrl = window.location.pathname + window.location.search
       sessionStorage.setItem('google_oauth_redirect', currentUrl)
@@ -206,10 +154,6 @@ export const authApi: { [K in keyof AuthApi]: (this: ApiClient, ...args: Paramet
     },
 
     async googleCallback(this: ApiClient, code: string): Promise<AuthResponse<User>> {
-      if (this.useMock) {
-        throw new Error('Google auth not available in mock mode')
-      }
-
       const res = await this.request<AuthResponse<BackendUserDto>>(
         API_CONFIG.ENDPOINTS.AUTH.GOOGLE_CALLBACK,
         {

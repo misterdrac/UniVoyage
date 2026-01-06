@@ -5,11 +5,9 @@ import type { BackendUserDto } from './types'
 
 export class ApiClient {
   public baseURL: string
-  public useMock: boolean
 
   constructor() {
     this.baseURL = API_CONFIG.BASE_URL
-    this.useMock = API_CONFIG.USE_MOCK
   }
 
   public adaptUserDto(user?: BackendUserDto): User | undefined {
@@ -139,10 +137,6 @@ export class ApiClient {
   }
 
   public async request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
-    if (this.useMock) {
-      throw new Error('Mock mode - use mock service instead')
-    }
-
     const url = `${this.baseURL}${endpoint}`
     const config: RequestInit = {
       ...options,
@@ -182,15 +176,6 @@ export class ApiClient {
         throw error
       }
       throw new ApiError(error instanceof Error ? error.message : 'Network error')
-    }
-  }
-
-  public getMockTrips(): any[] {
-    try {
-      const tripsJson = localStorage.getItem('mock_trips')
-      return tripsJson ? JSON.parse(tripsJson) : []
-    } catch {
-      return []
     }
   }
 }

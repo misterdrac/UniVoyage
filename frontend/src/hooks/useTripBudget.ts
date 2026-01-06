@@ -19,7 +19,7 @@ export interface CategoryTotals {
   overBudget: boolean
 }
 
-const STORAGE_PREFIX = 'trip-budget-' // localStorage key prefix for mock mode
+const STORAGE_PREFIX = 'trip-budget-' // localStorage key prefix for caching
 const DEFAULT_CATEGORIES: { value: BudgetCategoryValue; label: string; suggestion: string }[] = [
   { value: 'accommodation', label: 'Accommodation', suggestion: 'Hotels, hostels, rentals, resort fees' },
   { value: 'transportation', label: 'Transportation', suggestion: 'Flights, trains, rideshares, local transit' },
@@ -98,7 +98,7 @@ const parseBudgetData = (raw: string | null): TripBudgetPayload => {
 }
 
 /**
- * Persists budget data to localStorage (mock mode only).
+ * Persists budget data to localStorage for caching.
  * Data is stored with key: 'trip-budget-{tripId}'
  */
 const persistBudgetData = (key: string | null, data: TripBudgetPayload) => {
@@ -139,13 +139,6 @@ export const useTripBudget = (tripId: number | null | undefined) => {
         return
       }
 
-      if (apiService.useMock) {
-        const stored = parseBudgetData(storageKey ? localStorage.getItem(storageKey) : null)
-        applyBudget(stored)
-        setIsInitialized(true)
-        return
-      }
-
       try {
         const response = await apiService.getTripBudget(tripId)
         if (response.success) {
@@ -171,7 +164,6 @@ export const useTripBudget = (tripId: number | null | undefined) => {
   }, [tripId, storageKey])
 
   // Persist budget data whenever it changes
-  // Uses backend API when available, otherwise falls back to localStorage mock
   useEffect(() => {
     if (!isInitialized || !tripId) return
 
@@ -179,11 +171,6 @@ export const useTripBudget = (tripId: number | null | undefined) => {
       allocations,
       expenses,
       totalBudget,
-    }
-
-    if (apiService.useMock) {
-      persistBudgetData(storageKey, payload)
-      return
     }
 
     const saveBudget = async () => {
