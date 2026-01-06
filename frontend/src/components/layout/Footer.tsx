@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Facebook, Instagram } from "lucide-react";
 import { FaXTwitter } from "react-icons/fa6";
 import univoyageIcon from "@/assets/univoyage_icon.svg";
+import { ROUTE_PATHS } from "@/config/routes";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -12,7 +13,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-6">
           {/* Brand Section */}
           <div className="md:col-span-1">
-            <Link to="/" className="flex items-center space-x-2 mb-2">
+            <Link to={ROUTE_PATHS.HOME} className="flex items-center space-x-2 mb-2">
               <img 
                 src={univoyageIcon} 
                 alt="UniVoyage Logo" 
@@ -33,25 +34,25 @@ export function Footer() {
                 <h4 className="text-sm font-semibold text-foreground mb-3">Discover</h4>
                 <nav className="space-y-1">
                   <Link
-                    to="/destinations"
+                    to={ROUTE_PATHS.DESTINATIONS}
                     className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
                     Popular
                   </Link>
                   <Link
-                    to="/destinations/europe"
+                    to={ROUTE_PATHS.DESTINATIONS_EUROPE}
                     className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
                     Europe
                   </Link>
                   <Link
-                    to="/destinations/north-america"
+                    to={ROUTE_PATHS.DESTINATIONS_NORTH_AMERICA}
                     className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
                     N. America
                   </Link>
                   <Link
-                    to="/destinations/asia"
+                    to={ROUTE_PATHS.DESTINATIONS_ASIA}
                     className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
                     Asia
@@ -62,13 +63,13 @@ export function Footer() {
                 <h4 className="text-sm font-semibold text-foreground mb-3">About Us</h4>
                 <nav className="space-y-1">
                   <Link
-                    to="/about"
+                    to={ROUTE_PATHS.ABOUT}
                     className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
                     About
                   </Link>
                   <Link
-                    to="/contact"
+                    to={ROUTE_PATHS.CONTACT}
                     className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
                     Contact

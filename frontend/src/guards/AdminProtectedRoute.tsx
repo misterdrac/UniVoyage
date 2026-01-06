@@ -3,6 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Shield, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ROUTE_PATHS } from '@/config/routes';
 
 interface AdminProtectedRouteProps {
   children: React.ReactNode;
@@ -25,7 +26,7 @@ const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({ children }) =
 
   // Redirect to admin login if not authenticated
   if (!user) {
-    return <Navigate to="/admin" replace />;
+    return <Navigate to={ROUTE_PATHS.ADMIN} replace />;
   }
 
   // Show access denied if not an admin
@@ -46,7 +47,7 @@ const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({ children }) =
             <span>Current role: <strong className="text-foreground">{user.role}</strong></span>
           </div>
           <Button 
-            onClick={() => window.location.href = '/'} 
+            onClick={() => window.location.href = ROUTE_PATHS.HOME} 
             className="w-full"
           >
             Return to Home

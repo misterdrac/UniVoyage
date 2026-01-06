@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Home, User as UserIcon, MapPin, Info, Mail, Shield, Globe, Star } from "lucide-react";
 import { DESTINATION_NAV_ITEMS } from "./constants";
 import type { User } from "@/types/user";
+import { ROUTE_PATHS } from "@/config/routes";
 
 interface MobileNavigationProps {
   isOpen: boolean;
@@ -30,7 +31,7 @@ export const MobileNavigation = ({
         {/* Main Navigation Grid */}
         <div className="grid grid-cols-2 gap-2 mb-3">
           <Link
-            to="/"
+            to={ROUTE_PATHS.HOME}
             className="px-3 py-2 text-sm font-medium text-foreground hover:bg-accent rounded-md text-center flex flex-col items-center gap-1"
             onClick={handleLinkClick}
           >
@@ -40,7 +41,7 @@ export const MobileNavigation = ({
           
           {user ? (
             <Link
-              to="/profile"
+              to={ROUTE_PATHS.PROFILE}
               className="px-3 py-2 text-sm font-medium text-foreground hover:bg-accent rounded-md text-center flex flex-col items-center gap-1"
               onClick={handleLinkClick}
             >
@@ -64,7 +65,7 @@ export const MobileNavigation = ({
 
           {user && (
             <Link
-              to="/my-trips"
+              to={ROUTE_PATHS.MY_TRIPS}
               className="px-3 py-2 text-sm font-medium text-foreground hover:bg-accent rounded-md text-center flex flex-col items-center gap-1"
               onClick={handleLinkClick}
             >
@@ -74,7 +75,7 @@ export const MobileNavigation = ({
           )}
 
           <Link
-            to="/about"
+            to={ROUTE_PATHS.ABOUT}
             className="px-3 py-2 text-sm font-medium text-foreground hover:bg-accent rounded-md text-center flex flex-col items-center gap-1"
             onClick={handleLinkClick}
           >
@@ -83,7 +84,7 @@ export const MobileNavigation = ({
           </Link>
 
           <Link
-            to="/contact"
+            to={ROUTE_PATHS.CONTACT}
             className="px-3 py-2 text-sm font-medium text-foreground hover:bg-accent rounded-md text-center flex flex-col items-center gap-1"
             onClick={handleLinkClick}
           >
@@ -93,7 +94,7 @@ export const MobileNavigation = ({
 
           {user && (user.role === 'ADMIN' || user.role === 'HEAD_ADMIN') && (
             <Link
-              to="/admin/dashboard"
+              to={ROUTE_PATHS.ADMIN_DASHBOARD}
               className="px-3 py-2 text-sm font-medium text-foreground hover:bg-accent rounded-md text-center flex flex-col items-center gap-1"
               onClick={handleLinkClick}
             >

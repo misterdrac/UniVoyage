@@ -1,6 +1,7 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { ROUTE_PATHS } from '@/config/routes';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -23,7 +24,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 
   // Redirect to home if not authenticated
   if (!user) {
-    return <Navigate to="/" replace />;
+    return <Navigate to={ROUTE_PATHS.HOME} replace />;
   }
 
   // Render protected content if authenticated

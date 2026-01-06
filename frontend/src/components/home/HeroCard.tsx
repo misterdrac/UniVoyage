@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { StatsDisplay } from "./StatsDisplay";
+import { ROUTE_PATHS } from "@/config/routes";
 
 export function HeroCard() {
   const navigate = useNavigate();
@@ -28,7 +29,7 @@ export function HeroCard() {
         <div className="flex justify-center mb-4">
           <Button
             className="text-sm px-6 transition-transform duration-200 hover:scale-105 group/btn"
-            onClick={() => navigate('/destinations')}
+            onClick={() => navigate(ROUTE_PATHS.DESTINATIONS)}
           >
             Explore Destinations
             <MapPin className="w-4 h-4 ml-2" />

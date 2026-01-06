@@ -1,109 +1,35 @@
 import React, { useState, useCallback } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, AuthProvider, DestinationProvider, TripProvider } from '@/contexts';
-import { Header, Footer, ScrollToTop } from '@/components';
+import { ScrollToTop } from '@/components';
 import { AuthLoadingOverlay } from '@/components/layout/AuthLoadingOverlay';
 import { Toaster } from '@/components/ui/sonner';
-import { ProtectedRoute, AdminProtectedRoute } from '@/guards';
-import { HomePage, AboutPage, ContactPage, ProfilePage, MyTripsPage, TripDetailPage, PopularDestinationsPage, EuropeDestinationsPage, NorthAmericaDestinationsPage, SouthAmericaDestinationsPage, AsiaDestinationsPage, AfricaDestinationsPage, OceaniaDestinationsPage } from '@/pages';
-import { AdminLoginPage, AdminDashboardPage, AdminUsersPage, AdminDestinationsPage } from '@/pages/admin';
 import { LoginDialog, SignUpDialog } from '@/components/auth';
 import { useDestination } from '@/contexts/DestinationContext';
-import GoogleCallbackPage from "@/pages/GoogleCallbackPage"
+import { routes, createRouteElement } from '@/config/routes';
 
-
-// Layout component for main app (with Header/Footer)
-function MainLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <>
-      <Header />
-      {children}
-      <Footer />
-    </>
-  );
-}
-
-// Wrapper component to handle conditional layout
+/**
+ * AppRoutes component that renders all routes from centralized configuration
+ */
 function AppRoutes() {
-  const location = useLocation();
-  const isAdminRoute = location.pathname.startsWith('/admin');
-
   return (
     <Routes>
-      {/* Admin Routes - No Header/Footer */}
-      <Route path="/admin" element={<AdminLoginPage />} />
-      <Route 
-        path="/admin/dashboard" 
-        element={
-          <AdminProtectedRoute>
-            <AdminDashboardPage />
-          </AdminProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/admin/users" 
-        element={
-          <AdminProtectedRoute>
-            <AdminUsersPage />
-          </AdminProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/admin/destinations" 
-        element={
-          <AdminProtectedRoute>
-            <AdminDestinationsPage />
-          </AdminProtectedRoute>
-        } 
-      />
-
-      {/* Main App Routes - With Header/Footer */}
-      <Route path="/" element={<MainLayout><HomePage /></MainLayout>} />
-      <Route path="/about" element={<MainLayout><AboutPage /></MainLayout>} />
-      <Route path="/contact" element={<MainLayout><ContactPage /></MainLayout>} />
-      <Route path="/destinations" element={<MainLayout><PopularDestinationsPage /></MainLayout>} />
-      <Route path="/destinations/europe" element={<MainLayout><EuropeDestinationsPage /></MainLayout>} />
-      <Route path="/destinations/north-america" element={<MainLayout><NorthAmericaDestinationsPage /></MainLayout>} />
-      <Route path="/destinations/south-america" element={<MainLayout><SouthAmericaDestinationsPage /></MainLayout>} />
-      <Route path="/destinations/asia" element={<MainLayout><AsiaDestinationsPage /></MainLayout>} />
-      <Route path="/destinations/africa" element={<MainLayout><AfricaDestinationsPage /></MainLayout>} />
-      <Route path="/destinations/oceania" element={<MainLayout><OceaniaDestinationsPage /></MainLayout>} />
-      <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
-      <Route 
-        path="/profile" 
-        element={
-          <MainLayout>
-            <ProtectedRoute>
-              <ProfilePage />
-            </ProtectedRoute>
-          </MainLayout>
-        } 
-      />
-      <Route 
-        path="/my-trips" 
-        element={
-          <MainLayout>
-            <ProtectedRoute>
-              <MyTripsPage />
-            </ProtectedRoute>
-          </MainLayout>
-        } 
-      />
-      <Route 
-        path="/trips/:id" 
-        element={
-          <MainLayout>
-            <ProtectedRoute>
-              <TripDetailPage />
-            </ProtectedRoute>
-          </MainLayout>
-        } 
-      />
+      {routes.map((route) => (
+        <Route
+          key={route.path}
+          path={route.path}
+          element={createRouteElement(route)}
+        />
+      ))}
     </Routes>
   );
 }
 
-//todo improve this
+/**
+ * AppContent component manages authentication dialogs and routing
+ * Handles coordination between destination context auth dialog trigger
+ * and login/signup dialog states
+ */
 function AppContent() {
   const { showAuthDialog, setShowAuthDialog } = useDestination();
   const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -120,7 +46,7 @@ function AppContent() {
     setShowAuthDialog(false);
   }, [setShowAuthDialog]);
 
-  // Show login dialog when showAuthDialog is true
+  // Show login dialog when showAuthDialog is triggered from destination context
   React.useEffect(() => {
     if (showAuthDialog && !isLoginOpen && !isSignUpOpen) {
       setIsLoginOpen(true);

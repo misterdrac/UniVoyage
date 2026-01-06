@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts"
 import { Spinner } from "@/components/ui/spinner"
 import { LogIn } from "lucide-react"
 import univoyageIcon from '@/assets/univoyage_icon.svg'
+import { ROUTE_PATHS } from "@/config/routes"
 
 
 export default function GoogleCallbackPage() {
@@ -33,7 +34,7 @@ export default function GoogleCallbackPage() {
         window.close()
       } else {
         toast.error(errorMsg)
-        navigate("/")
+        navigate(ROUTE_PATHS.HOME)
       }
       return
     }
@@ -48,7 +49,7 @@ export default function GoogleCallbackPage() {
         window.close()
       } else {
         toast.error(errorMsg)
-        navigate("/")
+        navigate(ROUTE_PATHS.HOME)
       }
       return
     }
@@ -67,7 +68,7 @@ export default function GoogleCallbackPage() {
                 window.close()
               } else {
                 toast.error(errorMsg)
-                navigate("/")
+                navigate(ROUTE_PATHS.HOME)
               }
               return
           }
@@ -88,7 +89,7 @@ export default function GoogleCallbackPage() {
             window.close()
           } else {
             toast.success("Signed in with Google!")
-            navigate(redirectUrl || "/")
+            navigate(redirectUrl || ROUTE_PATHS.HOME)
           }
       } catch (e: any) {
           const errorMsg = e?.message || "Google login failed"
@@ -100,7 +101,7 @@ export default function GoogleCallbackPage() {
             window.close()
           } else {
             toast.error(errorMsg)
-            navigate("/")
+            navigate(ROUTE_PATHS.HOME)
           }
       }
     })()
