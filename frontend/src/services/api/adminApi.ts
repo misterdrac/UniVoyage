@@ -1,6 +1,8 @@
 import type { ApiClient } from './baseClient'
 
-// Admin User types
+/**
+ * Admin User data structure
+ */
 export interface AdminUser {
   id: number
   name: string
@@ -11,6 +13,9 @@ export interface AdminUser {
   dateOfLastSignin: string
 }
 
+/**
+ * Paginated admin users response
+ */
 export interface AdminUserPage {
   content: AdminUser[]
   totalElements: number
@@ -19,7 +24,9 @@ export interface AdminUserPage {
   number: number
 }
 
-// Admin Destination types
+/**
+ * Admin Destination data structure
+ */
 export interface AdminDestination {
   id: number
   name: string
@@ -35,6 +42,9 @@ export interface AdminDestination {
   updatedAt: string
 }
 
+/**
+ * Paginated admin destinations response
+ */
 export interface AdminDestinationPage {
   content: AdminDestination[]
   totalElements: number
@@ -43,6 +53,9 @@ export interface AdminDestinationPage {
   number: number
 }
 
+/**
+ * Request payload for creating a new destination
+ */
 export interface CreateDestinationRequest {
   name: string
   location: string
@@ -55,19 +68,73 @@ export interface CreateDestinationRequest {
   studentPerks?: string[]
 }
 
+/**
+ * Request payload for updating an existing destination
+ */
 export interface UpdateDestinationRequest extends CreateDestinationRequest {}
 
+/**
+ * Admin API interface
+ * Handles administrative operations for users and destinations
+ * Requires ADMIN or HEAD_ADMIN role
+ */
 export interface AdminApi {
-  // Users
+  /**
+   * Retrieves paginated list of users
+   * @param params - Pagination and filtering parameters
+   * @returns Promise resolving to paginated users response
+   */
   getUsers(params?: { page?: number; size?: number; sort?: string; search?: string }): Promise<AdminUserPage>
+  
+  /**
+   * Retrieves a single user by ID
+   * @param id - User ID
+   * @returns Promise resolving to user data
+   */
   getUser(id: number): Promise<AdminUser>
+  
+  /**
+   * Updates a user's role
+   * @param id - User ID
+   * @param role - New role to assign
+   * @returns Promise resolving to updated user data
+   */
   updateUserRole(id: number, role: 'USER' | 'ADMIN' | 'HEAD_ADMIN'): Promise<AdminUser>
   
-  // Destinations
+  /**
+   * Retrieves paginated list of destinations
+   * @param params - Pagination and filtering parameters
+   * @returns Promise resolving to paginated destinations response
+   */
   getAdminDestinations(params?: { page?: number; size?: number; sort?: string; search?: string }): Promise<AdminDestinationPage>
+  
+  /**
+   * Retrieves a single destination by ID
+   * @param id - Destination ID
+   * @returns Promise resolving to destination data
+   */
   getDestination(id: number): Promise<AdminDestination>
+  
+  /**
+   * Creates a new destination
+   * @param data - Destination creation data
+   * @returns Promise resolving to created destination data
+   */
   createDestination(data: CreateDestinationRequest): Promise<AdminDestination>
+  
+  /**
+   * Updates an existing destination
+   * @param id - Destination ID
+   * @param data - Destination update data
+   * @returns Promise resolving to updated destination data
+   */
   updateDestination(id: number, data: UpdateDestinationRequest): Promise<AdminDestination>
+  
+  /**
+   * Deletes a destination
+   * @param id - Destination ID
+   * @returns Promise that resolves when deletion is complete
+   */
   deleteDestination(id: number): Promise<void>
 }
 

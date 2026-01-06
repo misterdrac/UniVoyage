@@ -38,7 +38,7 @@ export function SignUpDialog({ open, onOpenChange, onLoginClick }: SignUpDialogP
     setCountry,
     showPasswordError,
     setShowPasswordError,
-    error,
+    error,  
     isLoading,
     isFormValid,
     passwordsMatch,

@@ -1,11 +1,18 @@
 import { API_CONFIG } from '@/config/apiConfig'
-import { API_CONSTANTS } from '@/lib/constants'
 import type { StoredItineraryPayload } from '@/types/itinerary'
 import type { TripBudgetPayload } from '@/types/budget'
-import type { User } from '@/types/user'
 import type { ApiClient } from './baseClient'
 
+/**
+ * Trips API interface
+ * Handles trip creation, retrieval, deletion, and related data (budget, accommodation)
+ */
 export interface TripsApi {
+  /**
+   * Creates a new trip
+   * @param data - Trip creation data including destination and dates
+   * @returns Promise resolving to success status and created trip data
+   */
   createTrip(data: {
     destinationId: number
     destinationName: string
@@ -13,10 +20,40 @@ export interface TripsApi {
     departureDate: string
     returnDate: string
   }): Promise<{ success: boolean; trip?: any; error?: string }>
+  
+  /**
+   * Retrieves all trips for the authenticated user
+   * @returns Promise resolving to success status and array of trips
+   */
   getTrips(): Promise<{ success: boolean; trips?: any[]; error?: string }>
+  
+  /**
+   * Deletes a trip by ID
+   * @param tripId - ID of the trip to delete
+   * @returns Promise resolving to success status
+   */
   deleteTrip(tripId: number): Promise<{ success: boolean; error?: string }>
+  
+  /**
+   * Retrieves budget data for a specific trip
+   * @param tripId - ID of the trip
+   * @returns Promise resolving to success status and budget payload
+   */
   getTripBudget(tripId: number): Promise<{ success: boolean; budget?: TripBudgetPayload; error?: string }>
+  
+  /**
+   * Saves budget data for a specific trip
+   * @param tripId - ID of the trip
+   * @param payload - Budget data to save
+   * @returns Promise resolving to success status
+   */
   saveTripBudget(tripId: number, payload: TripBudgetPayload): Promise<{ success: boolean; error?: string }>
+  
+  /**
+   * Retrieves accommodation information for a specific trip
+   * @param tripId - ID of the trip
+   * @returns Promise resolving to success status and accommodation data
+   */
   getTripAccommodation(tripId: number): Promise<{ 
     success: boolean
     accommodation?: {
@@ -26,6 +63,13 @@ export interface TripsApi {
     }
     error?: string 
   }>
+  
+  /**
+   * Saves accommodation information for a specific trip
+   * @param tripId - ID of the trip
+   * @param data - Accommodation data to save
+   * @returns Promise resolving to success status
+   */
   saveTripAccommodation(tripId: number, data: {
     accommodationName?: string
     accommodationAddress?: string
@@ -33,8 +77,24 @@ export interface TripsApi {
   }): Promise<{ success: boolean; error?: string }>
 }
 
+/**
+ * Itinerary API interface
+ * Handles trip itinerary generation and storage
+ */
 export interface ItineraryApi {
+  /**
+   * Retrieves itinerary data for a specific trip
+   * @param tripId - ID of the trip
+   * @returns Promise resolving to success status and itinerary payload
+   */
   getTripItinerary(tripId: number): Promise<{ success: boolean; itinerary?: StoredItineraryPayload; error?: string }>
+  
+  /**
+   * Saves itinerary data for a specific trip
+   * @param tripId - ID of the trip
+   * @param payload - Itinerary data to save
+   * @returns Promise resolving to success status
+   */
   saveTripItinerary(tripId: number, payload: StoredItineraryPayload): Promise<{ success: boolean; error?: string }>
 }
 

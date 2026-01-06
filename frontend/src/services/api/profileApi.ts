@@ -1,10 +1,18 @@
 import type { User } from '@/types/user'
 import { API_CONSTANTS } from '@/lib/constants'
 import { API_CONFIG } from '@/config/apiConfig'
-import type { BackendUserDto } from './types'
 import type { ApiClient } from './baseClient'
 
+/**
+ * Profile API interface
+ * Handles user profile updates
+ */
 export interface ProfileApi {
+  /**
+   * Updates user profile information
+   * @param data - Profile update data (all fields optional)
+   * @returns Promise resolving to success status and updated user data
+   */
   updateProfile(data: {
     name?: string
     surname?: string

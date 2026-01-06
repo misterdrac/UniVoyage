@@ -1,11 +1,26 @@
 import { API_CONFIG, type AuthResponse } from '@/config/apiConfig'
 import type { User } from '@/types/user'
 import type { BackendUserDto } from './types'
-import { API_CONSTANTS } from '@/lib/constants'
 import type { ApiClient } from './baseClient'
 
+/**
+ * Authentication API interface
+ * Handles user login, registration, logout, and OAuth flows
+ */
 export interface AuthApi {
+  /**
+   * Authenticates user with email and password
+   * @param email - User's email address
+   * @param password - User's password
+   * @returns Promise resolving to auth response with user data and token
+   */
   login(email: string, password: string): Promise<AuthResponse<User>>
+  
+  /**
+   * Registers a new user account
+   * @param data - Registration data including email, password, and optional profile fields
+   * @returns Promise resolving to auth response with user data and token
+   */
   register(data: {
     email: string
     password: string
@@ -16,9 +31,34 @@ export interface AuthApi {
     languageCodes?: string[]
     visitedCountryCodes?: string[]
   }): Promise<AuthResponse<User>>
+  
+  /**
+   * Logs out the current user
+   * Clears authentication token from storage
+   * @returns Promise resolving to success status
+   */
   logout(): Promise<{ success: boolean }>
+  
+  /**
+   * Retrieves the currently authenticated user
+   * @returns Promise resolving to User object or null if not authenticated
+   */
   getCurrentUser(): Promise<User | null>
+  
+  /**
+   * Initiates Google OAuth authentication flow
+   * Opens OAuth popup window and handles authentication
+   * @returns Promise that resolves when OAuth completes successfully
+   * @throws Error if popup is blocked or OAuth fails
+   */
   googleAuth(): Promise<void>
+  
+  /**
+   * Completes Google OAuth callback
+   * Exchanges authorization code for user data and token
+   * @param code - OAuth authorization code from Google
+   * @returns Promise resolving to auth response with user data and token
+   */
   googleCallback(code: string): Promise<AuthResponse<User>>
 }
 

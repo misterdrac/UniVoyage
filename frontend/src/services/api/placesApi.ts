@@ -1,6 +1,9 @@
-import { API_CONFIG, type ApiResponse } from '@/config/apiConfig'
+import { API_CONFIG } from '@/config/apiConfig'
 import type { ApiClient } from './baseClient'
 
+/**
+ * Point of interest (POI) data structure
+ */
 export interface Place {
   id: string
   name: string
@@ -13,7 +16,17 @@ export interface Place {
   longitude?: number
 }
 
+/**
+ * Places API interface
+ * Handles points of interest (POI) search
+ */
 export interface PlacesApi {
+  /**
+   * Searches for points of interest in a city
+   * @param city - City name to search in
+   * @param limit - Maximum number of results to return (default: 10)
+   * @returns Promise resolving to success status and array of places
+   */
   searchPlaces(city: string, limit?: number): Promise<{ success: boolean; places?: Place[]; error?: string }>
 }
 
@@ -23,7 +36,7 @@ export const placesApi: {
   async searchPlaces(this: ApiClient, city: string, limit = 10) {
     try {
       const params = new URLSearchParams({ city, limit: String(limit) })
-      const res = await this.request<ApiResponse<{ places: Place[] }>>(
+      const res = await this.request<{ places: Place[] }>(
         `${API_CONFIG.ENDPOINTS.PLACES.SEARCH}?${params.toString()}`
       )
 
