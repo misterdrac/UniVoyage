@@ -51,7 +51,7 @@ export const MobileNavigation = ({
           ) : (
             <Button 
               variant="secondary" 
-              size="sm"
+              size="lg"
               onClick={() => {
                 onLoginClick();
                 onClose();

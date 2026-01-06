@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { Eye, EyeOff, Mail, Lock } from "lucide-react"
+import { Eye, EyeOff, Mail, Lock, MapPin, Sparkles, Plane, Globe } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -7,7 +7,8 @@ import { useAuth } from "@/contexts/AuthContext"
 import { apiService } from "@/services/api"
 import { toast } from "sonner"
 import { VALIDATION } from "@/lib/constants"
-import { BrandGoogle } from "@mynaui/icons-react";
+import { BrandGoogle } from "@mynaui/icons-react"
+import univoyageIcon from "@/assets/univoyage_icon.svg"
 
 interface LoginDialogProps {
   open: boolean
@@ -64,13 +65,55 @@ export function LoginDialog({ open, onOpenChange, onSignUpClick }: LoginDialogPr
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="text-center text-2xl font-bold">
-            Welcome back to UniVoyage
-            email: "john.doe@example.com",
-            password: "Password123",
-          </DialogTitle>
+      <DialogContent className="sm:max-w-lg rounded-[4rem]">
+        <DialogHeader className="space-y-4">
+          {/* Logo with decorative icons */}
+          <div className="flex flex-col items-center mb-2 relative">
+            <div className="flex items-center gap-3 mb-3">
+              <img 
+                src={univoyageIcon} 
+                alt="UniVoyage Logo" 
+                className="w-14 h-14"
+              />
+              <DialogTitle className="text-3xl font-bold">
+                UniVoyage
+              </DialogTitle>
+            </div>
+            {/* Decorative plane icon */}
+            <div className="absolute -right-4 top-0 opacity-20 rotate-12">
+              <Plane className="w-16 h-16 text-primary" />
+            </div>
+            {/* Decorative globe icon */}
+            <div className="absolute -left-4 top-8 opacity-15 -rotate-12">
+              <Globe className="w-14 h-14 text-primary" />
+            </div>
+          </div>
+          
+          {/* Welcome Message */}
+          <div className="text-center space-y-2">
+            <h2 className="text-2xl font-semibold">
+              Welcome back!
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Sign in to continue planning your next adventure
+            </p>
+          </div>
+
+          {/* Features */}
+          <div className="flex items-center justify-center gap-6 pt-2 pb-2 text-xs text-muted-foreground">
+            <div className="flex items-center gap-1.5">
+              <MapPin className="w-4 h-4 text-primary" />
+              <span>Plan Trips</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-primary" />
+              <span>AI Itineraries</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Plane className="w-4 h-4 text-primary" />
+              <span>Travel Smart</span>
+            </div>
+          </div>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">

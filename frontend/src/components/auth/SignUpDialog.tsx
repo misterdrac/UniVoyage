@@ -81,7 +81,7 @@ export function SignUpDialog({ open, onOpenChange, onLoginClick }: SignUpDialogP
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-4xl lg:max-w-5xl max-h-[98vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-4xl lg:max-w-5xl max-h-[98vh] overflow-y-auto rounded-[4rem]">
         <DialogHeader>
           <DialogTitle className="text-center text-2xl font-bold">
             Create Account
