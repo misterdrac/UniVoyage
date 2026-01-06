@@ -2,7 +2,7 @@ import React, { useState } from "react"
 import { Eye, EyeOff, Mail, Lock, MapPin, Sparkles, Plane, Globe } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { useAuth } from "@/contexts/AuthContext"
 import { apiService } from "@/services/api"
 import { toast } from "sonner"
@@ -79,6 +79,9 @@ export function LoginDialog({ open, onOpenChange, onSignUpClick }: LoginDialogPr
                 UniVoyage
               </DialogTitle>
             </div>
+            <DialogDescription className="sr-only">
+              Sign in to your UniVoyage account to access your trips and travel planning features
+            </DialogDescription>
             {/* Decorative plane icon */}
             <div className="absolute -right-4 top-0 opacity-20 rotate-12">
               <Plane className="w-16 h-16 text-primary" />

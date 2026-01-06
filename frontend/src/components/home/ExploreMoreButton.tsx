@@ -13,7 +13,7 @@ export function ExploreMoreButton() {
     <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
       <button
         onClick={handleClick}
-        className="flex flex-col items-center gap-2 text-(--hero-text)/80 hover:text-hero-text transition-colors group"
+        className="flex flex-col items-center gap-2 text-hero-text/80 hover:text-hero-text transition-colors group"
         aria-label="Explore more content"
       >
         <span className="text-sm font-medium">Explore More</span>

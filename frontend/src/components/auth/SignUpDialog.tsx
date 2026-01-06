@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { apiService } from "@/services/api";
 import { toast } from "sonner";
@@ -85,6 +85,9 @@ export function SignUpDialog({ open, onOpenChange, onLoginClick }: SignUpDialogP
           <DialogTitle className="text-center text-2xl font-bold">
             Create Account
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            Create a new UniVoyage account to start planning your student travel adventures
+          </DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleFormSubmit} className="space-y-4">

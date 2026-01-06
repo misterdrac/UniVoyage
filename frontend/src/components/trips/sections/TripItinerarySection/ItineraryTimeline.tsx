@@ -59,7 +59,7 @@ export function ItineraryTimeline({ itinerary, locationLabel, durationInDays }: 
       )}
 
       <div className="space-y-10">
-        {itinerary.days.map((day, idx) => (
+        {itinerary.days.map((day) => (
           <div key={`itinerary-day-${day.dayNumber}-${day.title}`} className="grid grid-cols-[32px_1fr] gap-6">
             <TimelineDot />
             <div className="rounded-2xl border bg-linear-to-br from-background via-card to-background p-5 shadow-sm">

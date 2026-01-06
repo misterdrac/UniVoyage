@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Any linter warnings for @custom-variant, @theme, @layer, and @apply are false positives. */
 @custom-variant dark (&:is(.dark *));
 
 :root {
@@ -643,6 +644,7 @@
     margin: 0;
   }
   .no-spinners[type="number"] {
+    appearance: textfield;
     -moz-appearance: textfield;
   }
 }
