@@ -1,6 +1,5 @@
 package com.univoyage.user.model;
 
-import com.univoyage.user.model.UserEntity;
 import com.univoyage.reference.language.model.Language;
 
 import jakarta.persistence.*;
