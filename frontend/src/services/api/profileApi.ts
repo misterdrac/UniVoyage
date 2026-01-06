@@ -1,6 +1,6 @@
 import type { User } from '@/types/user'
 import { API_CONSTANTS } from '@/lib/constants'
-import { API_CONFIG } from '@/config/api'
+import { API_CONFIG } from '@/config/apiConfig'
 import type { BackendUserDto } from './types'
 import type { ApiClient } from './baseClient'
 

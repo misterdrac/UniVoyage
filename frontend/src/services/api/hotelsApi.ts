@@ -1,5 +1,5 @@
 import type { ApiClient } from './baseClient'
-import { API_CONFIG } from '@/config/api'
+import { API_CONFIG } from '@/config/apiConfig'
 
 export interface Hotel {
   hotelName: string

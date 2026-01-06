@@ -1,4 +1,4 @@
-import { API_CONFIG, type ApiResponse } from '@/config/api'
+import { API_CONFIG, type ApiResponse } from '@/config/apiConfig'
 import type { ApiClient } from './baseClient'
 
 export interface Place {

@@ -1,4 +1,4 @@
-import { API_CONFIG, type AuthResponse } from '@/config/api'
+import { API_CONFIG, type AuthResponse } from '@/config/apiConfig'
 import type { User } from '@/types/user'
 import type { BackendUserDto } from './types'
 import { API_CONSTANTS } from '@/lib/constants'

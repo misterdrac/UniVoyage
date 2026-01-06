@@ -1,4 +1,4 @@
-import { API_CONFIG } from '@/config/api'
+import { API_CONFIG } from '@/config/apiConfig'
 import type { Destination } from '@/types/destination'
 import type { ApiClient } from './baseClient'
 

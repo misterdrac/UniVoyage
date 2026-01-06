@@ -1,4 +1,4 @@
-import { API_CONFIG, type ApiResponse, type AuthResponse, ApiError } from '@/config/api'
+import { API_CONFIG, type ApiResponse, type AuthResponse, ApiError } from '@/config/apiConfig'
 import { API_CONSTANTS, COUNTRIES, LANGUAGES, TRAVEL_INTERESTS } from '@/lib/constants'
 import type { User, CountryDto, HobbyDto, LanguageDto, VisitedCountryDto } from '@/types/user'
 import type { BackendUserDto } from './types'

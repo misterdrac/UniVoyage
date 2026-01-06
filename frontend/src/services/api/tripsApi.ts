@@ -1,4 +1,4 @@
-import { API_CONFIG } from '@/config/api'
+import { API_CONFIG } from '@/config/apiConfig'
 import { API_CONSTANTS } from '@/lib/constants'
 import type { StoredItineraryPayload } from '@/types/itinerary'
 import type { TripBudgetPayload } from '@/types/budget'
