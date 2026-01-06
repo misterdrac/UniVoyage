@@ -5,9 +5,16 @@ import { useAuth } from './AuthContext';
 import { toast } from 'sonner';
 import { clearTripCache } from '@/lib/tripCacheUtils';
 
+/**
+ * Trip context type
+ * Provides trip data and operations for the authenticated user
+ */
 interface TripContextType {
+  /** Array of all trips for the current user */
   trips: Trip[];
+  /** Loading state for trip operations */
   isLoading: boolean;
+  /** Create a new trip */
   createTrip: (data: {
     destinationId: number;
     destinationName: string;
@@ -15,13 +22,21 @@ interface TripContextType {
     departureDate: string;
     returnDate: string;
   }) => Promise<{ success: boolean; error?: string }>;
+  /** Delete a trip by ID */
   deleteTrip: (tripId: number) => Promise<{ success: boolean; error?: string }>;
+  /** Refresh trips list from server */
   refreshTrips: () => Promise<void>;
+  /** Get a trip by ID from the current trips list */
   getTripById: (id: number) => Trip | undefined;
 }
 
 const TripContext = createContext<TripContextType | undefined>(undefined);
 
+/**
+ * Hook to access trip context
+ * @returns TripContextType with trips data and operations
+ * @throws Error if used outside of TripProvider
+ */
 export const useTrips = () => {
   const context = useContext(TripContext);
   if (context === undefined) {
@@ -34,11 +49,27 @@ interface TripProviderProps {
   children: ReactNode;
 }
 
+/**
+ * Context provider for trip management
+ * Manages user trips, creation, deletion, and automatic refresh on user login/logout
+ * Automatically loads trips when user logs in and clears trips on logout
+ * 
+ * @example
+ * ```tsx
+ * <TripProvider>
+ *   <App />
+ * </TripProvider>
+ * ```
+ */
 export const TripProvider: React.FC<TripProviderProps> = ({ children }) => {
   const [trips, setTrips] = useState<Trip[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
 
+  /**
+   * Refreshes trips list from the server
+   * Updates local trips state with latest data
+   */
   const refreshTrips = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -65,6 +96,12 @@ export const TripProvider: React.FC<TripProviderProps> = ({ children }) => {
     }
   }, [user?.id, refreshTrips]); // Only depend on user ID, not the entire user object
 
+  /**
+   * Creates a new trip for the authenticated user
+   * Automatically refreshes trips list after successful creation
+   * @param data - Trip creation data
+   * @returns Promise resolving to success status and optional error message
+   */
   const createTrip = useCallback(async (data: {
     destinationId: number;
     destinationName: string;
@@ -97,6 +134,12 @@ export const TripProvider: React.FC<TripProviderProps> = ({ children }) => {
     }
   }, [user, refreshTrips]);
 
+  /**
+   * Deletes a trip by ID
+   * Clears associated cache and refreshes trips list after successful deletion
+   * @param tripId - ID of the trip to delete
+   * @returns Promise resolving to success status and optional error message
+   */
   const deleteTrip = useCallback(async (tripId: number): Promise<{ success: boolean; error?: string }> => {
     if (!user) {
       return { success: false, error: 'You must be logged in to delete a trip' };
@@ -135,6 +178,11 @@ export const TripProvider: React.FC<TripProviderProps> = ({ children }) => {
     }
   }, [user, refreshTrips, trips]);
 
+  /**
+   * Gets a trip by ID from the current trips list
+   * @param id - Trip ID to search for
+   * @returns Trip object if found, undefined otherwise
+   */
   const getTripById = useCallback((id: number): Trip | undefined => {
     return trips.find(trip => trip.id === id);
   }, [trips]);
