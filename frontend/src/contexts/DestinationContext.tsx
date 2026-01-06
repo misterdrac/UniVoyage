@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, type ReactNode, useCallback, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import type { Option } from '@/components/ui/autocomplete';
 import type { DateRange } from 'react-day-picker';
 import { useAuth } from './AuthContext';
@@ -205,5 +206,26 @@ export const DestinationProvider: React.FC<DestinationProviderProps> = ({ childr
       {children}
     </DestinationContext.Provider>
   );
+};
+
+/**
+ * Component to handle route changes and reset destination fields
+ * Must be inside a Router component
+ * Export this to be used inside Router in App.tsx
+ */
+export const RouteChangeHandler: React.FC = () => {
+  const { resetAll } = useDestination();
+  const location = useLocation();
+  const previousPathnameRef = useRef<string>(location.pathname);
+
+  useEffect(() => {
+    const currentPathname = location.pathname;
+    if (previousPathnameRef.current && previousPathnameRef.current !== currentPathname) {
+      resetAll();
+    }
+    previousPathnameRef.current = currentPathname;
+  }, [location.pathname, resetAll]);
+
+  return null;
 };
 

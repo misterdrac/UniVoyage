@@ -5,7 +5,7 @@ import { ScrollToTop } from '@/components';
 import { AuthLoadingOverlay } from '@/components/layout/AuthLoadingOverlay';
 import { Toaster } from '@/components/ui/sonner';
 import { LoginDialog, SignUpDialog } from '@/components/auth';
-import { useDestination } from '@/contexts/DestinationContext';
+import { useDestination, RouteChangeHandler } from '@/contexts/DestinationContext';
 import { routes, createRouteElement } from '@/config/routes';
 
 /**
@@ -57,6 +57,7 @@ function AppContent() {
     <>
       <AuthLoadingOverlay />
       <Router>
+        <RouteChangeHandler />
         <ScrollToTop />
         <AppRoutes />
         <Toaster />
