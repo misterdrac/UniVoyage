@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Button } from '@/components/ui/button';
 import { Home, Sun, Moon } from 'lucide-react';
+import { ROUTE_PATHS } from '@/config/routes';
 
 interface AdminHeaderProps {
   title: string;
@@ -26,7 +27,7 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
         <div className="flex items-center gap-4">
           <Button
             variant="outline"
-            onClick={() => navigate('/admin/dashboard')}
+            onClick={() => navigate(ROUTE_PATHS.ADMIN_DASHBOARD)}
             className="gap-2"
           >
             <Home className="w-4 h-4" />

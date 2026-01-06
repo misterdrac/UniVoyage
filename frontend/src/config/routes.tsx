@@ -35,7 +35,6 @@ export function createRouteElement(config: RouteConfig): React.ReactElement {
 
 /**
  * Centralized route configuration
- * All application routes are defined here for easy maintenance
  */
 export const routes: RouteConfig[] = [
   // Admin Routes - No Header/Footer
@@ -129,27 +128,39 @@ export const routes: RouteConfig[] = [
 ];
 
 /**
- * Route path constants for use in navigation and links
+ * Helper function to get route path by matching pattern
+ * Used to extract paths from routes array for ROUTE_PATHS
+ */
+function getRoutePath(pattern: string): string {
+  const route = routes.find(r => r.path === pattern);
+  if (!route) {
+    throw new Error(`Route not found for pattern: ${pattern}`);
+  }
+  return route.path;
+}
+
+/**
+ * Route path constants derived from routes array
  * These can be imported and used instead of hardcoded strings
  */
 export const ROUTE_PATHS = {
-  HOME: '/',
-  ABOUT: '/about',
-  CONTACT: '/contact',
-  DESTINATIONS: '/destinations',
-  DESTINATIONS_EUROPE: '/destinations/europe',
-  DESTINATIONS_NORTH_AMERICA: '/destinations/north-america',
-  DESTINATIONS_SOUTH_AMERICA: '/destinations/south-america',
-  DESTINATIONS_ASIA: '/destinations/asia',
-  DESTINATIONS_AFRICA: '/destinations/africa',
-  DESTINATIONS_OCEANIA: '/destinations/oceania',
-  PROFILE: '/profile',
-  MY_TRIPS: '/my-trips',
+  HOME: getRoutePath('/'),
+  ABOUT: getRoutePath('/about'),
+  CONTACT: getRoutePath('/contact'),
+  DESTINATIONS: getRoutePath('/destinations'),
+  DESTINATIONS_EUROPE: getRoutePath('/destinations/europe'),
+  DESTINATIONS_NORTH_AMERICA: getRoutePath('/destinations/north-america'),
+  DESTINATIONS_SOUTH_AMERICA: getRoutePath('/destinations/south-america'),
+  DESTINATIONS_ASIA: getRoutePath('/destinations/asia'),
+  DESTINATIONS_AFRICA: getRoutePath('/destinations/africa'),
+  DESTINATIONS_OCEANIA: getRoutePath('/destinations/oceania'),
+  PROFILE: getRoutePath('/profile'),
+  MY_TRIPS: getRoutePath('/my-trips'),
   TRIP_DETAIL: (id: number | string) => `/trips/${id}`,
-  ADMIN: '/admin',
-  ADMIN_DASHBOARD: '/admin/dashboard',
-  ADMIN_USERS: '/admin/users',
-  ADMIN_DESTINATIONS: '/admin/destinations',
-  GOOGLE_CALLBACK: '/auth/google/callback',
+  ADMIN: getRoutePath('/admin'),
+  ADMIN_DASHBOARD: getRoutePath('/admin/dashboard'),
+  ADMIN_USERS: getRoutePath('/admin/users'),
+  ADMIN_DESTINATIONS: getRoutePath('/admin/destinations'),
+  GOOGLE_CALLBACK: getRoutePath('/auth/google/callback'),
 } as const;
 
