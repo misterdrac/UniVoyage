@@ -1,8 +1,7 @@
-import HeroImage from "@/assets/images/hero2.jpg";
+import HeroImage from "@/assets/images/hero.jpg";
+import MobileHeroImage from "@/assets/images/mobile_hero.jpg";
 import { HeroCard } from "./HeroCard";
 import { ExploreMoreButton } from "./ExploreMoreButton";
-
-const MOBILE_IMAGE_URL = "https://images.unsplash.com/photo-1517999349371-c43520457b23?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=687";
 
 export function HeroSection() {
   return (
@@ -10,7 +9,7 @@ export function HeroSection() {
       <div className="relative w-full h-[calc(100vh-68px)]">
         {/* Mobile Image */}
         <img
-          src={MOBILE_IMAGE_URL}
+          src={MobileHeroImage}
           alt="Students planning travel"
           className="md:hidden w-full h-full object-cover"
         />

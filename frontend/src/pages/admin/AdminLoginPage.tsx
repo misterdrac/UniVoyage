@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Shield, Mail, Lock, Loader2, Sun, Moon, Eye, EyeOff } from 'lucide-react';
-import heroImage from '@/assets/images/hero2.jpg';
+import heroImage from '@/assets/images/hero.jpg';
 import { ROUTE_PATHS } from '@/config/routes';
 
 const AdminLoginPage: React.FC = () => {
