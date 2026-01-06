@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Button } from '@/components/ui/button';
@@ -62,7 +62,7 @@ const AdminLoginPage: React.FC = () => {
           </p>
           <div className="space-y-3">
             <Button 
-              onClick={() => window.location.href = '/'} 
+              onClick={() => navigate(ROUTE_PATHS.HOME)} 
               className="w-full"
               variant="outline"
             >
@@ -230,12 +230,12 @@ const AdminLoginPage: React.FC = () => {
             </form>
 
             <div className="mt-8 text-center">
-              <a 
-                href="/" 
+              <Link 
+                to={ROUTE_PATHS.HOME}
                 className="text-sm text-muted-foreground hover:text-primary transition-colors"
               >
                 ← Back to UniVoyage
-              </a>
+              </Link>
             </div>
           </div>
         </div>
