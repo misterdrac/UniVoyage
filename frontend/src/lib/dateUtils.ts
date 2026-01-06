@@ -14,6 +14,9 @@ const normalizeForDiff = (value: DateInput): Date => {
   return date
 }
 
+/**
+ * Formats date as short string (e.g., "Jan 15")
+ */
 export const formatDateShort = (
   value: DateInput,
   locale: string = 'en-US',
@@ -22,6 +25,9 @@ export const formatDateShort = (
   return toDate(value).toLocaleDateString(locale, options)
 }
 
+/**
+ * Formats date as long string (e.g., "January 15, 2024")
+ */
 export const formatDateLong = (
   value: DateInput,
   locale: string = 'en-US',
@@ -30,6 +36,9 @@ export const formatDateLong = (
   return toDate(value).toLocaleDateString(locale, options)
 }
 
+/**
+ * Calculates duration in days between two dates (minimum 1 day)
+ */
 export const calculateDurationInDays = (start: DateInput, end: DateInput): number => {
   const normalizedStart = normalizeForDiff(start)
   const normalizedEnd = normalizeForDiff(end)

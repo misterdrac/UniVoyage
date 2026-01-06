@@ -7,6 +7,9 @@ export interface TripStatusConfig {
   icon: string
 }
 
+/**
+ * Returns Tailwind classes and icon for trip status badge
+ */
 export const getStatusConfig = (status: TripStatus): TripStatusConfig => {
   switch (status) {
     case 'planned':

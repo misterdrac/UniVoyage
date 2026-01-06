@@ -28,6 +28,9 @@ export const tripSortComparators: Record<TripSortOption, (a: Trip, b: Trip) => n
   'start-latest': compareDescending,
 }
 
+/**
+ * Sorts trips by departure date (soonest or latest)
+ */
 export const sortTrips = (trips: Trip[], sortOption: TripSortOption): Trip[] => {
   const sortedTrips = [...trips]
   sortedTrips.sort(tripSortComparators[sortOption])

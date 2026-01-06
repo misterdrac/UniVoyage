@@ -14,6 +14,9 @@ export const DEFAULT_TRIP_FILTERS: TripFilters = {
   sort: DEFAULT_TRIP_SORT,
 }
 
+/**
+ * Filters trips by status (planned, ongoing, completed, or all)
+ */
 export const filterTripsByStatus = (trips: Trip[], status: TripStatusFilter): Trip[] => {
   if (status === 'all') {
     return trips
@@ -24,10 +27,16 @@ export const filterTripsByStatus = (trips: Trip[], status: TripStatusFilter): Tr
   )
 }
 
+/**
+ * Applies all filters to trips list
+ */
 export const filterTrips = (trips: Trip[], filters: TripFilters): Trip[] => {
   return filterTripsByStatus(trips, filters.status)
 }
 
+/**
+ * Checks if any filters are active (not default values)
+ */
 export const hasActiveTripFilters = (filters: TripFilters): boolean => {
   return filters.status !== DEFAULT_TRIP_FILTERS.status || filters.sort !== DEFAULT_TRIP_FILTERS.sort
 }
