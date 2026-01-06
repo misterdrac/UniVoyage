@@ -6,7 +6,7 @@ import { getPasswordStrength } from "@/components/ui/password-strength";
 interface UseSignUpFormProps {
   onSuccess: () => void;
 
-  // prilagođeno BE RegisterRequestDto
+  // Matches backend RegisterRequestDto structure
   signup: (data: {
     name: string;
     surname?: string;
@@ -22,7 +22,7 @@ interface UseSignUpFormProps {
 export const useSignUpForm = ({ onSuccess, signup }: UseSignUpFormProps) => {
   const [showPasswordError, setShowPasswordError] = useState(false);
 
-  // UI state ostavljamo kako je da ne diraš ostale komponente
+  // Form state fields
   const [name, setName] = useState("");
   const [surname, setSurname] = useState("");
   const [email, setEmail] = useState("");
@@ -30,12 +30,12 @@ export const useSignUpForm = ({ onSuccess, signup }: UseSignUpFormProps) => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  // u UI ti vjerojatno dolaze stringovi (id-evi ili nazivi)
+  // UI receives strings (ids or names) that need conversion
   const [hobbies, setHobbies] = useState<string[]>([]);
   const [languages, setLanguages] = useState<string[]>([]);
   const [country, setCountry] = useState<Option | undefined>(undefined);
 
-  const [visitedCountries, setVisitedCountries] = useState<string[]>([]); // optional, možeš i ne koristit
+  const [visitedCountries, setVisitedCountries] = useState<string[]>([]); // Optional field
 
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -110,12 +110,11 @@ export const useSignUpForm = ({ onSuccess, signup }: UseSignUpFormProps) => {
         const languageCodes = languages ?? [];
 
         const payload = {
-          // redoslijed kako si tražio
           name,
           surname,
           email,
           countryCode: country.value,
-          hobbyIds: hobbies.map(h => Number(h)),
+          hobbyIds,
           languageCodes,
           password,
           visitedCountryCodes: visitedCountries ?? [], // can be empty

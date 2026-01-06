@@ -93,7 +93,7 @@ export function TripAccommodationSection({ trip }: TripAccommodationSectionProps
       description: 'The cheapest accommodation option. Find hostels, shared rooms, and budget-friendly stays perfect for students.',
       url: `https://www.hostelworld.com/st/hostels/${encodeURIComponent(safeCityName.toLowerCase().replace(/\s+/g, '-'))}/?dateFrom=${formatDateForBooking(checkIn)}&dateTo=${formatDateForBooking(checkOut)}`,
       icon: <Users className="h-8 w-8" />,
-      color: 'from-orange-500 to-red-500',
+      color: 'from-[var(--booking-partner-orange-from)] to-[var(--booking-partner-orange-to)]',
       bestFor: 'Cheapest Option',
     },
     {
@@ -101,7 +101,7 @@ export function TripAccommodationSection({ trip }: TripAccommodationSectionProps
       description: 'Wide selection of hotels, apartments, and hostels with free cancellation options and flexible booking.',
       url: `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(safeCityName)}&checkin=${formatDateForBooking(checkIn)}&checkout=${formatDateForBooking(checkOut)}`,
       icon: <Building className="h-8 w-8" />,
-      color: 'from-blue-500 to-blue-700',
+      color: 'from-[var(--booking-partner-blue-from)] to-[var(--booking-partner-blue-to)]',
       bestFor: 'Hotels & Apartments',
     },
   ]
@@ -166,12 +166,12 @@ export function TripAccommodationSection({ trip }: TripAccommodationSectionProps
         {/* User's saved accommodation info card with input fields */}
         <Card className="h-full overflow-hidden border-2 border-primary/30 transition-all duration-300 hover:shadow-xl hover:border-primary/50">
           <CardContent className="p-0">
-            <div className="bg-linear-to-r from-primary to-primary/80 p-5 text-white">
+            <div className="bg-linear-to-r from-primary to-primary/80 p-5 text-hero-text">
               <div className="flex items-center justify-between">
                 <Hotel className="h-8 w-8" />
                 <div className="flex items-center gap-2">
                   {isSaved && (
-                    <span className="flex items-center gap-1 text-xs bg-white/20 px-2 py-0.5 rounded-full">
+                    <span className="flex items-center gap-1 text-xs bg-hero-text/20 px-2 py-0.5 rounded-full">
                       <Check className="h-3 w-3" />
                       Saved
                     </span>
@@ -181,7 +181,7 @@ export function TripAccommodationSection({ trip }: TripAccommodationSectionProps
                       variant="ghost"
                       size="sm"
                       onClick={() => setShowClearDialog(true)}
-                      className="h-7 w-7 p-0 text-white/80 hover:text-white hover:bg-white/20"
+                      className="h-7 w-7 p-0 text-hero-text/80 hover:text-hero-text hover:bg-hero-text/20"
                       title="Clear accommodation details"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
@@ -190,7 +190,7 @@ export function TripAccommodationSection({ trip }: TripAccommodationSectionProps
                 </div>
               </div>
               <h4 className="text-lg font-bold mt-3">My Accommodation</h4>
-              <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full mt-2 inline-block">
+              <span className="text-xs bg-hero-text/20 px-2 py-0.5 rounded-full mt-2 inline-block">
                 Your Booking
               </span>
             </div>
@@ -243,13 +243,13 @@ export function TripAccommodationSection({ trip }: TripAccommodationSectionProps
         >
           <Card className="h-full overflow-hidden border-2 transition-all duration-300 hover:shadow-xl hover:scale-[1.02] hover:border-primary/50">
             <CardContent className="p-0 flex flex-col h-full">
-              <div className={cn('bg-linear-to-r p-5 text-white', bookingPartners[0].color)}>
+              <div className={cn('bg-linear-to-r p-5 text-hero-text', bookingPartners[0].color)}>
                 <div className="flex items-center justify-between">
                   {bookingPartners[0].icon}
                   <ExternalLink className="h-5 w-5 opacity-70 group-hover:opacity-100 transition-opacity" />
                 </div>
                 <h4 className="text-lg font-bold mt-3">{bookingPartners[0].name}</h4>
-                <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full mt-2 inline-block">
+                <span className="text-xs bg-hero-text/20 px-2 py-0.5 rounded-full mt-2 inline-block">
                   {bookingPartners[0].bestFor}
                 </span>
               </div>
@@ -277,13 +277,13 @@ export function TripAccommodationSection({ trip }: TripAccommodationSectionProps
         >
           <Card className="h-full overflow-hidden border-2 transition-all duration-300 hover:shadow-xl hover:scale-[1.02] hover:border-primary/50">
             <CardContent className="p-0 flex flex-col h-full">
-              <div className={cn('bg-linear-to-r p-5 text-white', bookingPartners[1].color)}>
+              <div className={cn('bg-linear-to-r p-5 text-hero-text', bookingPartners[1].color)}>
                 <div className="flex items-center justify-between">
                   {bookingPartners[1].icon}
                   <ExternalLink className="h-5 w-5 opacity-70 group-hover:opacity-100 transition-opacity" />
                 </div>
                 <h4 className="text-lg font-bold mt-3">{bookingPartners[1].name}</h4>
-                <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full mt-2 inline-block">
+                <span className="text-xs bg-hero-text/20 px-2 py-0.5 rounded-full mt-2 inline-block">
                   {bookingPartners[1].bestFor}
                 </span>
               </div>

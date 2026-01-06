@@ -69,34 +69,6 @@ const normalizeBudgetPayload = (data?: TripBudgetPayload | null): TripBudgetPayl
   }
 }
 
-const parseBudgetData = (raw: string | null): TripBudgetPayload => {
-  const fallback = createEmptyBudget()
-
-  if (!raw) return fallback
-  try {
-    const parsed = JSON.parse(raw)
-    if (Array.isArray(parsed)) {
-      // Backward compatibility with previous array-only storage
-      return normalizeBudgetPayload({
-        allocations: emptyAllocations(),
-        expenses: parsed,
-        totalBudget: 0,
-      })
-    }
-
-    if (parsed && typeof parsed === 'object') {
-      return normalizeBudgetPayload({
-        allocations: { ...emptyAllocations(), ...(parsed.allocations ?? {}) },
-        expenses: parsed.expenses ?? [],
-        totalBudget: parsed.totalBudget ?? 0,
-      })
-    }
-  } catch (error) {
-    console.error('Failed to parse stored budget data', error)
-  }
-  return fallback
-}
-
 
 /**
  * Manages trip budget state, allocations, and expenses with localStorage caching

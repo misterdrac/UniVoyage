@@ -12,7 +12,6 @@
  * Optional Future Optimizations (see inline comments):
  * - Consider useMemo for filtering if performance issues arise with large datasets (1000+ items)
  * - Consider useMemo for dynamic height calculation if virtual scrolling is added
- * Note: Current implementation is performant and optimizations are not urgent
  */
 
 import {

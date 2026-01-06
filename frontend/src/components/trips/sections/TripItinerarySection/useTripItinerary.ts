@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
-import { API_CONFIG } from '@/config/apiConfig'
 import { useAuth } from '@/contexts/AuthContext'
 import { calculateDurationInDays, formatDateLong } from '@/lib/dateUtils'
 import type { TripStatus } from '@/lib/tripStatusUtils'

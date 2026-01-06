@@ -41,6 +41,11 @@
   --sidebar-accent-foreground: oklch(0.3015 0.0572 282.4176);
   --sidebar-border: oklch(0.9115 0.0216 285.9625);
   --sidebar-ring: oklch(0.5417 0.1790 288.0332);
+  --hero-text: oklch(1.0000 0 0); /* White for hero sections */
+  --booking-partner-orange-from: oklch(0.7042 0.1602 14.9941); /* orange-500 */
+  --booking-partner-orange-to: oklch(0.6861 0.2061 14.9941); /* red-500 */
+  --booking-partner-blue-from: oklch(0.6356 0.1922 251.3265); /* blue-500 */
+  --booking-partner-blue-to: oklch(0.5571 0.1778 251.3265); /* blue-700 */
   --font-sans: Inter, sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: JetBrains Mono, monospace;
@@ -484,6 +489,11 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-hero-text: var(--hero-text);
+  --color-booking-partner-orange-from: var(--booking-partner-orange-from);
+  --color-booking-partner-orange-to: var(--booking-partner-orange-to);
+  --color-booking-partner-blue-from: var(--booking-partner-blue-from);
+  --color-booking-partner-blue-to: var(--booking-partner-blue-to);
 
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);

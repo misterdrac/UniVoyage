@@ -170,7 +170,7 @@ export function EditExpenseDialog({
             disabled={!form.description.trim() || form.amount <= 0}
             className={cn(
               expenseConfig.textColor.replace('text-', 'bg-').replace('-600', '-500'),
-              'text-white hover:opacity-90 w-full sm:w-auto'
+              'text-hero-text hover:opacity-90 w-full sm:w-auto'
             )}
           >
             <Check className="h-4 w-4 mr-2" />
