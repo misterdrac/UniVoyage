@@ -9,6 +9,10 @@ interface AdminProtectedRouteProps {
   children: React.ReactNode;
 }
 
+/**
+ * Protects admin routes that require ADMIN or HEAD_ADMIN role
+ * Shows access denied page if user lacks permissions
+ */
 const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({ children }) => {
   const { user, isLoading } = useAuth();
 
