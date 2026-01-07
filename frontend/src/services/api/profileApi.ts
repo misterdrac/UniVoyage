@@ -48,7 +48,8 @@ export const profileApi: { [K in keyof ProfileApi]: (this: ApiClient, ...args: P
             hobbyIds: normalized.hobbyIds ?? null, // -> ?? [] changed to ?? null, same for languageCodes and visitedCountryCodes
             languageCodes: normalized.languageCodes ?? null,
             visitedCountryCodes: normalized.visitedCountryCodes ?? null,
-            profileImagePath: normalized.profileImagePath ?? null,
+            // Send empty string to remove avatar, null to not update, or the URL to set it
+            profileImagePath: normalized.profileImagePath === undefined ? null : (normalized.profileImagePath || ""),
           }),
         })
 

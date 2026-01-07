@@ -68,7 +68,8 @@ export const ProfileHeaderCard = ({
       name: name.trim(),
       surname: surname.trim() || undefined,
       countryCode: country?.value || undefined,
-      profileImagePath: profileImagePath || undefined,
+      // Send empty string to remove avatar, undefined to not update, or the URL to set it
+      profileImagePath: profileImagePath === undefined ? undefined : (profileImagePath?.trim() || ""),
     });
   }, [name, surname, country, profileImagePath, onSave]);
 

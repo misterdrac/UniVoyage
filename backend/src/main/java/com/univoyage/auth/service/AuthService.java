@@ -285,13 +285,19 @@ public class AuthService {
         }
 
         // PROFILE IMAGE PATH
+        // Allow null or empty string to remove avatar, or a valid avatar URL to set one
         if (request.getProfileImagePath() != null) {
-            // Validate avatar URL to prevent malicious or unauthorized image URLs
             String avatarPath = request.getProfileImagePath();
-            if (!isValidAvatarUrl(avatarPath)) {
-                throw new IllegalArgumentException("Invalid avatar URL. Only avatar-1.png to avatar-20.png from cdn.shadcnstudio.com are allowed.");
+            // If empty string or blank, remove the avatar
+            if (avatarPath.isBlank()) {
+                user.setProfileImagePath(null);
+            } else {
+                // Validate avatar URL to prevent malicious or unauthorized image URLs
+                if (!isValidAvatarUrl(avatarPath)) {
+                    throw new IllegalArgumentException("Invalid avatar URL. Only avatar-1.png to avatar-20.png from cdn.shadcnstudio.com are allowed.");
+                }
+                user.setProfileImagePath(avatarPath);
             }
-            user.setProfileImagePath(avatarPath);
         }
 
         UserEntity savedUser = userRepository.save(user);
