@@ -1,5 +1,5 @@
-import { useCallback } from 'react';
-import { Edit2, Save, X, Mail, MapPin } from 'lucide-react';
+import { useCallback, useMemo } from 'react';
+import { Edit2, Save, X, Mail, MapPin, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
@@ -43,6 +43,16 @@ export const ProfileHeaderCard = ({
   onCountryChange,
   onProfileImagePathChange,
 }: ProfileHeaderCardProps) => {
+  // Check if profile is incomplete (missing avatar, surname, or country)
+  const isProfileIncomplete = useMemo(() => {
+    const missingFields = [
+      !user.profileImagePath,
+      !user.surname,
+      !user.countryOfOrigin,
+    ].filter(Boolean).length;
+    return missingFields > 0;
+  }, [user.profileImagePath, user.surname, user.countryOfOrigin]);
+
   const handleSave = useCallback(async () => {
     if (!name.trim()) {
       toast.error('Name is required');
@@ -67,7 +77,18 @@ export const ProfileHeaderCard = ({
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Avatar src={user.profileImagePath} alt="Profile" size="md" />
+            <div className="relative">
+              <Avatar src={user.profileImagePath} alt="Profile" size="md" />
+              {isProfileIncomplete && !isEditing && (
+                <div 
+                  className="absolute -top-1 -right-1 bg-primary text-primary-foreground rounded-full p-1.5 shadow-lg group cursor-pointer hover:bg-primary/90 transition-colors"
+                  onClick={onEdit}
+                  title={"Complete your profile"}
+                >
+                  <AlertCircle className="w-3.5 h-3.5" />
+                </div>
+              )}
+            </div>
             <div>
               <CardTitle className="flex items-center gap-2">
                 Profile Information
