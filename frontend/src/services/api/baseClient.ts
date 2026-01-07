@@ -243,7 +243,9 @@ export class ApiClient {
       }
 
       if (!response.ok) {
-        throw new ApiError(data.error || data.message || 'Request failed', response.status, data.code)
+        // Extract error message from various possible response formats
+        const errorMessage = data.error || data.message || data.detail || `Request failed with status ${response.status}`;
+        throw new ApiError(errorMessage, response.status, data.code)
       }
 
       return data

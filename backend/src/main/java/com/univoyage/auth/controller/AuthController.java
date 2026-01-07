@@ -69,9 +69,13 @@ public class AuthController {
         AuthPayload payload = authService.register(request);
 
         if (!payload.isSuccess()) {
+            // Use the actual error message from AuthPayload if available, otherwise use generic message
+            String errorMessage = payload.getError() != null && !payload.getError().isBlank() 
+                    ? payload.getError() 
+                    : "Registration failed";
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.fail("Registration failed"));
+                    .body(ApiResponse.fail(errorMessage));
         }
 
         // Set HttpOnly cookie for JWT using ResponseCookie (supports SameSite)
@@ -117,39 +121,55 @@ public class AuthController {
             @RequestBody LoginRequestDto request,
             HttpServletResponse response
     ) {
-        AuthPayload payload = authService.login(request);
+        try {
+            AuthPayload payload = authService.login(request);
 
-        if (!payload.isSuccess()) {
+            if (!payload.isSuccess()) {
+                // Use the actual error message from AuthPayload if available, otherwise use generic message
+                String errorMessage = payload.getError() != null && !payload.getError().isBlank() 
+                        ? payload.getError() 
+                        : "Invalid email or password";
+                return ResponseEntity
+                        .status(HttpStatus.UNAUTHORIZED)
+                        .body(ApiResponse.fail(errorMessage));
+            }
+
+            // Set HttpOnly cookie for JWT using ResponseCookie (supports SameSite)
+            if (payload.getToken() != null) {
+                ResponseCookie jwtCookie = ResponseCookie.from(CookieUtils.JWT_COOKIE_NAME, payload.getToken())
+                        .httpOnly(true)
+                        .secure(false) // false for localhost, true in production with HTTPS
+                        .path("/")
+                        .maxAge((int) jwtTtlSeconds)
+                        .sameSite("Lax") // Lax works better for localhost, allows cookies on top-level navigation (refresh)
+                        .build();
+                response.addHeader(HttpHeaders.SET_COOKIE, jwtCookie.toString());
+            }
+
+            // Set readable cookie for CSRF token using ResponseCookie
+            if (payload.getCsrfToken() != null) {
+                ResponseCookie csrfCookie = ResponseCookie.from(CookieUtils.CSRF_COOKIE_NAME, payload.getCsrfToken())
+                        .httpOnly(false) // must be readable by frontend
+                        .secure(false) // false for localhost, true in production with HTTPS
+                        .path("/")
+                        .maxAge((int) jwtTtlSeconds)
+                        .sameSite("Lax") // Lax works better for localhost, allows cookies on top-level navigation (refresh)
+                        .build();
+                response.addHeader(HttpHeaders.SET_COOKIE, csrfCookie.toString());
+            }
+
+            return ResponseEntity.ok(ApiResponse.ok(payload));
+        } catch (IllegalArgumentException e) {
+            // Handle IllegalArgumentException (e.g., user not found)
+            // Return user-friendly error message instead of exposing internal error
+            String errorMessage = "Invalid email or password";
+            if (e.getMessage() != null && e.getMessage().contains("Invalid credentials")) {
+                errorMessage = "Invalid email or password";
+            }
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.fail("Invalid email or password"));
+                    .body(ApiResponse.fail(errorMessage));
         }
-
-        // Set HttpOnly cookie for JWT using ResponseCookie (supports SameSite)
-        if (payload.getToken() != null) {
-            ResponseCookie jwtCookie = ResponseCookie.from(CookieUtils.JWT_COOKIE_NAME, payload.getToken())
-                    .httpOnly(true)
-                    .secure(false) // false for localhost, true in production with HTTPS
-                    .path("/")
-                    .maxAge((int) jwtTtlSeconds)
-                    .sameSite("Lax") // Lax works better for localhost, allows cookies on top-level navigation (refresh)
-                    .build();
-            response.addHeader(HttpHeaders.SET_COOKIE, jwtCookie.toString());
-        }
-
-        // Set readable cookie for CSRF token using ResponseCookie
-        if (payload.getCsrfToken() != null) {
-            ResponseCookie csrfCookie = ResponseCookie.from(CookieUtils.CSRF_COOKIE_NAME, payload.getCsrfToken())
-                    .httpOnly(false) // must be readable by frontend
-                    .secure(false) // false for localhost, true in production with HTTPS
-                    .path("/")
-                    .maxAge((int) jwtTtlSeconds)
-                    .sameSite("Lax") // Lax works better for localhost, allows cookies on top-level navigation (refresh)
-                    .build();
-            response.addHeader(HttpHeaders.SET_COOKIE, csrfCookie.toString());
-        }
-
-        return ResponseEntity.ok(ApiResponse.ok(payload));
     }
 
     /**

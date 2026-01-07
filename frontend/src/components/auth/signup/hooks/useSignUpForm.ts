@@ -2,6 +2,7 @@ import { useState, useCallback, useMemo } from "react";
 import { type Option } from "@/components/ui/autocomplete";
 import { VALIDATION } from "@/lib/constants";
 import { getPasswordStrength } from "@/components/ui/password-strength";
+import { toast } from "sonner";
 
 interface UseSignUpFormProps {
   onSuccess: () => void;
@@ -85,6 +86,7 @@ export const useSignUpForm = ({ onSuccess, signup }: UseSignUpFormProps) => {
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
+      e.stopPropagation();
       setShowPasswordError(true);
       setError("");
 
@@ -126,10 +128,14 @@ export const useSignUpForm = ({ onSuccess, signup }: UseSignUpFormProps) => {
           resetForm();
           onSuccess();
         } else {
-          setError(result.error || "Sign up failed");
+          const errorMessage = result.error || "Sign up failed";
+          setError(errorMessage);
+          toast.error(errorMessage);
         }
       } catch (error) {
-        setError("An unexpected error occurred");
+        const errorMessage = "An unexpected error occurred. Please try again.";
+        setError(errorMessage);
+        toast.error(errorMessage);
       } finally {
         setIsLoading(false);
       }
@@ -172,7 +178,6 @@ export const useSignUpForm = ({ onSuccess, signup }: UseSignUpFormProps) => {
     setVisitedCountries,
     showPasswordError,
     setShowPasswordError,
-    error,
     isLoading,
     isFormValid,
     passwordsMatch,

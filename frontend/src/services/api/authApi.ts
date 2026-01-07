@@ -4,6 +4,77 @@ import type { BackendUserDto } from './types'
 import type { ApiClient } from './baseClient'
 
 /**
+ * Normalizes authentication error messages for better user experience
+ * Maps backend error messages to user-friendly frontend messages
+ * Direct mapping of backend error messages from AuthService and AuthController
+ */
+function normalizeAuthError(error: string): string {
+  if (!error || typeof error !== 'string') {
+    return 'An error occurred. Please try again.';
+  }
+  
+  const lowerError = error.toLowerCase();
+  
+  // Backend returns: "Email is already in use" from AuthService.register()
+  if (lowerError.includes('email') && lowerError.includes('already') && lowerError.includes('use')) {
+    return 'This email is already registered. Please use a different email or sign in.';
+  }
+  
+  // Backend returns: "Invalid credentials" from AuthService.login() (user not found or wrong password)
+  if (lowerError.includes('invalid') && lowerError.includes('credential')) {
+    return 'Invalid email or password. Please check your credentials and try again.';
+  }
+  
+  // Backend returns: "Invalid email or password" from AuthController.login()
+  if (lowerError.includes('invalid') && (lowerError.includes('email') || lowerError.includes('password'))) {
+    return 'Invalid email or password. Please check your credentials and try again.';
+  }
+  
+  // Backend returns: "Country code is required" from AuthService.register()
+  if (lowerError.includes('country') && (lowerError.includes('required') || lowerError.includes('code'))) {
+    return 'Country is required. Please select your country.';
+  }
+  
+  // Backend returns: "Invalid country code: XX" from IllegalArgumentException
+  if (lowerError.includes('invalid') && lowerError.includes('country code')) {
+    return 'Invalid country selected. Please choose a valid country.';
+  }
+  
+  // Backend returns: "Invalid hobby id: X" from IllegalArgumentException
+  if (lowerError.includes('invalid') && lowerError.includes('hobby')) {
+    return 'Invalid hobby selected. Please choose valid hobbies.';
+  }
+  
+  // Backend returns: "Invalid language code: XX" from IllegalArgumentException
+  if (lowerError.includes('invalid') && lowerError.includes('language code')) {
+    return 'Invalid language selected. Please choose valid languages.';
+  }
+  
+  // Backend returns: "Invalid visited country code: XX" from IllegalArgumentException
+  if (lowerError.includes('invalid') && lowerError.includes('visited country')) {
+    return 'Invalid visited country selected. Please choose valid countries.';
+  }
+  
+  // Backend returns: "Registration failed" from AuthController.register() (generic wrapper)
+  if (lowerError.includes('registration failed')) {
+    return 'Registration failed. Please check your information and try again.';
+  }
+  
+  // Network errors
+  if (lowerError.includes('network') || lowerError.includes('fetch') || lowerError.includes('connection') || lowerError.includes('failed to fetch')) {
+    return 'Network error. Please check your connection and try again.';
+  }
+  
+  // Server errors (500 from IllegalArgumentException exceptions)
+  if (lowerError.includes('server error') || lowerError.includes('500') || lowerError.includes('internal')) {
+    return 'Server error. Please try again later.';
+  }
+  
+  // Return original error if no match found
+  return error;
+}
+
+/**
  * Authentication API interface
  * Handles user login, registration, logout, and OAuth flows
  */
@@ -65,23 +136,38 @@ export interface AuthApi {
 export const authApi: { [K in keyof AuthApi]: (this: ApiClient, ...args: Parameters<AuthApi[K]>) => ReturnType<AuthApi[K]> } =
   {
     async login(this: ApiClient, email, password) {
-      const response = await this.request<AuthResponse<BackendUserDto>>(API_CONFIG.ENDPOINTS.AUTH.LOGIN, {
-        method: 'POST',
-        body: JSON.stringify({ email, password }),
-      })
+      try {
+        const response = await this.request<AuthResponse<BackendUserDto>>(API_CONFIG.ENDPOINTS.AUTH.LOGIN, {
+          method: 'POST',
+          body: JSON.stringify({ email, password }),
+        })
 
-      const payload = this.adaptAuthPayload(response.data)
+        const payload = this.adaptAuthPayload(response.data)
 
-      if (payload.success) {
-        if (payload.token) {
-          this.setAuthToken(payload.token)
+        if (payload.success) {
+          if (payload.token) {
+            this.setAuthToken(payload.token)
+          }
+          return payload
         }
-        return payload
-      }
 
-      return {
-        success: false,
-        error: payload.error || response.error || 'Login failed',
+        // Normalize error messages for better UX
+        const rawError = payload.error || response.error || 'Login failed';
+        const normalizedError = normalizeAuthError(rawError);
+        
+        return {
+          success: false,
+          error: normalizedError,
+        }
+      } catch (error: any) {
+        // Handle ApiError and network errors
+        // ApiError has message property, also check error property for nested errors
+        const rawError = error?.message || error?.error || (typeof error === 'string' ? error : 'Login failed');
+        const normalizedError = normalizeAuthError(rawError);
+        return {
+          success: false,
+          error: normalizedError,
+        }
       }
     },
 
@@ -110,9 +196,17 @@ export const authApi: { [K in keyof AuthApi]: (this: ApiClient, ...args: Paramet
           return payload
         }
 
-        return { success: false, error: payload.error || res.error || 'Registration failed' }
+        // Normalize error messages for better UX
+        const rawError = payload.error || res.error || res.message || 'Registration failed';
+        const normalizedError = normalizeAuthError(rawError);
+        
+        return { success: false, error: normalizedError }
       } catch (err: any) {
-        return { success: false, error: err?.message ?? 'Registration failed' }
+        // Handle ApiError and network errors
+        // ApiError has message property, also check error property for nested errors
+        const rawError = err?.message || err?.error || (typeof err === 'string' ? err : 'Registration failed');
+        const normalizedError = normalizeAuthError(rawError);
+        return { success: false, error: normalizedError }
       }
     },
 

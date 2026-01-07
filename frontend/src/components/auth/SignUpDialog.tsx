@@ -71,12 +71,14 @@ export function SignUpDialog({ open, onOpenChange, onLoginClick }: SignUpDialogP
   }, [onOpenChange, onLoginClick]);
 
   const handleFormSubmit = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!passwordsMatch) {
+      setShowPasswordError(true);
       toast.error("Passwords do not match");
       return;
     }
     await handleSubmit(e);
-  }, [handleSubmit, passwordsMatch]);
+  }, [handleSubmit, passwordsMatch, setShowPasswordError]);
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
