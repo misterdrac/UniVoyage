@@ -2,7 +2,6 @@ package com.univoyage.config;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -12,10 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * CORS configuration filter to handle Cross-Origin Resource Sharing (CORS) settings.
@@ -26,29 +22,10 @@ import java.util.stream.Stream;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class CorsConfig extends OncePerRequestFilter {
 
-    private final Set<String> allowedOrigins;
-
-    public CorsConfig(Environment env) {
-        // Default localhost origins for development
-        Set<String> defaultOrigins = Set.of(
-                "http://localhost:5173",
-                "http://127.0.0.1:5173"
-        );
-
-        // Get allowed origins from environment variable (comma-separated)
-        String corsOrigins = env.getProperty("CORS_ALLOWED_ORIGINS");
-        if (corsOrigins != null && !corsOrigins.trim().isEmpty()) {
-            // Combine environment origins with defaults
-            allowedOrigins = Stream.concat(
-                    Arrays.stream(corsOrigins.split(","))
-                            .map(String::trim)
-                            .filter(s -> !s.isEmpty()),
-                    defaultOrigins.stream()
-            ).collect(Collectors.toSet());
-        } else {
-            allowedOrigins = defaultOrigins;
-        }
-    }
+    private static final Set<String> ALLOWED = Set.of(
+            "http://localhost:5173",
+            "http://127.0.0.1:5173"
+    );
 
     @Override
     protected void doFilterInternal(
@@ -60,7 +37,7 @@ public class CorsConfig extends OncePerRequestFilter {
         String origin = request.getHeader("Origin");
 
         // Only set CORS headers for allowed origins
-        if (origin != null && allowedOrigins.contains(origin)) {
+        if (origin != null && ALLOWED.contains(origin)) {
             response.setHeader("Access-Control-Allow-Origin", origin);
             response.setHeader("Vary", "Origin");
             response.setHeader("Access-Control-Allow-Credentials", "true");
