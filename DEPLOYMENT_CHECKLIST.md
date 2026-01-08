@@ -4,7 +4,7 @@ Use this checklist to track your deployment progress.
 
 ## Pre-Deployment Setup
 
-- [ ] Push code to GitHub repository (your fork)
+- [ ] Push code to GitHub repository
 - [ ] Gather all API keys:
   - [ ] OpenWeather API key
   - [ ] Geoapify API key
@@ -13,38 +13,30 @@ Use this checklist to track your deployment progress.
   - [ ] Google OAuth credentials (optional)
 - [ ] Generate JWT secret: `openssl rand -base64 32` (or use PowerShell command from guide)
 
-## Step 1: Railway Database Setup
+## Step 1: Render Database Setup
 
-- [ ] Sign up/login to Railway: [railway.app](https://railway.app)
-- [ ] Create new project: "Empty Project" named `UniVoyage`
-- [ ] Add PostgreSQL database:
-  - [ ] Click "+ New" → "Database" → "Add PostgreSQL"
-  - [ ] Save database credentials from "Variables" tab:
-    - [ ] `PGHOST`
-    - [ ] `PGPORT`
-    - [ ] `PGDATABASE`
-    - [ ] `PGUSER`
-    - [ ] `PGPASSWORD`
-    - [ ] Or note `DATABASE_URL`
+- [ ] Sign up/login to Render: [render.com](https://render.com)
+- [ ] Create PostgreSQL database:
+  - [ ] Name: `univoyage-db`
+  - [ ] Plan: Free
+  - [ ] Save database credentials (host, port, name, username, password)
 
-## Step 2: Railway Backend Deployment
+## Step 2: Render Backend Deployment
 
-- [ ] Add new service: "+ New" → "GitHub Repo"
-- [ ] Select your `UniVoyage` repository
-- [ ] Configure service:
-  - [ ] Set Root Directory to: `backend` (in Settings)
-  - [ ] Railway should auto-detect Java/Spring Boot
-- [ ] Link database:
-  - [ ] Go to backend service "Variables" tab
-  - [ ] Click "Reference Variable"
-  - [ ] Select PostgreSQL service
+- [ ] Create new Web Service on Render
+- [ ] Connect GitHub repository
+- [ ] Configure:
+  - [ ] Root Directory: `backend`
+  - [ ] Environment: Java
+  - [ ] Build Command: `./mvnw clean package -DskipTests`
+  - [ ] Start Command: `java -jar target/univoyage-0.0.1-SNAPSHOT.jar`
 - [ ] Set environment variables:
   - [ ] `SPRING_PROFILES_ACTIVE=production`
-  - [ ] `DB_HOST=${{Postgres.PGHOST}}` (or direct value)
-  - [ ] `DB_PORT=${{Postgres.PGPORT}}` (or direct value)
-  - [ ] `DB_NAME=${{Postgres.PGDATABASE}}` (or direct value)
-  - [ ] `DB_USERNAME=${{Postgres.PGUSER}}` (or direct value)
-  - [ ] `DB_PASSWORD=${{Postgres.PGPASSWORD}}` (or direct value)
+  - [ ] `DB_HOST=<from-database>`
+  - [ ] `DB_PORT=5432`
+  - [ ] `DB_NAME=univoyage_db`
+  - [ ] `DB_USERNAME=<from-database>`
+  - [ ] `DB_PASSWORD=<from-database>`
   - [ ] `JWT_SECRET=<your-generated-secret>`
   - [ ] `OPENWEATHER_API_KEY=<your-key>`
   - [ ] `GEOAPIFY_API_KEY=<your-key>`
@@ -53,13 +45,10 @@ Use this checklist to track your deployment progress.
   - [ ] `AMADEUS_API_SECRET=<your-secret>` (if using)
   - [ ] `GOOGLE_CLIENT_ID=<your-id>` (if using)
   - [ ] `GOOGLE_CLIENT_SECRET=<your-secret>` (if using)
-  - [ ] `GOOGLE_REDIRECT_URI=https://your-backend-url.railway.app/api/auth/google/callback` (if using)
-- [ ] Generate public domain:
-  - [ ] Go to "Settings" → "Networking"
-  - [ ] Click "Generate Domain"
-  - [ ] **Save backend URL**: `https://________________.railway.app`
+  - [ ] `GOOGLE_REDIRECT_URI=https://your-backend-url.onrender.com/api/auth/google/callback` (if using)
+- [ ] Link PostgreSQL database to web service
 - [ ] Deploy and wait for completion
-- [ ] Check deployment logs for any errors
+- [ ] **Save backend URL**: `https://________________.onrender.com`
 
 ## Step 3: Vercel Frontend Deployment
 
@@ -71,16 +60,15 @@ Use this checklist to track your deployment progress.
   - [ ] Build Command: `npm run build`
   - [ ] Output Directory: `dist`
 - [ ] Set environment variable:
-  - [ ] `VITE_API_URL=https://your-backend-url.railway.app/api` (use your actual Railway backend URL)
+  - [ ] `VITE_API_URL=https://your-backend-url.onrender.com/api` (use your actual backend URL)
 - [ ] Deploy
 - [ ] **Save frontend URL**: `https://________________.vercel.app`
 
 ## Step 4: Final Configuration
 
-- [ ] Update Railway backend environment variable:
-  - [ ] Go to backend service "Variables" tab
-  - [ ] Add/Update: `CORS_ALLOWED_ORIGINS=https://your-frontend-url.vercel.app` (use your actual frontend URL)
-- [ ] Railway will auto-redeploy with new CORS settings
+- [ ] Update Render backend environment variable:
+  - [ ] `CORS_ALLOWED_ORIGINS=https://your-frontend-url.vercel.app` (use your actual frontend URL)
+- [ ] Backend will auto-redeploy with new CORS settings
 
 ## Step 5: Testing
 
@@ -88,13 +76,13 @@ Use this checklist to track your deployment progress.
 - [ ] Test user registration
 - [ ] Test user login
 - [ ] Test API connectivity (check browser console for errors)
-- [ ] Verify database connection works
 
-## Optional: Monitor Usage
+## Optional: Keep Backend Active
 
-- [ ] Check Railway dashboard for credit usage
-- [ ] Set up usage alerts if needed
-- [ ] Monitor deployment logs for any issues
+- [ ] Set up UptimeRobot (free) to ping backend every 5 minutes
+  - [ ] Sign up: [uptimerobot.com](https://uptimerobot.com)
+  - [ ] Add monitor for: `https://your-backend-url.onrender.com/api/health` (or any endpoint)
+  - [ ] Set interval: 5 minutes
 
 ## 🎉 Done!
 
@@ -103,3 +91,4 @@ Your app should now be live and accessible!
 ---
 
 **Need help?** Check `DEPLOYMENT_GUIDE.md` for detailed instructions.
+
