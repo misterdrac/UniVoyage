@@ -4,15 +4,18 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Button } from '@/components/ui/button';
 import { Users, MapPin, LogOut, Sun, Moon, Shield, Settings, ExternalLink } from 'lucide-react';
+import { ROUTE_PATHS } from '@/config/routes';
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 const AdminDashboardPage: React.FC = () => {
+  useDocumentTitle('Admin Dashboard');
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
 
   const handleLogout = async () => {
     await logout();
-    navigate('/admin');
+    navigate(ROUTE_PATHS.ADMIN);
   };
 
   return (
@@ -67,7 +70,7 @@ const AdminDashboardPage: React.FC = () => {
         <div className="flex flex-col sm:flex-row gap-6 w-full max-w-xl">
           {/* Users Button */}
           <button
-            onClick={() => navigate('/admin/users')}
+            onClick={() => navigate(ROUTE_PATHS.ADMIN_USERS)}
             className="group flex-1 bg-card hover:bg-card/80 rounded-2xl p-8 border shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 text-left"
           >
             <div className="w-16 h-16 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform" style={{ background: 'linear-gradient(to bottom right, var(--admin-users-gradient-start), var(--admin-users-gradient-end))', boxShadow: `0 10px 15px -3px var(--admin-shadow-blue-30)` }}>
@@ -81,7 +84,7 @@ const AdminDashboardPage: React.FC = () => {
 
           {/* Destinations Button */}
           <button
-            onClick={() => navigate('/admin/destinations')}
+            onClick={() => navigate(ROUTE_PATHS.ADMIN_DESTINATIONS)}
             className="group flex-1 bg-card hover:bg-card/80 rounded-2xl p-8 border shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 text-left"
           >
             <div className="w-16 h-16 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform" style={{ background: 'linear-gradient(to bottom right, var(--admin-gradient-start), var(--admin-gradient-end))', boxShadow: `0 10px 15px -3px var(--admin-shadow-emerald-30)` }}>
@@ -99,7 +102,7 @@ const AdminDashboardPage: React.FC = () => {
       <footer className="relative z-10 p-6 flex justify-between">
         <Button
           variant="outline"
-          onClick={() => navigate('/')}
+          onClick={() => navigate(ROUTE_PATHS.HOME)}
           className="gap-2 bg-card/80 backdrop-blur-sm hover:bg-primary/10 transition-colors"
         >
           <ExternalLink className="w-4 h-4" />

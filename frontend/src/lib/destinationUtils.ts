@@ -1,8 +1,11 @@
-import type { Destination } from '@/data/destinations'
+import type { Destination } from '@/types/destination'
+import defaultDestinationImage from '@/assets/images/default_destination.jpg'
 
-export const DEFAULT_DESTINATION_IMAGE =
-  'https://images.unsplash.com/photo-1613744696511-fd64320d6c7b?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1074'
+export const DEFAULT_DESTINATION_IMAGE = defaultDestinationImage
 
+/**
+ * Gets destination image by ID, falls back to default if not found
+ */
 export const getDestinationImageById = (
   destinationId: number | null | undefined,
   destinationsList: Destination[]
@@ -15,4 +18,56 @@ export const getDestinationImageById = (
   return destination?.imageUrl || DEFAULT_DESTINATION_IMAGE
 }
 
+/**
+ * Finds destination by ID in a list
+ */
+export const getDestinationById = (destinationsList: Destination[], id: number): Destination | undefined => {
+  return destinationsList.find(destination => destination.id === id);
+};
+
+/**
+ * Filters destinations by continent
+ */
+export const getDestinationsByContinent = (destinationsList: Destination[], continent: string): Destination[] => {
+  return destinationsList.filter(destination => 
+    destination.continent?.toLowerCase() === continent.toLowerCase()
+  );
+};
+
+/**
+ * Checks if destination has all required fields for full card display
+ */
+export const hasFullDestinationDetails = (destination: Destination): boolean => {
+  return !!(
+    destination.imageUrl &&
+    destination.overview &&
+    destination.budgetPerDay !== undefined &&
+    destination.budgetPerDay !== null
+  );
+};
+
+/**
+ * Gets destinations with full details, optionally filtered by continent
+ */
+export const getPopularDestinations = (destinationsList: Destination[], continent?: string): Destination[] => {
+  const filtered = continent 
+    ? destinationsList.filter(dest => dest.continent === continent)
+    : destinationsList;
+  
+  // Return only destinations with full details (required for displaying cards)
+  return filtered.filter(hasFullDestinationDetails);
+};
+
+/**
+ * Gets unique country names from destinations, optionally filtered by continent
+ */
+export const getPopularCountries = (destinationsList: Destination[], continent?: string): string[] => {
+  const filtered = continent 
+    ? destinationsList.filter(dest => dest.continent === continent)
+    : destinationsList;
+  
+  const uniqueCountries = Array.from(new Set(filtered.map(dest => dest.location)));
+  
+  return uniqueCountries.sort();
+};
 

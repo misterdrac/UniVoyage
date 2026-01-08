@@ -11,6 +11,11 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+/**
+ * Custom AuthenticationEntryPoint that returns a JSON response
+ * with a 401 Unauthorized status when authentication fails.
+ * This is used in REST APIs to provide a consistent error response format.
+ */
 @Component
 public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
 

@@ -5,11 +5,12 @@ import { type Option } from '@/components/ui/autocomplete';
 import { DestinationAutoComplete } from '@/components/ui/destination-autocomplete';
 import { Button } from '@/components/ui/button';
 import { DateRangePicker } from './DateRangePicker';
-import { getPopularDestinations } from '@/data/destinations';
+import { getPopularDestinations } from '@/lib/destinationUtils';
 import { useDestinations } from '@/hooks/useDestinations';
 import type { DateRange } from 'react-day-picker';
 import { useDestination } from '@/contexts/DestinationContext';
 import { cn } from '@/lib/utils';
+import { ROUTE_PATHS } from '@/config/routes';
 
 interface DestinationPickerProps {
   continent?: string;
@@ -105,7 +106,7 @@ export const DestinationPicker = ({ continent }: DestinationPickerProps) => {
 
       if (result.success) {
         // Navigate to My Trips page using client-side navigation
-        navigate('/my-trips', { replace: false });
+        navigate(ROUTE_PATHS.MY_TRIPS, { replace: false });
       }
     } catch (error) {
       console.error('Error creating trip:', error);

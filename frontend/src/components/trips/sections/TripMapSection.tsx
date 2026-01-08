@@ -306,13 +306,13 @@ export function TripMapSection({ trip }: TripMapSectionProps) {
 
       <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-4 bg-blue-500 rounded-sm" style={{ clipPath: 'polygon(50% 0%, 100% 100%, 0% 100%)' }} />
+          <div className="w-3 h-4 var(--profile-stat-blue) rounded-sm" style={{ clipPath: 'polygon(50% 0%, 100% 100%, 0% 100%)' }} />
           <span>Destination</span>
         </div>
         {poisWithCoords.length > 0 && (
           <div className="flex items-center gap-1.5">
             <div 
-              className="w-3 h-3 rounded-full border border-white" 
+              className="w-3 h-3 rounded-full border border-hero-text" 
               style={{ background: 'linear-gradient(135deg, hsl(271, 91%, 65%) 0%, hsl(271, 81%, 55%) 100%)' }}
             />
             <span>Places to visit</span>

@@ -6,6 +6,10 @@ import com.univoyage.reference.hobby.model.Hobby;
 import jakarta.persistence.*;
 import lombok.*;
 
+/**
+ * Entity representing the association between User and Hobby.
+ * This is a join table for the many-to-many relationship.
+ */
 @Entity
 @Table(name = "user_hobbies")
 @Getter

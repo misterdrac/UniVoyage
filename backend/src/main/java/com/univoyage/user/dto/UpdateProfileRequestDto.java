@@ -4,6 +4,9 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 import java.util.Set;
 
+/**
+ * Request DTO for updating user profile information.
+ */
 @Data
 public class UpdateProfileRequestDto {
 
@@ -22,10 +25,12 @@ public class UpdateProfileRequestDto {
     // visited countries as ISO codes
     private Set<String> visitedCountryCodes;
 
-    // profile image path (avatar URL) - must be from allowed CDN with avatar number 1-20
+    // profile image path (avatar URL) - must be from allowed CDN with avatar number 1-20, or empty string to remove
+    // Empty string is allowed to remove avatar, null means don't update
+    // Security: Regex strictly validates exact URL pattern to prevent malicious image injection
     @Pattern(
-        regexp = "^https://cdn\\.shadcnstudio\\.com/ss-assets/avatar/avatar-(1[0-9]|20|[1-9])\\.png$",
-        message = "Profile image path must be a valid avatar URL (avatar-1.png to avatar-20.png)"
+        regexp = "^$|^https://cdn\\.shadcnstudio\\.com/ss-assets/avatar/avatar-(1[0-9]|20|[1-9])\\.png$",
+        message = "Profile image path must be a valid avatar URL (avatar-1.png to avatar-20.png) or empty string to remove"
     )
     private String profileImagePath;
 }

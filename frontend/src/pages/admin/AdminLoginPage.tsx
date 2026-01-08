@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Shield, Mail, Lock, Loader2, Sun, Moon, Eye, EyeOff } from 'lucide-react';
-import heroImage from '@/assets/images/hero2.jpg';
+import heroImage from '@/assets/images/hero.jpg';
+import { ROUTE_PATHS } from '@/config/routes';
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 const AdminLoginPage: React.FC = () => {
+  useDocumentTitle('Admin Login');
   const navigate = useNavigate();
   const { user, login, isLoading: authLoading } = useAuth();
   const { theme, toggleTheme } = useTheme();
@@ -22,7 +25,7 @@ const AdminLoginPage: React.FC = () => {
   // Redirect if already logged in as admin
   useEffect(() => {
     if (user && (user.role === 'ADMIN' || user.role === 'HEAD_ADMIN')) {
-      navigate('/admin/dashboard');
+      navigate(ROUTE_PATHS.ADMIN_DASHBOARD);
     }
   }, [user, navigate]);
 
@@ -61,7 +64,7 @@ const AdminLoginPage: React.FC = () => {
           </p>
           <div className="space-y-3">
             <Button 
-              onClick={() => window.location.href = '/'} 
+              onClick={() => navigate(ROUTE_PATHS.HOME)} 
               className="w-full"
               variant="outline"
             >
@@ -229,12 +232,12 @@ const AdminLoginPage: React.FC = () => {
             </form>
 
             <div className="mt-8 text-center">
-              <a 
-                href="/" 
+              <Link 
+                to={ROUTE_PATHS.HOME}
                 className="text-sm text-muted-foreground hover:text-primary transition-colors"
               >
                 ← Back to UniVoyage
-              </a>
+              </Link>
             </div>
           </div>
         </div>

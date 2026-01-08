@@ -1,35 +1,63 @@
 import React, { createContext, useContext, useState, type ReactNode, useCallback, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import type { Option } from '@/components/ui/autocomplete';
 import type { DateRange } from 'react-day-picker';
 import { useAuth } from './AuthContext';
 import { useTrips } from './TripContext';
 
+/**
+ * Trip data structure for trip creation
+ */
 interface TripData {
   destination: Option | undefined;
   departDate: string;
   returnDate: string;
 }
 
+/**
+ * Destination context type
+ * Manages destination picker state and trip planning flow
+ */
 interface DestinationContextType {
+  /** Currently selected country option */
   selectedCountry: Option | undefined;
+  /** Currently selected destination option */
   selectedDestination: Option | undefined;
+  /** Selected date range for the trip */
   dateRange: DateRange | undefined;
+  /** Loading state when country changes (animation) */
   isLoading: boolean;
+  /** Name of the country currently loading */
   loadingCountry: string;
+  /** Animation state for destination selection */
   isAnimating: boolean;
+  /** Whether to show authentication dialog */
   showAuthDialog: boolean;
+  /** Set the selected country */
   setCountry: (country: Option | undefined) => void;
+  /** Set the selected destination */
   setDestination: (destination: Option | undefined) => void;
+  /** Set the date range */
   setDateRange: (range: DateRange | undefined) => void;
+  /** Reset all destination picker state */
   resetAll: () => void;
+  /** Handle planning a trip from a destination card click */
   handlePlanTrip: (destination: { id: number; title: string; location: string }) => void;
+  /** Create a trip with selected destination and dates */
   planTrip: (data: TripData) => Promise<{ success: boolean; error?: string }>;
+  /** Scroll to top of page */
   scrollToTop: () => void;
+  /** Set authentication dialog visibility */
   setShowAuthDialog: (show: boolean) => void;
 }
 
 const DestinationContext = createContext<DestinationContextType | undefined>(undefined);
 
+/**
+ * Hook to access destination context
+ * @returns DestinationContextType with destination picker state and operations
+ * @throws Error if used outside of DestinationProvider
+ */
 export const useDestination = () => {
   const context = useContext(DestinationContext);
   if (context === undefined) {
@@ -40,9 +68,23 @@ export const useDestination = () => {
 
 interface DestinationProviderProps {
   children: ReactNode;
+  /** Optional callback when a trip is successfully created */
   onPlanTrip?: (data: TripData) => void;
 }
 
+/**
+ * Context provider for destination picker state management
+ * Manages country/destination selection, date range, and trip creation flow
+ * Automatically resets state on route changes via RouteChangeHandler
+ * Provides loading animations and authentication dialog triggers
+ * 
+ * @example
+ * ```tsx
+ * <DestinationProvider>
+ *   <App />
+ * </DestinationProvider>
+ * ```
+ */
 export const DestinationProvider: React.FC<DestinationProviderProps> = ({ children, onPlanTrip }) => {
   const [selectedCountry, setSelectedCountry] = useState<Option | undefined>();
   const [selectedDestination, setSelectedDestination] = useState<Option | undefined>();
@@ -99,6 +141,10 @@ export const DestinationProvider: React.FC<DestinationProviderProps> = ({ childr
     setDateRange(range);
   }, []);
 
+  /**
+   * Resets all destination picker state
+   * Clears selected country, destination, date range, and loading states
+   */
   const resetAll = useCallback(() => {
     // Clear animation timeout if it exists
     if (animationTimeoutRef.current) {
@@ -114,10 +160,18 @@ export const DestinationProvider: React.FC<DestinationProviderProps> = ({ childr
     previousCountryRef.current = '';
   }, []);
 
+  /**
+   * Scrolls to the top of the page
+   */
   const scrollToTop = useCallback(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
+  /**
+   * Handles planning a trip from a destination card click
+   * Sets the destination and country, triggers animation, and scrolls to top
+   * @param destination - Destination data from card click
+   */
   const handlePlanTrip = useCallback((destination: { id: number; title: string; location: string }) => {
     // Clear any existing animation timeout
     if (animationTimeoutRef.current) {
@@ -151,6 +205,13 @@ export const DestinationProvider: React.FC<DestinationProviderProps> = ({ childr
     }, 300);
   }, [selectedCountry, scrollToTop]);
 
+  /**
+   * Creates a trip with selected destination and dates
+   * Shows authentication dialog if user is not logged in
+   * Resets picker state on successful trip creation
+   * @param data - Trip data including destination and dates
+   * @returns Promise resolving to success status and optional error message
+   */
   const planTripHandler = useCallback(async (data: TripData): Promise<{ success: boolean; error?: string }> => {
     // Check if user is logged in
     if (!user) {
@@ -205,5 +266,34 @@ export const DestinationProvider: React.FC<DestinationProviderProps> = ({ childr
       {children}
     </DestinationContext.Provider>
   );
+};
+
+/**
+ * Component to handle route changes and reset destination picker state
+ * Automatically resets destination fields when navigating between pages
+ * Must be used inside a Router component (typically in App.tsx)
+ * 
+ * @example
+ * ```tsx
+ * <Router>
+ *   <RouteChangeHandler />
+ *   <Routes>...</Routes>
+ * </Router>
+ * ```
+ */
+export const RouteChangeHandler: React.FC = () => {
+  const { resetAll } = useDestination();
+  const location = useLocation();
+  const previousPathnameRef = useRef<string>(location.pathname);
+
+  useEffect(() => {
+    const currentPathname = location.pathname;
+    if (previousPathnameRef.current && previousPathnameRef.current !== currentPathname) {
+      resetAll();
+    }
+    previousPathnameRef.current = currentPathname;
+  }, [location.pathname, resetAll]);
+
+  return null;
 };
 

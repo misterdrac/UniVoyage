@@ -188,7 +188,7 @@ export function TripOverviewSection({
                       remainingBudget < 0 
                         ? 'bg-destructive' 
                         : budgetPercentage > 80
-                        ? 'bg-orange-500'
+                        ? 'bg-(--profile-stat-amber)'
                         : 'bg-primary'
                     )}
                     style={{
@@ -205,8 +205,8 @@ export function TripOverviewSection({
                   </>
                 ) : budgetPercentage > 80 ? (
                   <>
-                    <TrendingUp className="size-4 text-orange-500" />
-                    <span className="text-xs text-orange-500 font-medium">Almost spent</span>
+                    <TrendingUp className="size-4 var(--profile-stat-amber)" />
+                    <span className="text-xs var(--profile-stat-amber) font-medium">Almost spent</span>
                   </>
                 ) : (
                   <>

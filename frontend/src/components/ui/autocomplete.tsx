@@ -12,7 +12,6 @@
  * Optional Future Optimizations (see inline comments):
  * - Consider useMemo for filtering if performance issues arise with large datasets (1000+ items)
  * - Consider useMemo for dynamic height calculation if virtual scrolling is added
- * Note: Current implementation is performant and optimizations are not urgent
  */
 
 import {
@@ -35,6 +34,7 @@ type AutoCompleteProps = {
   emptyMessage: string
   value?: Option
   onValueChange?: (value: Option) => void
+  onBlur?: () => void
   isLoading?: boolean
   disabled?: boolean
   placeholder?: string
@@ -50,6 +50,7 @@ export const AutoComplete = ({
   emptyMessage,
   value,
   onValueChange,
+  onBlur,
   disabled,
   isLoading = false,
   popularOptions,
@@ -99,11 +100,16 @@ export const AutoComplete = ({
 
   const handleBlur = useCallback(() => {
     setOpen(false)
-    // Only reset to selected label if there's a selection, otherwise keep what user typed
+    // Only reset to selected label if there's a selection, otherwise clear invalid input
     if (selected && selected.label) {
       setInputValue(selected.label)
+    } else {
+      // Clear invalid input if no valid selection
+      setInputValue('')
+      setSelected(undefined)
     }
-  }, [selected])
+    onBlur?.()
+  }, [selected, onBlur])
 
   const handleSelectOption = useCallback(
     (selectedOption: Option) => {
@@ -120,9 +126,7 @@ export const AutoComplete = ({
     [onValueChange],
   )
 
-  // TODO: [Performance - Optional] Consider using useMemo for filtering if logic becomes more complex or options list grows very large (1000+ items)
-  // When to apply: If you notice slow filtering behavior with large datasets or during profiling
-  // Note: Current implementation is performant and not urgent
+
   const isEmpty = !inputValue || inputValue.trim() === ''
   
   // Filter options based on input value
@@ -157,10 +161,7 @@ export const AutoComplete = ({
   // Check if we're showing popular options
   const isShowingPopular = isEmpty && popularOptions && popularOptions.length > 0
   
-  // TODO: [Performance - Optional] Consider extracting height calculation to useMemo if this becomes a bottleneck
-  // When to apply: If dynamicHeight calculations cause re-render issues or if you add virtual scrolling
-  // Note: Current implementation is performant and not urgent
-  // Calculate dynamic height if enabled
+
   let listClassName = "rounded-lg max-h-[300px] overflow-y-auto overflow-x-hidden"
   let calculatedHeight = 300
   if (dynamicHeight) {
@@ -195,7 +196,7 @@ export const AutoComplete = ({
       <div className="relative mt-1">
         <div
           className={cn(
-            "animate-in fade-in-0 zoom-in-95 absolute top-0 z-[9999] w-full rounded-md border bg-popover shadow-md",
+            "animate-in fade-in-0 zoom-in-95 absolute top-0 z-9999 w-full rounded-md border bg-popover shadow-md",
             isOpen && filteredOptions.length > 0 ? "block" : "hidden",
           )}
         >

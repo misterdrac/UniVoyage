@@ -4,6 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Response DTO for Gemini AI responses.
+ * Contains fields for success status, content, and error message.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

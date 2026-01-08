@@ -14,8 +14,10 @@ import {
 } from '@/lib/tripFilters';
 import { sortTrips, type TripSortOption } from '@/lib/tripSorting';
 import { useDeleteTrip } from '@/hooks/useDeleteTrip';
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 const MyTripsPage = () => {
+  useDocumentTitle('My Trips');
   const { trips, isLoading, deleteTrip } = useTrips();
   const navigate = useNavigate();
   const [filters, setFilters] = useState<TripFilters>({ ...DEFAULT_TRIP_FILTERS });

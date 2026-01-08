@@ -5,13 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { AutoComplete, type Option } from '@/components/ui/autocomplete';
+import { COUNTRIES } from '@/lib/constants';
 import {
   AdminHeader,
   AdminSearchBar,
@@ -37,12 +32,13 @@ import {
   Info,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 type DestinationSortField = 'name' | 'location' | 'continent' | 'budgetPerDay' | 'createdAt' | 'updatedAt';
 
 const DESTINATION_TABLE_COLUMNS: { field: DestinationSortField; label: string }[] = [
   { field: 'name', label: 'Name' },
-  { field: 'location', label: 'Location' },
+  { field: 'location', label: 'Country' },
   { field: 'continent', label: 'Continent' },
   { field: 'budgetPerDay', label: 'Budget/Day' },
   { field: 'createdAt', label: 'Created' },
@@ -65,6 +61,7 @@ const EMPTY_FORM: CreateDestinationRequest = {
 };
 
 const AdminDestinationsPage: React.FC = () => {
+  useDocumentTitle('Admin - Destinations');
   // Data state
   const [destinations, setDestinations] = useState<AdminDestination[]>([]);
   const [totalPages, setTotalPages] = useState(0);
@@ -189,7 +186,7 @@ const AdminDestinationsPage: React.FC = () => {
 
   const handleSaveChanges = async () => {
     if (!formData.name || !formData.location || !formData.continent) {
-      toast.error('Name, Location, and Continent are required');
+      toast.error('Name, Country, and Continent are required');
       return;
     }
 
@@ -267,7 +264,7 @@ const AdminDestinationsPage: React.FC = () => {
             <AdminSearchBar
               value={table.searchQuery}
               onChange={table.handleSearchChange}
-              placeholder="Search destinations by name, location..."
+              placeholder="Search destinations by name, country..."
             />
 
             <div className="overflow-x-auto max-h-[calc(100vh-260px)] overflow-y-auto dropdown-scrollbar -mx-4 sm:mx-0">
@@ -374,24 +371,63 @@ const AdminDestinationsPage: React.FC = () => {
 
                 {/* Basic Fields */}
                 <FormField icon={<MapPin />} label="Name *" value={formData.name} onChange={(v) => updateField('name', v)} placeholder="e.g., Paris" />
-                <FormField icon={<Globe />} label="Location *" value={formData.location} onChange={(v) => updateField('location', v)} placeholder="e.g., France" />
                 
-                {/* Continent Select */}
+                {/* Country Autocomplete */}
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2">
+                    <Globe className="w-4 h-4" />
+                    Country *
+                  </Label>
+                  <AutoComplete
+                    options={COUNTRIES.map(country => ({ value: country.value, label: country.label }))}
+                    value={formData.location ? (() => {
+                      const country = COUNTRIES.find(c => c.label === formData.location);
+                      return country ? { value: country.value, label: country.label } : undefined;
+                    })() : undefined}
+                    onValueChange={(option: Option) => {
+                      // Only update if a valid option is selected
+                      if (option && COUNTRIES.some(c => c.label === option.label)) {
+                        updateField('location', option.label);
+                      }
+                    }}
+                    onBlur={() => {
+                      // Clear form field if current value doesn't match any valid country
+                      if (formData.location && !COUNTRIES.some(c => c.label === formData.location)) {
+                        updateField('location', '');
+                      }
+                    }}
+                    placeholder="Search for a country..."
+                    emptyMessage="No countries found"
+                  />
+                </div>
+                
+                {/* Continent Autocomplete */}
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
                     <Globe className="w-4 h-4" />
                     Continent *
                   </Label>
-                  <Select value={formData.continent} onValueChange={(v) => updateField('continent', v)}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select continent" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {CONTINENTS.map((c) => (
-                        <SelectItem key={c} value={c}>{c}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <AutoComplete
+                    options={CONTINENTS.map(continent => ({ value: continent, label: continent }))}
+                    value={formData.continent ? (() => {
+                      const continent = CONTINENTS.find(c => c === formData.continent);
+                      return continent ? { value: continent, label: continent } : undefined;
+                    })() : undefined}
+                    onValueChange={(option: Option) => {
+                      // Only update if a valid continent is selected
+                      if (option && CONTINENTS.includes(option.label)) {
+                        updateField('continent', option.label);
+                      }
+                    }}
+                    onBlur={() => {
+                      // Clear form field if current value doesn't match any valid continent
+                      if (formData.continent && !CONTINENTS.includes(formData.continent)) {
+                        updateField('continent', '');
+                      }
+                    }}
+                    placeholder="Select a continent..."
+                    emptyMessage="No continents found"
+                  />
                 </div>
 
                 {/* Budget */}

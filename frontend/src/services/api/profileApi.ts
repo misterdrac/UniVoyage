@@ -1,10 +1,18 @@
 import type { User } from '@/types/user'
 import { API_CONSTANTS } from '@/lib/constants'
-import { API_CONFIG } from '@/config/api'
-import type { BackendUserDto } from './types'
+import { API_CONFIG } from '@/config/apiConfig'
 import type { ApiClient } from './baseClient'
 
+/**
+ * Profile API interface
+ * Handles user profile updates
+ */
 export interface ProfileApi {
+  /**
+   * Updates user profile information
+   * @param data - Profile update data (all fields optional)
+   * @returns Promise resolving to success status and updated user data
+   */
   updateProfile(data: {
     name?: string
     surname?: string
@@ -29,38 +37,6 @@ export const profileApi: { [K in keyof ProfileApi]: (this: ApiClient, ...args: P
         profileImagePath: data.profileImagePath,
       }
 
-      if (this.useMock) {
-        try {
-          const savedUser = localStorage.getItem(API_CONSTANTS.USER_KEY)
-          if (!savedUser) {
-            return { success: false, error: 'User not found' }
-          }
-
-          const user = JSON.parse(savedUser) as User
-
-          const updatedUser: User = {
-            ...user,
-            name: normalized.name ?? user.name,
-            surname: normalized.surname ?? user.surname,
-            countryOfOrigin: normalized.countryCode
-            ? this.resolveCountry(normalized.countryCode)
-              : user.countryOfOrigin,
-          hobbies: normalized.hobbyIds ? this.mapHobbyIds(normalized.hobbyIds) : user.hobbies,
-          languages: normalized.languageCodes ? this.mapLanguageCodes(normalized.languageCodes) : user.languages,
-            visitedCountries: normalized.visitedCountryCodes
-            ? this.mapVisitedCountryCodes(normalized.visitedCountryCodes)
-              : user.visitedCountries,
-            profileImagePath: normalized.profileImagePath ?? user.profileImagePath,
-          }
-
-          localStorage.setItem(API_CONSTANTS.USER_KEY, JSON.stringify(updatedUser))
-
-          return { success: true, user: updatedUser }
-        } catch (err: any) {
-          return { success: false, error: err?.message ?? 'Update failed' }
-        }
-      }
-
       try {
         const res = await this.request<{ success: boolean; user: User }>(API_CONFIG.ENDPOINTS.USER.UPDATE_PROFILE, {
           method: 'PATCH',
@@ -72,7 +48,8 @@ export const profileApi: { [K in keyof ProfileApi]: (this: ApiClient, ...args: P
             hobbyIds: normalized.hobbyIds ?? null, // -> ?? [] changed to ?? null, same for languageCodes and visitedCountryCodes
             languageCodes: normalized.languageCodes ?? null,
             visitedCountryCodes: normalized.visitedCountryCodes ?? null,
-            profileImagePath: normalized.profileImagePath ?? null,
+            // Send empty string to remove avatar, null to not update, or the URL to set it
+            profileImagePath: normalized.profileImagePath === undefined ? null : (normalized.profileImagePath || ""),
           }),
         })
 

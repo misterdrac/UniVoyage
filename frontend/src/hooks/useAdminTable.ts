@@ -24,7 +24,7 @@ interface UseAdminTableReturn<T extends string> {
 }
 
 /**
- * Custom hook for managing admin table state (pagination, sorting, search)
+ * Manages admin table state (pagination, sorting, search)
  */
 export function useAdminTable<T extends string>(
   options: UseAdminTableOptions<T>

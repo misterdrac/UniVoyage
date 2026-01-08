@@ -113,7 +113,7 @@ export const TravelSection = ({
               }}
               disabled={isSaving}
             >
-              <Check className="w-4 h-4 text-white" />
+              <Check className="w-4 h-4 text-hero-text)" />
             </Button>
           </div>
         ) : (

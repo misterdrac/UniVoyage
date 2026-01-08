@@ -17,6 +17,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * Security configuration class for setting up HTTP security,
+ * including JWT authentication, CORS, CSRF protection, and endpoint authorization.
+ */
 @Configuration
 @EnableMethodSecurity
 @RequiredArgsConstructor
@@ -26,11 +30,23 @@ public class SecurityConfiguration {
     private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
     private final RestAccessDeniedHandler restAccessDeniedHandler;
 
+    /**
+     * Bean for password encoding using BCrypt.
+     *
+     * @return PasswordEncoder instance
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Configures the security filter chain.
+     *
+     * @param http HttpSecurity instance
+     * @return Configured SecurityFilterChain
+     * @throws Exception if an error occurs during configuration
+     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 

@@ -11,6 +11,7 @@ import {
 import { NavigationListItem } from "./NavigationListItem";
 import { DESTINATION_NAV_ITEMS } from "./constants";
 import type { User } from "@/types/user";
+import { ROUTE_PATHS } from "@/config/routes";
 
 interface DesktopNavigationProps {
   user: User | null;
@@ -23,14 +24,14 @@ export const DesktopNavigation = ({ user }: DesktopNavigationProps) => {
         <NavigationMenuList>
           <NavigationMenuItem>
             <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-              <Link to="/">Home</Link>
+              <Link to={ROUTE_PATHS.HOME}>Home</Link>
             </NavigationMenuLink>
           </NavigationMenuItem>
           
           {user && (
             <NavigationMenuItem>
               <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-                <Link to="/my-trips">My Trips</Link>
+                <Link to={ROUTE_PATHS.MY_TRIPS}>My Trips</Link>
               </NavigationMenuLink>
             </NavigationMenuItem>
           )}
@@ -54,20 +55,20 @@ export const DesktopNavigation = ({ user }: DesktopNavigationProps) => {
 
           <NavigationMenuItem>
             <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-              <Link to="/about">About</Link>
+              <Link to={ROUTE_PATHS.ABOUT}>About</Link>
             </NavigationMenuLink>
           </NavigationMenuItem>
 
           <NavigationMenuItem>
             <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-              <Link to="/contact">Contact</Link>
+              <Link to={ROUTE_PATHS.CONTACT}>Contact</Link>
             </NavigationMenuLink>
           </NavigationMenuItem>
 
           {user && (user.role === 'ADMIN' || user.role === 'HEAD_ADMIN') && (
             <NavigationMenuItem>
               <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-                <Link to="/admin/dashboard">Admin</Link>
+                <Link to={ROUTE_PATHS.ADMIN_DASHBOARD}>Admin</Link>
               </NavigationMenuLink>
             </NavigationMenuItem>
           )}

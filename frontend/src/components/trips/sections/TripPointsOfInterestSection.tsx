@@ -1,5 +1,5 @@
 import { Card, CardContent } from '@/components/ui/card'
-import { MapPin, ExternalLink, AlertCircle, RefreshCw, ChevronDown, Church, TreePine, TowerControl, Square, Flower2, Star, Palette, Shield, Castle, Amphora, BrickWall, University, Landmark, Camera, Globe, BookOpen } from 'lucide-react'
+import { MapPin, ExternalLink, AlertCircle, RefreshCw, ChevronDown, Church, TreePine, TowerControl, Square, Flower2, Star, Palette, Shield, Castle, Amphora, BrickWall, University, Landmark, Globe, BookOpen } from 'lucide-react'
 import type { Trip } from '@/types/trip'
 import { usePointsOfInterest } from '@/hooks/usePointsOfInterest'
 import { usePaginatedItems } from '@/hooks/usePaginatedItems'
@@ -129,12 +129,15 @@ export function TripPointsOfInterestSection({ trip }: TripPointsOfInterestSectio
         </div>
         <Card>
           <CardContent className="py-12 text-center">
-            <MapPin className="h-10 w-10 text-muted-foreground/50 mx-auto mb-3" />
-            <p className="text-muted-foreground">
-              No points of interest found for {cityName}
+            <MapPin className="h-12 w-12 text-muted-foreground/40 mx-auto mb-4" />
+            <h4 className="text-lg font-semibold text-foreground mb-2">
+              No points of interest found
+            </h4>
+            <p className="text-muted-foreground mb-1">
+              We couldn't find any points of interest for {cityName} at the moment.
             </p>
-            <p className="text-sm text-muted-foreground mt-1">
-              Try searching for a different destination
+            <p className="text-sm text-muted-foreground">
+              Don't worry! You can still explore the destination and discover hidden gems on your own adventure.
             </p>
           </CardContent>
         </Card>

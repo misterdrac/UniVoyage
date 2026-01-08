@@ -11,6 +11,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Pageable;
 
+
+/**
+ * Service for managing users in the admin panel.
+ * Provides methods for listing users, retrieving user details, and updating user roles.
+ * Interacts with UserRepository for data access.
+ * Handles business logic and data transformation.
+ * Throws ResourceNotFoundException for non-existent resources.
+ * Uses DTOs for response payloads.
+ * Supports pagination and searching for listing users.
+ * All methods that modify data are transactional.
+ * Maps UserEntity to AdminUserResponse DTO.
+ * Validates input data before processing.
+ */
 @Service
 @RequiredArgsConstructor
 public class AdminUserService {

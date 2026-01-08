@@ -3,6 +3,9 @@ package com.univoyage.reference.country.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+/**
+ * Entity representing a country with its ISO code and name.
+ */
 @Entity
 @Table(name = "countries")
 @Getter @Setter

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import type { User as UserType } from "@/types/user";
 import { Avatar } from "@/components/profile/Avatar";
+import { ROUTE_PATHS } from "@/config/routes";
 
 interface UserMenuButtonProps {
   user: UserType;
@@ -13,7 +14,7 @@ export const UserMenuButton = ({ user, variant = "desktop" }: UserMenuButtonProp
   const navigate = useNavigate();
 
   const handleProfileClick = useCallback(() => {
-    navigate('/profile');
+    navigate(ROUTE_PATHS.PROFILE);
   }, [navigate]);
 
   const userDisplayName = useMemo(

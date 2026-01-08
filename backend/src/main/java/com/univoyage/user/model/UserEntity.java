@@ -15,6 +15,9 @@ import lombok.*;
 import java.time.Instant;
 import java.util.*;
 
+/**
+ * Entity representing a user in the system.
+ */
 @Entity
 @Table(name = "users")
 @Getter @Setter

@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
-import { API_CONFIG } from '@/config/api'
 import { useAuth } from '@/contexts/AuthContext'
 import { calculateDurationInDays, formatDateLong } from '@/lib/dateUtils'
 import type { TripStatus } from '@/lib/tripStatusUtils'
@@ -50,7 +49,7 @@ export function useTripItinerary({ trip, currentStatus }: UseTripItineraryArgs):
     }
 
     return user.hobbies
-      .map((hobby) => hobby?.name?.trim())
+      .map((hobby) => hobby?.hobbyName?.trim())
       .filter((name): name is string => Boolean(name && name.length > 0))
   }, [user?.hobbies])
 
@@ -131,7 +130,7 @@ export function useTripItinerary({ trip, currentStatus }: UseTripItineraryArgs):
 
       setCachedSignature(snapshot.signature ?? null)
 
-      if (options?.skipRemote || API_CONFIG.USE_MOCK) return
+      if (options?.skipRemote) return
 
       try {
         await apiService.saveTripItinerary(trip.id, snapshot)
@@ -190,8 +189,6 @@ export function useTripItinerary({ trip, currentStatus }: UseTripItineraryArgs):
   }, [hydrateFromSnapshot, storageKey])
 
   useEffect(() => {
-    if (API_CONFIG.USE_MOCK) return
-
     let isCancelled = false
 
     const fetchRemoteItinerary = async () => {

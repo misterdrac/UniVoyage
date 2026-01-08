@@ -1,7 +1,6 @@
 import { Label } from '@/components/ui/label'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Wallet, TrendingUp, TrendingDown, ChevronUp, ChevronDown } from 'lucide-react'
+import { Wallet, TrendingUp, TrendingDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useState, useEffect } from 'react'
 

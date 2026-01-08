@@ -1,12 +1,12 @@
-// API Configuration
+/**
+ * API Configuration
+ * Centralized configuration for API base URL, endpoints, and response types
+ */
 export const API_CONFIG = {
   // Base URL for API calls
   // In development, use relative path so Vite proxy handles it
   // In production, use full URL or environment variable
   BASE_URL: import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '/api' : 'http://localhost:8080/api'),
-  
-  // Use mock data or real API
-  USE_MOCK: import.meta.env.VITE_USE_MOCK === 'true' || !import.meta.env.VITE_API_URL,
   
   // API endpoints
   ENDPOINTS: {
@@ -88,3 +88,4 @@ export class ApiError extends Error {
     this.code = code;
   }
 }
+

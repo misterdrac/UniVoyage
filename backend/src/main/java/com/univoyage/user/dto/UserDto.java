@@ -11,6 +11,9 @@ import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Data Transfer Object for User information.
+ */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -22,7 +25,7 @@ public class UserDto {
     private String name;
     private String surname;
     private String email;
-    private String role;                 // role.name()
+    private String role;
     private CountryDto countryOfOrigin;
     private List<HobbyDto> hobbies;
     private List<LanguageDto> languages;
@@ -39,7 +42,7 @@ public class UserDto {
                 .name(entity.getName())
                 .surname(entity.getSurname())
                 .email(entity.getEmail())
-                .role(entity.getRole().name())            // FIXED
+                .role(entity.getRole().name())
                 .countryOfOrigin(
                         entity.getCountry() != null
                                 ? CountryDto.from(entity.getCountry())

@@ -1,9 +1,11 @@
 import { useMemo } from 'react';
 import { DestinationsPageLayout, LoadingSpinner } from '@/components/destinations';
-import { getDestinationsByContinent } from '@/data/destinations';
+import { getDestinationsByContinent } from '@/lib/destinationUtils';
 import { useDestinations } from '@/hooks/useDestinations';
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 const EuropeDestinationsPage = () => {
+  useDocumentTitle('Europe Destinations');
   const { destinations: apiDestinations, isLoading } = useDestinations();
   
   const europeDestinations = useMemo(() => 

@@ -3,6 +3,9 @@ import type { User } from '@/types/user';
 import { apiService } from '@/services/api';
 import { API_CONSTANTS } from '@/lib/constants';
 
+/**
+ * Signup data structure for user registration
+ */
 interface SignupData {
   email: string;
   password: string;
@@ -14,11 +17,20 @@ interface SignupData {
   visitedCountryCodes?: string[];
 }
 
+/**
+ * Authentication context type
+ * Provides user authentication state and operations
+ */
 interface AuthContextType {
+  /** Current authenticated user, or null if not logged in */
   user: User | null;
+  /** Login with email and password */
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  /** Register a new user account */
   signup: (data: SignupData) => Promise<{ success: boolean; error?: string }>;
+  /** Logout the current user */
   logout: () => void;
+  /** Update user profile information */
   updateProfile: (data: {
     name?: string;
     surname?: string;
@@ -26,13 +38,21 @@ interface AuthContextType {
     hobbyIds?: number[];
     languageCodes?: string[];
     visitedCountryCodes?: string[];
+    profileImagePath?: string;
   }) => Promise<{ success: boolean; error?: string }>;
+  /** Reload current user data from server */
   loadUser: () => Promise<User | null>;
+  /** Loading state for authentication operations */
   isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+/**
+ * Hook to access authentication context
+ * @returns AuthContextType with user state and authentication methods
+ * @throws Error if used outside of AuthProvider
+ */
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
@@ -45,6 +65,18 @@ interface AuthProviderProps {
   children: React.ReactNode;
 }
 
+/**
+ * Context provider for user authentication state
+ * Manages user session, login, logout, signup, and profile updates
+ * Automatically initializes user session on mount by checking for existing authentication
+ * 
+ * @example
+ * ```tsx
+ * <AuthProvider>
+ *   <App />
+ * </AuthProvider>
+ * ```
+ */
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -72,6 +104,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     initializeAuth();
   }, []);
 
+  /**
+   * Authenticates user with email and password
+   * @param email - User's email address
+   * @param password - User's password
+   * @returns Promise resolving to success status and optional error message
+   */
   const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     try {
       setIsLoading(true);
@@ -100,6 +138,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  /**
+   * Registers a new user account
+   * @param data - Signup data including email, password, and optional profile fields
+   * @returns Promise resolving to success status and optional error message
+   */
   const signup = async (data: SignupData): Promise<{ success: boolean; error?: string }> => {
     try {
       setIsLoading(true);
@@ -128,6 +171,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  /**
+   * Reloads current user data from the server
+   * Updates local user state and localStorage
+   * @returns Promise resolving to User object or null if not authenticated
+   */
   const loadUser = async (): Promise<User | null> => {
       try {
         const me = await apiService.getCurrentUser()
@@ -145,6 +193,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
   };
 
+  /**
+   * Logs out the current user
+   * Clears user state and removes authentication tokens from storage
+   */
   const logout = async () => {
     try {
       await apiService.logout();
@@ -157,6 +209,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  /**
+   * Updates user profile information
+   * @param data - Profile update data (all fields optional)
+   * @returns Promise resolving to success status and optional error message
+   */
   const updateProfile = async (data: {
     name?: string;
     surname?: string;

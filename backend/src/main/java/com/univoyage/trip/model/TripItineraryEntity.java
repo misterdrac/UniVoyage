@@ -7,6 +7,9 @@ import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
 
+/**
+ * Entity representing itinerary details for a trip.
+ */
 @Entity
 @Table(name = "trip_itineraries")
 @Getter @Setter

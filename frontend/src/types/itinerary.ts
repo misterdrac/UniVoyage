@@ -1,9 +1,15 @@
+/**
+ * Activity segment within an itinerary day
+ */
 export interface NormalizedItinerarySegment {
   time: string
   activity: string
   details?: string
 }
 
+/**
+ * Single day in a normalized itinerary
+ */
 export interface NormalizedItineraryDay {
   dayNumber: number
   dateLabel: string
@@ -15,6 +21,9 @@ export interface NormalizedItineraryDay {
   tips: string[]
 }
 
+/**
+ * Complete normalized itinerary structure with days and segments
+ */
 export interface NormalizedItinerary {
   intro?: string
   days: NormalizedItineraryDay[]
@@ -22,6 +31,9 @@ export interface NormalizedItinerary {
   closingNote?: string
 }
 
+/**
+ * Itinerary data stored in backend/localStorage (structured or raw format)
+ */
 export interface StoredItineraryPayload {
   structured: NormalizedItinerary | null
   raw: string | null

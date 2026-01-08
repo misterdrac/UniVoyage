@@ -208,6 +208,4 @@ public class GoogleOAuthService {
     private String enc(String s) {
         return URLEncoder.encode(s, StandardCharsets.UTF_8);
     }
-
-
 }

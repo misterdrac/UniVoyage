@@ -1,6 +1,9 @@
-import { API_CONFIG, type ApiResponse } from '@/config/api'
+import { API_CONFIG } from '@/config/apiConfig'
 import type { ApiClient } from './baseClient'
 
+/**
+ * Current weather data structure
+ */
 export interface WeatherData {
   city: string
   temperature: number
@@ -10,6 +13,10 @@ export interface WeatherData {
   timezoneOffsetSeconds?: number
 }
 
+/**
+ * Weather forecast API response structure
+ * Contains 5-day forecast data from OpenWeatherMap
+ */
 export interface ForecastApiResponse {
   list: Array<{
     dt: number
@@ -31,9 +38,33 @@ export interface ForecastApiResponse {
   }
 }
 
+/**
+ * Weather API interface
+ * Handles current weather and forecast data retrieval
+ */
 export interface WeatherApi {
+  /**
+   * Retrieves current weather for a city
+   * @param city - City name
+   * @param country - Optional country code for more accurate results
+   * @returns Promise resolving to success status and weather data
+   */
   getCurrentWeather(city: string, country?: string): Promise<{ success: boolean; weather?: WeatherData; error?: string }>
+  
+  /**
+   * Retrieves current weather by geographic coordinates
+   * @param lat - Latitude coordinate
+   * @param lon - Longitude coordinate
+   * @returns Promise resolving to success status and weather data
+   */
   getCurrentWeatherByCoordinates(lat: number, lon: number): Promise<{ success: boolean; weather?: WeatherData; error?: string }>
+  
+  /**
+   * Retrieves 5-day weather forecast for a city
+   * @param city - City name
+   * @param country - Optional country code for more accurate results
+   * @returns Promise resolving to success status and forecast data
+   */
   getForecast(city: string, country?: string): Promise<{ success: boolean; forecast?: ForecastApiResponse; error?: string }>
 }
 
@@ -49,7 +80,7 @@ export const weatherApi: {
       if (country) {
         params.append('country', country)
       }
-      const res = await this.request<ApiResponse<{ weather: WeatherData }>>(
+      const res = await this.request<{ weather: WeatherData }>(
         `${API_CONFIG.ENDPOINTS.WEATHER.CURRENT}?${params.toString()}`
       )
 
@@ -69,7 +100,7 @@ export const weatherApi: {
         lat: lat.toString(),
         lon: lon.toString(),
       })
-      const res = await this.request<ApiResponse<{ weather: WeatherData }>>(
+      const res = await this.request<{ weather: WeatherData }>(
         `${API_CONFIG.ENDPOINTS.WEATHER.CURRENT}?${params.toString()}`
       )
 
@@ -89,7 +120,7 @@ export const weatherApi: {
       if (country) {
         params.append('country', country)
       }
-      const res = await this.request<ApiResponse<ForecastApiResponse>>(
+      const res = await this.request<ForecastApiResponse>(
         `${API_CONFIG.ENDPOINTS.WEATHER.FORECAST}?${params.toString()}`
       )
 

@@ -1,6 +1,7 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTrips } from '@/contexts/TripContext';
+import { ROUTE_PATHS } from '@/config/routes';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -17,6 +18,7 @@ import {
 import { calculateTripStatus } from '@/lib/tripUtils';
 import { calculateDurationInDays } from '@/lib/dateUtils';
 import { getDestinationImageById } from '@/lib/destinationUtils';
+import { scrollToTop } from '@/lib/utils';
 import { useDestinations } from '@/hooks/useDestinations';
 import {
   TripHeroSection,
@@ -25,7 +27,6 @@ import {
   TripOverviewSection,
   TripWeatherSection,
   TripBudgetSection,
-  TripPlaceholderSection,
   TripItinerarySection,
   TripPointsOfInterestSection,
   TripAccommodationSection,
@@ -34,6 +35,7 @@ import {
 import type { TripSectionDefinition } from '@/components/trips';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useDeleteTrip } from '@/hooks/useDeleteTrip';
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 type Section = 'overview' | 'budget' | 'accommodation' | 'things-to-visit' | 'map' | 'weather' | 'itinerary';
 
@@ -68,7 +70,7 @@ const TripDetailPage = () => {
     cancelDelete: handleCancelDeleteTrip,
     confirmDelete: handleConfirmDeleteTrip,
   } = useDeleteTrip({
-    onSuccess: () => navigate('/my-trips'),
+    onSuccess: () => navigate(ROUTE_PATHS.MY_TRIPS),
   });
 
   // Derive active section directly from URL (single source of truth)
@@ -92,7 +94,7 @@ const TripDetailPage = () => {
   const activeSectionData = TRIP_SECTIONS.find((s) => s.id === activeSection);
 
   const handleBack = useCallback(() => {
-    navigate('/my-trips');
+    navigate(ROUTE_PATHS.MY_TRIPS);
   }, [navigate]);
 
   const handleSectionChange = useCallback((section: Section) => {
@@ -105,7 +107,14 @@ const TripDetailPage = () => {
       }
       return next;
     }, { replace: true });
+    // Scroll to top when section changes
+    scrollToTop();
   }, [setSearchParams]);
+
+  // Also scroll to top when section changes via URL (e.g., browser back/forward)
+  useEffect(() => {
+    scrollToTop();
+  }, [activeSection]);
 
   const handleConfirmDelete = useCallback(async () => {
     if (!trip) return;
@@ -139,7 +148,7 @@ const TripDetailPage = () => {
               <p className="text-muted-foreground text-center mb-4">
                 The trip you're looking for doesn't exist or has been removed.
               </p>
-              <Button onClick={() => navigate('/my-trips')} variant="outline">
+              <Button onClick={() => navigate(ROUTE_PATHS.MY_TRIPS)} variant="outline">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to My Trips
               </Button>
@@ -151,6 +160,9 @@ const TripDetailPage = () => {
   }
 
   const { currentStatus, duration, imageUrl } = tripData;
+
+  // Set dynamic title based on trip destination
+  useDocumentTitle(trip.destinationName, [trip.destinationName]);
 
   return (
     <div className="min-h-screen bg-background">

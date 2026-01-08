@@ -53,6 +53,9 @@ function setCachedHotels(city: string, hotels: Hotel[]) {
   }
 }
 
+/**
+ * Fetches hotels for a city with localStorage caching
+ */
 export function useHotels({ city, limit = 10, enabled = true }: UseHotelsProps): UseHotelsResult {
   const [hotels, setHotels] = useState<Hotel[]>([])
   const [isLoading, setIsLoading] = useState(false)

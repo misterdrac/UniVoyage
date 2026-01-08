@@ -8,8 +8,9 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { getPopularDestinations } from "@/data/destinations";
+import { getPopularDestinations } from "@/lib/destinationUtils";
 import { useDestinations } from "@/hooks/useDestinations";
+import { ROUTE_PATHS } from "@/config/routes";
 
 export function PopularDestinationsCarousel() {
   const navigate = useNavigate();
@@ -52,7 +53,7 @@ export function PopularDestinationsCarousel() {
                   location={destination.location}
                   overview={destination.overview!}
                   budgetPerDay={destination.budgetPerDay!}
-                  onPlanTrip={() => navigate('/destinations')}
+                  onPlanTrip={() => navigate(ROUTE_PATHS.DESTINATIONS)}
                   className="h-[350px] hover:-translate-y-2"
                   hideOverview={true}
                   buttonText="Explore Destinations"

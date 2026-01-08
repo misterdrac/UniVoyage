@@ -1,11 +1,13 @@
 package com.univoyage.user.model;
 
-import com.univoyage.user.model.UserEntity;
 import com.univoyage.reference.language.model.Language;
 
 import jakarta.persistence.*;
 import lombok.*;
 
+/**
+ * Entity representing the association between a user and a language they speak.
+ */
 @Entity
 @Table(name = "user_languages")
 @Getter @Setter

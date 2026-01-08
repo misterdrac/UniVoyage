@@ -10,6 +10,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * Controller for AI-related functionalities using Gemini.
+ * Provides endpoints for generating travel itineraries and packing suggestions.
+ * All endpoints are prefixed with /api/ai.
+ * Uses GeminiService for business logic.
+ * Returns responses wrapped in ApiResponse for consistent API structure.
+ */
 @RestController
 @RequestMapping("/api/ai")
 @RequiredArgsConstructor

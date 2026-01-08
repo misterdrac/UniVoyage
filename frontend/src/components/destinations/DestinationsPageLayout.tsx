@@ -4,7 +4,7 @@ import { DestinationPicker, LoadingSpinner, DestinationFooter, useFilteredDestin
 import { useDestination } from '@/contexts/DestinationContext';
 import { usePaginatedItems } from '@/hooks/usePaginatedItems';
 import { ChevronDown, ArrowDown } from 'lucide-react';
-import type { Destination } from '@/data/destinations';
+import type { Destination } from '@/types/destination';
 import { Button } from '@/components/ui/button';
 
 // Shuffle array using Fisher-Yates algorithm

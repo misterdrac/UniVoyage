@@ -20,6 +20,14 @@ import lombok.RequiredArgsConstructor;
 
 import java.io.IOException;
 
+/**
+ * Filter that authenticates requests based on JWT stored in HttpOnly cookies
+ * and performs double-submit CSRF protection.
+ * Applies to all requests except public endpoints.
+ * Extracts JWT from cookie and CSRF secret from header.
+ * Validates JWT and CSRF secret, and sets authentication in the security context.
+ * Clears authentication cookies on failure.
+ */
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -52,6 +60,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         response.addCookie(CookieUtils.createExpiredCookie(CookieUtils.CSRF_COOKIE_NAME));
     }
 
+    /**
+     * Main filter method that processes each request.
+     * Bypasses public paths, extracts and validates JWT and CSRF tokens,
+     * and sets authentication in the security context.
+     * Clears cookies and responds with 401/403 on failure.
+     */
     @Override
     protected void doFilterInternal(
             @SuppressWarnings("null") HttpServletRequest request,

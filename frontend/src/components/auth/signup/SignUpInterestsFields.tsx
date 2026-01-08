@@ -15,21 +15,6 @@ export const SignUpInterestsFields = ({
   setLanguages,
 }: SignUpInterestsFieldsProps) => {
 
-  // mister_drac
-  // helper: map label -> value (id)
-    const mapLabelsToValues = (selected: string[], options: {value: string, label: string}[]) => {
-      return selected
-        .map(s => {
-          // if value is already a value, return it
-          if (options.some(o => o.value === s)) return s;
-
-          // if it's a label, find the corresponding value
-          const found = options.find(o => o.label === s);
-          return found?.value;
-        })
-        .filter((v): v is string => !!v);
-    };
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {/* Interests/Hobbies */}

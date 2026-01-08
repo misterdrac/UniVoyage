@@ -33,36 +33,57 @@ export const AvatarPicker = ({
   onAvatarChange,
   disabled = false,
 }: AvatarPickerProps) => {
-  // Initialize with user's current avatar, or default to 1 if they don't have one
-  const [currentAvatar, setCurrentAvatar] = useState<number>(() => {
+  // Use null to represent "no avatar" option, numbers 1-20 for actual avatars
+  // Initialize with user's current avatar, or null (no avatar) if they don't have one
+  const [currentAvatar, setCurrentAvatar] = useState<number | null>(() => {
     const avatarNum = getAvatarNumberFromPath(currentAvatarPath);
-    return avatarNum ?? 1;
+    return avatarNum ?? null;
   });
 
   // Update current avatar when prop changes (when user's avatar changes)
   useEffect(() => {
     const avatarNum = getAvatarNumberFromPath(currentAvatarPath);
-    if (avatarNum !== null) {
-      setCurrentAvatar(avatarNum);
-    } else if (!currentAvatarPath) {
-      // If user doesn't have an avatar, default to 1 for preview only
-      setCurrentAvatar(1);
-    }
+    setCurrentAvatar(avatarNum ?? null);
   }, [currentAvatarPath]);
 
   const handlePrevious = useCallback(() => {
-    const newAvatar = currentAvatar === 1 ? AVATAR_COUNT : currentAvatar - 1;
-    setCurrentAvatar(newAvatar);
-    onAvatarChange(getAvatarUrl(newAvatar));
+    if (currentAvatar === null) {
+      // From "no avatar" go to last avatar (20)
+      setCurrentAvatar(AVATAR_COUNT);
+      onAvatarChange(getAvatarUrl(AVATAR_COUNT));
+    } else if (currentAvatar === 1) {
+      // From avatar 1 go to "no avatar"
+      setCurrentAvatar(null);
+      onAvatarChange('');
+    } else {
+      // Go to previous avatar
+      const newAvatar = currentAvatar - 1;
+      setCurrentAvatar(newAvatar);
+      onAvatarChange(getAvatarUrl(newAvatar));
+    }
   }, [currentAvatar, onAvatarChange]);
 
   const handleNext = useCallback(() => {
-    const newAvatar = currentAvatar === AVATAR_COUNT ? 1 : currentAvatar + 1;
-    setCurrentAvatar(newAvatar);
-    onAvatarChange(getAvatarUrl(newAvatar));
+    if (currentAvatar === null) {
+      // From "no avatar" go to first avatar (1)
+      setCurrentAvatar(1);
+      onAvatarChange(getAvatarUrl(1));
+    } else if (currentAvatar === AVATAR_COUNT) {
+      // From last avatar go to "no avatar"
+      setCurrentAvatar(null);
+      onAvatarChange('');
+    } else {
+      // Go to next avatar
+      const newAvatar = currentAvatar + 1;
+      setCurrentAvatar(newAvatar);
+      onAvatarChange(getAvatarUrl(newAvatar));
+    }
   }, [currentAvatar, onAvatarChange]);
 
-  const currentAvatarUrl = useMemo(() => getAvatarUrl(currentAvatar), [currentAvatar]);
+  const currentAvatarUrl = useMemo(() => {
+    if (currentAvatar === null) return undefined;
+    return getAvatarUrl(currentAvatar);
+  }, [currentAvatar]);
 
   return (
     <div className="flex flex-col items-center gap-4">
@@ -81,10 +102,12 @@ export const AvatarPicker = ({
         </Button>
 
         <div className="relative">
-          <Avatar src={currentAvatarUrl} alt={`Avatar ${currentAvatar}`} size="lg" />
-          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded-full font-medium">
-            {currentAvatar}/{AVATAR_COUNT}
-          </div>
+          <Avatar src={currentAvatarUrl} alt={currentAvatar === null ? "No avatar" : `Avatar ${currentAvatar}`} size="lg" />
+          {currentAvatar !== null && (
+            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded-full font-medium">
+              {currentAvatar}/{AVATAR_COUNT}
+            </div>
+          )}
         </div>
 
         <Button

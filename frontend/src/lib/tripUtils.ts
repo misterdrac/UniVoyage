@@ -1,8 +1,5 @@
 /**
- * Calculates the trip status based on current date and trip dates
- * @param departureDate - Trip departure date (ISO string)
- * @param returnDate - Trip return date (ISO string)
- * @returns Trip status: 'planned' | 'ongoing' | 'completed'
+ * Calculates trip status based on current date (planned, ongoing, or completed)
  */
 export const calculateTripStatus = (
   departureDate: string,

@@ -1,7 +1,11 @@
-import { API_CONFIG } from '@/config/api'
-import type { Destination } from '@/data/destinations'
+import { API_CONFIG } from '@/config/apiConfig'
+import type { Destination } from '@/types/destination'
 import type { ApiClient } from './baseClient'
 
+/**
+ * Backend destination response format
+ * Matches the structure returned by the API
+ */
 export interface BackendDestinationResponse {
   id: number
   title: string
@@ -15,12 +19,30 @@ export interface BackendDestinationResponse {
   studentPerks?: string[]
 }
 
+/**
+ * Destinations API interface
+ * Handles destination retrieval and search
+ */
 export interface DestinationsApi {
+  /**
+   * Retrieves all available destinations
+   * @returns Promise resolving to success status and array of destinations
+   */
   getDestinations(): Promise<{ success: boolean; destinations?: Destination[]; error?: string }>
+  
+  /**
+   * Searches destinations by query string
+   * @param query - Search query to match against destination names and locations
+   * @returns Promise resolving to success status and array of matching destinations
+   */
   searchDestinations(query: string): Promise<{ success: boolean; destinations?: Destination[]; error?: string }>
 }
 
-// Map backend response to frontend Destination interface
+/**
+ * Maps backend destination response to frontend Destination interface
+ * @param backendDest - Destination data from backend API
+ * @returns Frontend Destination object
+ */
 function mapBackendDestination(backendDest: BackendDestinationResponse): Destination {
   return {
     id: backendDest.id,

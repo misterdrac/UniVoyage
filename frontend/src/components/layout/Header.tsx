@@ -68,14 +68,14 @@ export function Header() {
             <ThemeToggleButton />
           </div>
         </div>
-
-        <MobileNavigation
-          isOpen={isMobileMenuOpen}
-          onClose={handleMobileMenuClose}
-          user={user}
-          onLoginClick={handleLoginClick}
-        />
       </div>
+      
+      <MobileNavigation
+        isOpen={isMobileMenuOpen}
+        onClose={handleMobileMenuClose}
+        user={user}
+        onLoginClick={handleLoginClick}
+      />
       
       <LoginDialog 
         open={isLoginOpen} 

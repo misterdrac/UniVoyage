@@ -12,6 +12,18 @@ import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
 
+/**
+ * Service for managing destinations in the admin panel.
+ * Provides methods for CRUD operations on destinations.
+ * Interacts with DestinationRepository for data access.
+ * Handles business logic and data transformation.
+ * Throws ResourceNotFoundException for non-existent resources.
+ * Uses DTOs for request and response payloads.
+ * Supports pagination and searching for listing destinations.
+ * All methods that modify data are transactional.
+ * Maps DestinationEntity to AdminDestinationResponse DTO.
+ * Validates input data before processing.
+ */
 @Service
 @RequiredArgsConstructor
 public class AdminDestinationService {
@@ -24,7 +36,6 @@ public class AdminDestinationService {
         if (search == null || search.isBlank()) {
             page = destinationRepository.findAll(pageable);
         } else {
-            // treba metoda u repo (ispod ti dajem)
             page = destinationRepository.searchAdminDestinations(search.toLowerCase(), pageable);
         }
 

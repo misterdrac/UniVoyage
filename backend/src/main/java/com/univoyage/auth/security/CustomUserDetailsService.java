@@ -7,23 +7,29 @@ import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 
-
+/**
+ * Custom UserDetailsService to load user details by user ID from JWT.
+ * Implements Spring Security's UserDetailsService interface.
+ * Retrieves user information from UserRepository.
+ * Throws UsernameNotFoundException if user is not found.
+ */
 @Service
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
 
+    /**
+     * Load user details by user ID string.
+     * Parses user ID from string to Long.
+     * Retrieves UserEntity from UserRepository.
+     * @param userIdString
+     * @return UserDetails
+     * @throws UsernameNotFoundException if user not found
+     */
     @Override
     public UserDetails loadUserByUsername(String userIdString) throws UsernameNotFoundException {
 
-        /*
-        // JWT subject = email, that's why we search by email here
-        return userRepository.findByEmail(email)
-                .orElseThrow(() ->
-                        new UsernameNotFoundException("User not found with email: " + email));
-        */
-        // JWT subject is user ID, so we search by user Id
         Long userId;
         try{
             userId = Long.parseLong(userIdString);

@@ -9,7 +9,7 @@ import { Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { CATEGORY_CONFIG } from './categoryConfig'
 import { AmountInput } from './AmountInput'
-import type { TripBudgetExpense, BudgetCategoryValue } from '@/types/budget'
+import type { TripBudgetExpense } from '@/types/budget'
 
 const formatCurrency = (amount: number): string => {
   return new Intl.NumberFormat('en-US', {
@@ -170,7 +170,7 @@ export function EditExpenseDialog({
             disabled={!form.description.trim() || form.amount <= 0}
             className={cn(
               expenseConfig.textColor.replace('text-', 'bg-').replace('-600', '-500'),
-              'text-white hover:opacity-90 w-full sm:w-auto'
+              'text-hero-text hover:opacity-90 w-full sm:w-auto'
             )}
           >
             <Check className="h-4 w-4 mr-2" />

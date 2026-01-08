@@ -3,6 +3,9 @@ package com.univoyage.reference.hobby.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+/**
+ * Entity representing a Hobby.
+ */
 @Entity
 @Table(name = "hobbies")
 @Getter @Setter

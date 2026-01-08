@@ -7,6 +7,10 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+/**
+ * Repository interface for Country entities.
+ * Extends JpaRepository to provide CRUD operations and custom query methods.
+ */
 @Repository
 public interface CountryRepository extends JpaRepository<Country, String> {
     Optional<Country> findByIsoCode(String isoCode);

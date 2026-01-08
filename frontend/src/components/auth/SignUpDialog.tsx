@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { apiService } from "@/services/api";
 import { toast } from "sonner";
@@ -38,7 +38,6 @@ export function SignUpDialog({ open, onOpenChange, onLoginClick }: SignUpDialogP
     setCountry,
     showPasswordError,
     setShowPasswordError,
-    error,
     isLoading,
     isFormValid,
     passwordsMatch,
@@ -72,20 +71,25 @@ export function SignUpDialog({ open, onOpenChange, onLoginClick }: SignUpDialogP
   }, [onOpenChange, onLoginClick]);
 
   const handleFormSubmit = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!passwordsMatch) {
+      setShowPasswordError(true);
       toast.error("Passwords do not match");
       return;
     }
     await handleSubmit(e);
-  }, [handleSubmit, passwordsMatch]);
+  }, [handleSubmit, passwordsMatch, setShowPasswordError]);
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-4xl lg:max-w-5xl max-h-[98vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-4xl lg:max-w-5xl max-h-[98vh] overflow-y-auto rounded-[4rem]">
         <DialogHeader>
           <DialogTitle className="text-center text-2xl font-bold">
             Create Account
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            Create a new UniVoyage account to start planning your student travel adventures
+          </DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleFormSubmit} className="space-y-4">

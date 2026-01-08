@@ -26,6 +26,17 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 
+/**
+ * Controller for authentication-related endpoints.
+ * Provides endpoints for user registration, login, logout, and fetching current user info.
+ * All endpoints are prefixed with /api/auth.
+ * Uses AuthService for business logic.
+ * Returns responses wrapped in ApiResponse for consistent API structure.
+ * Manages JWT and CSRF tokens via HttpOnly and readable cookies.
+ * Handles setting and deleting cookies in the HTTP response.
+ * Supports CORS for frontend applications running on localhost:5173.
+ * Validates request bodies for registration and login.
+ */
 @CrossOrigin(
         origins = {"http://localhost:5173","http://127.0.0.1:5173"},
         allowCredentials = "true"
@@ -41,7 +52,15 @@ public class AuthController {
     @Value("${app.jwt.ttl-seconds}")
     private long jwtTtlSeconds;
 
-    // POST /api/auth/register
+    /**
+     * POST /api/auth/register
+     * @param request
+     * @param response
+     * @return ResponseEntity<ApiResponse<AuthPayload>>
+     *    Registers a new user and sets JWT and CSRF cookies in the response.
+     *    On success, returns 201 Created with AuthPayload containing tokens.
+     *    On failure, returns 400 Bad Request with error message.
+     */
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<AuthPayload>> register(
             @Valid @RequestBody RegisterRequestDto request,
@@ -50,11 +69,13 @@ public class AuthController {
         AuthPayload payload = authService.register(request);
 
         if (!payload.isSuccess()) {
-            // ovdje ne znamo koje sve fieldove ima AuthPayload,
-            // pa šaljemo generičku poruku
+            // Use the actual error message from AuthPayload if available, otherwise use generic message
+            String errorMessage = payload.getError() != null && !payload.getError().isBlank() 
+                    ? payload.getError() 
+                    : "Registration failed";
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.fail("Registration failed"));
+                    .body(ApiResponse.fail(errorMessage));
         }
 
         // Set HttpOnly cookie for JWT using ResponseCookie (supports SameSite)
@@ -86,49 +107,78 @@ public class AuthController {
                 .body(ApiResponse.ok(payload));
     }
 
-    // POST /api/auth/login
+    /**
+     * POST /api/auth/login
+     * @param request
+     * @param response
+     * @return ResponseEntity<ApiResponse<AuthPayload>>
+     *    Authenticates a user and sets JWT and CSRF cookies in the response.
+     *    On success, returns 200 OK with AuthPayload containing tokens.
+     *    On failure, returns 401 Unauthorized with error message.
+     */
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<AuthPayload>> login(
             @RequestBody LoginRequestDto request,
             HttpServletResponse response
     ) {
-        AuthPayload payload = authService.login(request);
+        try {
+            AuthPayload payload = authService.login(request);
 
-        if (!payload.isSuccess()) {
+            if (!payload.isSuccess()) {
+                // Use the actual error message from AuthPayload if available, otherwise use generic message
+                String errorMessage = payload.getError() != null && !payload.getError().isBlank() 
+                        ? payload.getError() 
+                        : "Invalid email or password";
+                return ResponseEntity
+                        .status(HttpStatus.UNAUTHORIZED)
+                        .body(ApiResponse.fail(errorMessage));
+            }
+
+            // Set HttpOnly cookie for JWT using ResponseCookie (supports SameSite)
+            if (payload.getToken() != null) {
+                ResponseCookie jwtCookie = ResponseCookie.from(CookieUtils.JWT_COOKIE_NAME, payload.getToken())
+                        .httpOnly(true)
+                        .secure(false) // false for localhost, true in production with HTTPS
+                        .path("/")
+                        .maxAge((int) jwtTtlSeconds)
+                        .sameSite("Lax") // Lax works better for localhost, allows cookies on top-level navigation (refresh)
+                        .build();
+                response.addHeader(HttpHeaders.SET_COOKIE, jwtCookie.toString());
+            }
+
+            // Set readable cookie for CSRF token using ResponseCookie
+            if (payload.getCsrfToken() != null) {
+                ResponseCookie csrfCookie = ResponseCookie.from(CookieUtils.CSRF_COOKIE_NAME, payload.getCsrfToken())
+                        .httpOnly(false) // must be readable by frontend
+                        .secure(false) // false for localhost, true in production with HTTPS
+                        .path("/")
+                        .maxAge((int) jwtTtlSeconds)
+                        .sameSite("Lax") // Lax works better for localhost, allows cookies on top-level navigation (refresh)
+                        .build();
+                response.addHeader(HttpHeaders.SET_COOKIE, csrfCookie.toString());
+            }
+
+            return ResponseEntity.ok(ApiResponse.ok(payload));
+        } catch (IllegalArgumentException e) {
+            // Handle IllegalArgumentException (e.g., user not found)
+            // Return user-friendly error message instead of exposing internal error
+            String errorMessage = "Invalid email or password";
+            if (e.getMessage() != null && e.getMessage().contains("Invalid credentials")) {
+                errorMessage = "Invalid email or password";
+            }
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.fail("Invalid email or password"));
+                    .body(ApiResponse.fail(errorMessage));
         }
-
-        // Set HttpOnly cookie for JWT using ResponseCookie (supports SameSite)
-        if (payload.getToken() != null) {
-            ResponseCookie jwtCookie = ResponseCookie.from(CookieUtils.JWT_COOKIE_NAME, payload.getToken())
-                    .httpOnly(true)
-                    .secure(false) // false for localhost, true in production with HTTPS
-                    .path("/")
-                    .maxAge((int) jwtTtlSeconds)
-                    .sameSite("Lax") // Lax works better for localhost, allows cookies on top-level navigation (refresh)
-                    .build();
-            response.addHeader(HttpHeaders.SET_COOKIE, jwtCookie.toString());
-        }
-
-        // Set readable cookie for CSRF token using ResponseCookie
-        if (payload.getCsrfToken() != null) {
-            ResponseCookie csrfCookie = ResponseCookie.from(CookieUtils.CSRF_COOKIE_NAME, payload.getCsrfToken())
-                    .httpOnly(false) // must be readable by frontend
-                    .secure(false) // false for localhost, true in production with HTTPS
-                    .path("/")
-                    .maxAge((int) jwtTtlSeconds)
-                    .sameSite("Lax") // Lax works better for localhost, allows cookies on top-level navigation (refresh)
-                    .build();
-            response.addHeader(HttpHeaders.SET_COOKIE, csrfCookie.toString());
-        }
-
-        return ResponseEntity.ok(ApiResponse.ok(payload));
     }
 
-    // GET /api/auth/me
-    // vrati trenutno autentificiranog usera, *zamotanog* u ApiResponse
+    /**
+     * GET /api/auth/me
+     * @return ResponseEntity<ApiResponse<UserDto>>
+     *     Retrieves the currently authenticated user's information.
+     *     On success, returns 200 OK with UserDto.
+     *     On failure, returns 401 Unauthorized if not authenticated.
+     */
     @GetMapping("/me")
     @Transactional(readOnly = true)
     public ResponseEntity<ApiResponse<UserDto>> me() {
@@ -166,7 +216,14 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.ok(userDto));
     }
 
-    // POST /api/auth/logout
+    /**
+     * POST /api/auth/logout
+     * @param response
+     * @return ResponseEntity<ApiResponse<Void>>
+     *    Logs out the user by deleting JWT and CSRF cookies.
+     *    On success, returns 200 OK.
+     *    On failure, returns appropriate error status.
+     */
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<Void>> logout(HttpServletResponse response) {
         // Delete JWT cookie by setting it with maxAge(0) and empty value
@@ -191,6 +248,4 @@ public class AuthController {
 
         return ResponseEntity.ok(ApiResponse.ok(null));
     }
-
-
 }

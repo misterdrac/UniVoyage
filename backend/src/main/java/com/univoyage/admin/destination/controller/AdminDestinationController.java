@@ -12,7 +12,17 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 
-
+/**
+ * Controller for managing destinations in the admin panel.
+ * Provides endpoints for CRUD operations on destinations.
+ * All endpoints are prefixed with /api/admin/destinations.
+ * Requires authentication and admin privileges.
+ * Uses AdminDestinationService for business logic.
+ * Returns responses wrapped in ApiResponse for consistent API structure.
+ * Supports pagination and searching for listing destinations.
+ * Validates request bodies for create and update operations.
+ * Handles exceptions and returns appropriate HTTP status codes.
+ */
 @RestController
 @RequestMapping("/api/admin/destinations")
 @RequiredArgsConstructor

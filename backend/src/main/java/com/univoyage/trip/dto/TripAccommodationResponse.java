@@ -4,6 +4,9 @@ import lombok.*;
 
 import java.time.Instant;
 
+/**
+ * Response DTO for trip accommodation details.
+ */
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
 @Builder

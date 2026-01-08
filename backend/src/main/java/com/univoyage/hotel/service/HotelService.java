@@ -21,6 +21,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Service for interacting with the Amadeus Hotel API.
+ * Handles authentication, token management, and hotel searches by city.
+ */
 @Service
 @Slf4j
 public class HotelService {

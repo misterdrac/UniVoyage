@@ -1,13 +1,32 @@
 import type { ApiClient } from './baseClient'
-import { API_CONFIG } from '@/config/api'
+import { API_CONFIG } from '@/config/apiConfig'
 
+/**
+ * Hotel data structure
+ */
 export interface Hotel {
   hotelName: string
   hotelId: string
 }
 
+/**
+ * Hotels API interface
+ * Handles hotel search and status checking
+ */
 export interface HotelsApi {
+  /**
+   * Searches for hotels in a city
+   * @param city - City name to search in
+   * @param limit - Maximum number of results to return (default: 10)
+   * @returns Promise resolving to success status and array of hotels
+   * @returns Error code 'NO_HOTELS_FOUND' if no hotels are available
+   */
   searchHotels(city: string, limit?: number): Promise<{ success: boolean; hotels?: Hotel[]; error?: string }>
+  
+  /**
+   * Checks if hotel search features are configured and available
+   * @returns Promise resolving to configuration status
+   */
   getHotelsStatus(): Promise<{ configured: boolean }>
 }
 
@@ -17,7 +36,7 @@ export const hotelsApi: {
   async searchHotels(this: ApiClient, city: string, limit = 10): Promise<{ success: boolean; hotels?: Hotel[]; error?: string }> {
     try {
       const url = `${API_CONFIG.ENDPOINTS.HOTELS.SEARCH}?city=${encodeURIComponent(city)}&limit=${limit}`
-      const response = await this.request<{ success: boolean; data?: { hotels: Hotel[] }; error?: string }>(url)
+      const response = await this.request<{ hotels: Hotel[] }>(url)
 
       if (response.success && response.data?.hotels) {
         return {
@@ -56,13 +75,16 @@ export const hotelsApi: {
 
   async getHotelsStatus(this: ApiClient): Promise<{ configured: boolean }> {
     try {
-      const response = await this.request<{ success: boolean; data?: boolean }>(
+      const response = await this.request<boolean>(
         API_CONFIG.ENDPOINTS.HOTELS.STATUS
       )
 
-      return {
-        configured: response.success && response.data === true,
+      if (response.success && response.data !== undefined) {
+        return {
+          configured: response.data === true,
+        }
       }
+      return { configured: false }
     } catch {
       return { configured: false }
     }

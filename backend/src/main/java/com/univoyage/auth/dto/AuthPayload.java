@@ -4,6 +4,10 @@ import com.univoyage.user.dto.UserDto;
 
 import lombok.*;
 
+/**
+ * Payload returned after authentication attempts.
+ * Contains success status, user details, tokens, and error messages.
+ */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -13,8 +17,8 @@ public class AuthPayload {
 
     private boolean success;
     private UserDto user;
-    private String token;     // JWT (HttpOnly cookie)
-    private String csrfToken; // Token B (header)
+    private String token;
+    private String csrfToken;
     private String error;
 
     public static AuthPayload ok(UserDto user, String token, String csrfToken) {

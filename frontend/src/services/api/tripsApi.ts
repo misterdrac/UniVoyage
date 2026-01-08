@@ -1,11 +1,18 @@
-import { API_CONFIG } from '@/config/api'
-import { API_CONSTANTS } from '@/lib/constants'
+import { API_CONFIG } from '@/config/apiConfig'
 import type { StoredItineraryPayload } from '@/types/itinerary'
 import type { TripBudgetPayload } from '@/types/budget'
-import type { User } from '@/types/user'
 import type { ApiClient } from './baseClient'
 
+/**
+ * Trips API interface
+ * Handles trip creation, retrieval, deletion, and related data (budget, accommodation)
+ */
 export interface TripsApi {
+  /**
+   * Creates a new trip
+   * @param data - Trip creation data including destination and dates
+   * @returns Promise resolving to success status and created trip data
+   */
   createTrip(data: {
     destinationId: number
     destinationName: string
@@ -13,10 +20,40 @@ export interface TripsApi {
     departureDate: string
     returnDate: string
   }): Promise<{ success: boolean; trip?: any; error?: string }>
+  
+  /**
+   * Retrieves all trips for the authenticated user
+   * @returns Promise resolving to success status and array of trips
+   */
   getTrips(): Promise<{ success: boolean; trips?: any[]; error?: string }>
+  
+  /**
+   * Deletes a trip by ID
+   * @param tripId - ID of the trip to delete
+   * @returns Promise resolving to success status
+   */
   deleteTrip(tripId: number): Promise<{ success: boolean; error?: string }>
+  
+  /**
+   * Retrieves budget data for a specific trip
+   * @param tripId - ID of the trip
+   * @returns Promise resolving to success status and budget payload
+   */
   getTripBudget(tripId: number): Promise<{ success: boolean; budget?: TripBudgetPayload; error?: string }>
+  
+  /**
+   * Saves budget data for a specific trip
+   * @param tripId - ID of the trip
+   * @param payload - Budget data to save
+   * @returns Promise resolving to success status
+   */
   saveTripBudget(tripId: number, payload: TripBudgetPayload): Promise<{ success: boolean; error?: string }>
+  
+  /**
+   * Retrieves accommodation information for a specific trip
+   * @param tripId - ID of the trip
+   * @returns Promise resolving to success status and accommodation data
+   */
   getTripAccommodation(tripId: number): Promise<{ 
     success: boolean
     accommodation?: {
@@ -26,6 +63,13 @@ export interface TripsApi {
     }
     error?: string 
   }>
+  
+  /**
+   * Saves accommodation information for a specific trip
+   * @param tripId - ID of the trip
+   * @param data - Accommodation data to save
+   * @returns Promise resolving to success status
+   */
   saveTripAccommodation(tripId: number, data: {
     accommodationName?: string
     accommodationAddress?: string
@@ -33,44 +77,29 @@ export interface TripsApi {
   }): Promise<{ success: boolean; error?: string }>
 }
 
+/**
+ * Itinerary API interface
+ * Handles trip itinerary generation and storage
+ */
 export interface ItineraryApi {
+  /**
+   * Retrieves itinerary data for a specific trip
+   * @param tripId - ID of the trip
+   * @returns Promise resolving to success status and itinerary payload
+   */
   getTripItinerary(tripId: number): Promise<{ success: boolean; itinerary?: StoredItineraryPayload; error?: string }>
+  
+  /**
+   * Saves itinerary data for a specific trip
+   * @param tripId - ID of the trip
+   * @param payload - Itinerary data to save
+   * @returns Promise resolving to success status
+   */
   saveTripItinerary(tripId: number, payload: StoredItineraryPayload): Promise<{ success: boolean; error?: string }>
 }
 
 export const tripsApi: { [K in keyof TripsApi]: (this: ApiClient, ...args: Parameters<TripsApi[K]>) => ReturnType<TripsApi[K]> } = {
   async createTrip(this: ApiClient, data) {
-    if (this.useMock) {
-      try {
-        const savedUser = localStorage.getItem(API_CONSTANTS.USER_KEY)
-        if (!savedUser) {
-          return { success: false, error: 'User not found' }
-        }
-
-        const user = JSON.parse(savedUser) as User
-        const trips = this.getMockTrips()
-        //todo remove mock after everything is working
-        const newTrip = {
-          id: trips.length > 0 ? Math.max(...trips.map((t: any) => t.id)) + 1 : 1,
-          userId: user.id,
-          destinationId: data.destinationId,
-          destinationName: data.destinationName,
-          destinationLocation: data.destinationLocation,
-          departureDate: data.departureDate,
-          returnDate: data.returnDate,
-          createdAt: new Date().toISOString(),
-          status: 'planned' as const,
-        }
-
-        trips.push(newTrip)
-        localStorage.setItem('mock_trips', JSON.stringify(trips))
-
-        return { success: true, trip: newTrip }
-      } catch (err: any) {
-        return { success: false, error: err?.message ?? 'Trip creation failed' }
-      }
-    }
-
     try {
       const res = await this.request<{ success: boolean; trip: any }>(API_CONFIG.ENDPOINTS.TRIPS.CREATE, {
         method: 'POST',
@@ -89,23 +118,6 @@ export const tripsApi: { [K in keyof TripsApi]: (this: ApiClient, ...args: Param
   },
 
   async getTrips(this: ApiClient) {
-    if (this.useMock) {
-      try {
-        const savedUser = localStorage.getItem(API_CONSTANTS.USER_KEY)
-        if (!savedUser) {
-          return { success: false, error: 'User not found' }
-        }
-
-        const user = JSON.parse(savedUser) as User
-        const trips = this.getMockTrips()
-        const userTrips = trips.filter((trip: any) => trip.userId === user.id)
-
-        return { success: true, trips: userTrips }
-      } catch (err: any) {
-        return { success: false, error: err?.message ?? 'Failed to fetch trips' }
-      }
-    }
-
     try {
       const res = await this.request<{ success: boolean; trips: any[] }>(API_CONFIG.ENDPOINTS.TRIPS.GET_ALL)
 
@@ -120,30 +132,6 @@ export const tripsApi: { [K in keyof TripsApi]: (this: ApiClient, ...args: Param
   },
 
   async deleteTrip(this: ApiClient, tripId) {
-    if (this.useMock) {
-      try {
-        const savedUser = localStorage.getItem(API_CONSTANTS.USER_KEY)
-        if (!savedUser) {
-          return { success: false, error: 'User not found' }
-        }
-
-        const user = JSON.parse(savedUser) as User
-        const trips = this.getMockTrips()
-        const tripIndex = trips.findIndex((t: any) => t.id === tripId && t.userId === user.id)
-
-        if (tripIndex === -1) {
-          return { success: false, error: 'Trip not found' }
-        }
-
-        trips.splice(tripIndex, 1)
-        localStorage.setItem('mock_trips', JSON.stringify(trips))
-
-        return { success: true }
-      } catch (err: any) {
-        return { success: false, error: err?.message ?? 'Trip deletion failed' }
-      }
-    }
-
     try {
       const res = await this.request<{ success: boolean }>(`${API_CONFIG.ENDPOINTS.TRIPS.DELETE}/${tripId}`, {
         method: 'DELETE',
@@ -160,17 +148,6 @@ export const tripsApi: { [K in keyof TripsApi]: (this: ApiClient, ...args: Param
   },
 
   async getTripBudget(this: ApiClient, tripId) {
-    if (this.useMock) {
-      // load from localStorage in mock mode
-      try {
-        const raw = localStorage.getItem(`trip-budget-${tripId}`)
-        const budget = raw ? (JSON.parse(raw) as TripBudgetPayload) : undefined
-        return { success: true, budget }
-      } catch (err: any) {
-        return { success: false, error: err?.message ?? 'Failed to load trip budget' }
-      }
-    }
-
     try {
       const res = await this.request<{ budget?: TripBudgetPayload }>(
         `${API_CONFIG.ENDPOINTS.TRIPS.GET_BY_ID}/${tripId}/budget`
@@ -187,16 +164,6 @@ export const tripsApi: { [K in keyof TripsApi]: (this: ApiClient, ...args: Param
   },
 
   async saveTripBudget(this: ApiClient, tripId, payload) {
-    if (this.useMock) {
-      // persist to localStorage in mock mode
-      try {
-        localStorage.setItem(`trip-budget-${tripId}`, JSON.stringify(payload))
-        return { success: true }
-      } catch (err: any) {
-        return { success: false, error: err?.message ?? 'Failed to save trip budget' }
-      }
-    }
-
     try {
       const res = await this.request<{ success: boolean }>(
         `${API_CONFIG.ENDPOINTS.TRIPS.UPDATE}/${tripId}/budget`,
@@ -218,26 +185,6 @@ export const tripsApi: { [K in keyof TripsApi]: (this: ApiClient, ...args: Param
   },
 
   async getTripAccommodation(this: ApiClient, tripId) {
-    if (this.useMock) {
-      try {
-        const trips = this.getMockTrips()
-        const trip = trips.find((t: any) => t.id === tripId)
-        if (trip && (trip.accommodationName || trip.accommodationAddress || trip.accommodationPhone)) {
-          return {
-            success: true,
-            accommodation: {
-              accommodationName: trip.accommodationName,
-              accommodationAddress: trip.accommodationAddress,
-              accommodationPhone: trip.accommodationPhone,
-            },
-          }
-        }
-        return { success: true }
-      } catch (err: any) {
-        return { success: false, error: err?.message ?? 'Failed to load accommodation' }
-      }
-    }
-
     try {
       const res = await this.request<{ accommodation?: { accommodationName?: string; accommodationAddress?: string; accommodationPhone?: string } }>(
         `${API_CONFIG.ENDPOINTS.TRIPS.GET_BY_ID}/${tripId}/accommodation`
@@ -254,22 +201,6 @@ export const tripsApi: { [K in keyof TripsApi]: (this: ApiClient, ...args: Param
   },
 
   async saveTripAccommodation(this: ApiClient, tripId, data) {
-    if (this.useMock) {
-      try {
-        const trips = this.getMockTrips()
-        const trip = trips.find((t: any) => t.id === tripId)
-        if (trip) {
-          trip.accommodationName = data.accommodationName
-          trip.accommodationAddress = data.accommodationAddress
-          trip.accommodationPhone = data.accommodationPhone
-          localStorage.setItem('mock_trips', JSON.stringify(trips))
-        }
-        return { success: true }
-      } catch (err: any) {
-        return { success: false, error: err?.message ?? 'Failed to save accommodation' }
-      }
-    }
-
     try {
       const res = await this.request<{ success: boolean }>(
         `${API_CONFIG.ENDPOINTS.TRIPS.UPDATE}/${tripId}/accommodation`,
@@ -294,19 +225,6 @@ export const tripsApi: { [K in keyof TripsApi]: (this: ApiClient, ...args: Param
 export const itineraryApi: { [K in keyof ItineraryApi]: (this: ApiClient, ...args: Parameters<ItineraryApi[K]>) => ReturnType<ItineraryApi[K]> } =
   {
     async getTripItinerary(this: ApiClient, tripId) {
-      if (this.useMock) {
-        try {
-          const cached = localStorage.getItem(`trip-itinerary-${tripId}`)
-          if (!cached) {
-            return { success: true }
-          }
-          const parsed = JSON.parse(cached) as StoredItineraryPayload
-          return { success: true, itinerary: parsed }
-        } catch (err: any) {
-          return { success: false, error: err?.message ?? 'Failed to load itinerary' }
-        }
-      }
-
       try {
         const res = await this.request<{ itinerary?: StoredItineraryPayload }>(
           `${API_CONFIG.ENDPOINTS.TRIPS.GET_BY_ID}/${tripId}/itinerary`
@@ -323,15 +241,6 @@ export const itineraryApi: { [K in keyof ItineraryApi]: (this: ApiClient, ...arg
     },
 
     async saveTripItinerary(this: ApiClient, tripId, payload) {
-      if (this.useMock) {
-        try {
-          localStorage.setItem(`trip-itinerary-${tripId}`, JSON.stringify(payload))
-          return { success: true }
-        } catch (err: any) {
-          return { success: false, error: err?.message ?? 'Failed to save itinerary' }
-        }
-      }
-
       try {
         const res = await this.request<{ itinerary?: StoredItineraryPayload }>(
           `${API_CONFIG.ENDPOINTS.TRIPS.UPDATE}/${tripId}/itinerary`,

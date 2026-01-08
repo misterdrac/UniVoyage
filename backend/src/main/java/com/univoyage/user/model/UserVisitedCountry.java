@@ -8,6 +8,9 @@ import lombok.*;
 
 import java.time.LocalDate;
 
+/**
+ * Entity representing a country visited by a user.
+ */
 @Entity
 @Table(name = "user_visited_countries")
 @Getter @Setter
@@ -20,12 +23,12 @@ public class UserVisitedCountry {
     private UserVisitedCountryId id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("userId") // povezuje id.userId s user.id
+    @MapsId("userId")
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("countryCode") // povezuje id.countryCode s country.isoCode
+    @MapsId("countryCode")
     @JoinColumn(name = "country_code", nullable = false)
     private Country country;
 

@@ -10,8 +10,10 @@ import {
   AccountInformationCard,
   useProfileForm,
 } from '@/components/profile';
+import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 const ProfilePage = () => {
+  useDocumentTitle('Profile');
   const { user, logout, updateProfile } = useAuth();
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isEditingInterests, setIsEditingInterests] = useState(false);

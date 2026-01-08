@@ -19,6 +19,15 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Service for interacting with the Gemini AI API to generate travel itineraries and packing suggestions.
+ * Handles prompt construction, API calls, and response parsing.
+ * Manages error handling and configuration checks.
+ * Uses RestTemplate for HTTP requests and Jackson for JSON processing.
+ * Provides methods to generate itineraries and packing lists based on user input.
+ * Validates configuration before making API calls.
+ * Logs errors for troubleshooting and monitoring.
+ */
 @Service
 @Slf4j
 public class GeminiService {
@@ -43,7 +52,13 @@ public class GeminiService {
         return geminiApiKey != null && !geminiApiKey.isBlank() 
             && geminiModel != null && !geminiModel.isBlank();
     }
-    
+
+    /**
+     * Generates a travel itinerary based on the provided request details.
+     *
+     * @param request The itinerary request containing location, dates, and user preferences.
+     * @return A GeminiResponse containing the generated itinerary or an error message.
+     */
     public GeminiResponse generateItinerary(ItineraryRequest request) {
         if (!isConfigured()) {
             return GeminiResponse.error("AI features are temporarily unavailable. Please try again later.");
@@ -57,7 +72,13 @@ public class GeminiService {
             return GeminiResponse.error("Oops! Something went wrong while generating your itinerary. Please try again in a moment.");
         }
     }
-    
+
+    /**
+     * Generates packing suggestions based on the provided request details.
+     *
+     * @param request The packing request containing destination, dates, and weather forecast.
+     * @return A GeminiResponse containing the packing suggestions or an error message.
+     */
     public GeminiResponse generatePackingSuggestions(PackingRequest request) {
         if (!isConfigured()) {
             return GeminiResponse.error("AI features are temporarily unavailable. Please try again later.");
@@ -71,7 +92,13 @@ public class GeminiService {
             return GeminiResponse.error("Failed to generate packing suggestions. Please try again.");
         }
     }
-    
+
+    /**
+     * Calls the Gemini API with the given prompt and handles the response.
+     *
+     * @param prompt The prompt to send to the Gemini API.
+     * @return A GeminiResponse containing the AI-generated content or an error message.
+     */
     private GeminiResponse callGeminiApi(String prompt) {
         try {
             String url = String.format(GEMINI_API_URL, geminiModel, geminiApiKey);
@@ -123,7 +150,13 @@ public class GeminiService {
             return GeminiResponse.error("Something went wrong. Please try again in a moment.");
         }
     }
-    
+
+    /**
+     * Extracts the generated text content from the Gemini API response.
+     *
+     * @param responseBody The raw JSON response body from the Gemini API.
+     * @return The extracted text content, or null if parsing fails.
+     */
     private String extractTextFromResponse(String responseBody) {
         try {
             JsonNode root = objectMapper.readTree(responseBody);
@@ -140,7 +173,13 @@ public class GeminiService {
         }
         return null;
     }
-    
+
+    /**
+     * Builds the prompt for generating a travel itinerary.
+     *
+     * @param request The itinerary request containing location, dates, and user preferences.
+     * @return The constructed prompt string.
+     */
     private String buildItineraryPrompt(ItineraryRequest request) {
         String dateRange = formatDateLong(request.getDepartureDate()) + " – " + formatDateLong(request.getReturnDate());
         
@@ -214,7 +253,13 @@ public class GeminiService {
                 request.getLocationLabel()
             ).trim();
     }
-    
+
+    /**
+     * Builds the prompt for generating packing suggestions.
+     *
+     * @param request The packing request containing destination, dates, and weather forecast.
+     * @return The constructed prompt string.
+     */
     private String buildPackingPrompt(PackingRequest request) {
         return """
             You are a concise travel packing assistant.
@@ -251,7 +296,13 @@ public class GeminiService {
                 request.getForecastSummary()
             ).trim();
     }
-    
+
+    /**
+     * Formats a date string from ISO format to a long, human-readable format.
+     *
+     * @param dateStr The date string in ISO format (yyyy-MM-dd).
+     * @return The formatted date string (e.g., "Monday, January 1, 2024").
+     */
     private String formatDateLong(String dateStr) {
         try {
             LocalDate date = LocalDate.parse(dateStr);

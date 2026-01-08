@@ -5,6 +5,10 @@ import jakarta.validation.constraints.NotBlank;
 
 import lombok.*;
 
+/**
+ * Request DTO for user login.
+ * Contains fields for email and password with validation constraints.
+ */
 @Getter
 @Setter
 @NoArgsConstructor

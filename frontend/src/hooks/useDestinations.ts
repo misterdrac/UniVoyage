@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { apiService } from '@/services/api'
-import type { Destination } from '@/data/destinations'
+import type { Destination } from '@/types/destination'
 
 /**
  * Hook to fetch destinations from the backend API
