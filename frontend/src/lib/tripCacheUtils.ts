@@ -4,13 +4,18 @@
 
 import { clearPlacesCacheForCity } from './placesCache'
 
+// Cache key prefixes
+const PACKING_SUGGESTIONS_PREFIX = 'packing-suggestions-'
+const ITINERARY_PREFIX = 'trip-itinerary-'
+const TRIP_BUDGET_PREFIX = 'trip-budget-'
+
 /**
  * Clear packing suggestions cache for a specific trip
  */
 export const clearPackingSuggestionsCache = (tripId: number): void => {
   try {
     if (typeof window === 'undefined') return
-    const storageKey = `packing-suggestions-${tripId}`
+    const storageKey = `${PACKING_SUGGESTIONS_PREFIX}${tripId}`
     localStorage.removeItem(storageKey)
   } catch (error) {
     console.error('Error clearing packing suggestions cache:', error)
@@ -23,7 +28,7 @@ export const clearPackingSuggestionsCache = (tripId: number): void => {
 export const clearItineraryPlanCache = (tripId: number): void => {
   try {
     if (typeof window === 'undefined') return
-    const storageKey = `trip-itinerary-${tripId}`
+    const storageKey = `${ITINERARY_PREFIX}${tripId}`
     localStorage.removeItem(storageKey)
   } catch (error) {
     console.error('Error clearing itinerary cache:', error)
@@ -91,5 +96,78 @@ export const clearTripCache = (
   if (locationName && locationName.trim() && locationName !== cityName) {
     clearPlacesCache(locationName)
   }
+}
+
+/**
+ * Clear all trip budget data from localStorage
+ */
+export const clearAllTripBudgets = (): void => {
+  try {
+    if (typeof window === 'undefined') return
+    const keysToRemove: string[] = []
+    
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (key && key.startsWith(TRIP_BUDGET_PREFIX)) {
+        keysToRemove.push(key)
+      }
+    }
+    
+    keysToRemove.forEach(key => localStorage.removeItem(key))
+  } catch (error) {
+    console.error('Error clearing all trip budgets:', error)
+  }
+}
+
+/**
+ * Clear all packing suggestions cache from localStorage
+ */
+export const clearAllPackingSuggestions = (): void => {
+  try {
+    if (typeof window === 'undefined') return
+    const keysToRemove: string[] = []
+    
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (key && key.startsWith(PACKING_SUGGESTIONS_PREFIX)) {
+        keysToRemove.push(key)
+      }
+    }
+    
+    keysToRemove.forEach(key => localStorage.removeItem(key))
+  } catch (error) {
+    console.error('Error clearing all packing suggestions:', error)
+  }
+}
+
+/**
+ * Clear all itinerary cache from localStorage
+ */
+export const clearAllItineraries = (): void => {
+  try {
+    if (typeof window === 'undefined') return
+    const keysToRemove: string[] = []
+    
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (key && key.startsWith(ITINERARY_PREFIX)) {
+        keysToRemove.push(key)
+      }
+    }
+    
+    keysToRemove.forEach(key => localStorage.removeItem(key))
+  } catch (error) {
+    console.error('Error clearing all itineraries:', error)
+  }
+}
+
+/**
+ * Clear all trip-related data from localStorage
+ * This includes budgets, itineraries, and packing suggestions
+ */
+export const clearAllTripData = (): void => {
+  clearAllTripBudgets()
+  clearAllItineraries()
+  clearAllPackingSuggestions()
 }
 

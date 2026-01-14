@@ -2,6 +2,10 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { User } from '@/types/user';
 import { apiService } from '@/services/api';
 import { API_CONSTANTS } from '@/lib/constants';
+import { clearAllPlacesCache } from '@/lib/placesCache';
+import { clearAllWeatherCache } from '@/lib/weatherCache';
+import { clearAllTripData } from '@/lib/tripCacheUtils';
+import { clearAllHotelCache } from '@/lib/hotelsCache';
 
 /**
  * Signup data structure for user registration
@@ -195,7 +199,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   /**
    * Logs out the current user
-   * Clears user state and removes authentication tokens from storage
+   * Clears user state and removes ALL data from localStorage
    */
   const logout = async () => {
     try {
@@ -204,8 +208,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.error('Logout error:', error);
     } finally {
       setUser(null);
+      
+      // Clear authentication data
       localStorage.removeItem(API_CONSTANTS.USER_KEY);
       localStorage.removeItem(API_CONSTANTS.AUTH_TOKEN_KEY);
+      
+      // Clear all cached data using utility functions
+      clearAllTripData();
+      clearAllPlacesCache();
+      clearAllWeatherCache();
+      clearAllHotelCache();
     }
   };
 
