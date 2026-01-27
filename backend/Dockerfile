@@ -1,22 +1,15 @@
-# syntax=docker/dockerfile:1.7
-
 FROM eclipse-temurin:23-jdk AS build
 WORKDIR /app
 
 COPY mvnw .
 COPY .mvn .mvn
 COPY pom.xml .
-
 RUN chmod +x mvnw
 
-# ⬇⬇⬇ BITNO: cache- prefix ⬇⬇⬇
-RUN --mount=type=cache,id=cache-maven,target=/root/.m2 \
-    ./mvnw -q -DskipTests dependency:go-offline
+RUN ./mvnw -q -DskipTests dependency:go-offline
 
 COPY src src
-
-RUN --mount=type=cache,id=cache-maven,target=/root/.m2 \
-    ./mvnw -q -DskipTests clean package && \
+RUN ./mvnw -q -DskipTests clean package && \
     JAR=$(ls target/*.jar | grep -v "original" | head -n 1) && \
     cp "$JAR" target/app.jar
 
