@@ -1,6 +1,5 @@
 # syntax=docker/dockerfile:1.7
 
-# ---------- BUILD STAGE ----------
 FROM eclipse-temurin:23-jdk AS build
 WORKDIR /app
 
@@ -10,18 +9,17 @@ COPY pom.xml .
 
 RUN chmod +x mvnw
 
-# Maven deps cache (BuildKit)
-RUN --mount=type=cache,id=maven-repo,target=/root/.m2 \
+# ⬇⬇⬇ BITNO: cache- prefix ⬇⬇⬇
+RUN --mount=type=cache,id=cache-maven,target=/root/.m2 \
     ./mvnw -q -DskipTests dependency:go-offline
 
 COPY src src
 
-RUN --mount=type=cache,id=maven-repo,target=/root/.m2 \
+RUN --mount=type=cache,id=cache-maven,target=/root/.m2 \
     ./mvnw -q -DskipTests clean package && \
     JAR=$(ls target/*.jar | grep -v "original" | head -n 1) && \
     cp "$JAR" target/app.jar
 
-# ---------- RUNTIME STAGE ----------
 FROM eclipse-temurin:23-jre
 WORKDIR /app
 COPY --from=build /app/target/app.jar app.jar
