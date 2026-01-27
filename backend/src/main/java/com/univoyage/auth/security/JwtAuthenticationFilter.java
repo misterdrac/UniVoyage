@@ -9,6 +9,8 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.WebUtils;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -60,9 +62,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private void clearAuthCookies(HttpServletResponse response) {
-        // Expire both cookies so FE doesn't keep stale CSRF/JWT pair
-        response.addCookie(CookieUtils.createExpiredCookie(CookieUtils.JWT_COOKIE_NAME));
-        response.addCookie(CookieUtils.createExpiredCookie(CookieUtils.CSRF_COOKIE_NAME));
+
+        ResponseCookie jwtCookie = ResponseCookie.from(CookieUtils.JWT_COOKIE_NAME, "")
+                .httpOnly(true)
+                .secure(true)      // u produkciji TRUE
+                .path("/")
+                .maxAge(0)
+                .sameSite("Lax")
+                .build();
+
+        ResponseCookie csrfCookie = ResponseCookie.from(CookieUtils.CSRF_COOKIE_NAME, "")
+                .httpOnly(false)
+                .secure(true)
+                .path("/")
+                .maxAge(0)
+                .sameSite("Lax")
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, jwtCookie.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, csrfCookie.toString());
     }
 
     /**

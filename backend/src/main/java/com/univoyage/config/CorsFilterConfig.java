@@ -12,9 +12,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Configuration
-public class CorsConfigurationSource {
+public class CorsFilterConfig {
 
-    @Value("${app.cors.allowed-origins}")
+    @Value("${app.cors.allowed-origins:}")
     private String allowedOrigins; // comma-separated
 
     @Bean
@@ -26,10 +26,14 @@ public class CorsConfigurationSource {
                 .filter(s -> !s.isBlank())
                 .collect(Collectors.toList());
 
+        if (origins.isEmpty()) {
+            origins = List.of("http://localhost:5173", "http://127.0.0.1:5173");
+        }
+
         config.setAllowedOrigins(origins);
         config.setAllowCredentials(true);
 
-        config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","PATCH","OPTIONS"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setAllowedHeaders(List.of(
                 "Authorization",
                 "Content-Type",
@@ -38,7 +42,9 @@ public class CorsConfigurationSource {
                 "X-Requested-With",
                 "X-CSRF-TOKEN"
         ));
-        config.setExposedHeaders(List.of("Authorization","Content-Type"));
+
+        config.setExposedHeaders(List.of("Authorization", "Content-Type"));
+
         config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

@@ -23,12 +23,14 @@
         <spring-cloud.version>2025.0.0</spring-cloud.version>
         <mapstruct.version>1.6.2</mapstruct.version>
         <lombok.version>1.18.34</lombok.version>
+        <jjwt.version>0.11.5</jjwt.version>
+        <dotenv.version>3.0.0</dotenv.version>
+        <lombok.mapstruct.binding.version>0.2.0</lombok.mapstruct.binding.version>
     </properties>
 
-    <!-- ================= DEPENDENCIES ================= -->
     <dependencies>
 
-        <!-- Spring Boot -->
+        <!-- Spring Boot core -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -45,10 +47,18 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
+
+        <!-- OAuth -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-oauth2-client</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+        </dependency>
+
+        <!-- Actuator -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
@@ -75,18 +85,18 @@
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
-            <version>0.11.5</version>
+            <version>${jjwt.version}</version>
         </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-impl</artifactId>
-            <version>0.11.5</version>
+            <version>${jjwt.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-jackson</artifactId>
-            <version>0.11.5</version>
+            <version>${jjwt.version}</version>
             <scope>runtime</scope>
         </dependency>
 
@@ -97,19 +107,25 @@
             <version>${mapstruct.version}</version>
         </dependency>
 
-        <!-- Lombok (CRITICAL) -->
+        <!-- Lombok (NE stavljati provided) -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
-            <scope>provided</scope>
+        </dependency>
+
+        <!-- Lombok + MapStruct binding (bitno za maven build) -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok-mapstruct-binding</artifactId>
+            <version>${lombok.mapstruct.binding.version}</version>
         </dependency>
 
         <!-- dotenv -->
         <dependency>
             <groupId>me.paulschwarz</groupId>
             <artifactId>spring-dotenv</artifactId>
-            <version>3.0.0</version>
+            <version>${dotenv.version}</version>
         </dependency>
 
         <!-- Tests -->
@@ -118,10 +134,14 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
 
     </dependencies>
 
-    <!-- ================= DEPENDENCY MANAGEMENT ================= -->
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -134,22 +154,26 @@
         </dependencies>
     </dependencyManagement>
 
-    <!-- ================= BUILD ================= -->
     <build>
         <plugins>
 
-            <!-- COMPILER (Lombok + MapStruct) -->
+            <!-- Compiler: Lombok + MapStruct -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.11.0</version>
                 <configuration>
-                    <release>23</release>
+                    <release>${java.version}</release>
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
                             <version>${lombok.version}</version>
+                        </path>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok-mapstruct-binding</artifactId>
+                            <version>${lombok.mapstruct.binding.version}</version>
                         </path>
                         <path>
                             <groupId>org.mapstruct</groupId>
@@ -160,10 +184,17 @@
                 </configuration>
             </plugin>
 
-            <!-- SPRING BOOT -->
+            <!-- Spring Boot -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
                 <configuration>
                     <layers enabled="true"/>
                 </configuration>

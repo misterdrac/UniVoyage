@@ -2,23 +2,24 @@
 FROM eclipse-temurin:23-jdk AS build
 WORKDIR /app
 
-# kopiraj wrapper prvo (da cache radi)
+# kopiraj samo build definicije (cache-friendly)
 COPY mvnw .
 COPY .mvn .mvn
 COPY pom.xml .
 
-# (Windows) osiguraj da mvnw ima LF i execute permission
 RUN chmod +x mvnw
 
-# download dependencies (brže na idući build)
-RUN ./mvnw -q -DskipTests dependency:go-offline
+# Maven cache
+RUN --mount=type=cache,target=/root/.m2 \
+    ./mvnw -q -DskipTests dependency:go-offline
 
-# kopiraj source i buildaj
+# kopiraj source
 COPY src src
-RUN ./mvnw -q -DskipTests clean package && \
-    ls -la target && \
+
+# build s cacheom
+RUN --mount=type=cache,target=/root/.m2 \
+    ./mvnw -q -DskipTests clean package && \
     JAR=$(ls target/*.jar | grep -v "original" | head -n 1) && \
-    echo "Using jar: $JAR" && \
     cp "$JAR" target/app.jar
 
 
@@ -26,9 +27,7 @@ RUN ./mvnw -q -DskipTests clean package && \
 FROM eclipse-temurin:23-jre
 WORKDIR /app
 
-# uzmi jar (Spring Boot fat jar)
 COPY --from=build /app/target/app.jar app.jar
-
 
 EXPOSE 8080
 ENTRYPOINT ["java","-jar","/app/app.jar"]
