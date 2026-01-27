@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Configuration
-public class CorsConfig {
+public class CorsConfigurationSource {
 
     @Value("${app.cors.allowed-origins}")
     private String allowedOrigins; // comma-separated
