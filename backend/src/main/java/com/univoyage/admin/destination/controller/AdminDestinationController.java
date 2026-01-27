@@ -22,6 +22,14 @@ import org.springframework.data.web.PageableDefault;
  * Supports pagination and searching for listing destinations.
  * Validates request bodies for create and update operations.
  * Handles exceptions and returns appropriate HTTP status codes.
+ * endpoints:
+ * - GET /api/admin/destinations : List destinations with optional search and pagination.
+ * - GET /api/admin/destinations/{id} : Get details of a specific destination by ID.
+ * - POST /api/admin/destinations : Create a new destination.
+ * - PUT /api/admin/destinations/{id} : Fully update an existing destination by ID.
+ * - PATCH /api/admin/destinations/{id} : Partially update an existing destination by ID.
+ * - DELETE /api/admin/destinations/{id} : Delete a destination by ID.
+ *
  */
 @RestController
 @RequestMapping("/api/admin/destinations")

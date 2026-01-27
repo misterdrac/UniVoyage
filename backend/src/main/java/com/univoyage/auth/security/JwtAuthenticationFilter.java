@@ -44,10 +44,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     // Public endpoints that don't require authentication
     private static final String[] PUBLIC_PATHS = {
             "/api/auth/register",
+            "/api/auth/register/",
             "/api/auth/login",
+            "/api/auth/login/",
             "/api/auth/google",
-            "/api/auth/google/callback"
+            "/api/auth/google/",
+            "/api/auth/google/callback",
+            "/api/auth/google/callback/"
     };
+
 
     private boolean csrfRequired(HttpServletRequest request) {
         String method = request.getMethod();
@@ -74,9 +79,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         // 1) Public paths bypass
-        String servletPath = request.getServletPath();
+        String path = request.getRequestURI(); // umjesto getServletPath()
+
         for (String publicPath : PUBLIC_PATHS) {
-            if (servletPath.equals(publicPath)) {
+            if (path.equals(publicPath) || path.startsWith(publicPath + "/")) {
                 filterChain.doFilter(request, response);
                 return;
             }

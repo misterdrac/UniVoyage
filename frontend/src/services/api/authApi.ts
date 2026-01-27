@@ -154,7 +154,6 @@ export const authApi: { [K in keyof AuthApi]: (this: ApiClient, ...args: Paramet
         // Normalize error messages for better UX
         const rawError = payload.error || response.error || 'Login failed';
         const normalizedError = normalizeAuthError(rawError);
-        
         return {
           success: false,
           error: normalizedError,
@@ -199,7 +198,6 @@ export const authApi: { [K in keyof AuthApi]: (this: ApiClient, ...args: Paramet
         // Normalize error messages for better UX
         const rawError = payload.error || res.error || res.message || 'Registration failed';
         const normalizedError = normalizeAuthError(rawError);
-        
         return { success: false, error: normalizedError }
       } catch (err: any) {
         // Handle ApiError and network errors

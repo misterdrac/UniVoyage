@@ -166,9 +166,15 @@ public class AuthService {
         UserEntity user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
 
+        // System.out.println("FOUND USER id=" + user.getId() + " role=" + user.getRole());
+        // System.out.println("HASH=" + user.getPasswordHash());
+
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
             return AuthPayload.fail("Invalid credentials");
         }
+
+        // boolean ok = passwordEncoder.matches(request.getPassword(), user.getPasswordHash());
+        // System.out.println("PASSWORD MATCH=" + ok);
 
         user.setDateOfLastSignin(Instant.now());
         userRepository.save(user);

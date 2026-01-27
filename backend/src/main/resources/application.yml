@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: UniVoyage
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:${HOST:localhost}}:${DB_PORT:5432}/${DB_NAME:univoyage_db}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+
+app:
+  jwt:
+    secret: ${JWT_SECRET}
+    ttl-seconds: 3600
+    issuer: univoyage
+    audience: web
+
+  cookies:
+    secure: false
+    same-site: Lax
+
+  cors:
+    allowed-origins:
+      - http://localhost:5173
+      - http://127.0.0.1:5173
+
+logging:
+  level:
+    org.springframework.security: INFO
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"

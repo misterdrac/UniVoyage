@@ -3,7 +3,6 @@ package com.univoyage.config;
 import com.univoyage.auth.security.JwtAuthenticationFilter;
 import com.univoyage.exception.security.RestAccessDeniedHandler;
 import com.univoyage.exception.security.RestAuthenticationEntryPoint;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,10 +16,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-/**
- * Security configuration class for setting up HTTP security,
- * including JWT authentication, CORS, CSRF protection, and endpoint authorization.
- */
 @Configuration
 @EnableMethodSecurity
 @RequiredArgsConstructor
@@ -30,23 +25,11 @@ public class SecurityConfiguration {
     private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
     private final RestAccessDeniedHandler restAccessDeniedHandler;
 
-    /**
-     * Bean for password encoding using BCrypt.
-     *
-     * @return PasswordEncoder instance
-     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    /**
-     * Configures the security filter chain.
-     *
-     * @param http HttpSecurity instance
-     * @return Configured SecurityFilterChain
-     * @throws Exception if an error occurs during configuration
-     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
@@ -56,12 +39,17 @@ public class SecurityConfiguration {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
+
+                        .requestMatchers("/error").permitAll()
+                        .requestMatchers("/actuator/**").permitAll()
+
+                        .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/register").permitAll()
                         .requestMatchers("/api/auth/google", "/api/auth/google/callback").permitAll()
+
                         .requestMatchers(HttpMethod.GET, "/api/destinations", "/api/destinations/**").permitAll()
+
                         .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "HEAD_ADMIN")
-                        .requestMatchers("/api/weather/**").authenticated()
-                        .requestMatchers("/api/ai/**").authenticated()
+
                         .requestMatchers("/api/auth/me").authenticated()
                         .requestMatchers("/api/auth/**").authenticated()
                         .anyRequest().authenticated()
