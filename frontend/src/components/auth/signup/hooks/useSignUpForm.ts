@@ -38,7 +38,6 @@ export const useSignUpForm = ({ onSuccess, signup }: UseSignUpFormProps) => {
 
   const [visitedCountries, setVisitedCountries] = useState<string[]>([]); // Optional field
 
-  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const passwordsMatch = useMemo(
@@ -80,7 +79,6 @@ export const useSignUpForm = ({ onSuccess, signup }: UseSignUpFormProps) => {
     setCountry(undefined);
     setVisitedCountries([]);
     setShowPasswordError(false);
-    setError("");
   }, []);
 
   const handleSubmit = useCallback(
@@ -88,14 +86,13 @@ export const useSignUpForm = ({ onSuccess, signup }: UseSignUpFormProps) => {
       e.preventDefault();
       e.stopPropagation();
       setShowPasswordError(true);
-      setError("");
 
       if (password !== confirmPassword) {
         return;
       }
 
       if (!country?.value) {
-        setError("Country is required");
+        toast.error("Country is required");
         return;
       }
 
@@ -129,12 +126,10 @@ export const useSignUpForm = ({ onSuccess, signup }: UseSignUpFormProps) => {
           onSuccess();
         } else {
           const errorMessage = result.error || "Sign up failed";
-          setError(errorMessage);
           toast.error(errorMessage);
         }
       } catch (error) {
         const errorMessage = "An unexpected error occurred. Please try again.";
-        setError(errorMessage);
         toast.error(errorMessage);
       } finally {
         setIsLoading(false);

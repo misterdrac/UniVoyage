@@ -93,6 +93,9 @@ const TripDetailPage = () => {
 
   const activeSectionData = TRIP_SECTIONS.find((s) => s.id === activeSection);
 
+  // Set dynamic title based on trip destination - must be called before any early returns
+  useDocumentTitle(trip?.destinationName || '', [trip?.destinationName]);
+
   const handleBack = useCallback(() => {
     navigate(ROUTE_PATHS.MY_TRIPS);
   }, [navigate]);
@@ -160,9 +163,6 @@ const TripDetailPage = () => {
   }
 
   const { currentStatus, duration, imageUrl } = tripData;
-
-  // Set dynamic title based on trip destination
-  useDocumentTitle(trip.destinationName, [trip.destinationName]);
 
   return (
     <div className="min-h-screen bg-background">
