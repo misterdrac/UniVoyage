@@ -6,6 +6,8 @@ services:
       POSTGRES_DB: univoyage_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: admin
+      POSTGRES_HOST_AUTH_METHOD: trust  # DODAJ OVO ZA TEST
+
     ports:
       - "5432:5432"
     volumes:
@@ -33,6 +35,6 @@ services:
       - DB_NAME=univoyage_db
       - DB_USERNAME=postgres
       - DB_PASSWORD=admin
-      - JWT_SECRET=tvoj_tajni_kljuc_ovdje
+
 volumes:
   pgdata:
