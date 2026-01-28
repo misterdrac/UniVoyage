@@ -51,7 +51,7 @@ public class SecurityConfiguration {
                         .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "HEAD_ADMIN")
 
                         .requestMatchers("/api/auth/me").authenticated()
-                        .requestMatchers("/api/auth/**").authenticated()
+                        .requestMatchers("/api/auth/login**", "/api/auth/register**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(eh -> eh
