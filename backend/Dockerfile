@@ -1,24 +1,34 @@
 FROM eclipse-temurin:23-jdk AS build
 WORKDIR /app
 
-# wrapper i pom iz backend foldera
+# Kopiramo Maven wrapper i pom.xml
+# Napomena: Putanje ovise o tome pokrećeš li 'docker build' iz root-a projekta
 COPY backend/mvnw .
 COPY backend/.mvn .mvn
 COPY backend/pom.xml .
 
 RUN chmod +x mvnw
-RUN ./mvnw -q -DskipTests dependency:go-offline
+# Dohvaćamo dependencije (ovaj layer će biti cache-iran dok se pom.xml ne promijeni)
+RUN ./mvnw dependency:go-offline
 
-# source iz backend foldera
+# Kopiramo cijeli source
 COPY backend/src src
 
-RUN ./mvnw -q -DskipTests clean package && \
-    JAR=$(ls target/*.jar | grep -v "original" | head -n 1) && \
-    cp "$JAR" target/app.jar
+# Buildamo aplikaciju i fiksiramo ime JAR-a da izbjegnemo greške s verzijama
+RUN ./mvnw clean package -DskipTests && \
+    mv target/*.jar target/app.jar
 
+# Finalni runtime stage
 FROM eclipse-temurin:23-jre
 WORKDIR /app
+
+# Kopiramo samo JAR iz build faze
 COPY --from=build /app/target/app.jar app.jar
 
+# Definiramo enviroment varijable koje Spring prepoznaje (defaulti)
+ENV SPRING_PROFILES_ACTIVE=docker
+
 EXPOSE 8080
-ENTRYPOINT ["java","-jar","/app/app.jar"]
+
+# Pokrećemo aplikaciju
+ENTRYPOINT ["java", "-jar", "app.jar"]

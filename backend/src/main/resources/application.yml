@@ -3,14 +3,19 @@ spring:
     name: UniVoyage
 
   datasource:
-    url: jdbc:postgresql://${DB_HOST:${HOST:localhost}}:${DB_PORT:5432}/${DB_NAME:univoyage_db}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    # Ovdje spajamo tvoje .env varijable u ispravan JDBC URL
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:univoyage_db}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:admin}
 
   flyway:
     enabled: true
     locations: classpath:db/migration
     baseline-on-migrate: true
+    # Flyway treba vlastite postavke ako datasource URL nije prepoznat
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:univoyage_db}
+    user: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:admin}
 
   jpa:
     hibernate:
@@ -19,14 +24,16 @@ spring:
 
 app:
   jwt:
-    secret: ${JWT_SECRET}
+    # Dodaj fallback za secret ako ga zaboraviš u .env (samo za dev!)
+    secret: ${JWT_SECRET:7a4b3c2d1e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a7b8c9d0e1f}
     ttl-seconds: 3600
     issuer: univoyage
     audience: web
 
   cookies:
-    secure: false
-    same-site: Lax
+    # Budući da ideš na produkciju/docker, postavi ovo na varijable
+    secure: ${COOKIE_SECURE:false}
+    same-site: ${COOKIE_SAMESITE:Lax}
 
   cors:
     allowed-origins:
@@ -36,9 +43,10 @@ app:
 logging:
   level:
     org.springframework.security: INFO
+    org.hibernate.SQL: DEBUG
 
 management:
   endpoints:
     web:
       exposure:
-        include: "*"
+        include: "health,info"

@@ -1,6 +1,7 @@
 services:
   postgres:
     image: postgres:16
+    container_name: univoyage_db_container
     environment:
       POSTGRES_DB: univoyage_db
       POSTGRES_USER: postgres
@@ -12,11 +13,12 @@ services:
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d univoyage_db"]
       interval: 5s
-      timeout: 3s
-      retries: 20
+      timeout: 5s
+      retries: 5
 
   backend:
     build: .
+    container_name: univoyage_backend
     depends_on:
       postgres:
         condition: service_healthy
@@ -25,12 +27,13 @@ services:
     env_file:
       - .env
     environment:
-      SPRING_PROFILES_ACTIVE: docker
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: univoyage_db
-      DB_USERNAME: postgres
-      DB_PASSWORD: admin
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/univoyage_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=admin
+      - SPRING_FLYWAY_URL=jdbc:postgresql://postgres:5432/univoyage_db
+      - SPRING_FLYWAY_USER=postgres
+      - SPRING_FLYWAY_PASSWORD=admin
 
 volumes:
   pgdata:
