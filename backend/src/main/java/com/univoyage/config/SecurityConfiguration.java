@@ -38,26 +38,34 @@ public class SecurityConfiguration {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        // 1. Dopusti OPTIONS za CORS preflight
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        .requestMatchers("/error").permitAll()
-                        .requestMatchers("/actuator/**").permitAll()
+                        // 2. Javne rute (Error, Actuator)
+                        .requestMatchers("/error", "/actuator/**").permitAll()
 
-                        .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/register").permitAll()
-                        .requestMatchers("/api/auth/google", "/api/auth/google/callback").permitAll()
+                        // 3. Specifične Auth rute koje MORAJU biti javne
+                        .requestMatchers("/api/auth/login/**", "/api/auth/register/**").permitAll()
+                        .requestMatchers("/api/auth/google/**").permitAll()
 
-                        .requestMatchers(HttpMethod.GET, "/api/destinations", "/api/destinations/**").permitAll()
+                        // 4. Javni dohvat destinacija
+                        .requestMatchers(HttpMethod.GET, "/api/destinations/**").permitAll()
 
+                        // 5. Admin rute
                         .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "HEAD_ADMIN")
 
+                        // 6. Sve ostalo pod /api/auth/ (poput /me) mora biti ulogirano
                         .requestMatchers("/api/auth/me").authenticated()
-                        .requestMatchers("/api/auth/login**", "/api/auth/register**").permitAll()
+                        .requestMatchers("/api/auth/**").authenticated()
+
+                        // 7. Sigurnosni "catch-all"
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(eh -> eh
                         .authenticationEntryPoint(restAuthenticationEntryPoint)
                         .accessDeniedHandler(restAccessDeniedHandler)
                 )
+                // Dodajemo filter na pravo mjesto
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

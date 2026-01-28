@@ -68,7 +68,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 .secure(true)      // u produkciji TRUE
                 .path("/")
                 .maxAge(0)
-                .sameSite("Lax")
+                .sameSite("None")
                 .build();
 
         ResponseCookie csrfCookie = ResponseCookie.from(CookieUtils.CSRF_COOKIE_NAME, "")
@@ -76,7 +76,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 .secure(true)
                 .path("/")
                 .maxAge(0)
-                .sameSite("Lax")
+                .sameSite("None")
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, jwtCookie.toString());
@@ -96,14 +96,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @SuppressWarnings("null") FilterChain filterChain
     ) throws ServletException, IOException {
 
-        // 1) Public paths bypass
-        String path = request.getRequestURI(); // umjesto getServletPath()
+        String path = request.getRequestURI();
 
-        for (String publicPath : PUBLIC_PATHS) {
-            if (path.equals(publicPath) || path.startsWith(publicPath + "/")) {
-                filterChain.doFilter(request, response);
-                return;
-            }
+        // Robusna provjera - ako putanja sadrži ove riječi, pusti bez tokena
+        if (path.contains("/api/auth/login") ||
+                path.contains("/api/auth/register") ||
+                path.contains("/api/auth/google") ||
+                path.contains("/api/destinations") ||
+                path.contains("/error") ||
+                path.contains("/actuator")) {
+            filterChain.doFilter(request, response);
+            return;
         }
 
         // 2) Extract JWT from HttpOnly cookie
