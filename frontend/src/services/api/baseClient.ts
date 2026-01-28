@@ -188,18 +188,24 @@ export class ApiClient {
    * @returns Headers object with required headers
    */
   public getHeaders(): HeadersInit {
-      const headers: HeadersInit = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      }
-
-      const csrfToken = this.getCsrfToken()
-      if (csrfToken) {
-        headers['X-CSRF-TOKEN'] = csrfToken
-      }
-
-      return headers
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
     }
+
+    // Dodajemo Authorization header ako imamo token u localStorageu
+    const token = this.getAuthToken()
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`
+    }
+
+    const csrfToken = this.getCsrfToken()
+    if (csrfToken) {
+      headers['X-CSRF-TOKEN'] = csrfToken
+    }
+
+    return headers
+  }
 
   /**
    * Makes HTTP request to API endpoint

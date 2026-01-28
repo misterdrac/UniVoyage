@@ -256,9 +256,13 @@ export const authApi: { [K in keyof AuthApi]: (this: ApiClient, ...args: Paramet
       // Listen for messages from the popup
       return new Promise((resolve, reject) => {
         const messageListener = (event: MessageEvent) => {
-          // Verify origin for security
-          if (event.origin !== window.location.origin) {
-            return
+          const allowedOrigins = [
+            window.location.origin,
+            'https://univoyage-production-d7c5.up.railway.app'
+          ];
+
+          if (!allowedOrigins.includes(event.origin)) {
+            return;
           }
 
           if (event.data.type === 'GOOGLE_OAUTH_SUCCESS') {
