@@ -9,10 +9,11 @@ spring:
     password: ${DB_PASSWORD:admin}
   flyway:
     enabled: true
-    # Flywayu eksplicitno dajemo isti URL jer on nekad ignorira datasource u Dockeru
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:univoyage_db}
     user: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:admin}
+    connect-retries: 10          # DODAJ OVO
+    connect-retries-interval: 5  # DODAJ OVO (čekaj 5s između pokušaja)
     locations: classpath:db/migration
     baseline-on-migrate: true
 
