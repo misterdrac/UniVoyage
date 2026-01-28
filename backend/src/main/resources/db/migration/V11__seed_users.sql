@@ -48,4 +48,6 @@ INSERT INTO users (
 ('dario.golubovic@univoyage.com', '$2a$15$zrxWh3CpsbJmb7lOmHb6LerDd3/w0c3enc4p1EncK37Vmif/tyCsK', 'LIK', 'koji je ovo radio', 'HEAD_ADMIN', 'DE', NOW(), NOW()),
 ('mrs.napravnik@uniri.hr', '$2a$15$ZVdqct0fJBZfiGW5INptTeZwtauHo.nysiczgsvoEvQ4Qko6qg3Q6', 'Mateica', 'iz Rwa', 'HEAD_ADMIN', 'IT', NOW(), NOW()),
 ('leonard.lecic@univoyage.com', '$2a$15$dOPlRPE1RwM3SOK6rSXOSe4fCg3EwwMkO1YBV66v0ik8dGbVj4VAa', 'Leca', 'Lecić', 'HEAD_ADMIN', 'RU', NOW(), NOW()),
-('bata.batic@uniri.hr', '$2a$15$AJmw86PCI/M32JYXzKdbO.fJkU3MuV5DgXgPguNu8yZ3RPtxeOMxe', 'Bata', 'Batić', 'HEAD_ADMIN', 'CN', NOW(), NOW());
+('bata.batic@uniri.hr', '$2a$15$AJmw86PCI/M32JYXzKdbO.fJkU3MuV5DgXgPguNu8yZ3RPtxeOMxe', 'Bata', 'Batić', 'HEAD_ADMIN', 'CN', NOW(), NOW())
+
+ON CONFLICT (email) DO NOTHING;
