@@ -3,16 +3,16 @@ WORKDIR /app
 
 # Kopiramo Maven wrapper i pom.xml
 # Napomena: Putanje ovise o tome pokrećeš li 'docker build' iz root-a projekta
-COPY backend/mvnw .
-COPY backend/.mvn .mvn
-COPY backend/pom.xml .
+COPY mvnw .
+COPY .mvn .mvn
+COPY pom.xml .
 
 RUN chmod +x mvnw
 # Dohvaćamo dependencije (ovaj layer će biti cache-iran dok se pom.xml ne promijeni)
 RUN ./mvnw dependency:go-offline
 
 # Kopiramo cijeli source
-COPY backend/src src
+COPY src src
 
 # Buildamo aplikaciju i fiksiramo ime JAR-a da izbjegnemo greške s verzijama
 RUN ./mvnw clean package -DskipTests && \
