@@ -3,19 +3,18 @@ spring:
     name: UniVoyage
 
   datasource:
-    # Ovdje spajamo tvoje .env varijable u ispravan JDBC URL
+    # Koristimo točna imena iz .env datoteke
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:univoyage_db}
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:admin}
-
   flyway:
     enabled: true
-    locations: classpath:db/migration
-    baseline-on-migrate: true
-    # Flyway treba vlastite postavke ako datasource URL nije prepoznat
+    # Flywayu eksplicitno dajemo isti URL jer on nekad ignorira datasource u Dockeru
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:univoyage_db}
     user: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:admin}
+    locations: classpath:db/migration
+    baseline-on-migrate: true
 
   jpa:
     hibernate:
