@@ -168,18 +168,38 @@ export class ApiClient {
    * @returns CSRF token string or null if not found
    */
   public getCsrfToken(): string | null {
-    if (typeof document === 'undefined') {
-      return null
+      if (typeof document === 'undefined') return null;
+
+      // Poboljšani regex za čitanje keksa
+      const name = `${API_CONSTANTS.CSRF_COOKIE_NAME}=`;
+      const ca = document.cookie.split(';');
+      for (let i = 0; i < ca.length; i++) {
+        let c = ca[i].trim();
+        if (c.indexOf(name) === 0) return c.substring(name.length, c.length);
+      }
+      return null;
     }
-    const cookieName = `${API_CONSTANTS.CSRF_COOKIE_NAME}=`
-    return (
-      document.cookie
-        ?.split(';')
-        .map((cookie) => cookie.trim())
-        .find((cookie) => cookie.startsWith(cookieName))
-        ?.substring(cookieName.length) ?? null
-    )
-  }
+
+    public getHeaders(): HeadersInit {
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      };
+
+      // 1. Šaljemo JWT iz localStorage (ako ga ima)
+      const token = this.getAuthToken();
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      // 2. Šaljemo CSRF token pročitan iz keksa
+      const csrfToken = this.getCsrfToken();
+      if (csrfToken) {
+        headers['X-CSRF-TOKEN'] = csrfToken;
+      }
+
+      return headers;
+    }
 
   /**
    * Builds HTTP headers for API requests

@@ -6,7 +6,9 @@ export const API_CONFIG = {
   // Base URL for API calls
   // In development, use relative path so Vite proxy handles it
   // In production, use full URL or environment variable
-  BASE_URL: import.meta.env.VITE_API_URL || 'https://univoyage-production-d7c5.up.railway.app/api',
+  //BASE_URL: import.meta.env.VITE_API_URL || 'https://univoyage-production-d7c5.up.railway.app/api',
+
+    BASE_URL: '/api',
   // API endpoints
   ENDPOINTS: {
     AUTH: {
