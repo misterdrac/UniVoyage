@@ -31,15 +31,12 @@ services:
       - .env
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - DB_HOST=postgres         # Ime servisa iz docker-compose
-      - DB_PORT=5432
-      - DB_NAME=univoyage_db
-      - DB_USERNAME=postgres
-      - DB_PASSWORD=admin
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/univoyage_db
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=admin
       - SPRING_FLYWAY_URL=jdbc:postgresql://postgres:5432/univoyage_db
+      - SPRING_FLYWAY_USER=postgres
+      - SPRING_FLYWAY_PASSWORD=admin
 
 volumes:
   pgdata:
