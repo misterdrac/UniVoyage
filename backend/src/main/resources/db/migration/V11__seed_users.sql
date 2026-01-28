@@ -1,7 +1,5 @@
--- =========================================
+
 -- Seed users (USER / ADMIN / HEAD_ADMIN)
--- All passwords are now BCrypt hashed.
--- =========================================
 
 INSERT INTO users (
     email,

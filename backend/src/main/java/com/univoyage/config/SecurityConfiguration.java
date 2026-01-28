@@ -38,34 +38,34 @@ public class SecurityConfiguration {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // 1. Dopusti OPTIONS za CORS preflight
+                        // Allow preflight CORS requests
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // 2. Javne rute (Error, Actuator)
+                        // Public routes for error handling and actuator
                         .requestMatchers("/error", "/actuator/**").permitAll()
 
-                        // 3. Specifične Auth rute koje MORAJU biti javne
+                        // Specific public routes for authentication
                         .requestMatchers("/api/auth/login/**", "/api/auth/register/**").permitAll()
                         .requestMatchers("/api/auth/google/**").permitAll()
 
-                        // 4. Javni dohvat destinacija
+                        // Public routes for destinations
                         .requestMatchers(HttpMethod.GET, "/api/destinations/**").permitAll()
 
-                        // 5. Admin rute
+                        // Admin routes
                         .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "HEAD_ADMIN")
 
-                        // 6. Sve ostalo pod /api/auth/ (poput /me) mora biti ulogirano
+                        // Everything under /api/auth/me requires authentication
                         .requestMatchers("/api/auth/me").authenticated()
                         .requestMatchers("/api/auth/**").authenticated()
 
-                        // 7. Sigurnosni "catch-all"
+                        // Secure catch-all
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(eh -> eh
                         .authenticationEntryPoint(restAuthenticationEntryPoint)
                         .accessDeniedHandler(restAccessDeniedHandler)
                 )
-                // Dodajemo filter na pravo mjesto
+                // We add our custom JWT security filter before the default UsernamePasswordAuthenticationFilter
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

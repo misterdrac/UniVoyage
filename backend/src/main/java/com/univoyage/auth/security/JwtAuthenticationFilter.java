@@ -65,7 +65,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         ResponseCookie jwtCookie = ResponseCookie.from(CookieUtils.JWT_COOKIE_NAME, "")
                 .httpOnly(true)
-                .secure(true)      // u produkciji TRUE
+                .secure(true)      // in prod TRUE
                 .path("/")
                 .maxAge(0)
                 .sameSite("None")
@@ -98,7 +98,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String path = request.getRequestURI();
 
-        // Robusna provjera - ako putanja sadrži ove riječi, pusti bez tokena
         if (path.contains("/api/auth/login") ||
                 path.contains("/api/auth/register") ||
                 path.contains("/api/auth/google") ||
