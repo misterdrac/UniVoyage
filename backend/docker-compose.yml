@@ -21,6 +21,7 @@ services:
   backend:
     build: .
     container_name: univoyage_backend
+    restart: always
     depends_on:
       postgres:
         condition: service_healthy
@@ -35,6 +36,10 @@ services:
       - DB_NAME=univoyage_db
       - DB_USERNAME=postgres
       - DB_PASSWORD=admin
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/univoyage_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=admin
+      - SPRING_FLYWAY_URL=jdbc:postgresql://postgres:5432/univoyage_db
 
 volumes:
   pgdata:
