@@ -1,15 +1,17 @@
 server:
   port: ${PORT:8080}
-  forward-headers-strategy: framework  # bitno iza reverse proxy (Vercel/Fly/Railway)
+  forward-headers-strategy: framework
 
 spring:
   config:
     activate:
       on-profile: prod
+
   datasource:
-    url: jdbc:postgresql://${DB_HOST:${PGHOST:localhost}}:${DB_PORT:${PGPORT:5432}}/${DB_NAME:${PGDATABASE:univoyage_db}}
-    username: ${DB_USERNAME:${PGUSER:postgres}}
-    password: ${DB_PASSWORD:${PGPASSWORD:admin}}
+    # Prvo gledamo puni URL koji smo stavili u Railway, ako ga nema, tek onda slažemo kockice
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://${DB_HOST:${PGHOST:localhost}}:${DB_PORT:${PGPORT:5432}}/${DB_NAME:${PGDATABASE:univoyage_db}}}
+    username: ${SPRING_DATASOURCE_USERNAME:${DB_USERNAME:${PGUSER:postgres}}}
+    password: ${SPRING_DATASOURCE_PASSWORD:${DB_PASSWORD:${PGPASSWORD:admin}}}
 
   jpa:
     hibernate:
@@ -18,9 +20,10 @@ spring:
 
   flyway:
     enabled: true
-    url: ${SPRING_DATASOURCE_URL} # DODAJ OVO: neka koristi isti URL kao i DB
-    user: ${DB_USERNAME:${PGUSER:postgres}}
-    password: ${DB_PASSWORD:${PGPASSWORD:admin}}
+    # Flyway sada sigurno koristi istu stvar kao i datasource
+    url: ${SPRING_DATASOURCE_URL}
+    user: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     locations: classpath:db/migration
     baseline-on-migrate: true
 
@@ -30,15 +33,15 @@ app:
     ttl-seconds: ${JWT_TTL_SECONDS:3600}
 
   cors:
-    # OBAVEZNO puna domena(e), comma-separated:
-    # https://univoyage-frontend.vercel.app,https://univoyage.com
-    allowed-origins: ${CORS_ALLOWED_ORIGINS}
+    # Ako zaboraviš varijablu, barem će lokalni frontend raditi
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
 
   cookies:
     secure: ${COOKIE_SECURE:true}
     same-site: ${COOKIE_SAMESITE:None}
-    domain: ${COOKIE_DOMAIN:}   # ostavi prazno ako nemaš isti apex/subdomain setup
+    domain: ${COOKIE_DOMAIN:}
 
 logging:
   level:
     org.springframework.security: INFO
+    org.hibernate.SQL: INFO
