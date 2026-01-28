@@ -188,21 +188,18 @@ export class ApiClient {
    * @returns Headers object with required headers
    */
   public getHeaders(): HeadersInit {
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      }
+
+      const csrfToken = this.getCsrfToken()
+      if (csrfToken) {
+        headers['X-CSRF-TOKEN'] = csrfToken
+      }
+
+      return headers
     }
-
-    // JWT is stored in HttpOnly cookie, so browser sends it automatically
-    // We don't need to send it as Bearer token
-
-    // CSRF token is in a readable cookie, we need to send it in header
-    const csrfToken = this.getCsrfToken()
-    if (csrfToken) {
-      headers['X-CSRF-TOKEN'] = csrfToken
-    }
-
-    return headers
-  }
 
   /**
    * Makes HTTP request to API endpoint
