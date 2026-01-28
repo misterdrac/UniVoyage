@@ -3,6 +3,9 @@ server:
   forward-headers-strategy: framework  # bitno iza reverse proxy (Vercel/Fly/Railway)
 
 spring:
+  config:
+    activate:
+      on-profile: prod
   datasource:
     url: jdbc:postgresql://${DB_HOST:${PGHOST:localhost}}:${DB_PORT:${PGPORT:5432}}/${DB_NAME:${PGDATABASE:univoyage_db}}
     username: ${DB_USERNAME:${PGUSER:postgres}}
@@ -15,6 +18,9 @@ spring:
 
   flyway:
     enabled: true
+    url: ${SPRING_DATASOURCE_URL} # DODAJ OVO: neka koristi isti URL kao i DB
+    user: ${DB_USERNAME:${PGUSER:postgres}}
+    password: ${DB_PASSWORD:${PGPASSWORD:admin}}
     locations: classpath:db/migration
     baseline-on-migrate: true
 
