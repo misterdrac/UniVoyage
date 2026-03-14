@@ -3,15 +3,14 @@ import { useLocation } from 'react-router-dom';
 import type { Option } from '@/components/ui/autocomplete';
 import type { DateRange } from 'react-day-picker';
 import { useAuth } from './AuthContext';
-import { useTrips } from './TripContext';
 
 /**
- * Trip data structure for trip creation
+ * Destination data for navigating to the plan trip page
  */
-interface TripData {
-  destination: Option | undefined;
-  departDate: string;
-  returnDate: string;
+interface PlanTripDestination {
+  destinationId: number;
+  destinationName: string;
+  destinationLocation: string;
 }
 
 /**
@@ -43,8 +42,8 @@ interface DestinationContextType {
   resetAll: () => void;
   /** Handle planning a trip from a destination card click */
   handlePlanTrip: (destination: { id: number; title: string; location: string }) => void;
-  /** Create a trip with selected destination and dates */
-  planTrip: (data: TripData) => Promise<{ success: boolean; error?: string }>;
+  /** Get destination data and check auth for navigating to the plan trip wizard */
+  getPlanTripDestination: () => PlanTripDestination | null;
   /** Scroll to top of page */
   scrollToTop: () => void;
   /** Set authentication dialog visibility */
@@ -68,8 +67,6 @@ export const useDestination = () => {
 
 interface DestinationProviderProps {
   children: ReactNode;
-  /** Optional callback when a trip is successfully created */
-  onPlanTrip?: (data: TripData) => void;
 }
 
 /**
@@ -85,7 +82,7 @@ interface DestinationProviderProps {
  * </DestinationProvider>
  * ```
  */
-export const DestinationProvider: React.FC<DestinationProviderProps> = ({ children, onPlanTrip }) => {
+export const DestinationProvider: React.FC<DestinationProviderProps> = ({ children }) => {
   const [selectedCountry, setSelectedCountry] = useState<Option | undefined>();
   const [selectedDestination, setSelectedDestination] = useState<Option | undefined>();
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
@@ -96,7 +93,6 @@ export const DestinationProvider: React.FC<DestinationProviderProps> = ({ childr
   const previousCountryRef = useRef<string>('');
   const animationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { user } = useAuth();
-  const { createTrip } = useTrips();
 
   // Watch for country changes and trigger loading animation
   useEffect(() => {
@@ -206,42 +202,26 @@ export const DestinationProvider: React.FC<DestinationProviderProps> = ({ childr
   }, [selectedCountry, scrollToTop]);
 
   /**
-   * Creates a trip with selected destination and dates
-   * Shows authentication dialog if user is not logged in
-   * Resets picker state on successful trip creation
-   * @param data - Trip data including destination and dates
-   * @returns Promise resolving to success status and optional error message
+   * Returns the currently selected destination data for navigating to the plan trip wizard.
+   * Shows authentication dialog if user is not logged in.
+   * Returns null if auth fails or destination is not selected.
    */
-  const planTripHandler = useCallback(async (data: TripData): Promise<{ success: boolean; error?: string }> => {
-    // Check if user is logged in
+  const getPlanTripDestination = useCallback((): PlanTripDestination | null => {
     if (!user) {
       setShowAuthDialog(true);
-      return { success: false, error: 'You must be logged in to create a trip' };
+      return null;
     }
 
-    // Check if destination and dates are selected
-    if (!data.destination || !data.departDate || !data.returnDate) {
-      return { success: false, error: 'Please select a destination and dates' };
+    if (!selectedDestination) {
+      return null;
     }
 
-    // Create trip
-    const result = await createTrip({
-      destinationId: parseInt(data.destination.value),
-      destinationName: data.destination.label,
-      destinationLocation: data.destination.location || '',
-      departureDate: data.departDate,
-      returnDate: data.returnDate,
-    });
-
-    if (result.success) {
-      // Reset form on success
-      resetAll();
-      // Also call the original callback if provided
-      onPlanTrip?.(data);
-    }
-
-    return result;
-  }, [user, createTrip, resetAll, onPlanTrip]);
+    return {
+      destinationId: parseInt(selectedDestination.value),
+      destinationName: selectedDestination.label,
+      destinationLocation: selectedDestination.location || '',
+    };
+  }, [user, selectedDestination]);
 
   const value: DestinationContextType = {
     selectedCountry,
@@ -256,7 +236,7 @@ export const DestinationProvider: React.FC<DestinationProviderProps> = ({ childr
     setDateRange: setDateRangeHandler,
     resetAll,
     handlePlanTrip,
-    planTrip: planTripHandler,
+    getPlanTripDestination,
     scrollToTop,
     setShowAuthDialog,
   };

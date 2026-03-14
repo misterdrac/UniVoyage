@@ -14,14 +14,14 @@ interface TripContextType {
   trips: Trip[];
   /** Loading state for trip operations */
   isLoading: boolean;
-  /** Create a new trip */
+  /** Create a new trip and return the created trip data */
   createTrip: (data: {
     destinationId: number;
     destinationName: string;
     destinationLocation: string;
     departureDate: string;
     returnDate: string;
-  }) => Promise<{ success: boolean; error?: string }>;
+  }) => Promise<{ success: boolean; trip?: Trip; error?: string }>;
   /** Delete a trip by ID */
   deleteTrip: (tripId: number) => Promise<{ success: boolean; error?: string }>;
   /** Refresh trips list from server */
@@ -108,7 +108,7 @@ export const TripProvider: React.FC<TripProviderProps> = ({ children }) => {
     destinationLocation: string;
     departureDate: string;
     returnDate: string;
-  }): Promise<{ success: boolean; error?: string }> => {
+  }): Promise<{ success: boolean; trip?: Trip; error?: string }> => {
     if (!user) {
       return { success: false, error: 'You must be logged in to create a trip' };
     }
@@ -119,7 +119,7 @@ export const TripProvider: React.FC<TripProviderProps> = ({ children }) => {
       if (result.success && result.trip) {
         await refreshTrips();
         toast.success(`Trip to ${data.destinationName} created successfully!`);
-        return { success: true };
+        return { success: true, trip: result.trip as Trip };
       } else {
         const error = result.error || 'Failed to create trip';
         toast.error(error);
