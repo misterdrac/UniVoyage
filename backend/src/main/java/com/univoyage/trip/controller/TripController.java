@@ -9,15 +9,12 @@ import com.univoyage.trip.dto.TripAccommodationRequest;
 import com.univoyage.trip.dto.TripAccommodationResponse;
 
 import jakarta.validation.Valid;
-
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
-import java.util.List;
-
 
 /**
  * Controller for managing trips.
@@ -53,7 +50,8 @@ public class TripController {
     @GetMapping("/{tripId}/budget")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getBudget(@PathVariable Long tripId) {
         Long userId = currentUser.id();
-        return ResponseEntity.ok(ApiResponse.ok(Map.of("budget", tripService.getBudget(userId, tripId))));
+        Object budget = tripService.getBudget(userId, tripId);
+        return ResponseEntity.ok(ApiResponse.ok(Map.of("budget", budget == null ? Map.of() : budget)));
     }
 
     @PutMapping("/{tripId}/budget")
@@ -91,8 +89,8 @@ public class TripController {
     public ResponseEntity<ApiResponse<Map<String, Object>>> getAccommodation(@PathVariable Long tripId) {
         Long userId = currentUser.id();
         TripAccommodationResponse acc = tripService.getAccommodation(userId, tripId);
-        return ResponseEntity.ok(ApiResponse.ok(Map.of("accommodation", acc)));
+        return ResponseEntity.ok(ApiResponse.ok(
+                Map.of("accommodation", acc == null ? Map.of() : acc)
+        ));
     }
-
-
 }

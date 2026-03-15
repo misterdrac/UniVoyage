@@ -1,9 +1,28 @@
 spring:
-  config:
-    activate:
-      on-profile: docker
-  
   datasource:
-    url: ${SPRING_DATASOURCE_URL}
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
+    url: jdbc:postgresql://postgres:5432/univoyage_db
+    username: postgres
+    password: admin
+
+  flyway:
+    enabled: true
+    url: jdbc:postgresql://postgres:5432/univoyage_db
+    user: postgres
+    password: admin
+    connect-retries: 10
+    connect-retries-interval: 5
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+
+logging:
+  file:
+    name: /app/logs/univoyage.log
+  level:
+    root: INFO
+    org.springframework.security: INFO
+    org.hibernate.SQL: DEBUG
