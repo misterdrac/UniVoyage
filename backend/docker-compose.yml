@@ -2,26 +2,40 @@ services:
   postgres:
     image: postgres:16
     container_name: univoyage_db_container
+    restart: unless-stopped
     environment:
       POSTGRES_DB: univoyage_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: admin
-      POSTGRES_HOST_AUTH_METHOD: trust  # DODAJ OVO ZA TEST
-
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - ./logs/postgres:/var/log/postgresql
+    command: >
+      postgres
+      -c logging_collector=on
+      -c log_destination=stderr
+      -c log_directory=/var/log/postgresql
+      -c log_filename=postgresql.log
+      -c log_truncate_on_rotation=on
+      -c log_rotation_age=1d
+      -c log_rotation_size=50MB
+      -c log_min_messages=info
+      -c log_min_error_statement=error
+      -c log_connections=on
+      -c log_disconnections=on
+      -c log_statement=none
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d univoyage_db"]
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 10
 
   backend:
     build: .
     container_name: univoyage_backend
-    restart: always
+    restart: unless-stopped
     depends_on:
       postgres:
         condition: service_healthy
@@ -30,13 +44,20 @@ services:
     env_file:
       - .env
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/univoyage_db
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=admin
-      - SPRING_FLYWAY_URL=jdbc:postgresql://postgres:5432/univoyage_db
-      - SPRING_FLYWAY_USER=postgres
-      - SPRING_FLYWAY_PASSWORD=admin
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/univoyage_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: admin
+      SPRING_FLYWAY_URL: jdbc:postgresql://postgres:5432/univoyage_db
+      SPRING_FLYWAY_USER: postgres
+      SPRING_FLYWAY_PASSWORD: admin
+    volumes:
+      - ./logs/spring:/app/logs
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'echo > /dev/tcp/127.0.0.1/8080'"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
 volumes:
   pgdata:
