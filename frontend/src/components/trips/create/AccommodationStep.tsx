@@ -19,7 +19,7 @@ export function AccommodationStep({ data, onChange }: AccommodationStepProps) {
   }
 
   return (
-    <div className="flex flex-col items-center gap-8">
+    <div className="flex flex-col items-center gap-6">
       <div className="text-center space-y-2">
         <h2 className="text-2xl font-semibold tracking-tight text-foreground">
           Where are you staying?

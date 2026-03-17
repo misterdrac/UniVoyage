@@ -83,17 +83,17 @@ export function TravelDatesStep({ departureDate, returnDate, onChange }: TravelD
   }
 
   return (
-    <div className="flex flex-col items-center gap-8">
-      <div className="text-center space-y-2">
-        <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+    <div className="flex flex-col items-center gap-4">
+      <div className="text-center space-y-1">
+        <h2 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
           When are you traveling?
         </h2>
         <p className="text-muted-foreground text-sm max-w-md mx-auto">
-          Select your departure and return dates. Trips can be up to 30 days long and must start within the next year.
+          Select your departure and return dates. Trips can be up to 30 days long.
         </p>
       </div>
 
-      <div className="rounded-2xl border border-border bg-card p-4 sm:p-6 shadow-sm">
+      <div className="rounded-2xl border border-border bg-card p-2 sm:p-3 shadow-sm">
         <Calendar
           mode="range"
           defaultMonth={dateRange?.from || new Date()}
@@ -103,19 +103,19 @@ export function TravelDatesStep({ departureDate, returnDate, onChange }: TravelD
           disabled={isDateDisabled}
           startMonth={getToday()}
           endMonth={getOneYearFromNow()}
-          className="rounded-2xl p-0"
+          className="rounded-2xl p-0 text-xs [--cell-size:--spacing(8)] sm:[--cell-size:--spacing(9)]"
         />
       </div>
 
-      <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 text-sm">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center gap-6 text-sm">
+        <div className="flex items-center gap-1.5">
           <span className="text-muted-foreground">Departure:</span>
           <span className="font-medium text-foreground">
             {formatDisplayDate(departureDate)}
           </span>
         </div>
         <div className="hidden sm:block h-4 w-px bg-border" />
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <span className="text-muted-foreground">Return:</span>
           <span className="font-medium text-foreground">
             {formatDisplayDate(returnDate)}

@@ -11,6 +11,7 @@ interface PlanTripDestination {
   destinationId: number;
   destinationName: string;
   destinationLocation: string;
+  destinationImageUrl?: string;
 }
 
 /**
@@ -168,7 +169,7 @@ export const DestinationProvider: React.FC<DestinationProviderProps> = ({ childr
    * Sets the destination and country, triggers animation, and scrolls to top
    * @param destination - Destination data from card click
    */
-  const handlePlanTrip = useCallback((destination: { id: number; title: string; location: string }) => {
+  const handlePlanTrip = useCallback((destination: { id: number; title: string; location: string; imageUrl?: string }) => {
     // Clear any existing animation timeout
     if (animationTimeoutRef.current) {
       clearTimeout(animationTimeoutRef.current);
@@ -177,7 +178,8 @@ export const DestinationProvider: React.FC<DestinationProviderProps> = ({ childr
     const option: Option = {
       value: destination.id.toString(),
       label: destination.title,
-      location: destination.location
+      location: destination.location,
+      imageUrl: destination.imageUrl || '',
     };
     
     const countryOption: Option = {
@@ -220,6 +222,7 @@ export const DestinationProvider: React.FC<DestinationProviderProps> = ({ childr
       destinationId: parseInt(selectedDestination.value),
       destinationName: selectedDestination.label,
       destinationLocation: selectedDestination.location || '',
+      destinationImageUrl: selectedDestination.imageUrl || undefined,
     };
   }, [user, selectedDestination]);
 

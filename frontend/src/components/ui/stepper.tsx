@@ -162,7 +162,11 @@ interface StepOptions {
   responsive?: boolean
   checkIcon?: IconType
   errorIcon?: IconType
-  onClickStep?: (step: number, setStep: (step: number) => void) => void
+  onClickStep?: (
+    step: number,
+    setStep: (step: number) => void,
+    activeStep: number
+  ) => void
   mobileBreakpoint?: string
   variant?: 'circle' | 'circle-alt' | 'line'
   expandVerticalSteps?: boolean
@@ -372,7 +376,11 @@ interface StepProps extends React.HTMLAttributes<HTMLDivElement> {
   errorIcon?: IconType
   isCompletedStep?: boolean
   isKeepError?: boolean
-  onClickStep?: (step: number, setStep: (step: number) => void) => void
+  onClickStep?: (
+    step: number,
+    setStep: (step: number) => void,
+    activeStep: number
+  ) => void
 }
 
 interface StepSharedProps extends StepProps {
@@ -382,6 +390,7 @@ interface StepSharedProps extends StepProps {
   hasVisited: boolean | undefined
   isError?: boolean
   isLoading?: boolean
+  clickable?: boolean
 }
 
 interface StepInternalConfig {
@@ -512,6 +521,7 @@ const VerticalStep = React.forwardRef<HTMLDivElement, VerticalStepProps>(
       orientation: _orientation,
       steps,
       setStep,
+      activeStep,
       isLastStep: _isLastStepCurrentStep,
       previousActiveStep,
     } = useStepper()
@@ -561,6 +571,7 @@ const VerticalStep = React.forwardRef<HTMLDivElement, VerticalStepProps>(
         ref={ref}
         className={cn(
           'stepper__vertical-step',
+          'data-[clickable=true]:cursor-pointer',
           verticalStepVariants({
             variant: variant?.includes('circle') ? 'circle' : 'line',
           }),
@@ -573,9 +584,9 @@ const VerticalStep = React.forwardRef<HTMLDivElement, VerticalStepProps>(
         data-invalid={localIsError && isCurrentStep}
         onClick={() => {
           if (onClickStep)
-            onClickStep(index || 0, setStep)
+            onClickStep(index || 0, setStep, activeStep)
           else
-            onClickStepGeneral?.(index || 0, setStep)
+            onClickStepGeneral?.(index || 0, setStep, activeStep)
         }}
       >
         <div
@@ -642,6 +653,7 @@ const HorizontalStep = React.forwardRef<HTMLDivElement, StepSharedProps>(
       styles,
       steps,
       setStep,
+      activeStep,
     } = useStepper()
 
     const {
@@ -674,6 +686,7 @@ const HorizontalStep = React.forwardRef<HTMLDivElement, StepSharedProps>(
         className={cn(
           'stepper__horizontal-step',
           'relative flex items-center transition-all duration-200',
+          'data-[clickable=true]:cursor-pointer',
           '[&:not(:last-child)]:flex-1',
           '[&:not(:last-child)]:after:transition-all [&:not(:last-child)]:after:duration-200',
           '[&:not(:last-child)]:after:h-[2px] [&:not(:last-child)]:after:bg-border',
@@ -691,7 +704,7 @@ const HorizontalStep = React.forwardRef<HTMLDivElement, StepSharedProps>(
         data-active={isCurrentStep}
         data-clickable={clickable}
         data-invalid={localIsError && isCurrentStep}
-        onClick={() => onClickStep?.(index || 0, setStep)}
+        onClick={() => onClickStep?.(index || 0, setStep, activeStep)}
         ref={ref}
       >
         <div
@@ -767,6 +780,7 @@ function StepButtonContainer({
         'h-[var(--step-icon-size)] w-[var(--step-icon-size)]',
         'flex items-center justify-center rounded-full border-2',
         'data-[clickable=true]:pointer-events-auto',
+        'data-[clickable=true]:cursor-pointer',
         'data-[active=true]:bg-primary data-[active=true]:border-primary data-[active=true]:text-primary-foreground',
         'data-[current=true]:border-primary data-[current=true]:bg-secondary',
         'data-[invalid=true]:bg-destructive data-[invalid=true]:border-destructive data-[invalid=true]:text-destructive-foreground',

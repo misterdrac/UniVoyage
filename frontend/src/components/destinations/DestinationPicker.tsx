@@ -63,7 +63,8 @@ export const DestinationPicker = ({ continent }: DestinationPickerProps) => {
     return filtered.map(dest => ({
       value: dest.id.toString(),
       label: dest.title,
-      location: dest.location
+      location: dest.location,
+      imageUrl: dest.imageUrl || '',
     }));
   }, [apiDestinations, selectedCountry, continent]);
 
