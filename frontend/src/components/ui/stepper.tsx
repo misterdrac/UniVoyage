@@ -88,7 +88,7 @@ function StepperProvider({ value, children }: StepperContextProviderProps) {
 // <---------- HOOKS ---------->
 
 function usePrevious<T>(value: T): T | undefined {
-  const ref = React.useRef<T>()
+  const ref = React.useRef<T>(undefined)
 
   React.useEffect(() => {
     ref.current = value
@@ -208,16 +208,16 @@ const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
     const {
       className,
       children,
-      orientation: orientationProp,
+      orientation: orientationProp = 'horizontal',
       state,
-      responsive,
+      responsive = true,
       checkIcon,
       errorIcon,
       onClickStep,
       mobileBreakpoint,
       expandVerticalSteps = false,
       initialStep = 0,
-      size,
+      size = 'md',
       steps,
       variant,
       styles,
@@ -307,12 +307,6 @@ const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
     )
   },
 )
-
-Stepper.defaultProps = {
-  size: 'md',
-  orientation: 'horizontal',
-  responsive: true,
-}
 
 function VerticalContent({ children }: { children: React.ReactNode }) {
   const { activeStep } = useStepper()
@@ -532,8 +526,6 @@ const VerticalStep = React.forwardRef<HTMLDivElement, VerticalStepProps>(
 
     const isLastStep = index === steps.length - 1
 
-    const active =
-      variant === 'line' ? isCompletedStep || isCurrentStep : isCompletedStep
     const checkIcon = checkIconProp || checkIconContext
     const errorIcon = errorIconProp || errorIconContext
 
@@ -575,7 +567,7 @@ const VerticalStep = React.forwardRef<HTMLDivElement, VerticalStepProps>(
           verticalStepVariants({
             variant: variant?.includes('circle') ? 'circle' : 'line',
           }),
-          isLastStep && 'gap-[var(--step-gap)]',
+          isLastStep && 'gap-(--step-gap)',
           styles?.['vertical-step'],
         )}
         data-completed={isCompletedStep}
@@ -651,7 +643,6 @@ const HorizontalStep = React.forwardRef<HTMLDivElement, StepSharedProps>(
       checkIcon: checkIconContext,
       errorIcon: errorIconContext,
       styles,
-      steps,
       setStep,
       activeStep,
     } = useStepper()
@@ -674,9 +665,6 @@ const HorizontalStep = React.forwardRef<HTMLDivElement, StepSharedProps>(
     const localIsError = isError || state === 'error'
 
     const opacity = hasVisited ? 1 : 0.8
-
-    const active =
-      variant === 'line' ? isCompletedStep || isCurrentStep : isCompletedStep
 
     const checkIcon = checkIconProp || checkIconContext
     const errorIcon = errorIconProp || errorIconContext
@@ -777,7 +765,7 @@ function StepButtonContainer({
       className={cn(
         'stepper__step-button-container',
         'pointer-events-none rounded-full p-0',
-        'h-[var(--step-icon-size)] w-[var(--step-icon-size)]',
+        'h-(--step-icon-size) w-(--step-icon-size)',
         'flex items-center justify-center rounded-full border-2',
         'data-[clickable=true]:pointer-events-auto',
         'data-[clickable=true]:cursor-pointer',
