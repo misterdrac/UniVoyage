@@ -281,8 +281,8 @@ const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
         <div
           ref={ref}
           className={cn(
-            'flex w-full flex-1 justify-between gap-4 text-center',
-            isVertical ? 'flex-col' : 'flex-row',
+            'flex w-full flex-1 gap-4 text-center',
+            isVertical ? 'flex-col' : 'flex-row flex-wrap justify-center sm:flex-nowrap sm:justify-between',
             variant === 'line' && 'gap-0',
             styles?.['main-container'],
             className,
@@ -687,15 +687,15 @@ const HorizontalStep = React.forwardRef<HTMLDivElement, StepSharedProps>(
           'stepper__horizontal-step',
           'relative flex items-center transition-all duration-200',
           'data-[clickable=true]:cursor-pointer',
-          '[&:not(:last-child)]:flex-1',
-          '[&:not(:last-child)]:after:transition-all [&:not(:last-child)]:after:duration-200',
-          '[&:not(:last-child)]:after:h-[2px] [&:not(:last-child)]:after:bg-border',
-          'data-[completed=true]:[&:not(:last-child)]:after:bg-primary',
-          'data-[invalid=true]:[&:not(:last-child)]:after:bg-destructive',
+          'sm:not-last:flex-1',
+          'sm:not-last:after:transition-all sm:not-last:after:duration-200',
+          'sm:not-last:after:h-[2px] sm:not-last:after:bg-border',
+          'sm:data-[completed=true]:not-last:after:bg-primary',
+          'sm:data-[invalid=true]:not-last:after:bg-destructive',
           variant === 'circle-alt'
-            && 'flex-1 flex-col justify-start [&:not(:last-child)]:after:relative [&:not(:last-child)]:after:order-[-1] [&:not(:last-child)]:after:start-[50%] [&:not(:last-child)]:after:end-[50%] [&:not(:last-child)]:after:top-[calc(var(--step-icon-size)/2)] [&:not(:last-child)]:after:w-[calc(100%-var(--step-icon-size)-var(--step-gap))]',
+            && 'sm:flex-1 flex-col justify-start sm:not-last:after:relative sm:not-last:after:-order-1 sm:not-last:after:start-[50%] sm:not-last:after:end-[50%] sm:not-last:after:top-[calc(var(--step-icon-size)/2)] sm:not-last:after:w-[calc(100%-var(--step-icon-size)-var(--step-gap))]',
           variant === 'circle'
-            && '[&:not(:last-child)]:after:me-2 [&:not(:last-child)]:after:ms-2 [&:not(:last-child)]:after:flex-1',
+            && 'sm:not-last:after:me-2 sm:not-last:after:ms-2 sm:not-last:after:flex-1',
           variant === 'line'
             && 'flex-1 flex-col border-t-[3px] data-[active=true]:border-primary',
           styles?.['horizontal-step'],

@@ -286,10 +286,11 @@ export default function PlanTripPage() {
             steps={STEPS}
             size="md"
             variant="circle"
+            responsive={false}
             onClickStep={handleStepClick}
             styles={{
-              'main-container': 'gap-6',
-              'horizontal-step': 'flex-1',
+              'main-container': 'gap-3 sm:gap-6',
+              'horizontal-step': 'sm:flex-1',
             }}
           >
             {STEPS.map(({ label }) => (
