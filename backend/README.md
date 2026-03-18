@@ -85,11 +85,11 @@ Before running the back-end of this project, ensure you have the following softw
   AMADEUS_CLIENT_SECRET=your_amadeus_client_secret
 ```
 
-### 1.4 (NOT IMPORTAINT NOW) Verify which Docker version do you have
+### 1.4 Verify which Docker version do you have
 ```bash
   docker -v
 ```
-- Make sure you have Docker 24.0.5 or higher installed. If not, please install the appropriate version, you can download Docker 24.0.5 here: https://docs.docker.com/get-docker/
+- Make sure you have Docker 24.0.5 or higher installed. If not, please install the appropriate version, you can download Docker 24.0.5 here: https://www.docker.com/products/docker-desktop/ . Docker is required to run the application, but it can be used to set up the database and other services in a containerized environment if you prefer that approach. Honestly it's not required to run the application, but it's preferable to use it since it will make the setup easier and faster, especially for the database.
 
 ## 2. Environment setup
 
@@ -106,6 +106,7 @@ Before running the back-end of this project, ensure you have the following softw
 ### 2.2 Database configuration
 - The application uses PostgreSQL as its database. You need to set up a PostgreSQL database instance and configure the connection settings in the `application.properties` file located in the `src/main/resources` directory.
 - Make sure you have downloaded and installed PostgreSQL 18 from https://www.postgresql.org/download/
+- Do NOT forget to set up a user with the appropriate permissions for the database you will create.
 - Create a new database for the application (e.g., `univoyage_db`).
 - Update the following properties in the `application.properties` file with your database details:
 ```properties
@@ -154,3 +155,21 @@ spring.datasource.password=${DB_PASSWORD}
 ```
 - You should be able to access the application at `http://localhost:8080` but you can't since our front-end is hosted in another port (5173) and it will communicate with the back-end through that port.
 - You as a user should not be able to access the back-end directly through the browser.
+
+### 3.3 Run via Docker (Highly Recommended)
+- If you prefer to run the application in a containerized environment, you can use Docker. Make sure you have Docker installed and running on your machine.
+- We have Dockerfile in our backend directory that defines how to build the Docker image for the back-end application. You can build and run the Docker container using the following commands:
+```bash
+  # Build image from Dockerfile and start the container
+  docker compose up --build -d
+
+  # Stop and remove containers
+  docker compose down
+```
+- to verify that the container is running, you can use the following command:
+```bash
+  docker ps
+```
+- or you can go to Docker Desktop and check the "Containers/Apps" section to see if the container is running. You should see Docker image named "backend" and under that image are two containers, one for the back-end application and another for the PostgreSQL database.
+- This will build the Docker image for the back-end application and start it in a container. The application will be accessible at `http://localhost:8080` and it will be able to communicate with the front-end running on port 5173.
+- Using Docker is highly recommended as it simplifies the setup process and ensures that all dependencies are correctly
