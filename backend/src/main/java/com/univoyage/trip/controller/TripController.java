@@ -24,6 +24,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class TripController {
 
+    private final TripCurrencyService tripCurrencyService;
     private final TripService tripService;
     private final CurrentUser currentUser;
 
@@ -92,5 +93,12 @@ public class TripController {
         return ResponseEntity.ok(ApiResponse.ok(
                 Map.of("accommodation", acc == null ? Map.of() : acc)
         ));
+    }
+
+    @GetMapping("/{tripId}/currency")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getCurrency(@PathVariable Long tripId) {
+        Long userId = currentUser.id();
+        TripCurrencyResponse currency = tripCurrencyService.getTripCurrency(userId, tripId);
+        return ResponseEntity.ok(ApiResponse.ok(Map.of("currency", currency)));
     }
 }
