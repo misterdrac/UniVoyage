@@ -1,5 +1,5 @@
 import React from 'react';
-import { HomePage, AboutPage, ContactPage, ProfilePage, MyTripsPage, TripDetailPage, PopularDestinationsPage, EuropeDestinationsPage, NorthAmericaDestinationsPage, SouthAmericaDestinationsPage, AsiaDestinationsPage, AfricaDestinationsPage, OceaniaDestinationsPage } from '@/pages';
+import { HomePage, AboutPage, ContactPage, ProfilePage, MyTripsPage, TripDetailPage, PlanTripPage, PopularDestinationsPage, EuropeDestinationsPage, NorthAmericaDestinationsPage, SouthAmericaDestinationsPage, AsiaDestinationsPage, AfricaDestinationsPage, OceaniaDestinationsPage } from '@/pages';
 import { AdminLoginPage, AdminDashboardPage, AdminUsersPage, AdminDestinationsPage } from '@/pages/admin';
 import GoogleCallbackPage from '@/pages/GoogleCallbackPage';
 import { MainLayout } from '@/components/layout';
@@ -116,6 +116,11 @@ export const routes: RouteConfig[] = [
     protected: true,
   },
   {
+    path: '/plan-trip',
+    element: <PlanTripPage />,
+    protected: true,
+  },
+  {
     path: '/my-trips',
     element: <MyTripsPage />,
     protected: true,
@@ -155,6 +160,7 @@ export const ROUTE_PATHS = {
   DESTINATIONS_AFRICA: getRoutePath('/destinations/africa'),
   DESTINATIONS_OCEANIA: getRoutePath('/destinations/oceania'),
   PROFILE: getRoutePath('/profile'),
+  PLAN_TRIP: getRoutePath('/plan-trip'),
   MY_TRIPS: getRoutePath('/my-trips'),
   TRIP_DETAIL: (id: number | string) => `/trips/${id}`,
   ADMIN: getRoutePath('/admin'),
