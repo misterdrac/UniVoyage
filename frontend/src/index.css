@@ -533,6 +533,8 @@
   --shadow-border-small: var(--ds-shadow-border-small);
   --shadow-menu: var(--ds-shadow-menu);
   --animate-fade-spin: fade-spin 1.2s linear infinite;
+  --animate-collapsible-down: collapsible-down 0.2s ease-out;
+  --animate-collapsible-up: collapsible-up 0.2s ease-out;
   --color-ds-amber-900: var(----ds-amber-900);
   --color-ds-amber-100: var(----ds-amber-100);
   --color-ds-red-100: var(----ds-red-100);
@@ -572,6 +574,22 @@
     }
   100% {
     opacity: 1;
+    }
+  }
+  @keyframes collapsible-down {
+  from {
+    height: 0;
+    }
+  to {
+    height: var(--radix-collapsible-content-height);
+    }
+  }
+  @keyframes collapsible-up {
+  from {
+    height: var(--radix-collapsible-content-height);
+    }
+  to {
+    height: 0;
     }
   }
 }
