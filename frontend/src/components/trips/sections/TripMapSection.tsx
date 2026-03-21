@@ -8,6 +8,7 @@ import type { Trip } from '@/types/trip'
 import { cn } from '@/lib/utils'
 import { usePointsOfInterest } from '@/hooks/usePointsOfInterest'
 import { PlacesLoadingCard } from './PlacesLoadingCard'
+import { searchNominatim } from '@/services/external'
 
 // Import Leaflet CSS
 import 'leaflet/dist/leaflet.css'
@@ -77,32 +78,6 @@ function MapRecenter({ center }: { center: LatLngExpression }) {
   return null
 }
 
-// Geocode city name using Nominatim (OSM's free geocoding service)
-async function geocodeCity(cityName: string): Promise<GeocodedLocation | null> {
-  try {
-    const response = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cityName)}&limit=1`,
-      {
-        headers: {
-          'User-Agent': 'UniVoyage/1.0',
-        },
-      }
-    )
-    const data = await response.json()
-    if (data && data.length > 0) {
-      return {
-        lat: parseFloat(data[0].lat),
-        lon: parseFloat(data[0].lon),
-        displayName: data[0].display_name,
-      }
-    }
-    return null
-  } catch (error) {
-    console.error('Geocoding error:', error)
-    return null
-  }
-}
-
 export function TripMapSection({ trip }: TripMapSectionProps) {
   const [location, setLocation] = useState<GeocodedLocation | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -134,7 +109,14 @@ export function TripMapSection({ trip }: TripMapSectionProps) {
       setIsLoading(true)
       setError(null)
 
-      const result = await geocodeCity(searchQuery)
+      const nominatim = await searchNominatim(searchQuery)
+      const result: GeocodedLocation | null = nominatim
+        ? {
+            lat: nominatim.lat,
+            lon: nominatim.lng,
+            displayName: nominatim.displayName ?? '',
+          }
+        : null
 
       if (!isMounted) return
 

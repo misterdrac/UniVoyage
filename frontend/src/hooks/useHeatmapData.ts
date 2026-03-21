@@ -1,17 +1,14 @@
 import { useEffect, useState, useRef } from 'react'
-import { API_CONFIG } from '@/config/apiConfig'
-
-interface HeatmapPointRaw {
-  destinationName: string
-  destinationLocation: string
-  tripCount: number
-}
+import { apiService } from '@/services/api'
+import type { HeatmapPointRaw } from '@/services/api/heatmapApi'
+import { searchNominatim } from '@/services/external'
 
 export interface HeatmapPoint {
   lat: number
   lng: number
   intensity: number
   name: string
+  location: string
 }
 
 const GEOCODE_CACHE_KEY = 'univoyage_geocode_cache'
@@ -28,22 +25,6 @@ function saveCache(cache: Record<string, { lat: number; lng: number }>) {
   try {
     localStorage.setItem(GEOCODE_CACHE_KEY, JSON.stringify(cache))
   } catch { /* quota exceeded -- ignore */ }
-}
-
-async function geocode(query: string): Promise<{ lat: number; lng: number } | null> {
-  try {
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`,
-      { headers: { 'User-Agent': 'UniVoyage/1.0' } }
-    )
-    const data = await res.json()
-    if (data?.[0]) {
-      return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) }
-    }
-    return null
-  } catch {
-    return null
-  }
 }
 
 function delay(ms: number) {
@@ -64,11 +45,12 @@ export function useHeatmapData() {
       setError(null)
 
       try {
-        const res = await fetch(`${API_CONFIG.BASE_URL}/heatmap`)
-        if (!res.ok) throw new Error('Failed to fetch heatmap data')
+        const heatmapRes = await apiService.getHeatmapPoints()
+        if (!heatmapRes.success) {
+          throw new Error(heatmapRes.error ?? 'Failed to fetch heatmap data')
+        }
 
-        const json = await res.json()
-        const raw: HeatmapPointRaw[] = json.data?.points ?? []
+        const raw: HeatmapPointRaw[] = heatmapRes.points ?? []
 
         if (raw.length === 0) {
           setPoints([])
@@ -77,7 +59,7 @@ export function useHeatmapData() {
         }
 
         const cache = loadCache()
-        const result: HeatmapPoint[] = []
+        const mappedPoints: HeatmapPoint[] = []
         let cacheUpdated = false
 
         for (const p of raw) {
@@ -87,21 +69,23 @@ export function useHeatmapData() {
           let coords = cache[key]
 
           if (!coords) {
-            const geocoded = await geocode(key)
+            const geocoded = await searchNominatim(key)
             if (geocoded) {
               coords = geocoded
               cache[key] = coords
               cacheUpdated = true
             }
-            await delay(1100)
+            //info: po policiyu nominatima ne bi trebali raditi vise od 1 request u sekundi
+            await delay(1000)
           }
 
           if (coords) {
-            result.push({
+            mappedPoints.push({
               lat: coords.lat,
               lng: coords.lng,
               intensity: p.tripCount,
               name: p.destinationName,
+              location: p.destinationLocation,
             })
           }
         }
@@ -109,7 +93,8 @@ export function useHeatmapData() {
         if (abortRef.current) return
 
         if (cacheUpdated) saveCache(cache)
-        setPoints(result)
+        mappedPoints.sort((a, b) => b.intensity - a.intensity)
+        setPoints(mappedPoints)
       } catch (err) {
         if (!abortRef.current) {
           setError(err instanceof Error ? err.message : 'Something went wrong')
