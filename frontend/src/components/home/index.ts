@@ -4,3 +4,4 @@ export { ExploreMoreButton } from './ExploreMoreButton';
 export { StatsDisplay } from './StatsDisplay';
 export { PopularDestinationsCarousel } from './PopularDestinationsCarousel';
 export { FeaturesSection } from './FeaturesSection';
+export { TravelHeatmapSection } from './TravelHeatmapSection';
