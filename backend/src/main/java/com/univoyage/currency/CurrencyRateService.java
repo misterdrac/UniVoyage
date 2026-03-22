@@ -1,13 +1,13 @@
 package com.univoyage.currency;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
+@Log4j2
 public class CurrencyRateService {
 
     private final ExchangeRateApiClient primaryClient;
@@ -17,27 +17,30 @@ public class CurrencyRateService {
     public double getRate(String base, String target) {
 
         if (base.equalsIgnoreCase(target)) {
+            log.debug("Same currency detected: {} -> {}, returning 1.0", base, target);
             return 1.0;
         }
 
-        // try primary API first
+        log.info("Fetching FX rate: {} -> {}", base, target);
+
+        // PRIMARY
         try {
             double rate = primaryClient.getPairRate(base, target);
-            log.info("FX rate fetched from PRIMARY API: {} -> {}", base, target);
+            log.info("FX rate from PRIMARY API: {} -> {} = {}", base, target, rate);
             return rate;
 
         } catch (Exception e) {
-            log.warn("Primary FX API failed: {} -> {}, switching to fallback", base, target);
+            log.warn("Primary FX API failed: {} -> {} | reason={}", base, target, e.getMessage());
         }
 
-        // try fallback API if primary fails
+        // FALLBACK
         try {
             double rate = fallbackClient.getRate(base, target);
-            log.info("FX rate fetched from FALLBACK API: {} -> {}", base, target);
+            log.info("FX rate from FALLBACK API: {} -> {} = {}", base, target, rate);
             return rate;
 
         } catch (Exception e) {
-            log.error("Fallback FX API also failed: {} -> {}", base, target);
+            log.error("Fallback FX API failed: {} -> {} | reason={}", base, target, e.getMessage(), e);
             throw new IllegalStateException("All currency providers failed");
         }
     }

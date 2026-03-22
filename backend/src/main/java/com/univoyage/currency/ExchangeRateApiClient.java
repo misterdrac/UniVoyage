@@ -1,14 +1,11 @@
 package com.univoyage.currency;
 
-import lombok.RequiredArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
-import java.util.Map;
-
 @Component
-@RequiredArgsConstructor
 public class ExchangeRateApiClient {
 
     private final RestClient restClient = RestClient.builder().build();
@@ -43,8 +40,14 @@ public class ExchangeRateApiClient {
 
     public static class ExchangeRateApiPairResponse {
         private String result;
+
+        @JsonProperty("base_code")
         private String baseCode;
+
+        @JsonProperty("target_code")
         private String targetCode;
+
+        @JsonProperty("conversion_rate")
         private Double conversionRate;
 
         public String getResult() { return result; }
