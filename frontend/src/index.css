@@ -1,7 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/* Fix #134: pointer cursor on all interactive/clickable elements */
+/* Pointer cursor on all clickable buttons and interactive elements */
 button,
 [role="button"],
 a,
