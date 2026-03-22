@@ -1,6 +1,21 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Pointer cursor on all clickable buttons and interactive elements */
+button,
+[role="button"],
+a,
+select,
+label,
+input[type="checkbox"],
+input[type="radio"],
+input[type="submit"],
+input[type="reset"],
+summary,
+[tabindex]:not([tabindex="-1"]) {
+  cursor: pointer;
+}
+
 /* Any linter warnings for @custom-variant, @theme, @layer, and @apply are false positives. */
 @custom-variant dark (&:is(.dark *));
 
