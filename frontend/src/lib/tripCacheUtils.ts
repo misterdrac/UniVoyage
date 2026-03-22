@@ -6,6 +6,7 @@ import { clearPlacesCacheForCity } from './placesCache'
 
 // Cache key prefixes
 const PACKING_SUGGESTIONS_PREFIX = 'packing-suggestions-'
+const PACKING_STATE_PREFIX = 'packing-'
 const ITINERARY_PREFIX = 'trip-itinerary-'
 const TRIP_BUDGET_PREFIX = 'trip-budget-'
 
@@ -19,6 +20,19 @@ export const clearPackingSuggestionsCache = (tripId: number): void => {
     localStorage.removeItem(storageKey)
   } catch (error) {
     console.error('Error clearing packing suggestions cache:', error)
+  }
+}
+
+/**
+ * Clear packing item state (checked items) for a specific trip
+ */
+export const clearPackingState = (tripId: number): void => {
+  try {
+    if (typeof window === 'undefined') return
+    const storageKey = `${PACKING_STATE_PREFIX}${tripId}`
+    localStorage.removeItem(storageKey)
+  } catch (error) {
+    console.error('Error clearing packing state:', error)
   }
 }
 
@@ -88,6 +102,7 @@ export const clearTripCache = (
   returnDate: string
 ): void => {
   clearPackingSuggestionsCache(tripId)
+  clearPackingState(tripId)
   clearItineraryPlanCache(tripId)
   clearWeatherForecastCache(cityName, locationName, departureDate, returnDate)
   // Clear POI cache for the destination city
