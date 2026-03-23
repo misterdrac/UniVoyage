@@ -6,6 +6,7 @@ import { clearPlacesCacheForCity } from './placesCache'
 
 // Cache key prefixes
 const PACKING_SUGGESTIONS_PREFIX = 'packing-suggestions-'
+const PACKING_STATE_PREFIX = 'packing-'
 const ITINERARY_PREFIX = 'trip-itinerary-'
 const TRIP_BUDGET_PREFIX = 'trip-budget-'
 
@@ -19,6 +20,19 @@ export const clearPackingSuggestionsCache = (tripId: number): void => {
     localStorage.removeItem(storageKey)
   } catch (error) {
     console.error('Error clearing packing suggestions cache:', error)
+  }
+}
+
+/**
+ * Clear packing item state (checked items) for a specific trip
+ */
+export const clearPackingState = (tripId: number): void => {
+  try {
+    if (typeof window === 'undefined') return
+    const storageKey = `${PACKING_STATE_PREFIX}${tripId}`
+    localStorage.removeItem(storageKey)
+  } catch (error) {
+    console.error('Error clearing packing state:', error)
   }
 }
 
@@ -88,6 +102,7 @@ export const clearTripCache = (
   returnDate: string
 ): void => {
   clearPackingSuggestionsCache(tripId)
+  clearPackingState(tripId)
   clearItineraryPlanCache(tripId)
   clearWeatherForecastCache(cityName, locationName, departureDate, returnDate)
   // Clear POI cache for the destination city
@@ -120,23 +135,24 @@ export const clearAllTripBudgets = (): void => {
 }
 
 /**
- * Clear all packing suggestions cache from localStorage
+ * Clear all packing-related data from localStorage
+ * This includes both packing suggestions and checklist state (all keys starting with 'packing-')
  */
-export const clearAllPackingSuggestions = (): void => {
+export const clearAllPackingLocalStorage = (): void => {
   try {
     if (typeof window === 'undefined') return
     const keysToRemove: string[] = []
     
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i)
-      if (key && key.startsWith(PACKING_SUGGESTIONS_PREFIX)) {
+      if (key && key.startsWith(PACKING_STATE_PREFIX)) {
         keysToRemove.push(key)
       }
     }
     
     keysToRemove.forEach(key => localStorage.removeItem(key))
   } catch (error) {
-    console.error('Error clearing all packing suggestions:', error)
+    console.error('Error clearing all packing data:', error)
   }
 }
 
@@ -168,6 +184,6 @@ export const clearAllItineraries = (): void => {
 export const clearAllTripData = (): void => {
   clearAllTripBudgets()
   clearAllItineraries()
-  clearAllPackingSuggestions()
+  clearAllPackingLocalStorage()
 }
 
