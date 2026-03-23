@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import type { ForecastDay } from '@/components/ui/weather-widget'
 import type { TripStatus } from '@/lib/tripStatusUtils'
 import { cn } from '@/lib/utils'
@@ -47,8 +48,10 @@ export function PackingSuggestionsSection({
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [cachedForecastSummary, setCachedForecastSummary] = useState<string | null>(null)
+  const [packedItems, setPackedItems] = useState<Set<string>>(new Set())
 
   const storageKey = useMemo(() => `packing-suggestions-${tripId}`, [tripId])
+  const packingStateKey = useMemo(() => `packing-${tripId}`, [tripId])
 
   const forecastSummary = useMemo(() => {
     if (!forecast || forecast.length === 0) return null
@@ -74,6 +77,34 @@ export function PackingSuggestionsSection({
     [forecastSummary, storageKey]
   )
 
+  const persistPackingState = useCallback(
+    (items: Set<string>) => {
+      if (typeof window === 'undefined') return
+      try {
+        localStorage.setItem(packingStateKey, JSON.stringify(Array.from(items)))
+      } catch (err) {
+        console.error('Failed to persist packing state', err)
+      }
+    },
+    [packingStateKey]
+  )
+
+  const togglePackedItem = useCallback(
+    (itemId: string) => {
+      setPackedItems((prev) => {
+        const updated = new Set(prev)
+        if (updated.has(itemId)) {
+          updated.delete(itemId)
+        } else {
+          updated.add(itemId)
+        }
+        persistPackingState(updated)
+        return updated
+      })
+    },
+    [persistPackingState]
+  )
+
   useEffect(() => {
     if (typeof window === 'undefined') return
     const cached = localStorage.getItem(storageKey)
@@ -92,6 +123,18 @@ export function PackingSuggestionsSection({
       console.error('Failed to load cached packing suggestions', err)
     }
   }, [storageKey])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const cached = localStorage.getItem(packingStateKey)
+    if (!cached) return
+    try {
+      const parsed = JSON.parse(cached) as string[]
+      setPackedItems(new Set(parsed))
+    } catch (err) {
+      console.error('Failed to load packing state', err)
+    }
+  }, [packingStateKey])
 
   const generateSuggestions = useCallback(async () => {
     if (!forecastSummary) {
@@ -180,16 +223,43 @@ export function PackingSuggestionsSection({
   const renderStructured = () => {
     if (!structuredSuggestions) return null
 
+    // Calculate total items and packed count
+    const totalItems = structuredSuggestions.categories.reduce((sum, cat) => sum + (cat.items?.length ?? 0), 0)
+    const packedCount = Array.from(packedItems).filter(itemId => {
+      const [, catIdx, itemIdx] = itemId.split('|')
+      return catIdx && itemIdx
+    }).length
+
+    // Calculate progress percentage
+    const progressPercentage = totalItems > 0 ? Math.round((packedCount / totalItems) * 100) : 0
+
     return (
       <div className="space-y-4">
         <div className="flex items-start gap-2 text-sm text-muted-foreground">
           <Sparkles className="h-4 w-4 text-primary mt-0.5" />
           <p>{structuredSuggestions.summary}</p>
         </div>
-        <div className="grid gap-4 md:grid-cols-2">
-          {structuredSuggestions.categories.map((category, idx) => (
+
+        {/* Progress tracking */}
+        <div className="space-y-2">
+          <div className="flex justify-between items-center text-sm">
+            <span className="font-medium text-foreground">Packing Progress</span>
+            <span className="text-sm text-muted-foreground">
+              {packedCount}/{totalItems} packed
+            </span>
+          </div>
+          <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
             <div
-              key={`${category.title}-${idx}`}
+              className="bg-primary h-full transition-all duration-300 ease-out"
+              style={{ width: `${progressPercentage}%` }}
+            />
+          </div>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          {structuredSuggestions.categories.map((category, catIdx) => (
+            <div
+              key={`${category.title}-${catIdx}`}
               className="rounded-lg border bg-card/60 p-4 shadow-sm"
             >
               <div className="flex items-center gap-2 mb-3">
@@ -200,14 +270,31 @@ export function PackingSuggestionsSection({
                   {category.title}
                 </h4>
               </div>
-              <ul className="space-y-1 text-sm text-muted-foreground">
-                {category.items?.map((item, itemIdx) => (
-                  <li key={`${item}-${itemIdx}`} className="flex items-start gap-2">
-                    <span className="mt-1 inline-block h-1.5 w-1.5 rounded-full bg-primary" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
+              <div className="space-y-2">
+                {category.items?.map((item, itemIdx) => {
+                  const itemId = `${tripId}|${catIdx}|${itemIdx}`
+                  const isPacked = packedItems.has(itemId)
+                  return (
+                    <div key={`${item}-${itemIdx}`} className="flex items-start gap-3">
+                      <Checkbox
+                        id={itemId}
+                        checked={isPacked}
+                        onCheckedChange={() => togglePackedItem(itemId)}
+                        className="mt-1"
+                      />
+                      <label
+                        htmlFor={itemId}
+                        className={cn(
+                          'text-sm text-muted-foreground cursor-pointer flex-1 leading-relaxed',
+                          isPacked && 'line-through text-muted-foreground/50'
+                        )}
+                      >
+                        {item}
+                      </label>
+                    </div>
+                  )
+                })}
+              </div>
             </div>
           ))}
         </div>
