@@ -14,6 +14,7 @@ import {
   Map,
   Cloud,
   Loader2,
+  CircleDollarSign,
 } from 'lucide-react';
 import { calculateTripStatus } from '@/lib/tripUtils';
 import { calculateDurationInDays } from '@/lib/dateUtils';
@@ -31,13 +32,14 @@ import {
   TripPointsOfInterestSection,
   TripAccommodationSection,
   TripMapSection,
+  TripCurrencySection,
 } from '@/components/trips';
 import type { TripSectionDefinition } from '@/components/trips';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useDeleteTrip } from '@/hooks/useDeleteTrip';
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
-type Section = 'overview' | 'budget' | 'accommodation' | 'things-to-visit' | 'map' | 'weather' | 'itinerary';
+type Section = 'overview' | 'budget' | 'accommodation' | 'things-to-visit' | 'map' | 'weather' | 'itinerary' | 'currency';
 
 // Sections configuration - constant outside component for better performance
 const TRIP_SECTIONS: TripSectionDefinition<Section>[] = [
@@ -48,6 +50,7 @@ const TRIP_SECTIONS: TripSectionDefinition<Section>[] = [
   { id: 'map', label: 'Map', icon: Map },
   { id: 'weather', label: 'Weather', icon: Cloud },
   { id: 'itinerary', label: 'Itinerary', icon: Calendar },
+  { id: 'currency', label: 'Currency', icon: CircleDollarSign },
 ];
 
 // Valid section IDs for quick lookup - constant
@@ -225,6 +228,10 @@ const TripDetailPage = () => {
 
                 {activeSection === 'itinerary' && (
                   <TripItinerarySection trip={trip} currentStatus={currentStatus} />
+                )}
+
+                {activeSection === 'currency' && (
+                  <TripCurrencySection />
                 )}
               </TripSectionCard>
             </div>
