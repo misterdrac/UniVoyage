@@ -1,4 +1,4 @@
-import { PopularDestinationsCarousel, FeaturesSection, HeroSection } from "@/components/home";
+import { PopularDestinationsCarousel, FeaturesSection, HeroSection, TravelHeatmapSection } from "@/components/home";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 export default function HomePage() {
@@ -7,6 +7,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-background">
       <HeroSection />
       <PopularDestinationsCarousel />
+      <TravelHeatmapSection />
       <FeaturesSection />
     </div>
   );

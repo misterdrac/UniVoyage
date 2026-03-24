@@ -9,6 +9,7 @@ export type { PlacesApi } from './placesApi';
 export type { AiApi } from './aiApi';
 export type { HotelsApi } from './hotelsApi';
 export type { AdminApi } from './adminApi';
+export type { HeatmapApi, HeatmapPointRaw } from './heatmapApi';
 export type { ApiClient } from './baseClient';
 export type { BackendUserDto } from './types';
 

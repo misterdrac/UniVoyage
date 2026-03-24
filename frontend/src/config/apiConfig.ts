@@ -51,6 +51,9 @@ export const API_CONFIG = {
               SEARCH: '/hotels/search',
               STATUS: '/hotels/status',
             },
+            HEATMAP: {
+              GET: '/heatmap',
+            },
           },
   
   // Request timeout

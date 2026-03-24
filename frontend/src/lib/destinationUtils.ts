@@ -25,6 +25,20 @@ export const getDestinationById = (destinationsList: Destination[], id: number):
   return destinationsList.find(destination => destination.id === id);
 };
 
+const norm = (s: string) => s.trim().toLowerCase()
+
+export function findDestinationByHeatmapLabels(
+  destinationName: string,
+  destinationLocation: string,
+  destinationsList: Destination[]
+): Destination | undefined {
+  const n = norm(destinationName)
+  const l = norm(destinationLocation)
+  const exact = destinationsList.find((d) => norm(d.title) === n && norm(d.location) === l)
+  if (exact) return exact
+  return destinationsList.find((d) => norm(d.title) === n)
+}
+
 /**
  * Filters destinations by continent
  */
