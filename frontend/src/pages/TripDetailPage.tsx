@@ -231,7 +231,7 @@ const TripDetailPage = () => {
                 )}
 
                 {activeSection === 'currency' && (
-                  <TripCurrencySection />
+                  <TripCurrencySection trip={trip} />
                 )}
               </TripSectionCard>
             </div>
