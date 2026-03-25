@@ -10,10 +10,10 @@ public class ExchangeRateHostClient {
 
     private final RestClient restClient = RestClient.builder().build();
 
-    @Value("${app.currency.fallback.key}")
+    @Value("${APP_CURRENCY_FALLBACK_KEY}")
     private String apiKey;
 
-    @Value("${app.currency.fallback.base-url:https://api.exchangerate.host}")
+    @Value("${APP_CURRENCY_FALLBACK_BASE_URL:https://api.exchangerate.host}")
     private String baseUrl;
 
     public double getRate(String base, String target) {

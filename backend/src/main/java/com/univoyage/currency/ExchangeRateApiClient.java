@@ -8,13 +8,18 @@ import org.springframework.web.client.RestClient;
 @Component
 public class ExchangeRateApiClient {
 
-    private final RestClient restClient = RestClient.builder().build();
+    private final RestClient restClient;
+    private final String apiKey;
+    private final String baseUrl;
 
-    @Value("${app.currency.api.key}")
-    private String apiKey;
-
-    @Value("${app.currency.api.base-url:https://v6.exchangerate-api.com/v6}")
-    private String baseUrl;
+    public ExchangeRateApiClient(
+            @Value("${APP_CURRENCY_API_KEY}") String apiKey,
+            @Value("${APP_CURRENCY_API_BASE_URL:https://v6.exchangerate-api.com/v6}") String baseUrl
+    ) {
+        this.restClient = RestClient.builder().build();
+        this.apiKey = apiKey;
+        this.baseUrl = baseUrl;
+    }
 
     public double getPairRate(String baseCurrency, String targetCurrency) {
         ExchangeRateApiPairResponse response = restClient.get()
