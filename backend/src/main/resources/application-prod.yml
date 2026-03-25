@@ -41,6 +41,12 @@ app:
     same-site: ${COOKIE_SAMESITE:None}
     domain: ${COOKIE_DOMAIN:}
 
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
 logging:
   level:
     org.springframework.security: INFO

@@ -18,5 +18,11 @@ public class Country {
 
     @Column(name = "country_name", nullable = false, unique = true, length = 100)
     private String countryName;
+
+    @Column(name = "currency_code", length = 3)
+    private String currencyCode;
+
+    @Column(name = "currency_name", length = 100)
+    private String currencyName;
 }
 

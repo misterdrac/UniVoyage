@@ -20,5 +20,6 @@ public record AdminUpdateDestinationRequest(
         String overview,
         Integer budgetPerDay,
         String whyVisit,
-        @NotNull List<String> studentPerks
+        @NotNull List<String> studentPerks,
+        @Size(min = 2, max = 2) String countryIsoCode
 ) {}

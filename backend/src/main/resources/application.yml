@@ -23,6 +23,14 @@ spring:
     show-sql: true
 
 app:
+  currency:
+    # Spec-style key; EXCHANGE_RATE_API_KEY still sets it via env (see .env.example)
+    api:
+      key: ${EXCHANGE_RATE_API_KEY:}
+    exchangerate-api:
+      api-key: ${app.currency.api.key:}
+      base-url: ${EXCHANGE_RATE_API_URL:https://v6.exchangerate-api.com/v6}
+
   jwt:
     # Dodaj fallback za secret ako ga zaboraviš u .env (samo za dev!)
     secret: ${JWT_SECRET:7a4b3c2d1e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a7b8c9d0e1f}

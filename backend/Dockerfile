@@ -1,4 +1,4 @@
-FROM eclipse-temurin:23-jdk AS build
+FROM eclipse-temurin:24-jdk AS build
 WORKDIR /app
 
 COPY mvnw .
@@ -13,7 +13,7 @@ COPY src src
 RUN ./mvnw clean package -DskipTests && \
     mv target/*.jar target/app.jar
 
-FROM eclipse-temurin:23-jre
+FROM eclipse-temurin:24-jre
 WORKDIR /app
 
 COPY --from=build /app/target/app.jar app.jar

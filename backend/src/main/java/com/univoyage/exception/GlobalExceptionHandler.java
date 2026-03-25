@@ -62,4 +62,19 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiResponse<Object>> handleIllegalArgument(IllegalArgumentException ex) {
+        return new ResponseEntity<>(ApiResponse.fail(ex.getMessage()), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(UnprocessableEntityException.class)
+    public ResponseEntity<ApiResponse<Object>> handleUnprocessable(UnprocessableEntityException ex) {
+        return new ResponseEntity<>(ApiResponse.fail(ex.getMessage()), HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    @ExceptionHandler(ExternalServiceException.class)
+    public ResponseEntity<ApiResponse<Object>> handleExternalService(ExternalServiceException ex) {
+        return new ResponseEntity<>(ApiResponse.fail(ex.getMessage()), HttpStatus.BAD_GATEWAY);
+    }
 }

@@ -22,4 +22,6 @@ public class DestinationResponse {
     private Integer budgetPerDay;
     private String whyVisit;
     private List<String> studentPerks;
+    /** ISO 3166-1 alpha-2; null if not linked to a country. */
+    private String countryIsoCode;
 }

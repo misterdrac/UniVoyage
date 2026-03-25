@@ -4,6 +4,8 @@ import com.univoyage.destination.dto.CreateDestinationRequest;
 import com.univoyage.destination.dto.DestinationResponse;
 import com.univoyage.destination.model.DestinationEntity;
 import com.univoyage.destination.repository.DestinationRepository;
+import com.univoyage.reference.country.model.Country;
+import com.univoyage.reference.country.repository.CountryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +22,7 @@ import java.util.List;
 public class DestinationService {
 
     private final DestinationRepository destinationRepository;
+    private final CountryRepository countryRepository;
 
     /**
      * Retrieve all destinations.
@@ -53,16 +56,31 @@ public class DestinationService {
      */
     @Transactional
     public DestinationResponse create(CreateDestinationRequest req) {
+        Country country = resolveCountry(req.getCountryIsoCode());
         DestinationEntity entity = destinationRepository
                 .findByNameAndLocation(req.getName().trim(), req.getLocation().trim())
                 .orElseGet(() -> destinationRepository.save(
                         DestinationEntity.builder()
                                 .name(req.getName().trim())
                                 .location(req.getLocation().trim())
+                                .country(country)
                                 .createdAt(Instant.now())
                                 .build()
                 ));
+        if (country != null && entity.getCountry() == null) {
+            entity.setCountry(country);
+            entity = destinationRepository.save(entity);
+        }
         return toDto(entity);
+    }
+
+    private Country resolveCountry(String iso) {
+        if (iso == null || iso.isBlank()) {
+            return null;
+        }
+        String code = iso.trim().toUpperCase();
+        return countryRepository.findByIsoCode(code)
+                .orElseThrow(() -> new IllegalArgumentException("Unknown country code: " + code));
     }
 
     /**
@@ -83,6 +101,7 @@ public class DestinationService {
                 .budgetPerDay(d.getBudgetPerDay())
                 .whyVisit(d.getWhyVisit())
                 .studentPerks(d.getStudentPerks())
+                .countryIsoCode(d.getCountry() != null ? d.getCountry().getIsoCode() : null)
                 .build();
     }
 }

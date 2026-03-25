@@ -2,9 +2,15 @@ spring:
   datasource:
     url: jdbc:tc:postgresql:18.1:///univoyage_test
     driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+    username: test
+    password: test
 
+  # application.yml sets spring.flyway.url to local DB; override so Flyway uses the same TC DB as the DataSource
   flyway:
     enabled: true
+    url: jdbc:tc:postgresql:18.1:///univoyage_test
+    user: test
+    password: test
 
   jpa:
     hibernate:

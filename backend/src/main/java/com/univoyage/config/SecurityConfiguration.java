@@ -44,6 +44,14 @@ public class SecurityConfiguration {
                         // Public routes for error handling and actuator
                         .requestMatchers("/error", "/actuator/**").permitAll()
 
+                        // Swagger UI + OpenAPI JSON (SpringDoc)
+                        .requestMatchers(
+                                "/swagger-ui.html",
+                                "/swagger-ui/**",
+                                "/v3/api-docs",
+                                "/v3/api-docs/**"
+                        ).permitAll()
+
                         // Specific public routes for authentication
                         .requestMatchers("/api/auth/login/**", "/api/auth/register/**").permitAll()
                         .requestMatchers("/api/auth/google/**").permitAll()

@@ -83,6 +83,9 @@ Before running the back-end of this project, ensure you have the following softw
   # Amadeus API
   AMADEUS_CLIENT_ID=your_amadeus_client_id
   AMADEUS_CLIENT_SECRET=your_amadeus_client_secret
+
+  # ExchangeRate-API (trip currency / FX)
+  EXCHANGE_RATE_API_KEY=your_exchangerate_api_key
 ```
 
 ### 1.4 Verify which Docker version do you have
@@ -156,7 +159,14 @@ spring.datasource.password=${DB_PASSWORD}
 - You should be able to access the application at `http://localhost:8080` but you can't since our front-end is hosted in another port (5173) and it will communicate with the back-end through that port.
 - You as a user should not be able to access the back-end directly through the browser.
 
-### 3.3 Run via Docker (Highly Recommended)
+### 3.3 API docs (Swagger UI)
+- With the default profile (not `prod`), interactive OpenAPI docs are available:
+  - **Swagger UI:** [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
+  - **OpenAPI JSON:** [http://localhost:8080/v3/api-docs](http://localhost:8080/v3/api-docs)
+- Call `POST /api/auth/login` or `POST /api/auth/register`, copy the JWT from the response, then in Swagger click **Authorize**, choose **bearer-jwt**, and paste `Bearer <token>` or just the raw token (depending on UI; usually paste the token only).
+- The `prod` profile **disables** Swagger UI and `/v3/api-docs` (see `application-prod.yml`).
+
+### 3.4 Run via Docker (Highly Recommended)
 - If you prefer to run the application in a containerized environment, you can use Docker. Make sure you have Docker installed and running on your machine.
 - We have Dockerfile in our backend directory that defines how to build the Docker image for the back-end application. You can build and run the Docker container using the following commands:
 ```bash

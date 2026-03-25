@@ -6,6 +6,7 @@ CREATE TABLE destinations (
     title VARCHAR(200) NOT NULL,
     location VARCHAR(100) NOT NULL,
     continent VARCHAR(50) NOT NULL,
+    country_iso_code VARCHAR(2) NOT NULL REFERENCES countries(iso_code),
 
     image_url TEXT,
     image_alt TEXT,
@@ -25,3 +26,4 @@ CREATE TABLE destinations (
 CREATE INDEX IF NOT EXISTS idx_destinations_continent ON destinations(continent);
 CREATE INDEX IF NOT EXISTS idx_destinations_location ON destinations(location);
 CREATE INDEX IF NOT EXISTS idx_destinations_title ON destinations(title);
+CREATE INDEX IF NOT EXISTS idx_destinations_country_iso ON destinations (country_iso_code);

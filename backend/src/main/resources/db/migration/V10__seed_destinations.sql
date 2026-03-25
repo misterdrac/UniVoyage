@@ -1,8 +1,8 @@
--- V8__seed_destinations.sql
+-- V10__seed_destinations.sql
 -- Seed destinations (FULL + MINIMAL) with fixed IDs (matching FE)
 
 INSERT INTO destinations (
-    id, title, location, continent,
+    id, title, location, continent, country_iso_code,
     image_url, image_alt,
     overview, budget_per_day, why_visit, student_perks
 )
@@ -10,7 +10,7 @@ VALUES
 -- ===================================================================
 -- FULL DESTINATIONS (IDs 1-30)
 -- ===================================================================
-(1, 'Paris', 'France', 'Europe',
+(1, 'Paris', 'France', 'Europe', 'FR',
  'https://images.unsplash.com/photo-1550340499-a6c60fc8287c?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170',
  'Paris, France',
  'The City of Light, home to the Eiffel Tower, Louvre Museum, and world-class cuisine. Experience romance, art, and history in every corner.',
@@ -24,7 +24,7 @@ VALUES
    'Free walking tours available daily'
  ]),
 
-(2, 'Barcelona', 'Spain', 'Europe',
+(2, 'Barcelona', 'Spain', 'Europe', 'ES',
  'https://images.unsplash.com/photo-1583422409516-2895a77efded?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170',
  'Barcelona, Spain',
  'Architectural masterpieces by Gaudí, beautiful beaches, and vibrant nightlife. Barcelona combines art, history, and Mediterranean charm.',
@@ -38,7 +38,7 @@ VALUES
    'Discounted public transport passes'
  ]),
 
-(3, 'Prague', 'Czech Republic', 'Europe',
+(3, 'Prague', 'Czech Republic', 'Europe', 'CZ',
  'https://images.unsplash.com/photo-1564511287568-54483b52a35e?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170',
  'Prague, Czech Republic',
  'The Golden City with stunning Gothic architecture, rich history, and affordable prices. A fairy-tale destination for budget-conscious travelers.',
@@ -52,7 +52,7 @@ VALUES
    'Affordable public transport and beer culture'
  ]),
 
-(4, 'Amsterdam', 'Netherlands', 'Europe',
+(4, 'Amsterdam', 'Netherlands', 'Europe', 'NL',
  'https://images.unsplash.com/photo-1584003564911-a7a321c84e1c?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=984',
  'Amsterdam, Netherlands',
  'Canals, bicycles, world-class museums, and a unique liberal culture. Amsterdam offers a perfect blend of history, art, and modern lifestyle.',
@@ -66,7 +66,7 @@ VALUES
    'Discounted public transport with student card'
  ]),
 
-(5, 'Rome', 'Italy', 'Europe',
+(5, 'Rome', 'Italy', 'Europe', 'IT',
  'https://plus.unsplash.com/premium_photo-1675975706513-9daba0ec12a8?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170',
  'Rome, Italy',
  'The Eternal City, where ancient history meets vibrant modern life. Explore the Colosseum, Vatican City, and indulge in authentic Italian cuisine.',
@@ -80,7 +80,7 @@ VALUES
    'Discounted public transport cards'
  ]),
 
-(6, 'Berlin', 'Germany', 'Europe',
+(6, 'Berlin', 'Germany', 'Europe', 'DE',
  'https://images.unsplash.com/photo-1560969184-10fe8719e047?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170',
  'Berlin, Germany',
  'A city of contrasts, from historic monuments to cutting-edge art and nightlife. Experience dynamic culture and rich history in Germany''s capital.',
@@ -94,7 +94,7 @@ VALUES
    'Affordable public transport'
  ]),
 
-(7, 'Tokyo', 'Japan', 'Asia',
+(7, 'Tokyo', 'Japan', 'Asia', 'JP',
  'https://plus.unsplash.com/premium_photo-1661914240950-b0124f20a5c1?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170',
  'Tokyo, Japan',
  'A mesmerizing blend of ancient traditions and cutting-edge technology. From serene temples to neon-lit streets, Tokyo offers endless adventures.',
@@ -108,7 +108,7 @@ VALUES
    'Budget-friendly ramen and street food'
  ]),
 
-(8, 'New York City', 'USA', 'North America',
+(8, 'New York City', 'USA', 'North America', 'US',
  'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170',
  'New York City, USA',
  'The city that never sleeps offers world-class museums, Broadway shows, and diverse neighborhoods. Experience the energy of the Big Apple.',
@@ -122,7 +122,7 @@ VALUES
    'Free events and concerts in parks'
  ]),
 
-(9, 'Los Angeles', 'USA', 'North America',
+(9, 'Los Angeles', 'USA', 'North America', 'US',
  'https://images.unsplash.com/flagged/photo-1575555201693-7cd442b8023f?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1632',
  'Los Angeles, USA',
  'Sunny beaches, Hollywood dreams, and diverse cultures. LA offers incredible food, iconic landmarks, and endless entertainment.',
@@ -136,7 +136,7 @@ VALUES
    'Free beach access and outdoor activities'
  ]),
 
-(10, 'Toronto', 'Canada', 'North America',
+(10, 'Toronto', 'Canada', 'North America', 'CA',
  'https://images.unsplash.com/photo-1543962226-818f4301073f?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1907',
  'Toronto, Canada',
  'Canada''s largest city offers incredible diversity, world-class museums, and a welcoming atmosphere for international students.',
@@ -150,7 +150,7 @@ VALUES
    'Discounted public transit with student card'
  ]),
 
-(11, 'Rio de Janeiro', 'Brazil', 'South America',
+(11, 'Rio de Janeiro', 'Brazil', 'South America', 'BR',
  'https://images.unsplash.com/photo-1483729558449-99ef09a8c325?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170',
  'Rio de Janeiro, Brazil',
  'The Marvelous City with stunning beaches, vibrant samba culture, and iconic landmarks. Experience the energy of Carnival''s hometown.',
@@ -164,7 +164,7 @@ VALUES
    'Discounted public transport passes'
  ]),
 
-(12, 'Mexico City', 'Mexico', 'North America',
+(12, 'Mexico City', 'Mexico', 'North America', 'MX',
  'https://images.unsplash.com/photo-1585464231875-d9ef1f5ad396?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170',
  'Mexico City, Mexico',
  'A vibrant metropolis rich in history, art, and incredible cuisine. Explore ancient Aztec temples, world-class museums, and bustling markets.',
@@ -178,7 +178,7 @@ VALUES
    'Budget-friendly public transport'
  ]),
 
-(13, 'Punta Cana', 'Dominican Republic', 'North America',
+(13, 'Punta Cana', 'Dominican Republic', 'North America', 'DO',
  'https://images.unsplash.com/photo-1569700946659-fe1941c71fe4?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170',
  'Punta Cana, Dominican Republic',
  'Paradise beaches, turquoise waters, and all-inclusive resorts. Perfect for students seeking sun, sand, and tropical adventures.',
@@ -192,7 +192,7 @@ VALUES
    'Student discounts on tours and excursions'
  ]),
 
-(14, 'Bangkok', 'Thailand', 'Asia',
+(14, 'Bangkok', 'Thailand', 'Asia', 'TH',
  'https://images.unsplash.com/photo-1513568720563-6a5b8c6caab3?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1144',
  'Bangkok, Thailand',
  'A vibrant city where ancient temples meet modern life. Discover golden palaces, floating markets, and incredible street food for unbeatable prices.',
@@ -206,7 +206,7 @@ VALUES
    'Student-friendly nightlife and markets'
  ]),
 
-(15, 'Bali', 'Indonesia', 'Asia',
+(15, 'Bali', 'Indonesia', 'Asia', 'ID',
  'https://images.unsplash.com/photo-1604999333679-b86d54738315?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1025',
  'Bali, Indonesia',
  'Tropical paradise with stunning beaches, lush rice terraces, and spiritual culture. Experience yoga, surfing, and incredible nature on a student budget.',
@@ -220,7 +220,7 @@ VALUES
    'Budget-friendly temple visits and activities'
  ]),
 
-(16, 'Seoul', 'South Korea', 'Asia',
+(16, 'Seoul', 'South Korea', 'Asia', 'KR',
  'https://plus.unsplash.com/premium_photo-1661948404806-391a240d6d40?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1172',
  'Seoul, South Korea',
  'Where ancient palaces meet K-pop culture. Experience incredible food, cutting-edge technology, and vibrant student neighborhoods.',
@@ -234,7 +234,7 @@ VALUES
    'Student discounts at major attractions'
  ]),
 
-(17, 'Cape Town', 'South Africa', 'Africa',
+(17, 'Cape Town', 'South Africa', 'Africa', 'ZA',
  'https://images.unsplash.com/photo-1576485290814-1c72aa4bbb8e?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170',
  'Cape Town, South Africa',
  'Stunning natural beauty, vibrant culture, and incredible wildlife. From Table Mountain to penguin beaches, Cape Town offers unique experiences.',
@@ -248,7 +248,7 @@ VALUES
    'Affordable wildlife and cultural tours'
  ]),
 
-(18, 'Marrakech', 'Morocco', 'Africa',
+(18, 'Marrakech', 'Morocco', 'Africa', 'MA',
  'https://images.unsplash.com/photo-1587974928442-77dc3e0dba72?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1524',
  'Marrakech, Morocco',
  'A sensory explosion of colors, sounds, and aromas. Explore bustling souks, stunning palaces, and nearby desert adventures.',
@@ -262,7 +262,7 @@ VALUES
    'Cheap desert tours and activities'
  ]),
 
-(19, 'Serengeti National Park', 'Tanzania', 'Africa',
+(19, 'Serengeti National Park', 'Tanzania', 'Africa', 'TZ',
  'https://plus.unsplash.com/premium_photo-1661936361131-c421746dcd0d?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=2159',
  'Serengeti National Park, Tanzania',
  'Witness the Great Migration, Big Five, and endless savannas. Experience the raw beauty of African wildlife in their natural habitat.',
@@ -276,7 +276,7 @@ VALUES
    'Camping and budget lodge packages'
  ]),
 
-(20, 'Zagreb', 'Croatia', 'Europe',
+(20, 'Zagreb', 'Croatia', 'Europe', 'HR',
  'https://plus.unsplash.com/premium_photo-1661963915825-9dee778ad548?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170',
  'Zagreb, Croatia',
  'Croatia''s capital blends Austro-Hungarian architecture with modern culture. Beautiful parks, museums, and a vibrant cafe scene. The perfect introduction to Croatian urban life.',
@@ -290,7 +290,7 @@ VALUES
    'Student-friendly nightlife and restaurants'
  ]),
 
-(21, 'Rijeka', 'Croatia', 'Europe',
+(21, 'Rijeka', 'Croatia', 'Europe', 'HR',
  'https://images.unsplash.com/photo-1645356753760-b61ef173c917?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170',
  'Rijeka, Croatia',
  'Croatia''s largest port city with rich maritime history, vibrant cultural scene, and stunning Kvarner Bay views. A perfect blend of urban energy and coastal charm.',
@@ -304,7 +304,7 @@ VALUES
    'Cheap ferry connections to nearby islands'
  ]),
 
-(22, 'Petrinja', 'Croatia', 'Europe',
+(22, 'Petrinja', 'Croatia', 'Europe', 'HR',
  'https://upload.wikimedia.org/wikipedia/commons/a/a3/Petrinja_ulica.jpg',
  'Petrinja, Croatia',
  'A charming historic town in continental Croatia known for its wine region, traditional architecture, and rich cultural heritage. Experience authentic inland Croatian life.',
@@ -318,7 +318,7 @@ VALUES
    'Less touristy, more authentic experience'
  ]),
 
-(23, 'Silba', 'Croatia', 'Europe',
+(23, 'Silba', 'Croatia', 'Europe', 'HR',
  'https://www.yachtscroatia.hr/var/site/storage/images/_aliases/i1920/6/7/6/5/245676-14-cro-HR/1b7d205a1ed0-Otok-Silba-01.jpg.webp',
  'Silba, Croatia',
  'A tiny car-free island paradise in the Adriatic. Sandy beaches, crystal-clear waters, and peaceful island life. Perfect for digital nomads and solo travelers seeking tranquility.',
@@ -332,7 +332,7 @@ VALUES
    'Perfect for water sports and snorkeling'
  ]),
 
-(24, 'Vienna', 'Austria', 'Europe',
+(24, 'Vienna', 'Austria', 'Europe', 'AT',
  'https://plus.unsplash.com/premium_photo-1716932567535-6bb42a3f38ff?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1632',
  'Vienna, Austria',
  'The City of Music with stunning palaces, world-class museums, and coffee house culture. Experience imperial grandeur and modern art on a student budget.',
@@ -346,7 +346,7 @@ VALUES
    'Discounted public transport passes'
  ]),
 
-(25, 'Budapest', 'Hungary', 'Europe',
+(25, 'Budapest', 'Hungary', 'Europe', 'HU',
  'https://images.unsplash.com/photo-1616432902940-b7a1acbc60b3?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=2070',
  'Budapest, Hungary',
  'The Pearl of the Danube with thermal baths, stunning architecture, and incredible nightlife. Experience history, culture, and affordability in this beautiful city.',
@@ -360,7 +360,7 @@ VALUES
    'Affordable public transport'
  ]),
 
-(26, 'Stockholm', 'Sweden', 'Europe',
+(26, 'Stockholm', 'Sweden', 'Europe', 'SE',
  'https://images.unsplash.com/photo-1509356843151-3e7d96241e11?ixlib=rb-4.1.https://images.unsplash.com/photo-1588653818221-2651ec1a6423?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1171',
  'Stockholm, Sweden',
  'A beautiful archipelago city with stunning design, museums, and vibrant culture. Experience Swedish lifestyle and modern Scandinavian architecture.',
@@ -374,7 +374,7 @@ VALUES
    'Discounted public transport passes'
  ]),
 
-(27, 'Shanghai', 'China', 'Asia',
+(27, 'Shanghai', 'China', 'Asia', 'CN',
  'https://images.unsplash.com/photo-1538428494232-9c0d8a3ab403?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170',
  'Shanghai, China',
  'A futuristic metropolis where ancient meets ultra-modern. Experience stunning skylines, incredible food, and vibrant youth culture.',
@@ -388,7 +388,7 @@ VALUES
    'Cheap accommodation options'
  ]),
 
-(28, 'Singapore', 'Singapore', 'Asia',
+(28, 'Singapore', 'Singapore', 'Asia', 'SG',
  'https://images.unsplash.com/photo-1605425183435-25b7e99104a4?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=764',
  'Singapore',
  'A clean, modern city-state with amazing food, stunning architecture, and perfect public transport. Experience diverse cultures and world-class attractions.',
@@ -402,7 +402,7 @@ VALUES
    'Student-friendly hostels and accommodations'
  ]),
 
-(29, 'São Paulo', 'Brazil', 'South America',
+(29, 'São Paulo', 'Brazil', 'South America', 'BR',
  'https://images.unsplash.com/photo-1543059080-f9b1272213d5?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1074',
  'São Paulo, Brazil',
  'South America''s largest city offers incredible diversity, world-class food, and vibrant nightlife. Experience authentic Brazilian culture at great prices.',
@@ -416,7 +416,7 @@ VALUES
    'Student discounts at museums and attractions'
  ]),
 
-(30, 'Buenos Aires', 'Argentina', 'South America',
+(30, 'Buenos Aires', 'Argentina', 'South America', 'AR',
  'https://plus.unsplash.com/premium_photo-1697729901052-fe8900e24993?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1633',
  'Buenos Aires, Argentina',
  'The Paris of South America with stunning architecture, incredible tango culture, and amazing food. Experience vibrant street life and rich culture.',
@@ -433,7 +433,7 @@ VALUES
 -- ===================================================================
 -- MORE FULL DESTINATIONS (IDs 87-119) - as in FE snippet
 -- ===================================================================
-(87, 'London', 'United Kingdom', 'Europe',
+(87, 'London', 'United Kingdom', 'Europe', 'GB',
  'https://images.unsplash.com/photo-1500380804539-4e1e8c1e7118?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170',
  'London, United Kingdom',
  'The historic capital with world-class museums, royal palaces, and diverse culture. Experience centuries of history, cutting-edge art, and vibrant student life.',
@@ -447,7 +447,7 @@ VALUES
    'Budget-friendly markets and food halls'
  ]),
 
-(88, 'Dublin', 'Ireland', 'Europe',
+(88, 'Dublin', 'Ireland', 'Europe', 'IE',
  'https://images.unsplash.com/photo-1634499282463-274002e296a9?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1632',
  'Dublin, Ireland',
  'The friendly capital known for its literary heritage, lively pubs, and welcoming atmosphere. Experience rich history, music, and vibrant student culture.',
@@ -461,7 +461,7 @@ VALUES
    'Student discounts on public transport'
  ]),
 
-(89, 'Lisbon', 'Portugal', 'Europe',
+(89, 'Lisbon', 'Portugal', 'Europe', 'PT',
  'https://images.unsplash.com/photo-1585208798174-6cedd86e019a?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1173',
  'Lisbon, Portugal',
  'A stunning coastal capital with colorful tiles, historic trams, and incredible food. Experience beautiful architecture, vibrant neighborhoods, and affordable prices.',
@@ -475,7 +475,7 @@ VALUES
    'Affordable seafood and local cuisine'
  ]),
 
-(90, 'Copenhagen', 'Denmark', 'Europe',
+(90, 'Copenhagen', 'Denmark', 'Europe', 'DK',
  'https://images.unsplash.com/photo-1513622470522-26c3c8a854bc?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170',
  'Copenhagen, Denmark',
  'The world''s happiest city with stunning design, bike-friendly streets, and incredible food scene. Experience Scandinavian lifestyle and modern sustainability.',
@@ -489,7 +489,7 @@ VALUES
    'Student-friendly food markets and cafes'
  ]),
 
-(91, 'Oslo', 'Norway', 'Europe',
+(91, 'Oslo', 'Norway', 'Europe', 'NO',
  'https://plus.unsplash.com/premium_photo-1733259769233-72fe12c32433?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1074',
  'Oslo, Norway',
  'A beautiful capital surrounded by fjords and forests. Experience stunning natural beauty, world-class museums, and modern Scandinavian architecture.',
@@ -503,7 +503,7 @@ VALUES
    'Student-friendly food markets'
  ]),
 
-(92, 'Helsinki', 'Finland', 'Europe',
+(92, 'Helsinki', 'Finland', 'Europe', 'FI',
  'https://images.unsplash.com/photo-1538332576228-eb5b4c4de6f5?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170',
  'Helsinki, Finland',
  'A modern design capital with stunning architecture, sauna culture, and beautiful archipelago. Experience Finnish lifestyle and cutting-edge design.',
@@ -517,7 +517,7 @@ VALUES
    'Student-friendly cafes and markets'
  ]),
 
-(93, 'Reykjavik', 'Iceland', 'Europe',
+(93, 'Reykjavik', 'Iceland', 'Europe', 'IS',
  'https://images.unsplash.com/photo-1606130503037-6a8ef67c9d2d?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1625',
  'Reykjavik, Iceland',
  'A small capital with incredible natural wonders nearby. Experience geysers, waterfalls, Northern Lights, and unique Icelandic culture.',
@@ -531,7 +531,7 @@ VALUES
    'Free natural attractions and hiking'
  ]),
 
-(94, 'Warsaw', 'Poland', 'Europe',
+(94, 'Warsaw', 'Poland', 'Europe', 'PL',
  'https://images.unsplash.com/photo-1607078486875-a697a8a38e87?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170',
  'Warsaw, Poland',
  'A resilient capital that rebuilt from ruins. Experience rich history, vibrant culture, and incredible value. Perfect blend of old and new Europe.',
@@ -545,7 +545,7 @@ VALUES
    'Very cheap local cuisine and cafes'
  ]),
 
-(95, 'Athens', 'Greece', 'Europe',
+(95, 'Athens', 'Greece', 'Europe', 'GR',
  'https://images.unsplash.com/photo-1603565816030-6b389eeb23cb?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170',
  'Athens, Greece',
  'The ancient capital where history comes alive. Explore ancient ruins, world-class museums, and vibrant neighborhoods with incredible food.',
@@ -559,7 +559,7 @@ VALUES
    'Cheap and delicious Greek cuisine'
  ]),
 
-(96, 'Istanbul', 'Turkey', 'Europe',
+(96, 'Istanbul', 'Turkey', 'Europe', 'TR',
  'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?ixlib=rb-4.1.0&auto=format&fit=crop&q=80&w=1170',
  'Istanbul, Turkey',
  'A city spanning two continents with incredible history, stunning architecture, and amazing food. Experience the bridge between Europe and Asia.',
@@ -573,7 +573,7 @@ VALUES
    'Incredibly cheap and delicious Turkish cuisine'
  ]),
 
-(97, 'Brussels', 'Belgium', 'Europe',
+(97, 'Brussels', 'Belgium', 'Europe', 'BE',
  'https://images.unsplash.com/photo-1701013694884-a278c7acea5c?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1077',
  'Brussels, Belgium',
  'The European capital with stunning architecture, world-class beer, and incredible chocolate. Experience rich culture and vibrant international atmosphere.',
@@ -587,7 +587,7 @@ VALUES
    'Student-friendly food markets and cafes'
  ]),
 
-(98, 'Zurich', 'Switzerland', 'Europe',
+(98, 'Zurich', 'Switzerland', 'Europe', 'CH',
  'https://images.unsplash.com/photo-1620563092215-0fbc6b55cfc5?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1171',
  'Zurich, Switzerland',
  'A stunning lakeside city with incredible natural beauty, world-class museums, and pristine cleanliness. Experience Swiss precision and Alpine beauty.',
@@ -601,7 +601,7 @@ VALUES
    'Student-friendly food options'
  ]),
 
-(99, 'Bucharest', 'Romania', 'Europe',
+(99, 'Bucharest', 'Romania', 'Europe', 'RO',
  'https://images.unsplash.com/photo-1564336899707-dd34a4b165d7?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1143',
  'Bucharest, Romania',
  'The Paris of the East with stunning architecture, vibrant nightlife, and incredible value. Experience a mix of Eastern European charm and modern culture.',
@@ -615,7 +615,7 @@ VALUES
    'Very cheap local cuisine and cafes'
  ]),
 
-(100, 'Delhi', 'India', 'Asia',
+(100, 'Delhi', 'India', 'Asia', 'IN',
  'https://images.unsplash.com/photo-1587474260584-136574528ed5?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170',
  'Delhi, India',
  'A vibrant capital where ancient history meets modern life. Experience incredible food, stunning monuments, and rich culture at unbeatable prices.',
@@ -629,7 +629,7 @@ VALUES
    'Incredibly cheap and delicious street food'
  ]),
 
-(101, 'Ho Chi Minh City', 'Vietnam', 'Asia',
+(101, 'Ho Chi Minh City', 'Vietnam', 'Asia', 'VN',
  'https://images.unsplash.com/photo-1521019795854-14e15f600980?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1632',
  'Ho Chi Minh City, Vietnam',
  'A vibrant metropolis with rich history, incredible street food, and bustling energy. Experience authentic Vietnamese culture and amazing value.',
@@ -643,7 +643,7 @@ VALUES
    'Incredibly cheap and delicious Vietnamese cuisine'
  ]),
 
-(102, 'Kuala Lumpur', 'Malaysia', 'Asia',
+(102, 'Kuala Lumpur', 'Malaysia', 'Asia', 'MY',
  'https://images.unsplash.com/photo-1596422846543-75c6fc197f07?ixlib=rb-4.1.0&auto=format&fit=crop&q=80&w=1170',
  'Kuala Lumpur, Malaysia',
  'A modern metropolis with stunning skyscrapers, incredible food, and diverse culture. Experience the perfect blend of traditional and modern Asia.',
@@ -657,7 +657,7 @@ VALUES
    'Cheap and delicious Malaysian cuisine'
  ]),
 
-(103, 'Manila', 'Philippines', 'Asia',
+(103, 'Manila', 'Philippines', 'Asia', 'PH',
  'https://images.unsplash.com/photo-1655016268120-383558788b37?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1171',
  'Manila, Philippines',
  'A vibrant capital with rich history, incredible food, and friendly locals. Experience authentic Filipino culture and amazing value.',
@@ -671,7 +671,7 @@ VALUES
    'Very cheap and delicious Filipino cuisine'
  ]),
 
-(104, 'Taipei', 'Taiwan', 'Asia',
+(104, 'Taipei', 'Taiwan', 'Asia', 'TW',
  'https://plus.unsplash.com/premium_photo-1661955975506-04d3812be312?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1171',
  'Taipei, Taiwan',
  'A modern city with incredible food, stunning temples, and vibrant night markets. Experience the perfect blend of traditional and modern Taiwan.',
@@ -685,7 +685,7 @@ VALUES
    'Cheap and delicious night market food'
  ]),
 
-(105, 'Hong Kong', 'Hong Kong', 'Asia',
+(105, 'Hong Kong', 'Hong Kong', 'Asia', 'HK',
  'https://images.unsplash.com/photo-1536599018102-9f803c140fc1?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1528',
  'Hong Kong',
  'A dynamic city where East meets West. Experience stunning skylines, incredible food, and vibrant culture in this world-class metropolis.',
@@ -699,7 +699,7 @@ VALUES
    'Affordable food options in local markets'
  ]),
 
-(106, 'Kathmandu', 'Nepal', 'Asia',
+(106, 'Kathmandu', 'Nepal', 'Asia', 'NP',
  'https://images.unsplash.com/photo-1605640840605-14ac1855827b?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1933',
  'Kathmandu, Nepal',
  'A spiritual capital surrounded by stunning mountains. Experience ancient temples, rich culture, and incredible natural beauty at amazing prices.',
@@ -713,7 +713,7 @@ VALUES
    'Very cheap and delicious local cuisine'
  ]),
 
-(107, 'Colombo', 'Sri Lanka', 'Asia',
+(107, 'Colombo', 'Sri Lanka', 'Asia', 'LK',
  'https://images.unsplash.com/photo-1653478673261-4937126eb512?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170',
  'Colombo, Sri Lanka',
  'A coastal capital with colonial architecture, incredible food, and beautiful beaches nearby. Experience authentic Sri Lankan culture and amazing value.',
@@ -727,7 +727,7 @@ VALUES
    'Cheap and delicious Sri Lankan cuisine'
  ]),
 
-(108, 'Vancouver', 'Canada', 'North America',
+(108, 'Vancouver', 'Canada', 'North America', 'CA',
  'https://images.unsplash.com/photo-1559511260-66a654ae982a?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1518',
  'Vancouver, Canada',
  'A stunning coastal city surrounded by mountains and ocean. Experience incredible natural beauty, diverse culture, and world-class quality of life.',
@@ -741,7 +741,7 @@ VALUES
    'Student-friendly food options'
  ]),
 
-(109, 'Montreal', 'Canada', 'North America',
+(109, 'Montreal', 'Canada', 'North America', 'CA',
  'https://images.unsplash.com/photo-1613060600794-b4d20def8e02?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1194',
  'Montreal, Canada',
  'A vibrant French-Canadian city with incredible food, rich culture, and beautiful architecture. Experience European charm in North America.',
@@ -755,7 +755,7 @@ VALUES
    'Student-friendly food markets and cafes'
  ]),
 
-(110, 'Sydney', 'Australia', 'Oceania',
+(110, 'Sydney', 'Australia', 'Oceania', 'AU',
  'https://images.unsplash.com/photo-1528072164453-f4e8ef0d475a?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1171',
  'Sydney, Australia',
  'A stunning harbor city with iconic landmarks, beautiful beaches, and incredible quality of life. Experience outdoor lifestyle and vibrant culture.',
@@ -769,7 +769,7 @@ VALUES
    'Student-friendly food markets'
  ]),
 
-(111, 'Melbourne', 'Australia', 'Oceania',
+(111, 'Melbourne', 'Australia', 'Oceania', 'AU',
  'https://plus.unsplash.com/premium_photo-1733317293766-5606f74b765b?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1074',
  'Melbourne, Australia',
  'A cultural capital known for incredible food, street art, and vibrant arts scene. Experience coffee culture, festivals, and world-class quality of life.',
@@ -783,7 +783,7 @@ VALUES
    'Student-friendly food markets and cafes'
  ]),
 
-(112, 'Auckland', 'New Zealand', 'Oceania',
+(112, 'Auckland', 'New Zealand', 'Oceania', 'NZ',
  'https://images.unsplash.com/photo-1515248027005-c33283ec3fba?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1168',
  'Auckland, New Zealand',
  'A stunning harbor city surrounded by volcanoes and islands. Experience incredible natural beauty, outdoor activities, and friendly Kiwi culture.',
@@ -797,7 +797,7 @@ VALUES
    'Student-friendly food options'
  ]),
 
-(113, 'Santiago', 'Chile', 'South America',
+(113, 'Santiago', 'Chile', 'South America', 'CL',
  'https://images.unsplash.com/photo-1647618920221-43306af5c58d?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1074',
  'Santiago, Chile',
  'A modern capital with stunning mountain views, incredible wine, and vibrant culture. Experience the gateway to Chilean adventures.',
@@ -811,7 +811,7 @@ VALUES
    'Affordable Chilean cuisine and wine'
  ]),
 
-(114, 'Bogota', 'Colombia', 'South America',
+(114, 'Bogota', 'Colombia', 'South America', 'CO',
  'https://images.unsplash.com/photo-1512617835784-a92626c0a554?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1074',
  'Bogota, Colombia',
  'A vibrant capital at high altitude with incredible food, rich culture, and friendly locals. Experience authentic Colombian culture and amazing value.',
@@ -825,7 +825,7 @@ VALUES
    'Very cheap and delicious Colombian cuisine'
  ]),
 
-(115, 'Lima', 'Peru', 'South America',
+(115, 'Lima', 'Peru', 'South America', 'PE',
  'https://images.unsplash.com/photo-1580530719837-952e0515b69a?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170',
  'Lima, Peru',
  'A coastal capital known for world-class cuisine, rich history, and vibrant culture. Experience the gateway to Machu Picchu and incredible food.',
@@ -839,7 +839,7 @@ VALUES
    'Affordable world-class Peruvian cuisine'
  ]),
 
-(116, 'Havana', 'Cuba', 'North America',
+(116, 'Havana', 'Cuba', 'North America', 'CU',
  'https://images.unsplash.com/photo-1500759285222-a95626b934cb?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170',
  'Havana, Cuba',
  'A time-capsule capital with colorful colonial architecture, vintage cars, and incredible music. Experience authentic Cuban culture and unique atmosphere.',
@@ -853,7 +853,7 @@ VALUES
    'Affordable Cuban cuisine'
  ]),
 
-(117, 'Cairo', 'Egypt', 'Africa',
+(117, 'Cairo', 'Egypt', 'Africa', 'EG',
  'https://images.unsplash.com/photo-1553913861-c0fddf2619ee?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170',
  'Cairo, Egypt',
  'An ancient capital with incredible pyramids, rich history, and vibrant culture. Experience thousands of years of history and amazing value.',
@@ -867,7 +867,7 @@ VALUES
    'Cheap and delicious Egyptian cuisine'
  ]),
 
-(118, 'Nairobi', 'Kenya', 'Africa',
+(118, 'Nairobi', 'Kenya', 'Africa', 'KE',
  'https://images.unsplash.com/photo-1635595358293-03620e36be48?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170',
  'Nairobi, Kenya',
  'A vibrant capital with incredible wildlife nearby, rich culture, and friendly locals. Experience the gateway to African safaris and amazing adventures.',
@@ -881,7 +881,7 @@ VALUES
    'Affordable local cuisine'
  ]),
 
-(119, 'Accra', 'Ghana', 'Africa',
+(119, 'Accra', 'Ghana', 'Africa', 'GH',
  'https://images.unsplash.com/photo-1630386226447-af0a955c1009?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1124',
  'Accra, Ghana',
  'A vibrant coastal capital with rich history, incredible music, and friendly locals. Experience authentic West African culture and amazing value.',
@@ -898,7 +898,7 @@ VALUES
 -- ===================================================================
 -- MINIMAL DESTINATIONS (IDs 31-86 + extra minimal IDs 135-182)
 -- ===================================================================
-(31, 'Lyon', 'France', 'Europe',
+(31, 'Lyon', 'France', 'Europe', 'FR',
  'https://images.unsplash.com/photo-1602087594298-706ccc894bfd?q=80&w=3024&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Lyon, France',
  'France''s culinary capital with stunning Renaissance architecture, vibrant food markets, and rich history. Experience world-class gastronomy and beautiful old town charm.',
@@ -912,7 +912,7 @@ VALUES
    'Student-friendly markets and food festivals'
  ]),
 
-(32, 'Nice', 'France', 'Europe',
+(32, 'Nice', 'France', 'Europe', 'FR',
  'https://images.unsplash.com/photo-1643914729809-4aa59fdc4c17?q=80&w=2274&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Nice, France',
  'The jewel of the French Riviera with stunning beaches, vibrant markets, and Mediterranean charm. Experience sunny weather, beautiful coastline, and Italian influences.',
@@ -926,7 +926,7 @@ VALUES
    'Discounted public transport passes'
  ]),
 
-(33, 'Madrid', 'Spain', 'Europe',
+(33, 'Madrid', 'Spain', 'Europe', 'ES',
  'https://images.unsplash.com/photo-1539037116277-4db20889f2d4?ixlib=rb-4.1.0&auto=format&fit=crop&q=80&w=1170',
  'Madrid, Spain',
  'Spain''s vibrant capital with world-class museums, incredible nightlife, and authentic tapas culture. Experience royal palaces, beautiful parks, and energetic street life.',
@@ -940,7 +940,7 @@ VALUES
    'Cheap student accommodations in great neighborhoods'
  ]),
 
-(34, 'Porto', 'Portugal', 'Europe',
+(34, 'Porto', 'Portugal', 'Europe', 'PT',
  'https://images.unsplash.com/photo-1555881400-74d7acaacd8b?ixlib=rb-4.1.0&auto=format&fit=crop&q=80&w=1170',
  'Porto, Portugal',
  'A charming riverside city famous for port wine, colorful tiles, and stunning bridges. Experience authentic Portuguese culture, beautiful architecture, and incredible value.',
@@ -954,7 +954,7 @@ VALUES
    'Cheap public transport and metro passes'
  ]),
 
-(35, 'Cork', 'Ireland', 'Europe',
+(35, 'Cork', 'Ireland', 'Europe', 'IE',
  'https://images.unsplash.com/photo-1590089415225-401ed6f9db8e?q=80&w=2274&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Cork, Ireland',
  'Ireland''s second city with vibrant food culture, friendly locals, and rich maritime history. Experience authentic Irish charm, lively pubs, and beautiful coastal scenery nearby.',
@@ -968,7 +968,7 @@ VALUES
    'Student discounts on public transport'
  ]),
 
-(36, 'Salzburg', 'Austria', 'Europe',
+(36, 'Salzburg', 'Austria', 'Europe', 'AT',
  'https://images.unsplash.com/photo-1603892710963-331039c8dc66?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Salzburg, Austria',
  'Mozart''s birthplace with stunning Alpine scenery, baroque architecture, and classical music heritage. Experience The Sound of Music locations and imperial grandeur.',
@@ -982,7 +982,7 @@ VALUES
    'Discounted cable car rides to fortress'
  ]),
 
-(37, 'Aarhus', 'Denmark', 'Europe',
+(37, 'Aarhus', 'Denmark', 'Europe', 'DK',
  'https://plus.unsplash.com/premium_photo-1734414813946-a105a02d1b7d?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Aarhus, Denmark',
  'Denmark''s second city with vibrant student culture, modern architecture, and beautiful coastal location. Experience innovative design, museums, and relaxed Scandinavian lifestyle.',
@@ -996,7 +996,7 @@ VALUES
    'Discounted public transport with student card'
  ]),
 
-(38, 'Gothenburg', 'Sweden', 'Europe',
+(38, 'Gothenburg', 'Sweden', 'Europe', 'SE',
  'https://images.unsplash.com/photo-1509356843151-3e7d96241e11?ixlib=rb-4.1.0&auto=format&fit=crop&q=80&w=1170',
  'Gothenburg, Sweden',
  'Sweden''s second city with beautiful canals, vibrant music scene, and coastal charm. Experience innovative food culture, friendly atmosphere, and stunning archipelago.',
@@ -1010,7 +1010,7 @@ VALUES
    'Discounted public transport passes'
  ]),
 
-(39, 'Bergen', 'Norway', 'Europe',
+(39, 'Bergen', 'Norway', 'Europe', 'NO',
  'https://plus.unsplash.com/premium_photo-1694475250638-a006ac51161b?q=80&w=1289&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Bergen, Norway',
  'The gateway to the fjords with colorful Bryggen wharf, stunning natural beauty, and rich maritime history. Experience breathtaking landscapes and authentic Norwegian culture.',
@@ -1024,7 +1024,7 @@ VALUES
    'Discounted public transport passes'
  ]),
 
-(40, 'Tampere', 'Finland', 'Europe',
+(40, 'Tampere', 'Finland', 'Europe', 'FI',
  'https://images.unsplash.com/photo-1636452089599-56a0dc26b4f2?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Tampere, Finland',
  'Finland''s industrial heart transformed into a vibrant cultural hub. Experience lakeside beauty, sauna culture, and innovative museums in this student-friendly city.',
@@ -1037,7 +1037,7 @@ VALUES
    'Free access to many cultural events',
    'Discounted public transport with student card'
  ]),
-(41, 'Krakow', 'Poland', 'Europe',
+(41, 'Krakow', 'Poland', 'Europe', 'PL',
  'https://plus.unsplash.com/premium_photo-1661962364008-85ad40328d89?q=80&w=2671&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Krakow, Poland',
  'Poland''s cultural capital with stunning medieval architecture, rich history, and vibrant student life. Experience beautiful old town, fascinating museums, and incredible value.',
@@ -1051,7 +1051,7 @@ VALUES
    'Very cheap public transport'
  ]),
 
-(42, 'Debrecen', 'Hungary', 'Europe',
+(42, 'Debrecen', 'Hungary', 'Europe', 'HU',
  'https://plus.unsplash.com/premium_photo-1690921288020-1556d0868ff5?q=80&w=1287&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Debrecen, Hungary',
  'Hungary''s second city with beautiful baroque architecture, thermal baths, and strong university tradition. Experience authentic Hungarian culture away from tourist crowds.',
@@ -1065,7 +1065,7 @@ VALUES
    'Budget-friendly public transport'
  ]),
 
-(43, 'Thessaloniki', 'Greece', 'Europe',
+(43, 'Thessaloniki', 'Greece', 'Europe', 'GR',
  'https://images.unsplash.com/photo-1641758140558-ee487bb94c0e?q=80&w=2274&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Thessaloniki, Greece',
  'Greece''s cultural capital with vibrant waterfront, Byzantine history, and incredible food scene. Experience authentic Greek culture, beautiful sunsets, and lively student atmosphere.',
@@ -1079,7 +1079,7 @@ VALUES
    'Cheap public transport'
  ]),
 
-(44, 'Split', 'Croatia', 'Europe',
+(44, 'Split', 'Croatia', 'Europe', 'HR',
  'https://images.unsplash.com/photo-1555990538-c48ab0a194b5?q=80&w=2671&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Split, Croatia',
  'Croatia''s coastal gem with Roman palace at its heart, stunning beaches, and vibrant nightlife. Experience ancient history meeting Mediterranean beach culture.',
@@ -1093,7 +1093,7 @@ VALUES
    'Cheap ferry connections to islands'
  ]),
 
-(45, 'Dubrovnik', 'Croatia', 'Europe',
+(45, 'Dubrovnik', 'Croatia', 'Europe', 'HR',
  'https://images.unsplash.com/photo-1414862625453-d87604a607e4?q=80&w=3132&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Dubrovnik, Croatia',
  'The Pearl of the Adriatic with stunning medieval walls, crystal-clear waters, and Game of Thrones fame. Experience breathtaking beauty and rich maritime history.',
@@ -1107,7 +1107,7 @@ VALUES
    'Cheap bus connections along coast'
  ]),
 
-(46, 'Florence', 'Italy', 'Europe',
+(46, 'Florence', 'Italy', 'Europe', 'IT',
  'https://plus.unsplash.com/premium_photo-1676288635850-cd91d5b2a3af?q=80&w=1287&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Florence, Italy',
  'The cradle of the Renaissance with world-class art, stunning architecture, and incredible food. Experience Michelangelo, da Vinci, and authentic Tuscan culture.',
@@ -1121,7 +1121,7 @@ VALUES
    'Cheap regional train connections'
  ]),
 
-(47, 'Venice', 'Italy', 'Europe',
+(47, 'Venice', 'Italy', 'Europe', 'IT',
  'https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?ixlib=rb-4.1.0&auto=format&fit=crop&q=80&w=1183',
  'Venice, Italy',
  'The floating city with romantic canals, stunning architecture, and unique atmosphere. Experience gondolas, historic palaces, and one-of-a-kind Italian charm.',
@@ -1135,7 +1135,7 @@ VALUES
    'Student discounts on vaporetto passes'
  ]),
 
-(48, 'Milan', 'Italy', 'Europe',
+(48, 'Milan', 'Italy', 'Europe', 'IT',
  'https://images.unsplash.com/photo-1594755260889-29d5fb8e2d1f?q=80&w=1335&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Milan, Italy',
  'Italy''s fashion capital with stunning Duomo, world-class shopping, and innovative culture. Experience modern design, Leonardo da Vinci''s works, and aperitivo culture.',
@@ -1149,7 +1149,7 @@ VALUES
    'Cheap metro and tram passes'
  ]),
 
-(49, 'Birmingham', 'United Kingdom', 'Europe',
+(49, 'Birmingham', 'United Kingdom', 'Europe', 'GB',
  'https://images.unsplash.com/photo-1499958060387-dbdb8d0994fb?q=80&w=3000&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Birmingham, United Kingdom',
  'UK''s second city with diverse culture, vibrant arts scene, and incredible food diversity. Experience multicultural atmosphere, modern regeneration, and industrial heritage.',
@@ -1163,7 +1163,7 @@ VALUES
    'Student discounts on public transport'
  ]),
 
-(50, 'Liverpool', 'United Kingdom', 'Europe',
+(50, 'Liverpool', 'United Kingdom', 'Europe', 'GB',
  'https://images.unsplash.com/photo-1726410238762-2388af04eadb?q=80&w=2743&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Liverpool, United Kingdom',
  'The Beatles'' hometown with rich maritime history, vibrant music scene, and friendly locals. Experience world-class museums, waterfront regeneration, and legendary football culture.',
@@ -1177,7 +1177,7 @@ VALUES
    'Student discounts on public transport'
  ]),
 
-(51, 'Chiang Mai', 'Thailand', 'Asia',
+(51, 'Chiang Mai', 'Thailand', 'Asia', 'TH',
  'https://images.unsplash.com/photo-1599576838688-8a6c11263108?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Chiang Mai, Thailand',
  'Northern Thailand''s cultural heart with stunning temples, night markets, and surrounding mountains. Experience authentic Thai culture, digital nomad scene, and incredible food.',
@@ -1191,7 +1191,7 @@ VALUES
    'Cheap scooter rentals and local transport'
  ]),
 
-(52, 'Da Nang', 'Vietnam', 'Asia',
+(52, 'Da Nang', 'Vietnam', 'Asia', 'VN',
  'https://images.unsplash.com/photo-1505018620898-92616e1849cc?q=80&w=2676&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Da Nang, Vietnam',
  'Vietnam''s coastal gem with stunning beaches, dramatic mountains, and vibrant food scene. Experience beautiful bridges, nearby Hoi An, and amazing seafood.',
@@ -1205,7 +1205,7 @@ VALUES
    'Cheap motorbike rentals'
  ]),
 
-(53, 'Hanoi', 'Vietnam', 'Asia',
+(53, 'Hanoi', 'Vietnam', 'Asia', 'VN',
  'https://images.unsplash.com/photo-1599708153386-62bf3f035c78?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Hanoi, Vietnam',
  'Vietnam''s capital with charming old quarter, rich history, and incredible street food culture. Experience French colonial architecture, vibrant markets, and authentic Vietnamese life.',
@@ -1219,7 +1219,7 @@ VALUES
    'Very cheap local transport and motorbikes'
  ]),
 
-(54, 'Penang', 'Malaysia', 'Asia',
+(54, 'Penang', 'Malaysia', 'Asia', 'MY',
  'https://images.unsplash.com/photo-1620488212381-dea91f7dd69a?q=80&w=3132&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Penang, Malaysia',
  'Malaysia''s food capital with UNESCO heritage town, street art, and incredible hawker centers. Experience diverse culture, beautiful beaches, and unbeatable cuisine.',
@@ -1233,7 +1233,7 @@ VALUES
    'Cheap local buses and ferries'
  ]),
 
-(55, 'Jakarta', 'Indonesia', 'Asia',
+(55, 'Jakarta', 'Indonesia', 'Asia', 'ID',
  'https://plus.unsplash.com/premium_photo-1733306526358-ccebc598f0a2?q=80&w=3132&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Jakarta, Indonesia',
  'Indonesia''s bustling capital with modern skyline, diverse culture, and incredible food scene. Experience dynamic city life, shopping, and authentic Indonesian culture.',
@@ -1247,7 +1247,7 @@ VALUES
    'Cheap public transport and ride-sharing'
  ]),
 
-(56, 'Cebu', 'Philippines', 'Asia',
+(56, 'Cebu', 'Philippines', 'Asia', 'PH',
  'https://images.unsplash.com/photo-1581521894817-f7cb8bedd905?q=80&w=3134&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Cebu, Philippines',
  'The Queen City of the South with beautiful beaches, rich history, and friendly locals. Experience island-hopping, diving, and authentic Filipino hospitality.',
@@ -1261,7 +1261,7 @@ VALUES
    'Cheap local transport and jeepneys'
  ]),
 
-(57, 'Pokhara', 'Nepal', 'Asia',
+(57, 'Pokhara', 'Nepal', 'Asia', 'NP',
  'https://images.unsplash.com/photo-1610997686651-98492fd08108?q=80&w=3131&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Pokhara, Nepal',
  'Nepal''s adventure capital with stunning Himalayan views, beautiful lakes, and trekking opportunities. Experience paragliding, boating, and mountain culture.',
@@ -1275,7 +1275,7 @@ VALUES
    'Cheap local transport and boats'
  ]),
 
-(58, 'Kandy', 'Sri Lanka', 'Asia',
+(58, 'Kandy', 'Sri Lanka', 'Asia', 'LK',
  'https://images.unsplash.com/photo-1708694648935-eeafaa7fd1ef?q=80&w=1335&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Kandy, Sri Lanka',
  'Sri Lanka''s cultural capital with sacred Temple of the Tooth, lush hills, and tea plantations. Experience traditional dance, botanical gardens, and authentic culture.',
@@ -1289,7 +1289,7 @@ VALUES
    'Budget-friendly tuk-tuks and buses'
  ]),
 
-(59, 'Tashkent', 'Uzbekistan', 'Asia',
+(59, 'Tashkent', 'Uzbekistan', 'Asia', 'UZ',
  'https://images.unsplash.com/photo-1622021109028-8ba1d5374161?q=80&w=2226&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Tashkent, Uzbekistan',
  'Central Asia''s modern capital with stunning Soviet architecture, ancient history, and Silk Road heritage. Experience unique culture, beautiful metro, and incredible hospitality.',
@@ -1303,7 +1303,7 @@ VALUES
    'Cheap local transport'
  ]),
 
-(60, 'Almaty', 'Kazakhstan', 'Asia',
+(60, 'Almaty', 'Kazakhstan', 'Asia', 'KZ',
  'https://images.unsplash.com/photo-1548450847-8a9a5cc3968f?q=80&w=2673&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Almaty, Kazakhstan',
  'Kazakhstan''s cultural capital with stunning mountain backdrop, Soviet architecture, and vibrant café culture. Experience unique blend of Asian and European influences.',
@@ -1317,7 +1317,7 @@ VALUES
    'Cheap public transport and metro'
  ]),
 
-(61, 'Calgary', 'Canada', 'North America',
+(61, 'Calgary', 'Canada', 'North America', 'CA',
  'https://images.unsplash.com/photo-1526863336296-fac32d550655?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Calgary, Canada',
  'Gateway to the Canadian Rockies with modern skyline, cowboy culture, and outdoor adventures. Experience the famous Stampede, nearby mountain access, and friendly western hospitality.',
@@ -1331,7 +1331,7 @@ VALUES
    'Student deals at Stampede events'
  ]),
 
-(62, 'Ottawa', 'Canada', 'North America',
+(62, 'Ottawa', 'Canada', 'North America', 'CA',
  'https://plus.unsplash.com/premium_photo-1697730030448-fbfa52261ab6?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Ottawa, Canada',
  'Canada''s beautiful capital with stunning Parliament, world-class museums, and Rideau Canal. Experience bilingual culture, historic architecture, and seasonal festivals.',
@@ -1345,7 +1345,7 @@ VALUES
    'Free skating on Rideau Canal in winter'
  ]),
 
-(63, 'Quebec City', 'Canada', 'North America',
+(63, 'Quebec City', 'Canada', 'North America', 'CA',
  'https://images.unsplash.com/photo-1710881710078-d25d578fedc3?q=80&w=3132&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Quebec City, Canada',
  'North America''s most European city with stunning old town, French culture, and winter magic. Experience cobblestone streets, Château Frontenac, and authentic Québécois culture.',
@@ -1359,7 +1359,7 @@ VALUES
    'Discounted public transport passes'
  ]),
 
-(64, 'Guadalajara', 'Mexico', 'North America',
+(64, 'Guadalajara', 'Mexico', 'North America', 'MX',
  'https://images.unsplash.com/photo-1565670105658-ea35d27f7de7?q=80&w=2225&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Guadalajara, Mexico',
  'Mexico''s cultural heart with mariachi, tequila, and stunning colonial architecture. Experience authentic Mexican culture, vibrant arts scene, and incredible food.',
@@ -1373,7 +1373,7 @@ VALUES
    'Budget-friendly public transport'
  ]),
 
-(65, 'Cancun', 'Mexico', 'North America',
+(65, 'Cancun', 'Mexico', 'North America', 'MX',
  'https://images.unsplash.com/photo-1630252421399-ddde79af47b3?q=80&w=2274&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Cancun, Mexico',
  'Caribbean paradise with turquoise waters, white sand beaches, and vibrant nightlife. Experience Mayan ruins, cenotes, and all-inclusive beach resorts.',
@@ -1387,7 +1387,7 @@ VALUES
    'Cheap buses to Mayan ruins'
  ]),
 
-(66, 'Cusco', 'Peru', 'South America',
+(66, 'Cusco', 'Peru', 'South America', 'PE',
  'https://images.unsplash.com/photo-1593494441374-bad54249d0e8?q=80&w=2673&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Cusco, Peru',
  'Gateway to Machu Picchu with stunning Inca heritage, colonial architecture, and high-altitude beauty. Experience ancient history, vibrant markets, and Andean culture.',
@@ -1401,7 +1401,7 @@ VALUES
    'Affordable local transport and buses'
  ]),
 
-(67, 'Valparaiso', 'Chile', 'South America',
+(67, 'Valparaiso', 'Chile', 'South America', 'CL',
  'https://images.unsplash.com/photo-1566275163755-bbb09bbc5a13?q=80&w=2274&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Valparaiso, Chile',
  'Chile''s colorful port city with stunning street art, funiculars, and bohemian culture. Experience vibrant hills, artistic atmosphere, and Pacific Ocean views.',
@@ -1415,7 +1415,7 @@ VALUES
    'Affordable buses to Santiago and beaches'
  ]),
 
-(68, 'Barranquilla', 'Colombia', 'South America',
+(68, 'Barranquilla', 'Colombia', 'South America', 'CO',
  'https://images.unsplash.com/photo-1587332064870-7ccfa02a94ad?q=80&w=2274&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Barranquilla, Colombia',
  'Colombia''s Caribbean gateway with vibrant carnival culture, beautiful beaches, and warm hospitality. Experience coastal lifestyle, festive atmosphere, and authentic Colombian culture.',
@@ -1429,7 +1429,7 @@ VALUES
    'Cheap public transport'
  ]),
 
-(69, 'Cartagena', 'Colombia', 'South America',
+(69, 'Cartagena', 'Colombia', 'South America', 'CO',
  'https://images.unsplash.com/photo-1583531352515-8884af319dc1?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Cartagena, Colombia',
  'Colombia''s Caribbean jewel with stunning colonial old town, beautiful beaches, and vibrant nightlife. Experience colorful architecture, island hopping, and romantic atmosphere.',
@@ -1443,7 +1443,7 @@ VALUES
    'Budget-friendly island day trips'
  ]),
 
-(70, 'Cali', 'Colombia', 'South America',
+(70, 'Cali', 'Colombia', 'South America', 'CO',
  'https://images.unsplash.com/photo-1728588519059-a62e06050425?q=80&w=2262&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Cali, Colombia',
  'The world capital of salsa with incredible dance culture, warm weather, and vibrant nightlife. Experience authentic Colombian rhythm, friendly locals, and energetic atmosphere.',
@@ -1456,7 +1456,7 @@ VALUES
    'Free salsa in parks and plazas',
    'Cheap public transport and taxis'
  ]),
-(71, 'Quito', 'Ecuador', 'South America',
+(71, 'Quito', 'Ecuador', 'South America', 'EC',
  'https://images.unsplash.com/photo-1610226977124-9fd2755d09f2?q=80&w=2274&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Quito, Ecuador',
  'The world''s highest capital with stunning colonial center, surrounding volcanoes, and gateway to Galapagos. Experience UNESCO heritage, equator line, and Andean culture.',
@@ -1470,7 +1470,7 @@ VALUES
    'Budget-friendly day trips to volcanoes'
  ]),
 
-(72, 'Montevideo', 'Uruguay', 'South America',
+(72, 'Montevideo', 'Uruguay', 'South America', 'UY',
  'https://plus.unsplash.com/premium_photo-1742457604656-b9feed9543f1?q=80&w=2290&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Montevideo, Uruguay',
  'Uruguay''s relaxed capital with beautiful beaches, vibrant culture, and European charm. Experience tango, mate culture, and one of South America''s safest cities.',
@@ -1484,7 +1484,7 @@ VALUES
    'Affordable public transport'
  ]),
 
-(73, 'La Paz', 'Bolivia', 'South America',
+(73, 'La Paz', 'Bolivia', 'South America', 'BO',
  'https://images.unsplash.com/photo-1544142447-e43d0fe04bf2?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'La Paz, Bolivia',
  'The world''s highest administrative capital with stunning mountain views, cable cars, and indigenous culture. Experience dramatic landscapes, witches'' market, and Death Road.',
@@ -1498,7 +1498,7 @@ VALUES
    'Cheap local transport'
  ]),
 
-(74, 'Asunción', 'Paraguay', 'South America',
+(74, 'Asunción', 'Paraguay', 'South America', 'PY',
  'https://images.unsplash.com/photo-1655425541685-c3d9b0672d9f?q=80&w=3132&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Asunción, Paraguay',
  'Paraguay''s riverside capital with colonial charm, warm hospitality, and incredibly affordable prices. Experience authentic culture away from tourist trails.',
@@ -1512,7 +1512,7 @@ VALUES
    'Cheap public transport and taxis'
  ]),
 
-(75, 'San Juan', 'Puerto Rico', 'North America',
+(75, 'San Juan', 'Puerto Rico', 'North America', 'US',
  'https://images.unsplash.com/photo-1625642471723-12744e6e4211?q=80&w=1760&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'San Juan, Puerto Rico',
  'Caribbean paradise with stunning colonial old town, beautiful beaches, and vibrant culture. Experience colorful architecture, bioluminescent bays, and tropical beauty.',
@@ -1526,7 +1526,7 @@ VALUES
    'Affordable public buses and ferries'
  ]),
 
-(76, 'Trinidad', 'Cuba', 'North America',
+(76, 'Trinidad', 'Cuba', 'North America', 'CU',
  'https://images.unsplash.com/photo-1621458425208-b65bc41f82ae?q=80&w=3131&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Trinidad, Cuba',
  'Cuba''s colonial gem with colorful streets, stunning architecture, and nearby beaches. Experience preserved Spanish colonial heritage, tobacco farms, and authentic Cuban life.',
@@ -1540,7 +1540,7 @@ VALUES
    'Cheap horse rides to waterfalls'
  ]),
 
-(77, 'Mombasa', 'Kenya', 'Africa',
+(77, 'Mombasa', 'Kenya', 'Africa', 'KE',
  'https://plus.unsplash.com/premium_photo-1697729911993-626a3e2c44eb?q=80&w=3133&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Mombasa, Kenya',
  'Kenya''s coastal paradise with white sand beaches, rich Swahili culture, and historic old town. Experience beautiful coral reefs, spice markets, and tropical island getaways.',
@@ -1554,7 +1554,7 @@ VALUES
    'Affordable matatus and tuk-tuks'
  ]),
 
-(78, 'Dar es Salaam', 'Tanzania', 'Africa',
+(78, 'Dar es Salaam', 'Tanzania', 'Africa', 'TZ',
  'https://images.unsplash.com/photo-1589177900326-900782f88a55?q=80&w=2673&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Dar es Salaam, Tanzania',
  'Tanzania''s vibrant coastal city with beautiful beaches, rich culture, and gateway to Zanzibar. Experience Swahili culture, bustling markets, and Indian Ocean beauty.',
@@ -1568,7 +1568,7 @@ VALUES
    'Affordable daladalas (local buses)'
  ]),
 
-(79, 'Alexandria', 'Egypt', 'Africa',
+(79, 'Alexandria', 'Egypt', 'Africa', 'EG',
  'https://images.unsplash.com/photo-1697546889969-27f7b5be8664?q=80&w=2274&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Alexandria, Egypt',
  'Egypt''s Mediterranean jewel with ancient history, beautiful corniche, and diverse culture. Experience historic library, Greek heritage, and coastal Egyptian lifestyle.',
@@ -1582,7 +1582,7 @@ VALUES
    'Budget-friendly public transport'
  ]),
 
-(80, 'Luxor', 'Egypt', 'Africa',
+(80, 'Luxor', 'Egypt', 'Africa', 'EG',
  'https://plus.unsplash.com/premium_photo-1661963854938-e69a4e65c1e3?q=80&w=3174&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Luxor, Egypt',
  'The world''s greatest open-air museum with Valley of the Kings, Karnak Temple, and ancient wonders. Experience unparalleled pharaonic history and Nile River beauty.',
@@ -1595,7 +1595,7 @@ VALUES
    'Budget-friendly felucca rides on the Nile',
    'Affordable bicycle rentals and taxis'
  ]),
-(81, 'Casablanca', 'Morocco', 'Africa',
+(81, 'Casablanca', 'Morocco', 'Africa', 'MA',
  'https://images.unsplash.com/photo-1579017461826-8ea20d5cdb28?q=80&w=3956&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Casablanca, Morocco',
  'Morocco''s modern economic hub with stunning Hassan II Mosque, vibrant medina, and Atlantic coastline. Experience contemporary Moroccan life, art deco architecture, and coastal charm.',
@@ -1609,7 +1609,7 @@ VALUES
    'Budget-friendly trams and buses'
  ]),
 
-(82, 'Lagos', 'Nigeria', 'Africa',
+(82, 'Lagos', 'Nigeria', 'Africa', 'NG',
  'https://images.unsplash.com/photo-1618828665011-0abd973f7bb8?q=80&w=3132&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Lagos, Nigeria',
  'West Africa''s vibrant megacity with dynamic energy, incredible music scene, and rich culture. Experience Afrobeats capital, beautiful beaches, and entrepreneurial spirit.',
@@ -1623,7 +1623,7 @@ VALUES
    'Affordable ride-sharing and danfo buses'
  ]),
 
-(83, 'Kumasi', 'Ghana', 'Africa',
+(83, 'Kumasi', 'Ghana', 'Africa', 'GH',
  'https://plus.unsplash.com/premium_photo-1733263204644-030811b45b22?q=80&w=2274&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Kumasi, Ghana',
  'The heart of Ashanti culture with rich history, vibrant markets, and warm hospitality. Experience traditional kente weaving, royal palaces, and authentic Ghanaian life.',
@@ -1637,7 +1637,7 @@ VALUES
    'Budget-friendly tro-tros and taxis'
  ]),
 
-(84, 'Addis Ababa', 'Ethiopia', 'Africa',
+(84, 'Addis Ababa', 'Ethiopia', 'Africa', 'ET',
  'https://plus.unsplash.com/premium_photo-1697729902269-70f031f22531?q=80&w=2671&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Addis Ababa, Ethiopia',
  'Ethiopia''s high-altitude capital with rich history, coffee culture, and unique cuisine. Experience the birthplace of coffee, ancient churches, and vibrant Ethiopian culture.',
@@ -1651,7 +1651,7 @@ VALUES
    'Budget-friendly minibuses and taxis'
  ]),
 
-(85, 'Entebbe', 'Uganda', 'Africa',
+(85, 'Entebbe', 'Uganda', 'Africa', 'UG',
  'https://images.unsplash.com/photo-1680200023508-5289ae3de157?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Entebbe, Uganda',
  'Uganda''s gateway on Lake Victoria with beautiful botanical gardens, wildlife sanctuaries, and relaxed atmosphere. Experience lakeside beauty and access to gorilla trekking.',
@@ -1665,7 +1665,7 @@ VALUES
    'Affordable boda-bodas and matatus'
  ]),
 
-(86, 'Kigali', 'Rwanda', 'Africa',
+(86, 'Kigali', 'Rwanda', 'Africa', 'RW',
  'https://images.unsplash.com/photo-1687986261123-b17f08f2796c?q=80&w=3131&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Kigali, Rwanda',
  'Africa''s cleanest capital with stunning hills, powerful memorials, and inspiring transformation. Experience safety, innovation, and beautiful mountain scenery.',
@@ -1683,7 +1683,7 @@ VALUES
 -- BATCH 7: Extra European Cities (IDs 135-144)
 -- ===================================================================
 
-(135, 'Edinburgh', 'United Kingdom', 'Europe',
+(135, 'Edinburgh', 'United Kingdom', 'Europe', 'GB',
  'https://plus.unsplash.com/premium_photo-1699566448247-1627bee256d0?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Edinburgh, United Kingdom',
  'Scotland''s stunning capital with medieval old town, iconic castle, and vibrant festival culture. Experience dramatic architecture, rich history, and world-class cultural scene.',
@@ -1697,7 +1697,7 @@ VALUES
    'Student discounts on buses and trams'
  ]),
 
-(136, 'Manchester', 'United Kingdom', 'Europe',
+(136, 'Manchester', 'United Kingdom', 'Europe', 'GB',
  'https://images.unsplash.com/photo-1724135869739-6055627ba5df?q=80&w=3132&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Manchester, United Kingdom',
  'England''s northern powerhouse with legendary music scene, football culture, and industrial heritage. Experience vibrant nightlife, diverse culture, and strong student community.',
@@ -1711,7 +1711,7 @@ VALUES
    'Student tram and bus passes'
  ]),
 
-(137, 'Bristol', 'United Kingdom', 'Europe',
+(137, 'Bristol', 'United Kingdom', 'Europe', 'GB',
  'https://plus.unsplash.com/premium_photo-1742457733585-9f82e246d74f?q=80&w=2274&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Bristol, United Kingdom',
  'A creative harbor city with Banksy street art, vibrant music scene, and maritime history. Experience innovative culture, beautiful suspension bridge, and eco-conscious lifestyle.',
@@ -1725,7 +1725,7 @@ VALUES
    'Student bus passes available'
  ]),
 
-(138, 'Glasgow', 'United Kingdom', 'Europe',
+(138, 'Glasgow', 'United Kingdom', 'Europe', 'GB',
  'https://images.unsplash.com/photo-1531152369337-1d0b0b9ef20d?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Glasgow, United Kingdom',
  'Scotland''s vibrant cultural capital with stunning architecture, legendary music scene, and friendly locals. Experience Victorian heritage, contemporary arts, and authentic Scottish warmth.',
@@ -1739,7 +1739,7 @@ VALUES
    'Student subway and bus passes'
  ]),
 
-(139, 'Munich', 'Germany', 'Europe',
+(139, 'Munich', 'Germany', 'Europe', 'DE',
  'https://images.unsplash.com/photo-1595867818082-083862f3d630?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Munich, Germany',
  'Bavaria''s capital with beautiful beer gardens, stunning architecture, and Alpine access. Experience Oktoberfest, world-class museums, and Bavarian culture.',
@@ -1753,7 +1753,7 @@ VALUES
    'Student public transport passes'
  ]),
 
-(140, 'Hamburg', 'Germany', 'Europe',
+(140, 'Hamburg', 'Germany', 'Europe', 'DE',
  'https://plus.unsplash.com/premium_photo-1733353207482-d85d35635a45?q=80&w=2671&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Hamburg, Germany',
  'Germany''s maritime capital with beautiful harbor, vibrant nightlife, and modern architecture. Experience Reeperbahn, stunning Elbphilharmonie, and cosmopolitan atmosphere.',
@@ -1767,7 +1767,7 @@ VALUES
    'Student public transport passes'
  ]),
 
-(141, 'Frankfurt', 'Germany', 'Europe',
+(141, 'Frankfurt', 'Germany', 'Europe', 'DE',
  'https://images.unsplash.com/photo-1626447637943-4c9d412fa8cf?q=80&w=2274&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Frankfurt, Germany',
  'Germany''s financial hub with modern skyline, historic Römerberg, and international atmosphere. Experience banking district, beautiful Main River, and diverse culture.',
@@ -1781,7 +1781,7 @@ VALUES
    'Excellent student transport passes'
  ]),
 
-(142, 'Cologne', 'Germany', 'Europe',
+(142, 'Cologne', 'Germany', 'Europe', 'DE',
  'https://images.unsplash.com/photo-1561624485-0e43bcc1836d?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Cologne, Germany',
  'Rhineland''s cultural heart with stunning cathedral, vibrant carnival, and legendary nightlife. Experience rich history, beer culture, and welcoming atmosphere.',
@@ -1795,7 +1795,7 @@ VALUES
    'Student public transport passes'
  ]),
 
-(143, 'Seville', 'Spain', 'Europe',
+(143, 'Seville', 'Spain', 'Europe', 'ES',
  'https://images.unsplash.com/photo-1688404808661-92f72f2ea258?q=80&w=2676&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Seville, Spain',
  'Andalusia''s passionate capital with stunning Moorish architecture, flamenco culture, and vibrant atmosphere. Experience beautiful plazas, tapas bars, and Spanish soul.',
@@ -1809,7 +1809,7 @@ VALUES
    'Cheap bike rentals and buses'
  ]),
 
-(144, 'Valencia', 'Spain', 'Europe',
+(144, 'Valencia', 'Spain', 'Europe', 'ES',
  'https://images.unsplash.com/photo-1529437971227-3344caa48ce2?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Valencia, Spain',
  'Spain''s coastal gem with futuristic architecture, beautiful beaches, and paella birthplace. Experience City of Arts and Sciences, vibrant festivals, and Mediterranean lifestyle.',
@@ -1822,7 +1822,7 @@ VALUES
    'Free beach access and bike paths',
    'Cheap metro and bus passes'
  ]),
-(145, 'Granada', 'Spain', 'Europe',
+(145, 'Granada', 'Spain', 'Europe', 'ES',
  'https://images.unsplash.com/photo-1564740603199-5f56138c6679?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Granada, Spain',
  'Andalusian jewel with stunning Alhambra palace, Moorish heritage, and Sierra Nevada views. Experience magical Arabic architecture, tapas culture, and student atmosphere.',
@@ -1836,7 +1836,7 @@ VALUES
    'Cheap bus connections to beaches and mountains'
  ]),
 
-(146, 'Marseille', 'France', 'Europe',
+(146, 'Marseille', 'France', 'Europe', 'FR',
  'https://images.unsplash.com/photo-1566838217578-1903568a76d9?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Marseille, France',
  'France''s vibrant port city with Mediterranean beauty, diverse culture, and incredible seafood. Experience stunning calanques, historic Vieux Port, and multicultural atmosphere.',
@@ -1850,7 +1850,7 @@ VALUES
    'Cheap metro and bus passes'
  ]),
 
-(147, 'Toulouse', 'France', 'Europe',
+(147, 'Toulouse', 'France', 'Europe', 'FR',
  'https://images.unsplash.com/photo-1533375954403-dcc42d37d33a?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Toulouse, France',
  'The Pink City with aerospace industry, vibrant student culture, and beautiful architecture. Experience Canal du Midi, space museums, and southern French charm.',
@@ -1864,7 +1864,7 @@ VALUES
    'Cheap metro and tram passes'
  ]),
 
-(148, 'Strasbourg', 'France', 'Europe',
+(148, 'Strasbourg', 'France', 'Europe', 'FR',
  'https://images.unsplash.com/photo-1598875793784-55488654fb0b?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Strasbourg, France',
  'European capital with stunning cathedral, charming canals, and Franco-German culture. Experience beautiful half-timbered houses, Christmas markets, and international institutions.',
@@ -1878,7 +1878,7 @@ VALUES
    'Student tram passes'
  ]),
 
-(149, 'Naples', 'Italy', 'Europe',
+(149, 'Naples', 'Italy', 'Europe', 'IT',
  'https://images.unsplash.com/photo-1609244283184-96db6d696573?q=80&w=3140&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Naples, Italy',
  'Birthplace of pizza with stunning bay, volcanic scenery, and chaotic charm. Experience authentic Italian culture, archaeological wonders, and incredible street food.',
@@ -1892,7 +1892,7 @@ VALUES
    'Cheap metro and funicular passes'
  ]),
 
-(150, 'Bologna', 'Italy', 'Europe',
+(150, 'Bologna', 'Italy', 'Europe', 'IT',
  'https://images.unsplash.com/photo-1635469019177-7264fc1e013c?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Bologna, Italy',
  'Italy''s food capital with medieval towers, porticoed streets, and oldest university. Experience incredible cuisine, vibrant student life, and beautiful architecture.',
@@ -1906,7 +1906,7 @@ VALUES
    'Cheap bus passes for students'
  ]),
 
-(151, 'Turin', 'Italy', 'Europe',
+(151, 'Turin', 'Italy', 'Europe', 'IT',
  'https://images.unsplash.com/photo-1576749784069-59707271bf42?q=80&w=3134&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Turin, Italy',
  'Former Italian capital with elegant baroque architecture, chocolate culture, and Alpine views. Experience royal palaces, Egyptian museum, and aperitivo birthplace.',
@@ -1920,7 +1920,7 @@ VALUES
    'Cheap metro and tram passes'
  ]),
 
-(152, 'Ghent', 'Belgium', 'Europe',
+(152, 'Ghent', 'Belgium', 'Europe', 'BE',
  'https://images.unsplash.com/photo-1589749551167-067f0efd2ddd?q=80&w=1335&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Ghent, Belgium',
  'Medieval gem with stunning canal architecture, vibrant student culture, and excellent beer. Experience beautiful guildhalls, modern art, and authentic Belgian atmosphere.',
@@ -1934,7 +1934,7 @@ VALUES
    'Bike-friendly city with cheap rentals'
  ]),
 
-(153, 'Bruges', 'Belgium', 'Europe',
+(153, 'Bruges', 'Belgium', 'Europe', 'BE',
  'https://images.unsplash.com/photo-1571317084911-8899d61cc464?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Bruges, Belgium',
  'Fairy-tale medieval city with stunning canals, chocolate shops, and preserved architecture. Experience romantic cobblestone streets, belfry tower, and Belgian charm.',
@@ -1948,7 +1948,7 @@ VALUES
    'Bike rentals for exploring'
  ]),
 
-(154, 'Geneva', 'Switzerland', 'Europe',
+(154, 'Geneva', 'Switzerland', 'Europe', 'CH',
  'https://images.unsplash.com/photo-1667758682790-c58fa23dc76f?q=80&w=2687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Geneva, Switzerland',
  'International hub with stunning lake, UN headquarters, and Alpine beauty. Experience multicultural atmosphere, luxury watches, and world-class quality of life.',
@@ -1961,7 +1961,7 @@ VALUES
    'Free lake walks and jet d''eau views',
    'Student public transport passes'
  ]),
-(155, 'Basel', 'Switzerland', 'Europe',
+(155, 'Basel', 'Switzerland', 'Europe', 'CH',
  'https://images.unsplash.com/photo-1623855528606-61fb4681d75f?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Basel, Switzerland',
  'Cultural capital at the Swiss-German-French border with world-class art museums and Rhine River charm. Experience Art Basel, beautiful old town, and international atmosphere.',
@@ -1975,7 +1975,7 @@ VALUES
    'Student public transport passes'
  ]),
 
-(156, 'Lucerne', 'Switzerland', 'Europe',
+(156, 'Lucerne', 'Switzerland', 'Europe', 'CH',
  'https://images.unsplash.com/photo-1518079521743-d5f88b127929?q=80&w=1598&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Lucerne, Switzerland',
  'Picture-perfect lakeside city with stunning mountain views, medieval bridges, and Alpine beauty. Experience Chapel Bridge, Mount Pilatus, and Swiss charm.',
@@ -1989,7 +1989,7 @@ VALUES
    'Student rail passes for mountain trips'
  ]),
 
-(157, 'Coimbra', 'Portugal', 'Europe',
+(157, 'Coimbra', 'Portugal', 'Europe', 'PT',
  'https://images.unsplash.com/photo-1635893312205-6abda7db17a0?q=80&w=3087&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Coimbra, Portugal',
  'Portugal''s historic university city with stunning library, fado music, and student traditions. Experience one of Europe''s oldest universities and authentic Portuguese culture.',
@@ -2003,7 +2003,7 @@ VALUES
    'Budget-friendly public transport'
  ]),
 
-(158, 'Faro', 'Portugal', 'Europe',
+(158, 'Faro', 'Portugal', 'Europe', 'PT',
  'https://plus.unsplash.com/premium_photo-1697729561003-8569898dc30b?q=80&w=1634&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Faro, Portugal',
  'Gateway to the Algarve with beautiful beaches, historic old town, and Ria Formosa nature reserve. Experience stunning coastline, affordable paradise, and Portuguese charm.',
@@ -2017,7 +2017,7 @@ VALUES
    'Budget-friendly buses to beaches'
  ]),
 
-(159, 'Galway', 'Ireland', 'Europe',
+(159, 'Galway', 'Ireland', 'Europe', 'IE',
  'https://images.unsplash.com/photo-1585334644725-e0b49aa6cdce?q=80&w=2274&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Galway, Ireland',
  'Ireland''s cultural heart with vibrant arts scene, traditional music, and stunning coastal beauty. Experience colorful streets, friendly pubs, and Wild Atlantic Way.',
@@ -2031,7 +2031,7 @@ VALUES
    'Student bus passes'
  ]),
 
-(160, 'Limerick', 'Ireland', 'Europe',
+(160, 'Limerick', 'Ireland', 'Europe', 'IE',
  'https://images.unsplash.com/photo-1660687446301-7788b4a6ebe7?q=80&w=2671&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Limerick, Ireland',
  'Shannon-side city with medieval castle, vibrant student culture, and rich rugby heritage. Experience authentic Irish life, historic sites, and friendly locals.',
@@ -2045,7 +2045,7 @@ VALUES
    'Student bus passes'
  ]),
 
-(161, 'Odense', 'Denmark', 'Europe',
+(161, 'Odense', 'Denmark', 'Europe', 'DK',
  'https://plus.unsplash.com/premium_photo-1733306453050-1deda33e5cec?q=80&w=2677&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Odense, Denmark',
  'Hans Christian Andersen''s birthplace with fairy-tale charm, bike culture, and cozy atmosphere. Experience Danish hygge, beautiful gardens, and student-friendly city.',
@@ -2059,7 +2059,7 @@ VALUES
    'Student public transport passes'
  ]),
 
-(162, 'Aalborg', 'Denmark', 'Europe',
+(162, 'Aalborg', 'Denmark', 'Europe', 'DK',
  'https://images.unsplash.com/photo-1584699411820-47302a6c00c0?q=80&w=3132&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Aalborg, Denmark',
  'Northern Denmark''s vibrant city with waterfront culture, student atmosphere, and modern design. Experience maritime heritage, carnival culture, and Danish innovation.',
@@ -2073,7 +2073,7 @@ VALUES
    'Student public transport passes'
  ]),
 
-(163, 'Trondheim', 'Norway', 'Europe',
+(163, 'Trondheim', 'Norway', 'Europe', 'NO',
  'https://images.unsplash.com/photo-1639687809372-fe6e87e05fe4?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Trondheim, Norway',
  'Norway''s historic capital with stunning Nidaros Cathedral, fjord beauty, and strong student culture. Experience Viking heritage, colorful wharf houses, and northern lights.',
@@ -2087,7 +2087,7 @@ VALUES
    'Student public transport passes'
  ]),
 
-(164, 'Stavanger', 'Norway', 'Europe',
+(164, 'Stavanger', 'Norway', 'Europe', 'NO',
  'https://images.unsplash.com/photo-1456018660448-98385e9fd51f?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Stavanger, Norway',
  'Gateway to stunning fjords with charming old town, oil industry heritage, and outdoor adventures. Experience Pulpit Rock, white wooden houses, and Norwegian coastal life.',
@@ -2100,7 +2100,7 @@ VALUES
    'Free hiking access to Pulpit Rock',
    'Student ferry and bus passes'
  ]),
-(165, 'Oulu', 'Finland', 'Europe',
+(165, 'Oulu', 'Finland', 'Europe', 'FI',
  'https://images.unsplash.com/photo-1657123096362-f12bfb5dcf53?q=80&w=3132&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Oulu, Finland',
  'Northern Finland''s tech hub with beautiful archipelago, winter activities, and innovative culture. Experience midnight sun, northern lights, and modern Finnish lifestyle.',
@@ -2114,7 +2114,7 @@ VALUES
    'Student public transport passes'
  ]),
 
-(166, 'Rovaniemi', 'Finland', 'Europe',
+(166, 'Rovaniemi', 'Finland', 'Europe', 'FI',
  'https://images.unsplash.com/photo-1645020456013-c4e693da0bbf?q=80&w=2673&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Rovaniemi, Finland',
  'Official hometown of Santa Claus with Arctic Circle location, northern lights, and winter magic. Experience authentic Lapland, reindeer, and midnight sun.',
@@ -2128,7 +2128,7 @@ VALUES
    'Student discounts on Arctic activities'
  ]),
 
-(167, 'Gdansk', 'Poland', 'Europe',
+(167, 'Gdansk', 'Poland', 'Europe', 'PL',
  'https://images.unsplash.com/photo-1623130622557-8fab31968b8f?q=80&w=2671&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Gdansk, Poland',
  'Beautiful Baltic port with colorful architecture, rich history, and beach access. Experience amber capital, maritime heritage, and vibrant student culture.',
@@ -2142,7 +2142,7 @@ VALUES
    'Budget-friendly public transport'
  ]),
 
-(168, 'Wroclaw', 'Poland', 'Europe',
+(168, 'Wroclaw', 'Poland', 'Europe', 'PL',
  'https://images.unsplash.com/photo-1626826023333-bb7df9facc2b?q=80&w=2274&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Wroclaw, Poland',
  'City of islands and bridges with beautiful market square, gnome statues, and vibrant culture. Experience stunning architecture, student atmosphere, and amazing value.',
@@ -2156,7 +2156,7 @@ VALUES
    'Budget-friendly trams and buses'
  ]),
 
-(169, 'Poznan', 'Poland', 'Europe',
+(169, 'Poznan', 'Poland', 'Europe', 'PL',
  'https://images.unsplash.com/photo-1640605697310-f3ff957a83b2?q=80&w=2631&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Poznan, Poland',
  'Historic city with beautiful old market, fighting goats tradition, and strong student culture. Experience colorful architecture, vibrant nightlife, and Polish hospitality.',
@@ -2170,7 +2170,7 @@ VALUES
    'Budget-friendly public transport'
  ]),
 
-(170, 'Mykonos', 'Greece', 'Europe',
+(170, 'Mykonos', 'Greece', 'Europe', 'GR',
  'https://images.unsplash.com/photo-1601581875309-fafbf2d3ed3a?q=80&w=2274&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Mykonos, Greece',
  'Iconic Greek island with white-washed buildings, windmills, and legendary party scene. Experience beautiful beaches, vibrant nightlife, and Cycladic charm.',
@@ -2184,7 +2184,7 @@ VALUES
    'Cheap bus connections around island'
  ]),
 
-(171, 'Santorini', 'Greece', 'Europe',
+(171, 'Santorini', 'Greece', 'Europe', 'GR',
  'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?q=80&w=2638&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Santorini, Greece',
  'Breathtaking volcanic island with stunning sunsets, white-blue architecture, and dramatic cliffs. Experience romantic beauty, unique beaches, and unforgettable views.',
@@ -2198,7 +2198,7 @@ VALUES
    'Cheap bus connections around island'
  ]),
 
-(172, 'Rhodes', 'Greece', 'Europe',
+(172, 'Rhodes', 'Greece', 'Europe', 'GR',
  'https://images.unsplash.com/photo-1527108097555-a5c5e36f3dd0?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Rhodes, Greece',
  'Historic island with medieval old town, beautiful beaches, and ancient ruins. Experience Knights'' heritage, stunning coastline, and authentic Greek life.',
@@ -2212,7 +2212,7 @@ VALUES
    'Budget-friendly buses around island'
  ]),
 
-(173, 'Ankara', 'Turkey', 'Europe',
+(173, 'Ankara', 'Turkey', 'Europe', 'TR',
  'https://images.unsplash.com/photo-1584816152587-382580af2d85?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Ankara, Turkey',
  'Turkey''s modern capital with stunning Anıtkabir, rich history, and central location. Experience authentic Turkish culture, ancient Hittite sites, and cosmopolitan atmosphere.',
@@ -2226,7 +2226,7 @@ VALUES
    'Budget-friendly metro and buses'
  ]),
 
-(174, 'Izmir', 'Turkey', 'Europe',
+(174, 'Izmir', 'Turkey', 'Europe', 'TR',
  'https://images.unsplash.com/photo-1582380625189-423697e32b92?q=80&w=2671&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Izmir, Turkey',
  'Turkey''s beautiful Aegean port with stunning waterfront, ancient Ephesus nearby, and Mediterranean charm. Experience coastal Turkish life, historic sites, and warm hospitality.',
@@ -2239,7 +2239,7 @@ VALUES
    'Free waterfront walks and beaches',
    'Budget-friendly ferries and buses'
  ]),
-(175, 'Antalya', 'Turkey', 'Europe',
+(175, 'Antalya', 'Turkey', 'Europe', 'TR',
  'https://images.unsplash.com/photo-1593238739364-18cfde30e522?q=80&w=3140&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Antalya, Turkey',
  'Turkish Riviera paradise with stunning beaches, ancient ruins, and beautiful old town. Experience turquoise waters, Mediterranean climate, and affordable luxury.',
@@ -2253,7 +2253,7 @@ VALUES
    'Budget-friendly dolmuş buses'
  ]),
 
-(176, 'Cluj-Napoca', 'Romania', 'Europe',
+(176, 'Cluj-Napoca', 'Romania', 'Europe', 'RO',
  'https://images.unsplash.com/photo-1666197622918-54f902bc2eea?q=80&w=1287&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Cluj-Napoca, Romania',
  'Transylvania''s vibrant capital with beautiful architecture, strong student culture, and tech scene. Experience Gothic churches, festivals, and authentic Romanian life.',
@@ -2267,7 +2267,7 @@ VALUES
    'Budget-friendly public transport'
  ]),
 
-(177, 'Timisoara', 'Romania', 'Europe',
+(177, 'Timisoara', 'Romania', 'Europe', 'RO',
  'https://images.unsplash.com/photo-1566209259189-5fe63e28693f?q=80&w=2022&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Timisoara, Romania',
  'Beautiful baroque city with elegant squares, vibrant culture, and revolution heritage. Experience colorful architecture, parks, and welcoming Romanian hospitality.',
@@ -2281,7 +2281,7 @@ VALUES
    'Budget-friendly trams and buses'
  ]),
 
-(178, 'Brno', 'Czech Republic', 'Europe',
+(178, 'Brno', 'Czech Republic', 'Europe', 'CZ',
  'https://images.unsplash.com/photo-1678305671635-9cef0f009917?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Brno, Czech Republic',
  'Czech Republic''s second city with stunning Špilberk Castle, vibrant student culture, and modernist architecture. Experience Villa Tugendhat, festivals, and authentic Czech life.',
@@ -2295,7 +2295,7 @@ VALUES
    'Budget-friendly public transport'
  ]),
 
-(179, 'Ostrava', 'Czech Republic', 'Europe',
+(179, 'Ostrava', 'Czech Republic', 'Europe', 'CZ',
  'https://images.unsplash.com/photo-1692885277180-1fa3354fc1b8?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Ostrava, Czech Republic',
  'Industrial heritage city with unique mining museums, vibrant music scene, and authentic atmosphere. Experience post-industrial transformation and Czech working-class culture.',
@@ -2309,7 +2309,7 @@ VALUES
    'Budget-friendly public transport'
  ]),
 
-(180, 'Rotterdam', 'Netherlands', 'Europe',
+(180, 'Rotterdam', 'Netherlands', 'Europe', 'NL',
  'https://images.unsplash.com/photo-1526505917130-857817501277?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Rotterdam, Netherlands',
  'Modern architectural marvel with innovative design, vibrant port culture, and dynamic atmosphere. Experience cube houses, market hall, and contemporary Dutch lifestyle.',
@@ -2323,7 +2323,7 @@ VALUES
    'Student public transport passes'
  ]),
 
-(181, 'Utrecht', 'Netherlands', 'Europe',
+(181, 'Utrecht', 'Netherlands', 'Europe', 'NL',
  'https://images.unsplash.com/photo-1632734395785-3ebbe0042c56?q=80&w=1364&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'Utrecht, Netherlands',
  'Charming canal city with medieval center, vibrant student culture, and bike-friendly streets. Experience beautiful Dom Tower, waterfront cafes, and authentic Dutch lifestyle.',
@@ -2337,7 +2337,7 @@ VALUES
    'Student public transport passes'
  ]),
 
-(182, 'The Hague', 'Netherlands', 'Europe',
+(182, 'The Hague', 'Netherlands', 'Europe', 'NL',
  'https://images.unsplash.com/photo-1586174035695-35ab9e19215c?q=80&w=3230&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
  'The Hague, Netherlands',
  'Netherlands'' political capital with beautiful beach, international courts, and royal palaces. Experience Scheveningen beach, world-class museums, and diplomatic atmosphere.',
@@ -2355,6 +2355,7 @@ ON CONFLICT (id) DO UPDATE
 SET title          = EXCLUDED.title,
     location       = EXCLUDED.location,
     continent      = EXCLUDED.continent,
+    country_iso_code = EXCLUDED.country_iso_code,
     image_url      = EXCLUDED.image_url,
     image_alt      = EXCLUDED.image_alt,
     overview       = EXCLUDED.overview,

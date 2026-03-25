@@ -19,5 +19,6 @@ public record AdminCreateDestinationRequest(
         String overview,
         Integer budgetPerDay,
         String whyVisit,
-        List<String> studentPerks
+        List<String> studentPerks,
+        @Size(min = 2, max = 2) String countryIsoCode
 ) {}

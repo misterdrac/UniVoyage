@@ -1,5 +1,7 @@
 package com.univoyage.admin.destination.dto;
 
+import jakarta.validation.constraints.Size;
+
 import java.util.List;
 
 /**
@@ -15,5 +17,6 @@ public record AdminPatchDestinationRequest(
         String overview,
         Integer budgetPerDay,
         String whyVisit,
-        List<String> studentPerks
+        List<String> studentPerks,
+        @Size(min = 2, max = 2) String countryIsoCode
 ) {}

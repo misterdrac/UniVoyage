@@ -1,5 +1,7 @@
 package com.univoyage.destination.model;
 
+import com.univoyage.reference.country.model.Country;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -33,6 +35,10 @@ public class DestinationEntity {
 
     @Column(nullable = false, length = 50)
     private String continent;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "country_iso_code")
+    private Country country;
 
     @Column(name = "image_url")
     private String imageUrl;

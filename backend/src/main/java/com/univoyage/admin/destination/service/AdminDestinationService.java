@@ -4,6 +4,8 @@ import com.univoyage.admin.destination.dto.*;
 import com.univoyage.exception.ResourceNotFoundException;
 import com.univoyage.destination.model.DestinationEntity;
 import com.univoyage.destination.repository.DestinationRepository;
+import com.univoyage.reference.country.model.Country;
+import com.univoyage.reference.country.repository.CountryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -29,6 +31,7 @@ import java.time.Instant;
 public class AdminDestinationService {
 
     private final DestinationRepository destinationRepository;
+    private final CountryRepository countryRepository;
 
     public Page<AdminDestinationResponse> list(String search, Pageable pageable) {
 
@@ -62,6 +65,7 @@ public class AdminDestinationService {
         e.setWhyVisit(req.whyVisit());
         e.setStudentPerks(req.studentPerks());
         e.setCreatedAt(Instant.now());
+        e.setCountry(resolveCountry(req.countryIsoCode()));
 
         return toDto(destinationRepository.save(e));
     }
@@ -80,9 +84,20 @@ public class AdminDestinationService {
         e.setBudgetPerDay(req.budgetPerDay());
         e.setWhyVisit(req.whyVisit());
         e.setStudentPerks(req.studentPerks());
-
+        applyCountryOnPut(e, req.countryIsoCode());
 
         return toDto(destinationRepository.save(e));
+    }
+
+    private void applyCountryOnPut(DestinationEntity e, String countryIsoCode) {
+        if (countryIsoCode == null) {
+            return;
+        }
+        if (countryIsoCode.isBlank()) {
+            e.setCountry(null);
+            return;
+        }
+        e.setCountry(resolveCountry(countryIsoCode));
     }
 
     @Transactional
@@ -99,6 +114,9 @@ public class AdminDestinationService {
         if (req.budgetPerDay() != null) e.setBudgetPerDay(req.budgetPerDay());
         if (req.whyVisit() != null) e.setWhyVisit(req.whyVisit());
         if (req.studentPerks() != null) e.setStudentPerks(req.studentPerks());
+        if (req.countryIsoCode() != null) {
+            e.setCountry(req.countryIsoCode().isBlank() ? null : resolveCountry(req.countryIsoCode()));
+        }
 
         return toDto(destinationRepository.save(e));
     }
@@ -111,12 +129,22 @@ public class AdminDestinationService {
         destinationRepository.deleteById(id);
     }
 
+    private Country resolveCountry(String iso) {
+        if (iso == null || iso.isBlank()) {
+            return null;
+        }
+        String code = iso.trim().toUpperCase();
+        return countryRepository.findByIsoCode(code)
+                .orElseThrow(() -> new IllegalArgumentException("Unknown country code: " + code));
+    }
+
     private AdminDestinationResponse toDto(DestinationEntity e) {
         return new AdminDestinationResponse(
                 e.getId(),
                 e.getName(),
                 e.getLocation(),
                 e.getContinent(),
+                e.getCountry() != null ? e.getCountry().getIsoCode() : null,
                 e.getImageUrl(),
                 e.getImageAlt(),
                 e.getOverview(),

@@ -3,6 +3,8 @@ package com.univoyage.trip.controller;
 import com.univoyage.common.response.ApiResponse;
 import com.univoyage.trip.dto.CreateTripRequest;
 import com.univoyage.trip.dto.TripResponse;
+import com.univoyage.trip.dto.TripCurrencyResponse;
+import com.univoyage.currency.service.TripCurrencyService;
 import com.univoyage.trip.service.TripService;
 import com.univoyage.auth.security.CurrentUser;
 import com.univoyage.trip.dto.TripAccommodationRequest;
@@ -25,6 +27,7 @@ import java.util.Map;
 public class TripController {
 
     private final TripService tripService;
+    private final TripCurrencyService tripCurrencyService;
     private final CurrentUser currentUser;
 
     @PostMapping
@@ -92,5 +95,12 @@ public class TripController {
         return ResponseEntity.ok(ApiResponse.ok(
                 Map.of("accommodation", acc == null ? Map.of() : acc)
         ));
+    }
+
+    @GetMapping("/{tripId}/currency")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getTripCurrency(@PathVariable Long tripId) {
+        Long userId = currentUser.id();
+        TripCurrencyResponse currency = tripCurrencyService.getTripCurrency(userId, tripId);
+        return ResponseEntity.ok(ApiResponse.ok(Map.of("currency", currency)));
     }
 }

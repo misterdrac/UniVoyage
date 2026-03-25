@@ -14,4 +14,8 @@ public class CreateDestinationRequest {
 
     @NotBlank @Size(max = 250)
     private String location;
+
+    /** Optional ISO 3166-1 alpha-2 country code (validated when present). */
+    @Size(min = 2, max = 2)
+    private String countryIsoCode;
 }

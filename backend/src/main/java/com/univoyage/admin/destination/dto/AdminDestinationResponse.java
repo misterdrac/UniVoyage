@@ -12,6 +12,7 @@ public record AdminDestinationResponse(
         String name,
         String location,
         String continent,
+        String countryIsoCode,
         String imageUrl,
         String imageAlt,
         String overview,
