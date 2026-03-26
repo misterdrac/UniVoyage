@@ -24,6 +24,7 @@ public class TripCurrencyService {
 
     @Transactional(readOnly = true)
     public TripCurrencyResponse getTripCurrency(Long userId, Long tripId) {
+        long startedAt = System.currentTimeMillis();
 
         log.info("Fetching currency for tripId={} userId={}", tripId, userId);
 
@@ -53,6 +54,13 @@ public class TripCurrencyService {
 
         String destinationCurrencyCode = destinationCountry.getCurrencyCode();
         String destinationCurrencyName = destinationCountry.getCurrencyName();
+        log.debug(
+                "Destination currency context resolved: tripId={} country={} currencyCode={} currencyName={}",
+                tripId,
+                destinationCountry.getIsoCode(),
+                destinationCurrencyCode,
+                destinationCurrencyName
+        );
 
         if (destinationCurrencyCode == null || destinationCurrencyCode.isBlank()) {
             log.error("Currency not configured for country={}", destinationCountry.getIsoCode());
@@ -63,6 +71,9 @@ public class TripCurrencyService {
 
         if (user.getCountry() != null && user.getCountry().getCurrencyCode() != null) {
             baseCurrencyCode = user.getCountry().getCurrencyCode();
+            log.debug("Using user's country currency as base: userId={} baseCurrency={}", userId, baseCurrencyCode);
+        } else {
+            log.debug("User country/currency missing; defaulting base currency to EUR: userId={}", userId);
         }
 
         log.debug("Base currency={} Destination currency={}", baseCurrencyCode, destinationCurrencyCode);
@@ -70,8 +81,15 @@ public class TripCurrencyService {
         double exchangeRate = currencyRateService.getRate(baseCurrencyCode, destinationCurrencyCode);
 
         log.info("Computed FX rate: {} -> {} = {}", baseCurrencyCode, destinationCurrencyCode, exchangeRate);
+        log.info(
+                "Trip currency fetch completed: tripId={} userId={} durationMs={}",
+                tripId,
+                userId,
+                (System.currentTimeMillis() - startedAt)
+        );
 
-        return TripCurrencyResponse.builder()
+        return
+                TripCurrencyResponse.builder()
                 .destinationCurrencyCode(destinationCurrencyCode)
                 .destinationCurrencyName(destinationCurrencyName)
                 .baseCurrencyCode(baseCurrencyCode)

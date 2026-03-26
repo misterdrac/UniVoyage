@@ -13,7 +13,9 @@ public class ExchangeRateApiClient {
     private final String baseUrl;
 
     public ExchangeRateApiClient(
-            @Value("${APP_CURRENCY_API_KEY}") String apiKey,
+            // Optional so the application can still start in test environments
+            // that don't provide external API secrets.
+            @Value("${APP_CURRENCY_API_KEY:}") String apiKey,
             @Value("${APP_CURRENCY_API_BASE_URL:https://v6.exchangerate-api.com/v6}") String baseUrl
     ) {
         this.restClient = RestClient.builder().build();

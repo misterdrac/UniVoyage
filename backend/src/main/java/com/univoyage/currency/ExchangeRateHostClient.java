@@ -10,7 +10,8 @@ public class ExchangeRateHostClient {
 
     private final RestClient restClient = RestClient.builder().build();
 
-    @Value("${APP_CURRENCY_FALLBACK_KEY}")
+    // Optional so integration tests can load the Spring context without env vars.
+    @Value("${APP_CURRENCY_FALLBACK_KEY:}")
     private String apiKey;
 
     @Value("${APP_CURRENCY_FALLBACK_BASE_URL:https://api.exchangerate.host}")
