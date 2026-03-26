@@ -25,7 +25,7 @@ services:
       -c log_min_error_statement=error
       -c log_connections=on
       -c log_disconnections=on
-      -c log_statement=none
+      -c log_statement=all
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d univoyage_db"]
       interval: 5s
