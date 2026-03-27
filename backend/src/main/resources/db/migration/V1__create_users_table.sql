@@ -4,7 +4,9 @@
 
 CREATE TABLE countries (
     iso_code VARCHAR(2) PRIMARY KEY,
-    country_name VARCHAR(100) UNIQUE NOT NULL
+    country_name VARCHAR(100) UNIQUE NOT NULL,
+    currency_code VARCHAR(3),
+    currency_name VARCHAR(100)
 );
 
 CREATE TABLE users (
