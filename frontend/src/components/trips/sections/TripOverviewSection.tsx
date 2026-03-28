@@ -14,6 +14,41 @@ interface TripOverviewSectionProps {
   currentStatus: string
 }
 
+interface CountdownState {
+  days: number
+  hours: number
+  minutes: number
+  seconds: number
+}
+
+const ZERO_COUNTDOWN: CountdownState = {
+  days: 0,
+  hours: 0,
+  minutes: 0,
+  seconds: 0,
+}
+
+const getCountdownToDepartureStart = (departureDate: string): CountdownState => {
+  const now = new Date()
+  const departureStart = new Date(departureDate)
+  departureStart.setHours(0, 0, 0, 0)
+
+  const diffMs = departureStart.getTime() - now.getTime()
+  if (diffMs <= 0) {
+    return ZERO_COUNTDOWN
+  }
+
+  const totalSeconds = Math.floor(diffMs / 1000)
+  const days = Math.floor(totalSeconds / 86400)
+  const hours = Math.floor((totalSeconds % 86400) / 3600)
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
+  const seconds = totalSeconds % 60
+
+  return { days, hours, minutes, seconds }
+}
+
+const formatCountdownUnit = (value: number): string => value.toString().padStart(2, '0')
+
 const formatCurrency = (amount: number): string => {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -34,6 +69,9 @@ export function TripOverviewSection({
     accommodationAddress?: string
     accommodationPhone?: string
   } | null>(null)
+  const [countdown, setCountdown] = useState<CountdownState>(() =>
+    getCountdownToDepartureStart(trip.departureDate)
+  )
 
   const remainingBudget = totalBudget - totals.actualTotal
   const budgetPercentage = totalBudget > 0 ? (totals.actualTotal / totalBudget) * 100 : 0
@@ -60,6 +98,23 @@ export function TripOverviewSection({
     }
   }, [trip.id])
 
+  useEffect(() => {
+    if (currentStatus !== 'planned') {
+      setCountdown(ZERO_COUNTDOWN)
+      return
+    }
+
+    setCountdown(getCountdownToDepartureStart(trip.departureDate))
+
+    const intervalId = window.setInterval(() => {
+      setCountdown(getCountdownToDepartureStart(trip.departureDate))
+    }, 1000)
+
+    return () => {
+      window.clearInterval(intervalId)
+    }
+  }, [currentStatus, trip.departureDate])
+
   const hasAccommodation = accommodation && (accommodation.accommodationName || accommodation.accommodationAddress || accommodation.accommodationPhone)
 
   return (
@@ -75,6 +130,46 @@ export function TripOverviewSection({
       <div>
         <h3 className="text-xl font-semibold text-foreground mb-4">Quick Details</h3>
         <div className="space-y-4">
+          {currentStatus === 'planned' && (
+            <Card className="p-5 rounded-xl border bg-card hover:shadow-md transition-shadow">
+              <div className="mb-4">
+                <h4 className="text-base sm:text-lg lg:text-xl font-semibold text-foreground leading-tight wrap-break-word">
+                  Countdown To Departure Day
+                </h4>
+                <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+                  Time remaining until your trip officially starts
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="rounded-lg border border-border/50 bg-muted/50 p-3 text-center">
+                  <p className="text-xl sm:text-2xl font-bold text-foreground tabular-nums">
+                    {countdown.days}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">Days</p>
+                </div>
+                <div className="rounded-lg border border-border/50 bg-muted/50 p-3 text-center">
+                  <p className="text-xl sm:text-2xl font-bold text-foreground tabular-nums">
+                    {formatCountdownUnit(countdown.hours)}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">Hours</p>
+                </div>
+                <div className="rounded-lg border border-border/50 bg-muted/50 p-3 text-center">
+                  <p className="text-xl sm:text-2xl font-bold text-foreground tabular-nums">
+                    {formatCountdownUnit(countdown.minutes)}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">Minutes</p>
+                </div>
+                <div className="rounded-lg border border-border/50 bg-muted/50 p-3 text-center">
+                  <p className="text-xl sm:text-2xl font-bold text-foreground tabular-nums">
+                    {formatCountdownUnit(countdown.seconds)}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">Seconds</p>
+                </div>
+              </div>
+            </Card>
+          )}
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Card className="p-5 rounded-xl border bg-card hover:shadow-md transition-shadow">
               <div className="flex items-center gap-3 mb-2">
