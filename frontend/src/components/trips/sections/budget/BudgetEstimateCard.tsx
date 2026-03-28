@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Sparkles, Loader2, AlertTriangle, Calculator } from 'lucide-react'
@@ -20,10 +20,26 @@ interface BudgetEstimateData {
   tips: string[]
 }
 
+const STORAGE_PREFIX = 'budget-estimate-'
+
 export function BudgetEstimateCard({ trip }: { trip: Trip }) {
   const [estimate, setEstimate] = useState<BudgetEstimateData | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const storageKey = useMemo(() => `${STORAGE_PREFIX}${trip.id}`, [trip.id])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const cached = localStorage.getItem(storageKey)
+    if (!cached) return
+    try {
+      const parsed: BudgetEstimateData = JSON.parse(cached)
+      setEstimate(parsed)
+    } catch {
+      console.error('Failed to load cached budget estimate')
+    }
+  }, [storageKey])
 
   const generateEstimate = useCallback(async () => {
     try {
@@ -50,12 +66,18 @@ export function BudgetEstimateCard({ trip }: { trip: Trip }) {
 
       const parsed: BudgetEstimateData = JSON.parse(cleaned)
       setEstimate(parsed)
+
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(parsed))
+      } catch {
+        console.error('Failed to cache budget estimate')
+      }
     } catch {
       setError('Failed to parse budget estimate. Please try again.')
     } finally {
       setIsLoading(false)
     }
-  }, [trip])
+  }, [trip, storageKey])
 
   if (estimate) {
     return (
