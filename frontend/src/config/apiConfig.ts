@@ -45,6 +45,7 @@ export const API_CONFIG = {
             AI: {
               ITINERARY: '/ai/itinerary',
               PACKING: '/ai/packing',
+              BUDGET_ESTIMATE: '/ai/budget-estimate',
               STATUS: '/ai/status',
             },
             HOTELS: {
