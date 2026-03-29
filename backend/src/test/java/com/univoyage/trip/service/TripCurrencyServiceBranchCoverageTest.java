@@ -22,6 +22,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
+/**
+ * Pure unit tests for {@link TripCurrencyService} branches that are awkward to hit through JPA integration
+ * tests alone (null associations, missing user, blank currency codes).
+ * <p>
+ * Uses {@link org.mockito.junit.jupiter.MockitoExtension} with mocked repositories and FX service; no Spring
+ * context or database.
+ * </p>
+ */
 @ExtendWith(MockitoExtension.class)
 class TripCurrencyServiceBranchCoverageTest {
 
@@ -37,6 +45,10 @@ class TripCurrencyServiceBranchCoverageTest {
     @InjectMocks
     private TripCurrencyService tripCurrencyService;
 
+    /**
+     * When {@link TripEntity#getDestination()} returns an entity whose {@link DestinationEntity#getCountry()}
+     * is {@code null}, the service reports {@code Destination country not found} as {@link ResourceNotFoundException}.
+     */
     @Test
     @DisplayName("Throws 404 when destination country is null")
     void shouldThrowDestinationCountryNotFoundWhenTripDestinationCountryIsNull() {
@@ -68,6 +80,10 @@ class TripCurrencyServiceBranchCoverageTest {
         assertEquals("Destination country not found", ex.getMessage());
     }
 
+    /**
+     * If {@link UserRepository#findById(Object)} is empty for the trip owner id, the service throws
+     * {@link ResourceNotFoundException} with {@code User not found}.
+     */
     @Test
     @DisplayName("Throws 404 when user is missing")
     void shouldThrowUserNotFoundWhenUserDoesNotExist() {
@@ -87,6 +103,10 @@ class TripCurrencyServiceBranchCoverageTest {
         assertEquals("User not found", ex.getMessage());
     }
 
+    /**
+     * Blank {@link Country#getCurrencyCode()} on the destination country yields {@link IllegalStateException}
+     * with the same message used by {@link com.univoyage.exception.GlobalExceptionHandler} for HTTP 500.
+     */
     @Test
     @DisplayName("Throws 500 when destination currency code is blank")
     void shouldThrowIllegalStateWhenDestinationCurrencyCodeBlank() {
