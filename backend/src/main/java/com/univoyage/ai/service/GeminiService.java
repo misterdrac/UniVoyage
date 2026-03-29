@@ -3,6 +3,7 @@ package com.univoyage.ai.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.univoyage.ai.dto.GeminiResponse;
+import com.univoyage.ai.dto.BudgetEstimateRequest;
 import com.univoyage.ai.dto.ItineraryRequest;
 import com.univoyage.ai.dto.PackingRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -90,6 +91,26 @@ public class GeminiService {
         } catch (Exception e) {
             log.error("Error generating packing suggestions", e);
             return GeminiResponse.error("Failed to generate packing suggestions. Please try again.");
+        }
+    }
+
+    /**
+     * Generates a budget estimate based on destination, trip duration, and time of year.
+     *
+     * @param request The budget estimate request containing destination and dates.
+     * @return A GeminiResponse containing the estimated costs or an error message.
+     */
+    public GeminiResponse generateBudgetEstimate(BudgetEstimateRequest request) {
+        if (!isConfigured()) {
+            return GeminiResponse.error("AI features are temporarily unavailable. Please try again later.");
+        }
+        
+        try {
+            String prompt = buildBudgetEstimatePrompt(request);
+            return callGeminiApi(prompt);
+        } catch (Exception e) {
+            log.error("Error generating budget estimate", e);
+            return GeminiResponse.error("Failed to generate budget estimate. Please try again.");
         }
     }
 
@@ -294,6 +315,75 @@ public class GeminiService {
                 request.getDepartureDate(),
                 request.getReturnDate(),
                 request.getForecastSummary()
+            ).trim();
+    }
+
+    /**
+     * Builds the prompt for generating a budget estimate.
+     *
+     * @param request The budget estimate request containing destination and dates.
+     * @return The constructed prompt string.
+     */
+    private String buildBudgetEstimatePrompt(BudgetEstimateRequest request) {
+        long totalDays;
+        try {
+            LocalDate departure = LocalDate.parse(request.getDepartureDate());
+            LocalDate returnDate = LocalDate.parse(request.getReturnDate());
+            totalDays = java.time.temporal.ChronoUnit.DAYS.between(departure, returnDate);
+            if (totalDays < 1) totalDays = 1;
+        } catch (Exception e) {
+            totalDays = 1;
+        }
+
+        String month = "";
+        try {
+            LocalDate departure = LocalDate.parse(request.getDepartureDate());
+            month = departure.getMonth().getDisplayName(java.time.format.TextStyle.FULL, Locale.ENGLISH);
+        } catch (Exception e) {
+            month = "unknown";
+        }
+
+        return """
+            You are a travel budget advisor for students and young travelers.
+            Destination: %s, %s
+            Trip duration: %d days
+            Time of year: %s
+
+            Estimate realistic daily and total costs for this trip. Exclude flights and airfare entirely.
+
+            Return STRICT JSON ONLY using this schema:
+            {
+              "summary": "1-2 sentence overview of cost level for this destination",
+              "categories": [
+                { "name": "Accommodation", "icon": "🏨", "estimatedDailyCost": 50, "estimatedTotalCost": 250, "description": "Brief explanation of typical options and prices" },
+                { "name": "Food & Dining", "icon": "🍽️", "estimatedDailyCost": 30, "estimatedTotalCost": 150, "description": "Brief explanation" },
+                { "name": "Activities & Attractions", "icon": "🎯", "estimatedDailyCost": 20, "estimatedTotalCost": 100, "description": "Brief explanation" },
+                { "name": "Local Transportation", "icon": "🚌", "estimatedDailyCost": 10, "estimatedTotalCost": 50, "description": "Brief explanation" }
+              ],
+              "totalEstimatedBudget": 550,
+              "tips": [
+                "Practical money-saving tip specific to this destination"
+              ]
+            }
+
+            Rules:
+            - All costs in USD.
+            - Provide exactly the four categories above in that order.
+            - estimatedTotalCost = estimatedDailyCost * %d (trip duration).
+            - totalEstimatedBudget = sum of all estimatedTotalCost values.
+            - Consider %s seasonality and pricing (high/low season).
+            - Target budget-conscious travelers (hostels, street food, public transport options).
+            - 2-3 tips, each under 120 characters, specific to %s.
+            - Do NOT include flights, airfare, or travel insurance.
+            - No markdown, commentary, triple backticks, or extra keys—JSON string only.
+            """.formatted(
+                request.getDestinationName(),
+                request.getDestinationLocation(),
+                totalDays,
+                month,
+                totalDays,
+                month,
+                request.getDestinationName()
             ).trim();
     }
 

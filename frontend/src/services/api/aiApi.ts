@@ -31,6 +31,16 @@ export interface PackingRequest {
 }
 
 /**
+ * Request payload for AI budget estimate generation
+ */
+export interface BudgetEstimateRequest {
+  destinationName: string
+  destinationLocation: string
+  departureDate: string
+  returnDate: string
+}
+
+/**
  * Response structure from Gemini AI API
  */
 export interface GeminiApiResponse {
@@ -60,6 +70,14 @@ export interface AiApi {
    */
   generatePackingSuggestions(request: PackingRequest): Promise<GeminiApiResponse>
   
+  /**
+   * Generates AI-powered budget estimate
+   * Uses Gemini AI to estimate trip costs based on destination, duration, and time of year
+   * @param request - Budget estimate request with destination and dates
+   * @returns Promise resolving to AI response with generated content
+   */
+  generateBudgetEstimate(request: BudgetEstimateRequest): Promise<GeminiApiResponse>
+
   /**
    * Checks if AI features are configured and available
    * @returns Promise resolving to configuration status
@@ -127,6 +145,38 @@ export const aiApi: {
       }
     } catch (error: unknown) {
       console.error('Error generating packing suggestions:', error)
+      return {
+        success: false,
+        error: 'AI features are temporarily unavailable. Please try again later.',
+      }
+    }
+  },
+
+  async generateBudgetEstimate(this: ApiClient, request: BudgetEstimateRequest): Promise<GeminiApiResponse> {
+    try {
+      const response = await this.request<{ success: boolean; data?: { success: boolean; content?: string; error?: string }; error?: string }>(
+        API_CONFIG.ENDPOINTS.AI.BUDGET_ESTIMATE,
+        {
+          method: 'POST',
+          body: JSON.stringify(request),
+        }
+      )
+
+      if (response.success && response.data) {
+        const data: { success: boolean; content?: string; error?: string } = response.data
+        return {
+          success: data.success,
+          content: data.content,
+          error: data.error,
+        }
+      }
+
+      return {
+        success: false,
+        error: response.error || 'AI features are temporarily unavailable. Please try again later.',
+      }
+    } catch (error: unknown) {
+      console.error('Error generating budget estimate:', error)
       return {
         success: false,
         error: 'AI features are temporarily unavailable. Please try again later.',
