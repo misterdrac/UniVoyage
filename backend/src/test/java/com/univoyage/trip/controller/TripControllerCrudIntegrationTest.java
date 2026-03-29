@@ -41,7 +41,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Integration tests for {@link TripController} trip CRUD, budget, and itinerary endpoints.
+ * Integration tests for {@link TripController} trip CRUD, budget, itinerary, and accommodation endpoints.
  * <p>
  * Servlet filters are disabled to focus on controller and service integration; the authenticated
  * user is supplied via a {@link org.springframework.boot.test.mock.mockito.MockBean @MockBean}
@@ -294,6 +294,69 @@ class TripControllerCrudIntegrationTest {
     }
 
     /**
+     * Missing {@code departureDate} fails {@link jakarta.validation.constraints.NotBlank} / {@link jakarta.validation.constraints.NotNull}.
+     */
+    @Test
+    @DisplayName("POST /api/trips returns 400 when departureDate is missing")
+    void createTripMissingDepartureDate() throws Exception {
+        UserEntity user = saveUser("missing-dep@example.com");
+        DestinationEntity dest = saveDestination("ValMissingDep", country("CH"));
+        when(currentUser.id()).thenReturn(user.getId());
+
+        mockMvc.perform(post("/api/trips")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "destinationId", dest.getId(),
+                                "returnDate", LocalDate.now().plusDays(3).toString()
+                        ))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.data.departureDate").exists());
+    }
+
+    /**
+     * Blank {@code departureDate} fails bean validation ({@link jakarta.validation.constraints.NotBlank}).
+     */
+    @Test
+    @DisplayName("POST /api/trips returns 400 when departureDate is blank")
+    void createTripBlankDepartureDate() throws Exception {
+        UserEntity user = saveUser("blank-dep@example.com");
+        DestinationEntity dest = saveDestination("ValBlankDep", country("CH"));
+        when(currentUser.id()).thenReturn(user.getId());
+
+        mockMvc.perform(post("/api/trips")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "destinationId", dest.getId(),
+                                "departureDate", "   ",
+                                "returnDate", LocalDate.now().plusDays(3).toString()
+                        ))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false));
+    }
+
+    /**
+     * Blank {@code returnDate} fails bean validation ({@link jakarta.validation.constraints.NotBlank}).
+     */
+    @Test
+    @DisplayName("POST /api/trips returns 400 when returnDate is blank")
+    void createTripBlankReturnDate() throws Exception {
+        UserEntity user = saveUser("blank-ret@example.com");
+        DestinationEntity dest = saveDestination("ValBlankRet", country("LI"));
+        when(currentUser.id()).thenReturn(user.getId());
+
+        mockMvc.perform(post("/api/trips")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "destinationId", dest.getId(),
+                                "departureDate", LocalDate.now().plusDays(1).toString(),
+                                "returnDate", ""
+                        ))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false));
+    }
+
+    /**
      * Non-ISO date strings cause {@link java.time.format.DateTimeParseException} in the service; not mapped
      * to an HTTP response in this stack, so MockMvc throws {@link ServletException}.
      */
@@ -416,6 +479,40 @@ class TripControllerCrudIntegrationTest {
     }
 
     /**
+     * Non-owner cannot persist itinerary JSON for another user's trip.
+     */
+    @Test
+    @DisplayName("PUT /api/trips/{id}/itinerary returns 404 when trip is not owned")
+    void putItineraryNotOwned() throws Exception {
+        UserEntity owner = saveUser("owner-putitin@example.com");
+        UserEntity other = saveUser("other-putitin@example.com");
+        TripEntity trip = saveTrip(owner.getId(), saveDestination("PutItin", country("SE")));
+        when(currentUser.id()).thenReturn(other.getId());
+
+        mockMvc.perform(put("/api/trips/{tripId}/itinerary", trip.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of("days", List.of()))))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("Trip not found"));
+    }
+
+    /**
+     * Itinerary GET without prior PUT returns empty JSON object under {@code data.itinerary}, matching budget semantics.
+     */
+    @Test
+    @DisplayName("GET /api/trips/{id}/itinerary returns empty object when no itinerary saved")
+    void getItineraryWhenNoneStored() throws Exception {
+        UserEntity user = saveUser("noitinerary@example.com");
+        TripEntity trip = saveTrip(user.getId(), saveDestination("NoItinCity", country("AT")));
+        when(currentUser.id()).thenReturn(user.getId());
+
+        mockMvc.perform(get("/api/trips/{tripId}/itinerary", trip.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.itinerary", anEmptyMap()));
+    }
+
+    /**
      * Accommodation PUT/GET round-trip for the trip owner.
      */
     @Test
@@ -458,6 +555,43 @@ class TripControllerCrudIntegrationTest {
         mockMvc.perform(get("/api/trips/{tripId}/accommodation", trip.getId()))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").value("Trip not found"));
+    }
+
+    /**
+     * Non-owner cannot persist accommodation for another user's trip.
+     */
+    @Test
+    @DisplayName("PUT /api/trips/{id}/accommodation returns 404 when trip is not owned")
+    void putAccommodationNotOwned() throws Exception {
+        UserEntity owner = saveUser("owner-putacc@example.com");
+        UserEntity other = saveUser("other-putacc@example.com");
+        TripEntity trip = saveTrip(owner.getId(), saveDestination("PutAcc", country("BE")));
+        when(currentUser.id()).thenReturn(other.getId());
+
+        mockMvc.perform(put("/api/trips/{tripId}/accommodation", trip.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "accommodationName", "H",
+                                "accommodationAddress", "A",
+                                "accommodationPhone", "P"))))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("Trip not found"));
+    }
+
+    /**
+     * Accommodation GET without prior PUT returns empty JSON object under {@code data.accommodation}, matching budget semantics.
+     */
+    @Test
+    @DisplayName("GET /api/trips/{id}/accommodation returns empty object when no accommodation saved")
+    void getAccommodationWhenNoneStored() throws Exception {
+        UserEntity user = saveUser("noacc@example.com");
+        TripEntity trip = saveTrip(user.getId(), saveDestination("NoAccCity", country("PT")));
+        when(currentUser.id()).thenReturn(user.getId());
+
+        mockMvc.perform(get("/api/trips/{tripId}/accommodation", trip.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.accommodation", anEmptyMap()));
     }
 
     /**
