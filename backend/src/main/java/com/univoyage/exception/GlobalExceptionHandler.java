@@ -62,4 +62,18 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
+
+    /**
+     * Handles IllegalStateException and returns a 500 Internal Server Error.
+     *
+     * @param ex      The IllegalStateException instance.
+     * @param request The current web request.
+     * @return A ResponseEntity containing the ApiResponse with error message.
+     */
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ApiResponse<Object>> handleIllegalStateException(
+            IllegalStateException ex, WebRequest request) {
+        ApiResponse<Object> response = ApiResponse.fail(ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 }

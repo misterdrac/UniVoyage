@@ -3,6 +3,7 @@ import { useTripBudget } from '@/hooks/useTripBudget'
 import type { TripBudgetExpense } from '@/types/budget'
 import type { Trip } from '@/types/trip'
 import { TotalBudgetCard } from './TotalBudgetCard'
+import { BudgetEstimateCard } from './BudgetEstimateCard'
 import { CategoryExpenseCard } from './CategoryExpenseCard'
 import { EditExpenseDialog } from './EditExpenseDialog'
 import { toast } from 'sonner'
@@ -46,6 +47,8 @@ export function TripBudgetSection({ trip }: { trip: Trip }) {
 
   return (
     <div className="space-y-6">
+      <BudgetEstimateCard trip={trip} />
+
       <TotalBudgetCard
         totalBudget={totalBudget}
         updateTotalBudget={updateTotalBudget}

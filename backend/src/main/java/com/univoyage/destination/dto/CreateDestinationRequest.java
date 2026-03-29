@@ -1,5 +1,6 @@
 package com.univoyage.destination.dto;
 
+import com.univoyage.reference.country.model.Country;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -14,4 +15,10 @@ public class CreateDestinationRequest {
 
     @NotBlank @Size(max = 250)
     private String location;
+
+    @NotBlank @Size(max = 50)
+    private String continent;
+
+    @NotBlank @Size(max = 2)
+    private String countryCode;
 }

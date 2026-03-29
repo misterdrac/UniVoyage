@@ -4,6 +4,7 @@ import com.univoyage.destination.dto.CreateDestinationRequest;
 import com.univoyage.destination.dto.DestinationResponse;
 import com.univoyage.destination.model.DestinationEntity;
 import com.univoyage.destination.repository.DestinationRepository;
+import com.univoyage.reference.country.model.Country;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,7 +43,9 @@ public class DestinationService {
         if (query == null || query.isBlank()) return List.of();
         return destinationRepository
                 .findTop25ByNameContainingIgnoreCaseOrLocationContainingIgnoreCase(query, query)
-                .stream().map(this::toDto).toList();
+                .stream()
+                .map(this::toDto)
+                .toList();
     }
 
     /**
@@ -59,6 +62,10 @@ public class DestinationService {
                         DestinationEntity.builder()
                                 .name(req.getName().trim())
                                 .location(req.getLocation().trim())
+                                .continent(req.getContinent().trim())
+                                .country(Country.builder()
+                                        .isoCode(req.getCountryCode().trim())
+                                        .build())
                                 .createdAt(Instant.now())
                                 .build()
                 ));
@@ -72,11 +79,23 @@ public class DestinationService {
      * @return The corresponding DestinationResponse DTO.
      */
     private DestinationResponse toDto(DestinationEntity d) {
+        DestinationResponse.CountryResponse countryResponse = null;
+
+        if (d.getCountry() != null) {
+            countryResponse = DestinationResponse.CountryResponse.builder()
+                    .isoCode(d.getCountry().getIsoCode())
+                    .countryName(d.getCountry().getCountryName())
+                    .currencyCode(d.getCountry().getCurrencyCode())
+                    .currencyName(d.getCountry().getCurrencyName())
+                    .build();
+        }
+
         return DestinationResponse.builder()
                 .id(d.getId())
                 .title(d.getName())
                 .location(d.getLocation())
                 .continent(d.getContinent())
+                .country(countryResponse)
                 .imageUrl(d.getImageUrl())
                 .imageAlt(d.getImageAlt())
                 .overview(d.getOverview())

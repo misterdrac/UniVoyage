@@ -16,10 +16,20 @@ public class DestinationResponse {
     private String title;
     private String location;
     private String continent;
+    private CountryResponse country;
     private String imageUrl;
     private String imageAlt;
     private String overview;
     private Integer budgetPerDay;
     private String whyVisit;
     private List<String> studentPerks;
+
+    @Data
+    @Builder
+    public static class CountryResponse {
+        private String isoCode;
+        private String countryName;
+        private String currencyCode;
+        private String currencyName;
+    }
 }

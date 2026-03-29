@@ -20,7 +20,8 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
-    show-sql: true
+    # SQL is not echoed here; enable PostgreSQL log_statement (see docker-compose) for DB-side query logging.
+    show-sql: false
 
 app:
   jwt:
@@ -43,7 +44,9 @@ app:
 logging:
   level:
     org.springframework.security: INFO
-    org.hibernate.SQL: DEBUG
+    # Keep Hibernate SQL out of Spring Boot logs; use PostgreSQL server logs for queries.
+    org.hibernate.SQL: WARN
+    org.hibernate.orm.jdbc.bind: WARN
 
 management:
   endpoints:

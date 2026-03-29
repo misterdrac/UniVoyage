@@ -1,4 +1,5 @@
 -- migration script for creating trip-related tables
+
 CREATE TABLE trips (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
@@ -12,13 +13,13 @@ CREATE TABLE trips (
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
 
     CONSTRAINT fk_trips_destination
-            FOREIGN KEY (destination_id) REFERENCES destinations(id) ON DELETE RESTRICT,
+        FOREIGN KEY (destination_id) REFERENCES destinations(id) ON DELETE RESTRICT,
 
     CONSTRAINT trips_dates_chk CHECK (return_date >= departure_date)
 );
 
-CREATE INDEX idx_trips_user_id ON trips(user_id);
-CREATE INDEX idx_trips_destination_id ON trips(destination_id);
+CREATE INDEX IF NOT EXISTS idx_trips_user_id ON trips(user_id);
+CREATE INDEX IF NOT EXISTS idx_trips_destination_id ON trips(destination_id);
 
 -- trip budgets table (1:1)
 CREATE TABLE trip_budgets (
@@ -44,9 +45,9 @@ CREATE TABLE trip_itineraries (
 CREATE TABLE trip_accommodations (
     trip_id BIGINT PRIMARY KEY,
 
-    accommodation_name    VARCHAR(200),
+    accommodation_name VARCHAR(200),
     accommodation_address TEXT,
-    accommodation_phone   VARCHAR(50),
+    accommodation_phone VARCHAR(50),
 
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -54,6 +55,4 @@ CREATE TABLE trip_accommodations (
         FOREIGN KEY (trip_id) REFERENCES trips(id) ON DELETE CASCADE
 );
 
-
-CREATE INDEX idx_trip_accommodations_name ON trip_accommodations(accommodation_name);
-
+CREATE INDEX IF NOT EXISTS idx_trip_accommodations_name ON trip_accommodations(accommodation_name);

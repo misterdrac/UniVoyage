@@ -1,6 +1,7 @@
 package com.univoyage.ai.controller;
 
 import com.univoyage.ai.dto.GeminiResponse;
+import com.univoyage.ai.dto.BudgetEstimateRequest;
 import com.univoyage.ai.dto.ItineraryRequest;
 import com.univoyage.ai.dto.PackingRequest;
 import com.univoyage.ai.service.GeminiService;
@@ -50,6 +51,19 @@ public class GeminiController {
         return ResponseEntity.ok(ApiResponse.fail(response.getError()));
     }
     
+    @PostMapping("/budget-estimate")
+    public ResponseEntity<ApiResponse<GeminiResponse>> generateBudgetEstimate(
+            @Valid @RequestBody BudgetEstimateRequest request
+    ) {
+        GeminiResponse response = geminiService.generateBudgetEstimate(request);
+        
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(ApiResponse.ok(response));
+        }
+        
+        return ResponseEntity.ok(ApiResponse.fail(response.getError()));
+    }
+
     @GetMapping("/status")
     public ResponseEntity<ApiResponse<Boolean>> getStatus() {
         return ResponseEntity.ok(ApiResponse.ok(geminiService.isConfigured()));

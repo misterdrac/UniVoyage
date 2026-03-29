@@ -1,4 +1,5 @@
 export { TripBudgetSection } from './TripBudgetSection'
+export { BudgetEstimateCard } from './BudgetEstimateCard'
 export { TotalBudgetCard } from './TotalBudgetCard'
 export { CategoryExpenseCard } from './CategoryExpenseCard'
 export { AddExpenseDialog } from './AddExpenseDialog'

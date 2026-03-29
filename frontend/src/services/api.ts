@@ -8,6 +8,7 @@ import { placesApi, type PlacesApi } from './api/placesApi'
 import { aiApi, type AiApi } from './api/aiApi'
 import { hotelsApi, type HotelsApi } from './api/hotelsApi'
 import { adminApi, type AdminApi } from './api/adminApi'
+import { heatmapApi, type HeatmapApi } from './api/heatmapApi'
 
 /**
  * Main API service class
@@ -17,13 +18,37 @@ import { adminApi, type AdminApi } from './api/adminApi'
 class ApiService extends ApiClient {}
 
 // Mix in all API modules into the service prototype
-Object.assign(ApiService.prototype, authApi, profileApi, tripsApi, itineraryApi, destinationsApi, weatherApi, placesApi, aiApi, hotelsApi, adminApi)
+Object.assign(
+  ApiService.prototype,
+  authApi,
+  profileApi,
+  tripsApi,
+  itineraryApi,
+  destinationsApi,
+  weatherApi,
+  placesApi,
+  aiApi,
+  hotelsApi,
+  adminApi,
+  heatmapApi,
+)
 
 /**
  * Combined API service interface
  * Includes all API modules: Auth, Profile, Trips, Itinerary, Destinations, Weather, Places, AI, Hotels, and Admin
  */
-interface ApiService extends AuthApi, ProfileApi, TripsApi, ItineraryApi, DestinationsApi, WeatherApi, PlacesApi, AiApi, HotelsApi, AdminApi {}
+interface ApiService
+  extends AuthApi,
+    ProfileApi,
+    TripsApi,
+    ItineraryApi,
+    DestinationsApi,
+    WeatherApi,
+    PlacesApi,
+    AiApi,
+    HotelsApi,
+    AdminApi,
+    HeatmapApi {}
 
 /**
  * Singleton API service instance

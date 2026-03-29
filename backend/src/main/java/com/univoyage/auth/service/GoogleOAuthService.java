@@ -37,13 +37,15 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class GoogleOAuthService {
 
-    @Value("${GOOGLE_CLIENT_ID}")
+    // Optional in test environments. If not configured, the app should still start
+    // (integration tests rely on Spring context loading).
+    @Value("${GOOGLE_CLIENT_ID:}")
     private String clientId;
 
-    @Value("${GOOGLE_CLIENT_SECRET}")
+    @Value("${GOOGLE_CLIENT_SECRET:}")
     private String clientSecret;
 
-    @Value("${GOOGLE_REDIRECT_URI}")
+    @Value("${GOOGLE_REDIRECT_URI:}")
     private String redirectUri;
 
     private final JwtService jwtService;
@@ -56,6 +58,10 @@ public class GoogleOAuthService {
      * @return The authorization URL to redirect users for Google OAuth 2.0 authentication.
      */
     public String buildAuthorizationUrl() {
+        if (clientId.isBlank() || redirectUri.isBlank()) {
+            // Configuration missing; caller can decide how to handle this case.
+            throw new IllegalStateException("Google OAuth is not configured");
+        }
         return "https://accounts.google.com/o/oauth2/v2/auth"
                 + "?response_type=code"
                 + "&client_id=" + URLEncoder.encode(clientId, StandardCharsets.UTF_8)

@@ -1,6 +1,7 @@
 import { API_CONFIG } from '@/config/apiConfig'
 import type { StoredItineraryPayload } from '@/types/itinerary'
 import type { TripBudgetPayload } from '@/types/budget'
+import type { TripCurrencyInfo } from '@/types/trip'
 import type { ApiClient } from './baseClient'
 
 /**
@@ -75,6 +76,11 @@ export interface TripsApi {
     accommodationAddress?: string
     accommodationPhone?: string
   }): Promise<{ success: boolean; error?: string }>
+
+  /**
+   * Destination currency and exchange rate vs the user's home currency (from profile)
+   */
+  getTripCurrency(tripId: number): Promise<{ success: boolean; currency?: TripCurrencyInfo; error?: string }>
 }
 
 /**
@@ -218,6 +224,31 @@ export const tripsApi: { [K in keyof TripsApi]: (this: ApiClient, ...args: Param
       return { success: false, error: res.error ?? 'Failed to save accommodation' }
     } catch (err: any) {
       return { success: false, error: err?.message ?? 'Failed to save accommodation' }
+    }
+  },
+
+  async getTripCurrency(this: ApiClient, tripId) {
+    try {
+      const res = await this.request<{ currency?: TripCurrencyInfo }>(
+        `${API_CONFIG.ENDPOINTS.TRIPS.GET_BY_ID}/${tripId}/currency`
+      )
+
+      if (res.success && res.data?.currency) {
+        const c = res.data.currency
+        return {
+          success: true,
+          currency: {
+            destinationCurrencyCode: c.destinationCurrencyCode,
+            destinationCurrencyName: c.destinationCurrencyName,
+            baseCurrencyCode: c.baseCurrencyCode,
+            exchangeRate: Number(c.exchangeRate),
+          },
+        }
+      }
+
+      return { success: false, error: res.error ?? 'Failed to load currency' }
+    } catch (err: any) {
+      return { success: false, error: err?.message ?? 'Failed to load currency' }
     }
   },
 }

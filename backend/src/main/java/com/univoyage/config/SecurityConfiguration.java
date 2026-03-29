@@ -35,7 +35,7 @@ public class SecurityConfiguration {
 
         http
                 .cors(Customizer.withDefaults())
-                .csrf(csrf -> csrf.disable())
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"))
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // Allow preflight CORS requests
@@ -50,6 +50,9 @@ public class SecurityConfiguration {
 
                         // Public routes for destinations
                         .requestMatchers(HttpMethod.GET, "/api/destinations/**").permitAll()
+
+                        // Public heatmap endpoint (landing page)
+                        .requestMatchers(HttpMethod.GET, "/api/heatmap/**").permitAll()
 
                         // Admin routes
                         .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "HEAD_ADMIN")

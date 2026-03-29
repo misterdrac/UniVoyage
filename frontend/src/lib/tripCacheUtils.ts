@@ -9,6 +9,7 @@ const PACKING_SUGGESTIONS_PREFIX = 'packing-suggestions-'
 const PACKING_STATE_PREFIX = 'packing-'
 const ITINERARY_PREFIX = 'trip-itinerary-'
 const TRIP_BUDGET_PREFIX = 'trip-budget-'
+const BUDGET_ESTIMATE_PREFIX = 'budget-estimate-'
 
 /**
  * Clear packing suggestions cache for a specific trip
@@ -46,6 +47,19 @@ export const clearItineraryPlanCache = (tripId: number): void => {
     localStorage.removeItem(storageKey)
   } catch (error) {
     console.error('Error clearing itinerary cache:', error)
+  }
+}
+
+/**
+ * Clear budget estimate cache for a specific trip
+ */
+export const clearBudgetEstimateCache = (tripId: number): void => {
+  try {
+    if (typeof window === 'undefined') return
+    const storageKey = `${BUDGET_ESTIMATE_PREFIX}${tripId}`
+    localStorage.removeItem(storageKey)
+  } catch (error) {
+    console.error('Error clearing budget estimate cache:', error)
   }
 }
 
@@ -104,6 +118,7 @@ export const clearTripCache = (
   clearPackingSuggestionsCache(tripId)
   clearPackingState(tripId)
   clearItineraryPlanCache(tripId)
+  clearBudgetEstimateCache(tripId)
   clearWeatherForecastCache(cityName, locationName, departureDate, returnDate)
   // Clear POI cache for the destination city
   clearPlacesCache(cityName)
@@ -178,12 +193,34 @@ export const clearAllItineraries = (): void => {
 }
 
 /**
+ * Clear all budget estimate data from localStorage
+ */
+export const clearAllBudgetEstimates = (): void => {
+  try {
+    if (typeof window === 'undefined') return
+    const keysToRemove: string[] = []
+    
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (key && key.startsWith(BUDGET_ESTIMATE_PREFIX)) {
+        keysToRemove.push(key)
+      }
+    }
+    
+    keysToRemove.forEach(key => localStorage.removeItem(key))
+  } catch (error) {
+    console.error('Error clearing all budget estimates:', error)
+  }
+}
+
+/**
  * Clear all trip-related data from localStorage
- * This includes budgets, itineraries, and packing suggestions
+ * This includes budgets, itineraries, packing suggestions, and budget estimates
  */
 export const clearAllTripData = (): void => {
   clearAllTripBudgets()
   clearAllItineraries()
   clearAllPackingLocalStorage()
+  clearAllBudgetEstimates()
 }
 

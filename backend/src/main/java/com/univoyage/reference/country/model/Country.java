@@ -8,8 +8,11 @@ import lombok.*;
  */
 @Entity
 @Table(name = "countries")
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Country {
 
     @Id
@@ -18,5 +21,10 @@ public class Country {
 
     @Column(name = "country_name", nullable = false, unique = true, length = 100)
     private String countryName;
-}
 
+    @Column(name = "currency_code", length = 3)
+    private String currencyCode;
+
+    @Column(name = "currency_name", length = 100)
+    private String currencyName;
+}

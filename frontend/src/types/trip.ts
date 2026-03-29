@@ -18,3 +18,11 @@ export interface CreateTripRequest {
   returnDate: string;
 }
 
+/** Matches backend TripCurrencyResponse — rate is destination per 1 unit of base */
+export interface TripCurrencyInfo {
+  destinationCurrencyCode: string;
+  destinationCurrencyName: string;
+  baseCurrencyCode: string;
+  exchangeRate: number;
+}
+
