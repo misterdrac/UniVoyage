@@ -6,6 +6,7 @@ import { usePaginatedItems } from '@/hooks/usePaginatedItems';
 import { ChevronDown, ArrowDown } from 'lucide-react';
 import type { Destination } from '@/types/destination';
 import { Button } from '@/components/ui/button';
+import { getMockRating } from '@/lib/mockRating';
 
 // Shuffle array using Fisher-Yates algorithm
 const shuffleArray = <T,>(array: T[]): T[] => {
@@ -132,6 +133,7 @@ export const DestinationsPageLayout = ({
                           overview={destination.overview!}
                           budgetPerDay={destination.budgetPerDay!}
                           onPlanTrip={() => handlePlanTrip(destination)}
+                          averageRating={destination.averageRating ?? getMockRating(destination.id)}
                         />
                       </div>
                       <div className="space-y-4 sm:space-y-6 px-4 sm:px-0">
@@ -185,6 +187,7 @@ export const DestinationsPageLayout = ({
                           overview={destination.overview!}
                           budgetPerDay={destination.budgetPerDay!}
                           onPlanTrip={() => handlePlanTrip(destination)}
+                          averageRating={destination.averageRating ?? getMockRating(destination.id)}
                         />
                       </div>
                     </>
