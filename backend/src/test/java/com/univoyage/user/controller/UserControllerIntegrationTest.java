@@ -16,6 +16,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
@@ -102,7 +103,7 @@ class UserControllerIntegrationTest {
                 .andExpect(jsonPath("$.error").value("Invalid country code: QQ"));
     }
 
-    private static org.springframework.test.web.servlet.request.RequestPostProcessor securityContextFor(UserEntity principal) {
+    private static RequestPostProcessor securityContextFor(UserEntity principal) {
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                 principal, principal.getPassword(), principal.getAuthorities());
         SecurityContext context = SecurityContextHolder.createEmptyContext();
