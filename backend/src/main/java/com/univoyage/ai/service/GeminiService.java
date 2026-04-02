@@ -114,6 +114,19 @@ public class GeminiService {
         }
     }
 
+    public GeminiResponse generateFromPrompt(String prompt) {
+        if (!isConfigured()) {
+            return GeminiResponse.error("AI features are temporarily unavailable. Please try again later.");
+        }
+
+        try {
+            return callGeminiApi(prompt);
+        } catch (Exception e) {
+            log.error("Error generating AI response from prompt", e);
+            return GeminiResponse.error("Something went wrong. Please try again in a moment.");
+        }
+    }
+
     /**
      * Calls the Gemini API with the given prompt and handles the response.
      *
