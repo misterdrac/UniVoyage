@@ -1,5 +1,5 @@
 import React from 'react';
-import { HomePage, AboutPage, ContactPage, ProfilePage, MyTripsPage, TripDetailPage, PlanTripPage, PopularDestinationsPage, EuropeDestinationsPage, NorthAmericaDestinationsPage, SouthAmericaDestinationsPage, AsiaDestinationsPage, AfricaDestinationsPage, OceaniaDestinationsPage } from '@/pages';
+import { HomePage, AboutPage, ContactPage, ProfilePage, MyTripsPage, TripDetailPage, PlanTripPage, QuizPage, PopularDestinationsPage, EuropeDestinationsPage, NorthAmericaDestinationsPage, SouthAmericaDestinationsPage, AsiaDestinationsPage, AfricaDestinationsPage, OceaniaDestinationsPage } from '@/pages';
 import { AdminLoginPage, AdminDashboardPage, AdminUsersPage, AdminDestinationsPage } from '@/pages/admin';
 import GoogleCallbackPage from '@/pages/GoogleCallbackPage';
 import { MainLayout } from '@/components/layout';
@@ -74,6 +74,10 @@ export const routes: RouteConfig[] = [
   {
     path: '/contact',
     element: <ContactPage />,
+  },
+  {
+    path: '/quiz',
+    element: <QuizPage />,
   },
   {
     path: '/destinations',
@@ -152,6 +156,7 @@ export const ROUTE_PATHS = {
   HOME: getRoutePath('/'),
   ABOUT: getRoutePath('/about'),
   CONTACT: getRoutePath('/contact'),
+  QUIZ: getRoutePath('/quiz'),
   DESTINATIONS: getRoutePath('/destinations'),
   DESTINATIONS_EUROPE: getRoutePath('/destinations/europe'),
   DESTINATIONS_NORTH_AMERICA: getRoutePath('/destinations/north-america'),

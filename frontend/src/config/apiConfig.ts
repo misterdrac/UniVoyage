@@ -55,6 +55,9 @@ export const API_CONFIG = {
             HEATMAP: {
               GET: '/heatmap',
             },
+            QUIZ: {
+              RECOMMEND: '/quiz/recommend',
+            },
           },
   
   // Request timeout
