@@ -14,6 +14,7 @@ interface QuizQuestionProps {
   options: QuizOption[]
   selectedValue: string | null
   onSelect: (value: string) => void
+  columns?: 3 | 4
 }
 
 export function QuizQuestion({
@@ -22,6 +23,7 @@ export function QuizQuestion({
   options,
   selectedValue,
   onSelect,
+  columns = 3,
 }: QuizQuestionProps) {
   return (
     <div className="space-y-8">
@@ -36,7 +38,7 @@ export function QuizQuestion({
         )}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="flex flex-wrap justify-center gap-4">
         {options.map((option, index) => (
           <motion.button
             key={option.value}
@@ -45,7 +47,10 @@ export function QuizQuestion({
             transition={{ duration: 0.3, delay: index * 0.06 }}
             onClick={() => onSelect(option.value)}
             className={cn(
-              'group relative flex flex-col items-center gap-3 p-6 rounded-2xl border-2 transition-all duration-200 cursor-pointer text-center',
+              'group relative flex flex-col items-center gap-3 p-6 rounded-2xl border-2 transition-all duration-200 cursor-pointer text-center w-full sm:w-[calc(50%-0.5rem)]',
+              columns === 4
+                ? 'lg:w-[calc(25%-0.75rem)]'
+                : 'lg:w-[calc(33.333%-0.75rem)]',
               selectedValue === option.value
                 ? 'border-primary bg-primary/10 shadow-md shadow-primary/10'
                 : 'border-border bg-card hover:border-primary/40 hover:bg-accent/50 hover:shadow-sm'

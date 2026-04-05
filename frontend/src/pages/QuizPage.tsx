@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, ArrowRight, Compass, Loader2 } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Compass, Loader2, Sparkles, MapPin, Globe } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { QuizProgress, QuizQuestion, QuizResults } from '@/components/quiz'
 import type { QuizOption } from '@/components/quiz'
@@ -12,6 +12,7 @@ interface QuizStep {
   question: string
   subtitle: string
   options: QuizOption[]
+  columns?: 3 | 4
 }
 
 const QUIZ_STEPS: QuizStep[] = [
@@ -52,6 +53,7 @@ const QUIZ_STEPS: QuizStep[] = [
     key: 'continent',
     question: 'Which continent interests you?',
     subtitle: 'Where in the world do you want to go?',
+    columns: 4,
     options: [
       { value: 'Europe', label: 'Europe', icon: '🏰' },
       { value: 'Asia', label: 'Asia', icon: '⛩️' },
@@ -93,7 +95,15 @@ const slideVariants = {
   }),
 }
 
+const HERO_IMAGES = [
+  'https://images.unsplash.com/photo-1550340499-a6c60fc8287c?auto=format&fit=crop&q=80&w=600',
+  'https://images.unsplash.com/photo-1583422409516-2895a77efded?auto=format&fit=crop&q=80&w=600',
+  'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&q=80&w=600',
+  'https://images.unsplash.com/photo-1506929562872-bb421503ef21?auto=format&fit=crop&q=80&w=600',
+]
+
 export default function QuizPage() {
+  const [hasStarted, setHasStarted] = useState(false)
   const [currentStep, setCurrentStep] = useState(0)
   const [answers, setAnswers] = useState<QuizAnswers>({})
   const [direction, setDirection] = useState(1)
@@ -159,7 +169,90 @@ export default function QuizPage() {
     setCurrentStep(0)
     setDirection(1)
     setError(null)
+    setHasStarted(true)
   }, [])
+
+  if (!hasStarted) {
+    return (
+      <div className="min-h-screen bg-background pt-20 sm:pt-24 pb-16">
+        <div className="container mx-auto max-w-5xl px-4 sm:px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center min-h-[calc(100vh-12rem)]">
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              className="space-y-8"
+            >
+              <div className="space-y-4">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium">
+                  <Sparkles className="w-4 h-4" />
+                  Powered by Gemini AI
+                </div>
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight">
+                  Can't decide where to go next?
+                </h1>
+                <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-lg">
+                  Take our quick quiz and let AI find the perfect destination for you. 
+                  5 questions, personalized results, your next adventure awaits.
+                </p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Button
+                  size="lg"
+                  onClick={() => setHasStarted(true)}
+                  className="gap-2 text-base px-8 py-6"
+                >
+                  <Compass className="w-5 h-5" />
+                  Start the Quiz
+                </Button>
+              </div>
+
+              <div className="flex items-center gap-6 text-sm text-muted-foreground">
+                <span className="flex items-center gap-1.5">
+                  <MapPin className="w-4 h-4 text-primary" />
+                  167 destinations
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Globe className="w-4 h-4 text-primary" />
+                  66 countries
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <ArrowRight className="w-4 h-4 text-primary" />
+                  Instant results
+                </span>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 0, y: 20 }}
+              animate={{ opacity: 1, x: 0, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="relative"
+            >
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-3 sm:gap-4">
+                {HERO_IMAGES.map((src, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.3 + i * 0.1 }}
+                    className={i % 2 === 1 ? 'lg:mt-8' : ''}
+                  >
+                    <img
+                      src={src}
+                      alt="Travel destination"
+                      className="w-full h-32 sm:h-36 lg:h-48 object-cover rounded-2xl shadow-lg"
+                    />
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   if (isLoading) {
     return (
@@ -236,6 +329,7 @@ export default function QuizPage() {
                 options={step.options}
                 selectedValue={currentAnswer}
                 onSelect={handleSelect}
+                columns={step.columns}
               />
             </motion.div>
           </AnimatePresence>

@@ -1,9 +1,13 @@
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { MapPin, DollarSign, Sparkles, ArrowRight, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import type { QuizRecommendationResponse } from '@/services/api/quizApi'
+import { LoginDialog, SignUpDialog } from '@/components/auth'
+import type { QuizRecommendationResponse, RecommendedDestination } from '@/services/api/quizApi'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '@/contexts/AuthContext'
+import { ROUTE_PATHS } from '@/config/routes'
 
 interface QuizResultsProps {
   data: QuizRecommendationResponse
@@ -12,6 +16,37 @@ interface QuizResultsProps {
 
 export function QuizResults({ data, onRetake }: QuizResultsProps) {
   const navigate = useNavigate()
+  const { user } = useAuth()
+  const [isLoginOpen, setIsLoginOpen] = useState(false)
+  const [isSignUpOpen, setIsSignUpOpen] = useState(false)
+  const [pendingDestination, setPendingDestination] = useState<RecommendedDestination | null>(null)
+
+  useEffect(() => {
+    if (user && pendingDestination && !isLoginOpen && !isSignUpOpen) {
+      navigateToPlanner(pendingDestination)
+      setPendingDestination(null)
+    }
+  }, [user, pendingDestination, isLoginOpen, isSignUpOpen])
+
+  const handlePlanTrip = (rec: RecommendedDestination) => {
+    if (!user) {
+      setPendingDestination(rec)
+      setIsLoginOpen(true)
+      return
+    }
+    navigateToPlanner(rec)
+  }
+
+  const navigateToPlanner = (rec: RecommendedDestination) => {
+    navigate(ROUTE_PATHS.PLAN_TRIP, {
+      state: {
+        destinationId: rec.destinationId,
+        destinationName: rec.name,
+        destinationLocation: rec.location,
+        destinationImageUrl: rec.imageUrl,
+      },
+    })
+  }
 
   return (
     <div className="space-y-10">
@@ -100,7 +135,7 @@ export function QuizResults({ data, onRetake }: QuizResultsProps) {
                   </div>
 
                   <Button
-                    onClick={() => navigate('/plan-trip')}
+                    onClick={() => handlePlanTrip(rec)}
                     className="w-full sm:w-auto self-start gap-2"
                     size="lg"
                   >
@@ -133,6 +168,24 @@ export function QuizResults({ data, onRetake }: QuizResultsProps) {
           Retake Quiz
         </Button>
       </motion.div>
+
+      <LoginDialog
+        open={isLoginOpen}
+        onOpenChange={setIsLoginOpen}
+        onSignUpClick={() => {
+          setIsLoginOpen(false)
+          setIsSignUpOpen(true)
+        }}
+      />
+
+      <SignUpDialog
+        open={isSignUpOpen}
+        onOpenChange={setIsSignUpOpen}
+        onLoginClick={() => {
+          setIsSignUpOpen(false)
+          setIsLoginOpen(true)
+        }}
+      />
     </div>
   )
 }

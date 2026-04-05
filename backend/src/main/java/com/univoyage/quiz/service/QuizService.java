@@ -29,11 +29,13 @@ public class QuizService {
     private final GeminiService geminiService;
     private final ObjectMapper objectMapper;
 
+    private static final int MIN_CANDIDATES = 10;
+
     @Transactional(readOnly = true)
     public QuizRecommendationResponse recommend(QuizRequest request) {
-        List<DestinationEntity> destinations = destinationRepository.findAll();
+        List<DestinationEntity> allDestinations = destinationRepository.findAll();
 
-        if (destinations.isEmpty()) {
+        if (allDestinations.isEmpty()) {
             return QuizRecommendationResponse.builder()
                     .intro("We couldn't find any destinations at the moment.")
                     .recommendations(List.of())
@@ -41,7 +43,9 @@ public class QuizService {
                     .build();
         }
 
-        String prompt = buildPrompt(request, destinations);
+        List<DestinationEntity> candidates = preFilter(allDestinations, request);
+
+        String prompt = buildPrompt(request, candidates);
         GeminiResponse aiResponse = geminiService.generateFromPrompt(prompt);
 
         if (!aiResponse.isSuccess() || aiResponse.getContent() == null) {
@@ -55,7 +59,43 @@ public class QuizService {
                     .build();
         }
 
-        return parseResponse(aiResponse.getContent(), destinations);
+        return parseResponse(aiResponse.getContent(), allDestinations);
+    }
+
+    private List<DestinationEntity> preFilter(List<DestinationEntity> all, QuizRequest request) {
+        List<DestinationEntity> filtered = all.stream()
+                .filter(d -> matchesContinent(d, request.getContinent()))
+                .filter(d -> matchesBudget(d, request.getBudget()))
+                .toList();
+
+        if (filtered.size() >= MIN_CANDIDATES) {
+            return filtered;
+        }
+
+        List<DestinationEntity> byContinent = all.stream()
+                .filter(d -> matchesContinent(d, request.getContinent()))
+                .toList();
+
+        if (byContinent.size() >= MIN_CANDIDATES) {
+            return byContinent;
+        }
+
+        return all;
+    }
+
+    private boolean matchesContinent(DestinationEntity d, String continent) {
+        if (continent == null || continent.equalsIgnoreCase("any")) return true;
+        return continent.equalsIgnoreCase(d.getContinent());
+    }
+
+    private boolean matchesBudget(DestinationEntity d, String budget) {
+        if (budget == null || d.getBudgetPerDay() == null) return true;
+        return switch (budget.toLowerCase()) {
+            case "low" -> d.getBudgetPerDay() <= 30;
+            case "medium" -> d.getBudgetPerDay() > 30 && d.getBudgetPerDay() <= 60;
+            case "high" -> d.getBudgetPerDay() > 60;
+            default -> true;
+        };
     }
 
     private String buildPrompt(QuizRequest request, List<DestinationEntity> destinations) {

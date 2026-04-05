@@ -111,7 +111,7 @@ export const MobileNavigation = ({
             onClick={handleLinkClick}
           >
             <Compass className="w-4 h-4" />
-            <span>Quiz</span>
+            <span>Where to Go?</span>
           </Link>
 
           <Link
