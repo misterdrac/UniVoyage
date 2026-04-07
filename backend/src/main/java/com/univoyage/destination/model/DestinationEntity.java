@@ -4,6 +4,7 @@ import com.univoyage.reference.country.model.Country;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 
@@ -56,6 +57,10 @@ public class DestinationEntity {
 
     @Column(name = "student_perks", columnDefinition = "TEXT[]")
     private List<String> studentPerks;
+
+    /** Average rating 0–5 (one decimal), optional. */
+    @Column(name = "average_rating", precision = 2, scale = 1)
+    private BigDecimal averageRating;
 
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;

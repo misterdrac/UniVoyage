@@ -102,6 +102,7 @@ public class DestinationService {
                 .budgetPerDay(d.getBudgetPerDay())
                 .whyVisit(d.getWhyVisit())
                 .studentPerks(d.getStudentPerks())
+                .averageRating(d.getAverageRating() == null ? null : d.getAverageRating().doubleValue())
                 .build();
     }
 }

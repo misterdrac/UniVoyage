@@ -23,6 +23,8 @@ public class DestinationResponse {
     private Integer budgetPerDay;
     private String whyVisit;
     private List<String> studentPerks;
+    /** 0–5, one decimal; null if not set. */
+    private Double averageRating;
 
     @Data
     @Builder
