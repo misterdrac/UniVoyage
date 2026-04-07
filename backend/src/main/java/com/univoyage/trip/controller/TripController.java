@@ -7,14 +7,18 @@ import com.univoyage.trip.dto.TripAccommodationRequest;
 import com.univoyage.trip.dto.TripAccommodationResponse;
 import com.univoyage.trip.dto.TripCurrencyResponse;
 import com.univoyage.trip.dto.TripResponse;
+import com.univoyage.trip.dto.TripTravellerRatingRequest;
+import com.univoyage.trip.dto.TripTravellerRatingResponse;
 import com.univoyage.trip.service.TripCurrencyService;
 import com.univoyage.trip.service.TripService;
+import com.univoyage.trip.service.TripTravellerRatingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -28,6 +32,7 @@ public class TripController {
 
     private final TripCurrencyService tripCurrencyService;
     private final TripService tripService;
+    private final TripTravellerRatingService tripTravellerRatingService;
     private final CurrentUser currentUser;
 
     @PostMapping
@@ -116,5 +121,24 @@ public class TripController {
             log.warn("Trip currency tab failed: tripId={} userId={} reason={}", tripId, userId, ex.getMessage());
             throw ex;
         }
+    }
+
+    @GetMapping("/{tripId}/rating")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getTripRating(@PathVariable Long tripId) {
+        Long userId = currentUser.id();
+        TripTravellerRatingResponse rating = tripTravellerRatingService.getRating(userId, tripId);
+        Map<String, Object> data = new HashMap<>();
+        data.put("rating", rating);
+        return ResponseEntity.ok(ApiResponse.ok(data));
+    }
+
+    @PostMapping("/{tripId}/rating")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> submitTripRating(
+            @PathVariable Long tripId,
+            @Valid @RequestBody TripTravellerRatingRequest request
+    ) {
+        Long userId = currentUser.id();
+        TripTravellerRatingResponse rating = tripTravellerRatingService.submitRating(userId, tripId, request);
+        return ResponseEntity.ok(ApiResponse.ok(Map.of("rating", rating)));
     }
 }

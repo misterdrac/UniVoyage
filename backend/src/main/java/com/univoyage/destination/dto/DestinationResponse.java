@@ -26,6 +26,10 @@ public class DestinationResponse {
     /** 0–5, one decimal; null if not set. */
     private Double averageRating;
 
+    /** From submitted trip ratings; null when no traveller ratings yet. */
+    private Double travellerRatingAverage;
+    private Integer travellerRatingCount;
+
     @Data
     @Builder
     public static class CountryResponse {

@@ -103,6 +103,9 @@ public class DestinationService {
                 .whyVisit(d.getWhyVisit())
                 .studentPerks(d.getStudentPerks())
                 .averageRating(d.getAverageRating() == null ? null : d.getAverageRating().doubleValue())
+                .travellerRatingAverage(
+                        d.getTravellerRatingAverage() == null ? null : d.getTravellerRatingAverage().doubleValue())
+                .travellerRatingCount(d.getTravellerRatingCount() == null ? 0 : d.getTravellerRatingCount())
                 .build();
     }
 }
