@@ -76,4 +76,13 @@ public class GlobalExceptionHandler {
         ApiResponse<Object> response = ApiResponse.fail(ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    /**
+     * Invalid reference data (e.g. unknown ISO country code on admin destination create).
+     */
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiResponse<Object>> handleIllegalArgumentException(
+            IllegalArgumentException ex, WebRequest request) {
+        return new ResponseEntity<>(ApiResponse.fail(ex.getMessage()), HttpStatus.BAD_REQUEST);
+    }
 }

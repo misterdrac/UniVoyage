@@ -5,7 +5,6 @@ import com.univoyage.admin.destination.service.AdminDestinationService;
 import com.univoyage.common.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Pageable;
@@ -39,7 +38,7 @@ public class AdminDestinationController {
     private final AdminDestinationService adminDestinationService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<AdminDestinationResponse>>> list(
+    public ResponseEntity<ApiResponse<AdminDestinationPageResponse>> list(
             @RequestParam(required = false) String search,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {

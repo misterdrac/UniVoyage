@@ -12,12 +12,14 @@ public record AdminDestinationResponse(
         String name,
         String location,
         String continent,
+        String countryCode,
         String imageUrl,
         String imageAlt,
         String overview,
         Integer budgetPerDay,
         String whyVisit,
         List<String> studentPerks,
+        Double averageRating,
         Instant createdAt,
         Instant updatedAt
 ) {}

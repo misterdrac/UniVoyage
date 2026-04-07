@@ -32,12 +32,16 @@ export interface AdminDestination {
   name: string
   location: string
   continent: string
+  /** ISO 3166-1 alpha-2; required for create/update */
+  countryCode?: string
   imageUrl: string
   imageAlt: string
   overview: string
   budgetPerDay: number
   whyVisit: string
   studentPerks: string[]
+  /** 0–5; optional until set in admin */
+  averageRating?: number | null
   createdAt: string
   updatedAt: string
 }
@@ -60,12 +64,15 @@ export interface CreateDestinationRequest {
   name: string
   location: string
   continent: string
+  countryCode: string
   imageUrl?: string
   imageAlt?: string
   overview?: string
   budgetPerDay?: number
   whyVisit?: string
   studentPerks?: string[]
+  /** 0–5, optional */
+  averageRating?: number | null
 }
 
 /**

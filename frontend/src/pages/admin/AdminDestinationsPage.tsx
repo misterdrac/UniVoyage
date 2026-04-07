@@ -24,6 +24,7 @@ import {
   MapPin,
   Globe,
   DollarSign,
+  Star,
   Image,
   FileText,
   Plus,
@@ -52,12 +53,14 @@ const EMPTY_FORM: CreateDestinationRequest = {
   name: '',
   location: '',
   continent: '',
+  countryCode: '',
   imageUrl: '',
   imageAlt: '',
   overview: '',
   budgetPerDay: 0,
   whyVisit: '',
   studentPerks: [],
+  averageRating: undefined,
 };
 
 const AdminDestinationsPage: React.FC = () => {
@@ -150,12 +153,14 @@ const AdminDestinationsPage: React.FC = () => {
       name: destination.name,
       location: destination.location,
       continent: destination.continent,
+      countryCode: destination.countryCode || '',
       imageUrl: destination.imageUrl || '',
       imageAlt: destination.imageAlt || '',
       overview: destination.overview || '',
       budgetPerDay: destination.budgetPerDay || 0,
       whyVisit: destination.whyVisit || '',
       studentPerks: destination.studentPerks || [],
+      averageRating: destination.averageRating ?? undefined,
     });
   };
 
@@ -185,8 +190,8 @@ const AdminDestinationsPage: React.FC = () => {
   };
 
   const handleSaveChanges = async () => {
-    if (!formData.name || !formData.location || !formData.continent) {
-      toast.error('Name, Country, and Continent are required');
+    if (!formData.name || !formData.location || !formData.continent || !formData.countryCode) {
+      toast.error('Name, country, continent, and country code are required (pick a valid country from the list)');
       return;
     }
 
@@ -380,20 +385,27 @@ const AdminDestinationsPage: React.FC = () => {
                   </Label>
                   <AutoComplete
                     options={COUNTRIES.map(country => ({ value: country.value, label: country.label }))}
-                    value={formData.location ? (() => {
-                      const country = COUNTRIES.find(c => c.label === formData.location);
-                      return country ? { value: country.value, label: country.label } : undefined;
-                    })() : undefined}
+                    value={(() => {
+                      if (formData.countryCode) {
+                        const byCode = COUNTRIES.find(c => c.value === formData.countryCode);
+                        if (byCode) return { value: byCode.value, label: byCode.label };
+                      }
+                      if (formData.location) {
+                        const byLabel = COUNTRIES.find(c => c.label === formData.location);
+                        if (byLabel) return { value: byLabel.value, label: byLabel.label };
+                      }
+                      return undefined;
+                    })()}
                     onValueChange={(option: Option) => {
-                      // Only update if a valid option is selected
-                      if (option && COUNTRIES.some(c => c.label === option.label)) {
+                      if (option && COUNTRIES.some(c => c.value === option.value)) {
                         updateField('location', option.label);
+                        updateField('countryCode', option.value);
                       }
                     }}
                     onBlur={() => {
-                      // Clear form field if current value doesn't match any valid country
                       if (formData.location && !COUNTRIES.some(c => c.label === formData.location)) {
                         updateField('location', '');
+                        updateField('countryCode', '');
                       }
                     }}
                     placeholder="Search for a country..."
@@ -441,6 +453,34 @@ const AdminDestinationsPage: React.FC = () => {
                     value={formData.budgetPerDay || ''}
                     onChange={(e) => updateField('budgetPerDay', parseInt(e.target.value) || 0)}
                     placeholder="e.g., 100"
+                    className="no-spinners"
+                  />
+                </div>
+
+                {/* Average rating (0–5), shown on public destination cards */}
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2">
+                    <Star className="w-4 h-4" />
+                    Average rating (0–5)
+                  </Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    max={5}
+                    step={0.1}
+                    value={formData.averageRating ?? ''}
+                    onChange={(e) => {
+                      const raw = e.target.value
+                      if (raw === '') {
+                        updateField('averageRating', undefined)
+                        return
+                      }
+                      const n = parseFloat(raw)
+                      if (!Number.isNaN(n)) {
+                        updateField('averageRating', Math.round(n * 10) / 10)
+                      }
+                    }}
+                    placeholder="e.g., 4.5 (leave empty for no stars on card)"
                     className="no-spinners"
                   />
                 </div>
