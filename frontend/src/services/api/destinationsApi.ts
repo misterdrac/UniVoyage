@@ -17,6 +17,8 @@ export interface BackendDestinationResponse {
   budgetPerDay?: number
   whyVisit?: string
   studentPerks?: string[]
+  /** 0–5, one decimal; omitted or null if not set */
+  averageRating?: number | null
 }
 
 /**
@@ -55,6 +57,10 @@ function mapBackendDestination(backendDest: BackendDestinationResponse): Destina
     budgetPerDay: backendDest.budgetPerDay,
     whyVisit: backendDest.whyVisit,
     studentPerks: backendDest.studentPerks,
+    averageRating:
+      backendDest.averageRating !== undefined && backendDest.averageRating !== null
+        ? Number(backendDest.averageRating)
+        : undefined,
   }
 }
 
