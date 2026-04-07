@@ -51,6 +51,9 @@ public class SecurityConfiguration {
                         // Public routes for destinations
                         .requestMatchers(HttpMethod.GET, "/api/destinations/**").permitAll()
 
+                        // Public quiz endpoint
+                        .requestMatchers("/api/quiz/**").permitAll()
+
                         // Public heatmap endpoint (landing page)
                         .requestMatchers(HttpMethod.GET, "/api/heatmap/**").permitAll()
 

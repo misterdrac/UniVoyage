@@ -55,6 +55,12 @@ export const DesktopNavigation = ({ user }: DesktopNavigationProps) => {
 
           <NavigationMenuItem>
             <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+              <Link to={ROUTE_PATHS.QUIZ}>Where to Go?</Link>
+            </NavigationMenuLink>
+          </NavigationMenuItem>
+
+          <NavigationMenuItem>
+            <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
               <Link to={ROUTE_PATHS.ABOUT}>About</Link>
             </NavigationMenuLink>
           </NavigationMenuItem>
