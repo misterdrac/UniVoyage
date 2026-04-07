@@ -51,8 +51,6 @@ public class TripService {
         DestinationEntity dest = destinationRepository.findById(req.getDestinationId())
                 .orElseThrow(() -> new ResourceNotFoundException("Destination not found"));
 
-        System.out.println("destinationId = " + req.getDestinationId());
-
         TripEntity trip = TripEntity.builder()
                 .userId(userId)
                 .destination(dest)

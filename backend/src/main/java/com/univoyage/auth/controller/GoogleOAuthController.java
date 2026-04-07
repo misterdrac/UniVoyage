@@ -17,6 +17,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /** * Controller for handling Google OAuth 2.0 authentication.
  * Provides endpoints to initiate the OAuth flow and handle the callback.
@@ -34,6 +35,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@Slf4j
 public class GoogleOAuthController {
 
     private final GoogleOAuthService googleOAuthService;
@@ -63,7 +65,7 @@ public class GoogleOAuthController {
             @RequestBody GoogleCallbackRequestDto request,
             HttpServletResponse response
     ) {
-        System.out.println(">>> GoogleOAuthController /google/callback HIT");
+        log.debug("Google OAuth callback received");
         if (request.getCode() == null || request.getCode().isBlank()) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)

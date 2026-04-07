@@ -22,6 +22,7 @@ spring:
       ddl-auto: validate
     # SQL is not echoed here; enable PostgreSQL log_statement (see docker-compose) for DB-side query logging.
     show-sql: false
+    open-in-view: false
 
 app:
   jwt:

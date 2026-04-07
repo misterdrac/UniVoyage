@@ -19,6 +19,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -35,6 +36,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class GoogleOAuthService {
 
     // Optional in test environments. If not configured, the app should still start
@@ -78,7 +80,7 @@ public class GoogleOAuthService {
      */
     @Transactional
     public AuthPayload handleCallback(String code) {
-        System.out.println(">>> GoogleOAuthService.handleCallback CALLED, code=" + code);
+        log.debug("Google OAuth token exchange starting");
         try {
             String accessToken = exchangeCodeForAccessToken(code);
             Map<String, Object> userInfo = fetchUserInfo(accessToken);

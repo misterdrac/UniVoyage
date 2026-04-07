@@ -19,6 +19,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 
@@ -32,6 +33,7 @@ import java.io.IOException;
  */
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
@@ -157,7 +159,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authToken);
 
-            System.out.println("Authentication set for user [" + userIdString + "] with authorities: " + userDetails.getAuthorities());
+            log.debug("Authentication set for user [{}] with authorities: {}", userIdString, userDetails.getAuthorities());
         } catch (UsernameNotFoundException ex) {
             // user deleted / db reset / stale token
             clearAuthCookies(response);

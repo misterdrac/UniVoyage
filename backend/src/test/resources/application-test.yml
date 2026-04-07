@@ -4,6 +4,11 @@ spring:
     username: postgres
     password: admin
     driver-class-name: org.postgresql.Driver
+    # Many @SpringBootTest classes each spin up a context with its own pool; keep
+    # this small so full mvn package does not exhaust PostgreSQL max_connections.
+    hikari:
+      maximum-pool-size: 2
+      minimum-idle: 1
 
   jpa:
     hibernate:

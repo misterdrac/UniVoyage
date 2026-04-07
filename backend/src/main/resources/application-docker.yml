@@ -18,10 +18,16 @@ spring:
     hibernate:
       ddl-auto: validate
     show-sql: false
+    open-in-view: false
 
 logging:
   file:
     name: /app/logs/univoyage.log
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 30
+      total-size-cap: 1GB
   level:
     root: INFO
     org.springframework.security: INFO
