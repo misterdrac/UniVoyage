@@ -170,7 +170,9 @@ spring.datasource.password=${DB_PASSWORD}
 
 ### 3.3 Run via Docker (Highly Recommended)
 - If you prefer to run the application in a containerized environment, you can use Docker. Make sure you have Docker installed and running on your machine.
-- Ensure `.env` exists in `backend` with at least `POSTGRES_PASSWORD`, `JWT_SECRET`, and the API keys you use. Compose binds Postgres and the API to **127.0.0.1** only (not all interfaces).
+- Ensure `.env` exists in `backend` with at least `POSTGRES_USER`, `POSTGRES_PASSWORD`, `JWT_SECRET`, and the API keys you use. Both Postgres and the backend load **`env_file: .env`** so `docker-compose.yml` stays free of credentials (and secret scanners stay quiet). Compose binds Postgres and the API to **127.0.0.1** only (not all interfaces).
+- **Windows:** If Docker fails to bind Postgres on port 5432 (`forbidden by its access permissions`), the default host mapping is **5433** (`POSTGRES_HOST_PORT`). Connect from tools on the host with `localhost:5433`. The backend container still uses internal hostname `postgres` and port **5432**.
+- **Never share** the output of `docker compose config` in public: it expands all variables from `.env`.
 - We have Dockerfile in our backend directory that defines how to build the Docker image for the back-end application. You can build and run the Docker container using the following commands:
 ```bash
   # Build image from Dockerfile and start the container
@@ -184,6 +186,7 @@ spring.datasource.password=${DB_PASSWORD}
   docker ps
 ```
 - or you can go to Docker Desktop and check the "Containers/Apps" section to see if the container is running. You should see Docker image named "backend" and under that image are two containers, one for the back-end application and another for the PostgreSQL database.
+- **Log files on disk (Docker):** Compose bind-mounts logs under `backend/logs/` — PostgreSQL server log at `logs/postgres/postgresql.log`, Spring Boot file log at `logs/spring/univoyage.log` (see `application-docker.yml`). The `logs/` directory is gitignored.
 - This will build the Docker image for the back-end application and start it in a container. The application will be accessible at `http://localhost:8080` and it will be able to communicate with the front-end running on port 5173.
 - Using Docker is highly recommended as it simplifies the setup process and ensures that all dependencies are correctly configured.
 

@@ -1,14 +1,14 @@
 spring:
   datasource:
     url: ${SPRING_DATASOURCE_URL}
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
+    username: ${SPRING_DATASOURCE_USERNAME:${POSTGRES_USER:postgres}}
+    password: ${SPRING_DATASOURCE_PASSWORD:${POSTGRES_PASSWORD}}
 
   flyway:
     enabled: true
     url: ${SPRING_FLYWAY_URL}
-    user: ${SPRING_FLYWAY_USER}
-    password: ${SPRING_FLYWAY_PASSWORD}
+    user: ${SPRING_FLYWAY_USER:${POSTGRES_USER:postgres}}
+    password: ${SPRING_FLYWAY_PASSWORD:${POSTGRES_PASSWORD}}
     connect-retries: 10
     connect-retries-interval: 5
     locations: classpath:db/migration

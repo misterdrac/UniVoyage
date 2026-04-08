@@ -3,11 +3,11 @@ services:
     image: postgres:16
     container_name: univoyage_db_container
     restart: unless-stopped
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env (see env.example)}
+    env_file: .env
+    # Default 5433: on Windows, 5432 is often blocked (Hyper-V / excluded port ranges).
+    # Override in .env: POSTGRES_HOST_PORT=5432 when 5432 is free on your machine.
     ports:
-      - "127.0.0.1:5432:5432"
+      - "127.0.0.1:${POSTGRES_HOST_PORT:-5433}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./logs/postgres:/var/log/postgresql
@@ -41,16 +41,11 @@ services:
         condition: service_healthy
     ports:
       - "127.0.0.1:8080:8080"
-    env_file:
-      - .env
+    env_file: .env
     environment:
       SPRING_PROFILES_ACTIVE: docker
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-univoyage_db}
-      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env (see env.example)}
       SPRING_FLYWAY_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-univoyage_db}
-      SPRING_FLYWAY_USER: ${POSTGRES_USER:-postgres}
-      SPRING_FLYWAY_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env (see env.example)}
     volumes:
       - ./logs/spring:/app/logs
     healthcheck:
