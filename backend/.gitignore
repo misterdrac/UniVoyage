@@ -45,3 +45,6 @@ flyway.conf
 flyway.toml.bak
 flyway.user.toml
 flyway.log
+
+# Docker Compose log mounts (spring + postgres)
+logs/

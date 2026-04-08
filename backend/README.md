@@ -172,4 +172,32 @@ spring.datasource.password=${DB_PASSWORD}
 ```
 - or you can go to Docker Desktop and check the "Containers/Apps" section to see if the container is running. You should see Docker image named "backend" and under that image are two containers, one for the back-end application and another for the PostgreSQL database.
 - This will build the Docker image for the back-end application and start it in a container. The application will be accessible at `http://localhost:8080` and it will be able to communicate with the front-end running on port 5173.
-- Using Docker is highly recommended as it simplifies the setup process and ensures that all dependencies are correctly
+- Using Docker is highly recommended as it simplifies the setup process and ensures that all dependencies are correctly configured.
+
+### 3.4 Database creation and Flyway migration behavior in Docker
+- Database creation is handled by PostgreSQL container initialization, not by Flyway migration files.
+- Flyway migrations (`V1`, `V2`, `V3`, ...) create/update schema objects inside an already existing database.
+- If you edit an already executed migration file (for example `V1`, `V4`, `V6`), Flyway will not "re-run it as new logic" on an existing database.
+
+#### Recommended workflow for schema changes
+1. Create a new migration file (for example `V12__add_new_column.sql`).
+2. Rebuild and start containers:
+```bash
+docker compose up --build -d
+```
+3. Verify Flyway applied the new version in logs or in `flyway_schema_history`.
+
+#### Clean-slate workflow (only when needed)
+Use this when you changed historical migration files locally and need a full reset:
+```bash
+# Stop containers and remove volumes (deletes local DB data)
+docker compose down -v
+
+# Rebuild image and recreate containers from scratch
+docker compose up --build -d
+```
+
+#### Why this can look like "Docker cache issue"
+- Image cache and DB persistence are different things.
+- Even with a fresh backend image, schema/data can look unchanged if PostgreSQL volume (`pgdata`) is reused.
+- In this project, DB state is persisted in Docker volume unless you remove it with `docker compose down -v`.
