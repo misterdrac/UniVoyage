@@ -26,3 +26,10 @@ export interface TripCurrencyInfo {
   exchangeRate: number;
 }
 
+/** Matches backend TripTravellerRatingResponse */
+export interface TripRating {
+  stars: number;
+  comment?: string;
+  updatedAt: string;
+}
+

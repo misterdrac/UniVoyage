@@ -7,7 +7,7 @@ import { getStatusConfig } from '@/lib/tripStatusUtils'
 import { cn } from '@/lib/utils'
 import { useDestinations } from '@/hooks/useDestinations'
 import type { Trip } from '@/types/trip'
-import { Calendar, Clock, MapPin, ArrowRight, Trash2, Loader2 } from 'lucide-react'
+import { Calendar, Clock, MapPin, ArrowRight, Trash2, Loader2, Star } from 'lucide-react'
 
 interface TripCardProps {
   trip: Trip
@@ -131,6 +131,14 @@ export function TripCard({ trip, isDeleting = false, onDelete, onView }: TripCar
         </div>
 
         <div className="border-t border-border" />
+
+        {/* Rate trip notice for completed trips */}
+        {status === 'completed' && (
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-yellow-600 dark:text-yellow-400">
+            <Star className="h-4 w-4 shrink-0" />
+            <span className="text-xs font-medium">Rate your trip in Overview</span>
+          </div>
+        )}
 
         <button
           onClick={handleViewDetails}

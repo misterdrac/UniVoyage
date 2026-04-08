@@ -132,7 +132,7 @@ export const DestinationsPageLayout = ({
                           overview={destination.overview!}
                           budgetPerDay={destination.budgetPerDay!}
                           onPlanTrip={() => handlePlanTrip(destination)}
-                          averageRating={destination.averageRating}
+                          averageRating={destination.travellerRatingAverage ?? destination.averageRating}
                         />
                       </div>
                       <div className="space-y-4 sm:space-y-6 px-4 sm:px-0">
@@ -186,7 +186,7 @@ export const DestinationsPageLayout = ({
                           overview={destination.overview!}
                           budgetPerDay={destination.budgetPerDay!}
                           onPlanTrip={() => handlePlanTrip(destination)}
-                          averageRating={destination.averageRating}
+                          averageRating={destination.travellerRatingAverage ?? destination.averageRating}
                         />
                       </div>
                     </>

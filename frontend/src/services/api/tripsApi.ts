@@ -1,7 +1,7 @@
 import { API_CONFIG } from '@/config/apiConfig'
 import type { StoredItineraryPayload } from '@/types/itinerary'
 import type { TripBudgetPayload } from '@/types/budget'
-import type { TripCurrencyInfo } from '@/types/trip'
+import type { TripCurrencyInfo, TripRating } from '@/types/trip'
 import type { ApiClient } from './baseClient'
 
 /**
@@ -81,6 +81,21 @@ export interface TripsApi {
    * Destination currency and exchange rate vs the user's home currency (from profile)
    */
   getTripCurrency(tripId: number): Promise<{ success: boolean; currency?: TripCurrencyInfo; error?: string }>
+
+  /**
+   * Retrieves the current user's rating for a specific trip
+   * @param tripId - ID of the trip
+   * @returns Promise resolving to success status and rating data (null if not yet rated)
+   */
+  getTripRating(tripId: number): Promise<{ success: boolean; rating?: TripRating | null; error?: string }>
+
+  /**
+   * Submits or updates the current user's rating for a specific trip
+   * @param tripId - ID of the trip
+   * @param stars - Rating value between 1 and 5
+   * @returns Promise resolving to success status and saved rating data
+   */
+  submitTripRating(tripId: number, stars: number): Promise<{ success: boolean; rating?: TripRating; error?: string }>
 }
 
 /**
@@ -249,6 +264,43 @@ export const tripsApi: { [K in keyof TripsApi]: (this: ApiClient, ...args: Param
       return { success: false, error: res.error ?? 'Failed to load currency' }
     } catch (err: any) {
       return { success: false, error: err?.message ?? 'Failed to load currency' }
+    }
+  },
+
+  async getTripRating(this: ApiClient, tripId) {
+    try {
+      const res = await this.request<{ rating?: TripRating | null }>(
+        `${API_CONFIG.ENDPOINTS.TRIPS.GET_BY_ID}/${tripId}/rating`
+      )
+
+      if (res.success) {
+        return { success: true, rating: res.data?.rating ?? null }
+      }
+
+      return { success: false, error: res.error ?? 'Failed to load rating' }
+    } catch (err: any) {
+      return { success: false, error: err?.message ?? 'Failed to load rating' }
+    }
+  },
+
+  async submitTripRating(this: ApiClient, tripId, stars) {
+    try {
+      const res = await this.request<{ rating?: TripRating }>(
+        `${API_CONFIG.ENDPOINTS.TRIPS.GET_BY_ID}/${tripId}/rating`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ stars }),
+        }
+      )
+
+      if (res.success && res.data?.rating) {
+        return { success: true, rating: res.data.rating }
+      }
+
+      return { success: false, error: res.error ?? 'Failed to submit rating' }
+    } catch (err: any) {
+      return { success: false, error: err?.message ?? 'Failed to submit rating' }
     }
   },
 }

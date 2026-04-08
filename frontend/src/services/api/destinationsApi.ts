@@ -19,6 +19,9 @@ export interface BackendDestinationResponse {
   studentPerks?: string[]
   /** 0–5, one decimal; omitted or null if not set */
   averageRating?: number | null
+  /** From submitted trip ratings; null when no traveller ratings yet. */
+  travellerRatingAverage?: number | null
+  travellerRatingCount?: number | null
 }
 
 /**
@@ -60,6 +63,10 @@ function mapBackendDestination(backendDest: BackendDestinationResponse): Destina
     averageRating:
       backendDest.averageRating !== undefined && backendDest.averageRating !== null
         ? Number(backendDest.averageRating)
+        : undefined,
+    travellerRatingAverage:
+      backendDest.travellerRatingAverage !== undefined && backendDest.travellerRatingAverage !== null
+        ? Number(backendDest.travellerRatingAverage)
         : undefined,
   }
 }

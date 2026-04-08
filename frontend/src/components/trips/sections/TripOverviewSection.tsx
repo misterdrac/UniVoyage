@@ -7,6 +7,7 @@ import { useTripBudget } from '@/hooks/useTripBudget'
 import { apiService } from '@/services/api'
 import { cn } from '@/lib/utils'
 import { useEffect, useState } from 'react'
+import { TripRatingSection } from '@/components/trips/sections/TripRatingSection'
 
 interface TripOverviewSectionProps {
   trip: Trip
@@ -352,6 +353,14 @@ export function TripOverviewSection({
           </div>
         )}
       </div>
+
+      {/* Rating section — only shown after trip is completed */}
+      {currentStatus === 'completed' && (
+        <div>
+          <h3 className="text-xl font-semibold text-foreground mb-4">Rate Your Trip</h3>
+          <TripRatingSection tripId={trip.id} destinationName={trip.destinationName} />
+        </div>
+      )}
 
       <div>
         <h3 className="text-xl font-semibold text-foreground mb-3">What's Next?</h3>
