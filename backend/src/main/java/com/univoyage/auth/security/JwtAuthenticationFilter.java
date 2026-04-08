@@ -104,8 +104,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 path.contains("/api/auth/register") ||
                 path.contains("/api/auth/google") ||
                 path.contains("/api/destinations") ||
+                path.contains("/api/quiz") ||
                 path.contains("/error") ||
-                path.contains("/actuator")) {
+                path.startsWith("/actuator/health")) {
             filterChain.doFilter(request, response);
             return;
         }
