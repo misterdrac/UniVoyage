@@ -6,6 +6,7 @@ export { default as ProfilePage } from './ProfilePage';
 export { default as MyTripsPage } from './MyTripsPage';
 export { default as TripDetailPage } from './TripDetailPage';
 export { default as PlanTripPage } from './PlanTripPage';
+export { default as QuizPage } from './QuizPage';
 
 // Destination pages
 export * from './destinations';

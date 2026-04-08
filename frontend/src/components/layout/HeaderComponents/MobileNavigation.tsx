@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Home, User as UserIcon, MapPin, Info, Mail, Shield, Globe, Star } from "lucide-react";
+import { Home, User as UserIcon, MapPin, Info, Mail, Shield, Globe, Star, Compass } from "lucide-react";
 import { DESTINATION_NAV_ITEMS } from "./constants";
 import type { User } from "@/types/user";
 import { ROUTE_PATHS } from "@/config/routes";
@@ -104,6 +104,15 @@ export const MobileNavigation = ({
               <span>My Trips</span>
             </Link>
           )}
+
+          <Link
+            to={ROUTE_PATHS.QUIZ}
+            className="px-3 py-2 text-sm font-medium text-foreground hover:bg-accent rounded-md text-center flex flex-col items-center gap-1"
+            onClick={handleLinkClick}
+          >
+            <Compass className="w-4 h-4" />
+            <span>Where to Go?</span>
+          </Link>
 
           <Link
             to={ROUTE_PATHS.ABOUT}

@@ -20,7 +20,6 @@
 
     <properties>
         <java.version>23</java.version>
-        <spring-cloud.version>2025.0.0</spring-cloud.version>
         <mapstruct.version>1.6.2</mapstruct.version>
         <lombok.version>1.18.34</lombok.version>
         <jjwt.version>0.11.5</jjwt.version>
@@ -107,14 +106,14 @@
             <version>${mapstruct.version}</version>
         </dependency>
 
-        <!-- Lombok (NE stavljati provided) -->
+        <!-- Lombok: do not use provided scope -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
         </dependency>
 
-        <!-- Lombok + MapStruct binding (bitno za maven build) -->
+        <!-- Lombok + MapStruct binding (required for Maven build) -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok-mapstruct-binding</artifactId>
@@ -140,31 +139,7 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>postgresql</artifactId>
-            <scope>test</scope>
-        </dependency>
-
     </dependencies>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-dependencies</artifactId>
-                <version>${spring-cloud.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <build>
         <plugins>
@@ -173,7 +148,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.11.0</version>
                 <configuration>
                     <release>${java.version}</release>
                     <annotationProcessorPaths>
@@ -196,17 +170,22 @@
                 </configuration>
             </plugin>
 
-            <!-- Spring Boot -->
+            <!-- Tests: satisfy required placeholders from application.yml (never use these values in production) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <environmentVariables>
+                        <JWT_SECRET>test-only-jwt-secret-do-not-use-in-production-32chars-min</JWT_SECRET>
+                        <DB_PASSWORD>admin</DB_PASSWORD>
+                    </environmentVariables>
+                </configuration>
+            </plugin>
+
+            <!-- repackage is bound once by spring-boot-starter-parent; only add config here -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>repackage</goal>
-                        </goals>
-                    </execution>
-                </executions>
                 <configuration>
                     <layers enabled="true"/>
                 </configuration>

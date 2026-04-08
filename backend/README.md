@@ -63,17 +63,23 @@ Before running the back-end of this project, ensure you have the following softw
 - Copy the generated string.
 
 #### **G. Configure .env file**
-- Recommended: Check the `.env.example` file in the `backend` directory for reference.
-- Create or update the `.env` file in the `backend` directory with all the keys you obtained:
+- Copy `env.example` to `.env` in the `backend` directory and fill in real values. **Do not commit `.env`** (it is gitignored).
+- **Required for any local run:** `JWT_SECRET` and `DB_PASSWORD` (database user password).
+- **Required for Docker Compose:** `POSTGRES_PASSWORD` (use the same value as `DB_PASSWORD` unless you intentionally use different accounts).
 ```env
+  # Database (local / IDE)
+  DB_PASSWORD=your_db_password
+
+  # Docker Compose → Postgres + Spring in containers
+  POSTGRES_PASSWORD=your_db_password
+
+  # JWT (no default in application config — must be set)
+  JWT_SECRET=your_generated_jwt_secret_string
+
   # Google OAuth2
   GOOGLE_CLIENT_ID=your_google_client_id
   GOOGLE_CLIENT_SECRET=your_google_client_secret
-  GOOGLE_REDIRECT_URI=your_google_redirect_uri
-
-  # JWT Configuration
-  JWT_SECRET=your_generated_jwt_secret_string
-  JWT_EXPIRATION=86400000
+  GOOGLE_REDIRECT_URI=http://localhost:5173/auth/google/callback
 
   # External APIs
   OPENWEATHER_API_KEY=your_openweather_key
@@ -81,9 +87,15 @@ Before running the back-end of this project, ensure you have the following softw
   GEMINI_API_KEY=your_gemini_key
   
   # Amadeus API
-  AMADEUS_CLIENT_ID=your_amadeus_client_id
-  AMADEUS_CLIENT_SECRET=your_amadeus_client_secret
+  AMADEUS_API_KEY=your_amadeus_api_key
+  AMADEUS_API_SECRET=your_amadeus_api_secret
 ```
+
+#### **H. Production and staging**
+- Set `SPRING_PROFILES_ACTIVE=prod` and provide database credentials and `JWT_SECRET` via your host’s secret store (Railway, Kubernetes secrets, etc.), not in the image.
+- Set `CORS_ALLOWED_ORIGINS` to your real HTTPS frontend origins (comma-separated). In production, `application-prod.yml` uses secure cookies by default (`COOKIE_SECURE=true`, `COOKIE_SAMESITE=None`).
+- Only `/actuator/health` is exposed publicly; other actuator routes are denied.
+- If any API key or `JWT_SECRET` was ever printed in logs or committed, rotate it before go-live.
 
 ### 1.4 Verify which Docker version do you have
 ```bash
@@ -158,6 +170,9 @@ spring.datasource.password=${DB_PASSWORD}
 
 ### 3.3 Run via Docker (Highly Recommended)
 - If you prefer to run the application in a containerized environment, you can use Docker. Make sure you have Docker installed and running on your machine.
+- Ensure `.env` exists in `backend` with at least `POSTGRES_USER`, `POSTGRES_PASSWORD`, `JWT_SECRET`, and the API keys you use. Both Postgres and the backend load **`env_file: .env`** so `docker-compose.yml` stays free of credentials (and secret scanners stay quiet). Compose binds Postgres and the API to **127.0.0.1** only (not all interfaces).
+- **Windows:** If Docker fails to bind Postgres on port 5432 (`forbidden by its access permissions`), the default host mapping is **5433** (`POSTGRES_HOST_PORT`). Connect from tools on the host with `localhost:5433`. The backend container still uses internal hostname `postgres` and port **5432**.
+- **Never share** the output of `docker compose config` in public: it expands all variables from `.env`.
 - We have Dockerfile in our backend directory that defines how to build the Docker image for the back-end application. You can build and run the Docker container using the following commands:
 ```bash
   # Build image from Dockerfile and start the container
@@ -171,5 +186,36 @@ spring.datasource.password=${DB_PASSWORD}
   docker ps
 ```
 - or you can go to Docker Desktop and check the "Containers/Apps" section to see if the container is running. You should see Docker image named "backend" and under that image are two containers, one for the back-end application and another for the PostgreSQL database.
+- **Log files on disk (Docker):** Compose bind-mounts logs under `backend/logs/` — PostgreSQL server log at `logs/postgres/postgresql.log`, Spring Boot file log at `logs/spring/univoyage.log` (see `application-docker.yml`). The `logs/` directory is gitignored.
 - This will build the Docker image for the back-end application and start it in a container. The application will be accessible at `http://localhost:8080` and it will be able to communicate with the front-end running on port 5173.
-- Using Docker is highly recommended as it simplifies the setup process and ensures that all dependencies are correctly
+- Using Docker is highly recommended as it simplifies the setup process and ensures that all dependencies are correctly configured.
+
+### 3.4 Database creation and Flyway migration behavior in Docker
+- Database creation is handled by PostgreSQL container initialization, not by Flyway migration files.
+- In this project, PostgreSQL runs `backend/docker/postgres/init/01-create-univoyage-db.sql` via `/docker-entrypoint-initdb.d` during fresh volume initialization.
+- Flyway migrations (`V1`, `V2`, `V3`, ...) create/update schema objects inside an already existing database.
+- If you edit an already executed migration file (for example `V1`, `V4`, `V6`), Flyway will not "re-run it as new logic" on an existing database.
+- In the default Flyway/Spring Boot setup, changing an already applied migration usually causes a checksum validation error, so the application may fail to start until you either reset the database (see the clean-slate workflow below) or explicitly repair/disable validation.
+
+#### Recommended workflow for schema changes
+1. Create a new migration file (for example `V12__add_new_column.sql`).
+2. Rebuild and start containers:
+```bash
+docker compose up --build -d
+```
+3. Verify Flyway applied the new version in logs or in `flyway_schema_history`.
+
+#### Clean-slate workflow (only when needed)
+Use this when you changed historical migration files locally and need a full reset:
+```bash
+# Stop containers and remove volumes (deletes local DB data)
+docker compose down -v
+
+# Rebuild image and recreate containers from scratch
+docker compose up --build -d
+```
+
+#### Why this can look like "Docker cache issue"
+- Image cache and DB persistence are different things.
+- Even with a fresh backend image, schema/data can look unchanged if PostgreSQL volume (`pgdata`) is reused.
+- In this project, DB state is persisted in Docker volume unless you remove it with `docker compose down -v`.
