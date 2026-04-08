@@ -4,11 +4,14 @@ import com.univoyage.auth.dto.AuthPayload;
 import com.univoyage.auth.dto.RegisterRequestDto;
 import com.univoyage.auth.dto.LoginRequestDto;
 import com.univoyage.auth.service.AuthService;
+import com.univoyage.auth.security.ClientIpResolver;
 import com.univoyage.auth.security.CookieUtils;
+import com.univoyage.auth.security.LoginIpRateLimiter;
 import com.univoyage.common.response.ApiResponse;
 import com.univoyage.user.dto.UserDto;
 import com.univoyage.user.model.UserEntity;
 import com.univoyage.user.repository.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +32,7 @@ public class AuthController {
 
     private final AuthService authService;
     private final UserRepository userRepository;
+    private final LoginIpRateLimiter loginIpRateLimiter;
 
     @Value("${app.jwt.ttl-seconds}")
     private long jwtTtlSeconds;
@@ -63,8 +67,16 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<AuthPayload>> login(
             @Valid @RequestBody LoginRequestDto request,
+            HttpServletRequest httpRequest,
             HttpServletResponse response
     ) {
+        long retryAfterSec = loginIpRateLimiter.tryConsumeOrRetryAfterSeconds(
+                ClientIpResolver.resolve(httpRequest));
+        if (retryAfterSec >= 0) {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                    .header(HttpHeaders.RETRY_AFTER, String.valueOf(retryAfterSec))
+                    .body(ApiResponse.fail("Too many login attempts from this network. Please try again later."));
+        }
         try {
             AuthPayload payload = authService.login(request);
 
