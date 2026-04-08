@@ -3,15 +3,15 @@ services:
     image: postgres:16
     container_name: univoyage_db_container
     restart: unless-stopped
-    environment:
-      POSTGRES_DB: univoyage_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: admin
+    env_file: .env
+    # Default 5433: on Windows, 5432 is often blocked (Hyper-V / excluded port ranges).
+    # Override in .env: POSTGRES_HOST_PORT=5432 when 5432 is free on your machine.
     ports:
-      - "5432:5432"
+      - "127.0.0.1:${POSTGRES_HOST_PORT:-5433}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./logs/postgres:/var/log/postgresql
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
     command: >
       postgres
       -c logging_collector=on
@@ -25,9 +25,9 @@ services:
       -c log_min_error_statement=error
       -c log_connections=on
       -c log_disconnections=on
-      -c log_statement=all
+      -c log_statement=none
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d univoyage_db"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d univoyage_db"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -40,17 +40,12 @@ services:
       postgres:
         condition: service_healthy
     ports:
-      - "8080:8080"
-    env_file:
-      - .env
+      - "127.0.0.1:8080:8080"
+    env_file: .env
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/univoyage_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: admin
-      SPRING_FLYWAY_URL: jdbc:postgresql://postgres:5432/univoyage_db
-      SPRING_FLYWAY_USER: postgres
-      SPRING_FLYWAY_PASSWORD: admin
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-univoyage_db}
+      SPRING_FLYWAY_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-univoyage_db}
     volumes:
       - ./logs/spring:/app/logs
     healthcheck:

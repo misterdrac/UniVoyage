@@ -1,6 +1,5 @@
--- CREATE DATABASE univoyage_db;
-
--- \c univoyage_db
+-- Database creation is handled outside Flyway (docker postgres init / infra provisioning).
+-- Flyway migrations start after connecting to an existing database.
 
 CREATE TABLE countries (
     iso_code VARCHAR(2) PRIMARY KEY,

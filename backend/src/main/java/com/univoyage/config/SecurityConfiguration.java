@@ -41,8 +41,10 @@ public class SecurityConfiguration {
                         // Allow preflight CORS requests
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // Public routes for error handling and actuator
-                        .requestMatchers("/error", "/actuator/**").permitAll()
+                        // Public routes for error handling; actuator only health (defense in depth)
+                        .requestMatchers("/error").permitAll()
+                        .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
+                        .requestMatchers("/actuator/**").denyAll()
 
                         // Specific public routes for authentication
                         .requestMatchers("/api/auth/login/**", "/api/auth/register/**").permitAll()

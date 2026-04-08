@@ -1,14 +1,14 @@
 spring:
   datasource:
-    url: jdbc:postgresql://postgres:5432/univoyage_db
-    username: postgres
-    password: admin
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME:${POSTGRES_USER:postgres}}
+    password: ${SPRING_DATASOURCE_PASSWORD:${POSTGRES_PASSWORD}}
 
   flyway:
     enabled: true
-    url: jdbc:postgresql://postgres:5432/univoyage_db
-    user: postgres
-    password: admin
+    url: ${SPRING_FLYWAY_URL}
+    user: ${SPRING_FLYWAY_USER:${POSTGRES_USER:postgres}}
+    password: ${SPRING_FLYWAY_PASSWORD:${POSTGRES_PASSWORD}}
     connect-retries: 10
     connect-retries-interval: 5
     locations: classpath:db/migration

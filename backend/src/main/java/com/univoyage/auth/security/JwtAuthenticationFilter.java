@@ -104,7 +104,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 path.contains("/api/destinations") ||
                 path.contains("/api/quiz") ||
                 path.contains("/error") ||
-                path.contains("/actuator")) {
+                path.startsWith("/actuator/health")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -158,7 +158,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authToken);
 
-            System.out.println("Authentication set for user [" + userIdString + "] with authorities: " + userDetails.getAuthorities());
         } catch (UsernameNotFoundException ex) {
             // user deleted / db reset / stale token
             clearAuthCookies(response);

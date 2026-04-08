@@ -4,6 +4,8 @@ spring:
     username: postgres
     password: admin
     driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 5
 
   jpa:
     hibernate:
@@ -16,6 +18,8 @@ spring:
     enabled: true
     locations: classpath:db/migration
     baseline-on-migrate: true
+    # Allow flyway.clean() from test FlywayMigrationStrategy (Spring defaults clean-disabled=true).
+    clean-disabled: false
     url: jdbc:postgresql://localhost:5432/univoyage_test
     user: postgres
     password: admin
