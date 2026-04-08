@@ -3,15 +3,14 @@ spring:
     name: UniVoyage
 
   datasource:
-    # Koristimo točna imena iz .env datoteke
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:univoyage_db}
     username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:admin}
+    password: ${DB_PASSWORD}
   flyway:
     enabled: true
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:univoyage_db}
     user: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:admin}
+    password: ${DB_PASSWORD}
     connect-retries: 10          # DODAJ OVO
     connect-retries-interval: 5  # DODAJ OVO (čekaj 5s između pokušaja)
     locations: classpath:db/migration
@@ -25,8 +24,7 @@ spring:
 
 app:
   jwt:
-    # Dodaj fallback za secret ako ga zaboraviš u .env (samo za dev!)
-    secret: ${JWT_SECRET:7a4b3c2d1e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a7b8c9d0e1f}
+    secret: ${JWT_SECRET}
     ttl-seconds: 3600
     issuer: univoyage
     audience: web
@@ -37,9 +35,7 @@ app:
     same-site: ${COOKIE_SAMESITE:Lax}
 
   cors:
-    allowed-origins:
-      - http://localhost:5173
-      - http://127.0.0.1:5173
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}
 
 logging:
   level:
@@ -52,4 +48,4 @@ management:
   endpoints:
     web:
       exposure:
-        include: "health,info"
+        include: health

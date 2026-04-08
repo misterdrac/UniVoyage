@@ -8,10 +8,9 @@ spring:
       on-profile: prod
 
   datasource:
-    # Prvo gledamo puni URL koji smo stavili u Railway, ako ga nema, tek onda slažemo kockice
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://${DB_HOST:${PGHOST:localhost}}:${DB_PORT:${PGPORT:5432}}/${DB_NAME:${PGDATABASE:univoyage_db}}}
     username: ${SPRING_DATASOURCE_USERNAME:${DB_USERNAME:${PGUSER:postgres}}}
-    password: ${SPRING_DATASOURCE_PASSWORD:${DB_PASSWORD:${PGPASSWORD:admin}}}
+    password: ${SPRING_DATASOURCE_PASSWORD:${DB_PASSWORD:${PGPASSWORD}}}
 
   jpa:
     hibernate:
@@ -20,10 +19,9 @@ spring:
 
   flyway:
     enabled: true
-    # Flyway sada sigurno koristi istu stvar kao i datasource
-    url: ${SPRING_DATASOURCE_URL}
-    user: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
+    url: ${SPRING_FLYWAY_URL:${SPRING_DATASOURCE_URL:jdbc:postgresql://${DB_HOST:${PGHOST:localhost}}:${DB_PORT:${PGPORT:5432}}/${DB_NAME:${PGDATABASE:univoyage_db}}}}
+    user: ${SPRING_FLYWAY_USER:${SPRING_DATASOURCE_USERNAME:${DB_USERNAME:${PGUSER:postgres}}}}
+    password: ${SPRING_FLYWAY_PASSWORD:${SPRING_DATASOURCE_PASSWORD:${DB_PASSWORD:${PGPASSWORD}}}}
     locations: classpath:db/migration
     baseline-on-migrate: true
 
@@ -46,3 +44,12 @@ logging:
     org.springframework.security: INFO
     org.hibernate.SQL: WARN
     org.hibernate.orm.jdbc.bind: WARN
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never

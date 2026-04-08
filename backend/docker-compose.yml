@@ -4,14 +4,14 @@ services:
     container_name: univoyage_db_container
     restart: unless-stopped
     environment:
-      POSTGRES_DB: univoyage_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: admin
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env (see env.example)}
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./logs/postgres:/var/log/postgresql
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
     command: >
       postgres
       -c logging_collector=on
@@ -25,9 +25,9 @@ services:
       -c log_min_error_statement=error
       -c log_connections=on
       -c log_disconnections=on
-      -c log_statement=all
+      -c log_statement=none
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d univoyage_db"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d univoyage_db"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -40,17 +40,17 @@ services:
       postgres:
         condition: service_healthy
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:8080"
     env_file:
       - .env
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/univoyage_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: admin
-      SPRING_FLYWAY_URL: jdbc:postgresql://postgres:5432/univoyage_db
-      SPRING_FLYWAY_USER: postgres
-      SPRING_FLYWAY_PASSWORD: admin
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-univoyage_db}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env (see env.example)}
+      SPRING_FLYWAY_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-univoyage_db}
+      SPRING_FLYWAY_USER: ${POSTGRES_USER:-postgres}
+      SPRING_FLYWAY_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env (see env.example)}
     volumes:
       - ./logs/spring:/app/logs
     healthcheck:
