@@ -11,8 +11,8 @@ spring:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:univoyage_db}
     user: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD}
-    connect-retries: 10          # DODAJ OVO
-    connect-retries-interval: 5  # DODAJ OVO (čekaj 5s između pokušaja)
+    connect-retries: 10
+    connect-retries-interval: 5  # seconds between Flyway connection attempts
     locations: classpath:db/migration
     baseline-on-migrate: true
 
@@ -30,7 +30,7 @@ app:
     audience: web
 
   cookies:
-    # Budući da ideš na produkciju/docker, postavi ovo na varijable
+    # Override via env in production/docker (e.g. COOKIE_SECURE=true)
     secure: ${COOKIE_SECURE:false}
     same-site: ${COOKIE_SAMESITE:Lax}
 

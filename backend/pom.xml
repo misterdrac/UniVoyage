@@ -106,14 +106,14 @@
             <version>${mapstruct.version}</version>
         </dependency>
 
-        <!-- Lombok (NE stavljati provided) -->
+        <!-- Lombok: do not use provided scope -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
         </dependency>
 
-        <!-- Lombok + MapStruct binding (bitno za maven build) -->
+        <!-- Lombok + MapStruct binding (required for Maven build) -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok-mapstruct-binding</artifactId>

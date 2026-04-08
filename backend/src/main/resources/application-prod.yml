@@ -31,7 +31,7 @@ app:
     ttl-seconds: ${JWT_TTL_SECONDS:3600}
 
   cors:
-    # Ako zaboraviš varijablu, barem će lokalni frontend raditi
+    # Falls back to local frontend if CORS_ALLOWED_ORIGINS is unset
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
 
   cookies:
