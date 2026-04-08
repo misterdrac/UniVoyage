@@ -178,6 +178,7 @@ spring.datasource.password=${DB_PASSWORD}
 - Database creation is handled by PostgreSQL container initialization, not by Flyway migration files.
 - Flyway migrations (`V1`, `V2`, `V3`, ...) create/update schema objects inside an already existing database.
 - If you edit an already executed migration file (for example `V1`, `V4`, `V6`), Flyway will not "re-run it as new logic" on an existing database.
+- In the default Flyway/Spring Boot setup, changing an already applied migration usually causes a checksum validation error, so the application may fail to start until you either reset the database (see the clean-slate workflow below) or explicitly repair/disable validation.
 
 #### Recommended workflow for schema changes
 1. Create a new migration file (for example `V12__add_new_column.sql`).
