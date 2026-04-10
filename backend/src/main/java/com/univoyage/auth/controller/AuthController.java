@@ -3,27 +3,32 @@ package com.univoyage.auth.controller;
 import com.univoyage.auth.dto.AuthPayload;
 import com.univoyage.auth.dto.RegisterRequestDto;
 import com.univoyage.auth.dto.LoginRequestDto;
+import com.univoyage.auth.security.AuthCookieWriter;
 import com.univoyage.auth.service.AuthService;
+import com.univoyage.auth.service.RefreshTokenService;
 import com.univoyage.auth.security.ClientIpResolver;
 import com.univoyage.auth.security.CookieUtils;
 import com.univoyage.auth.security.LoginIpRateLimiter;
+import com.univoyage.auth.security.RefreshIpRateLimiter;
 import com.univoyage.common.response.ApiResponse;
 import com.univoyage.user.dto.UserDto;
 import com.univoyage.user.model.UserEntity;
 import com.univoyage.user.repository.UserRepository;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.WebUtils;
+
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -33,18 +38,9 @@ public class AuthController {
     private final AuthService authService;
     private final UserRepository userRepository;
     private final LoginIpRateLimiter loginIpRateLimiter;
-
-    @Value("${app.jwt.ttl-seconds}")
-    private long jwtTtlSeconds;
-
-    @Value("${app.cookies.secure:false}")
-    private boolean cookieSecure;
-
-    @Value("${app.cookies.same-site:Lax}")
-    private String cookieSameSite;
-
-    @Value("${app.cookies.domain:}")
-    private String cookieDomain;
+    private final RefreshIpRateLimiter refreshIpRateLimiter;
+    private final RefreshTokenService refreshTokenService;
+    private final AuthCookieWriter authCookieWriter;
 
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<AuthPayload>> register(
@@ -60,7 +56,7 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.fail(msg));
         }
 
-        writeAuthCookies(response, payload);
+        issueRefreshAndWriteCookies(response, payload);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(payload));
     }
 
@@ -87,12 +83,45 @@ public class AuthController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.fail(msg));
             }
 
-            writeAuthCookies(response, payload);
+            issueRefreshAndWriteCookies(response, payload);
             return ResponseEntity.ok(ApiResponse.ok(payload));
 
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.fail("Invalid email or password"));
         }
+    }
+
+    /**
+     * Exchanges a valid refresh token (HttpOnly cookie) for a new access JWT, CSRF cookie, and rotated refresh token.
+     */
+    @PostMapping("/refresh")
+    public ResponseEntity<ApiResponse<AuthPayload>> refresh(
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
+        long refreshRetrySec = refreshIpRateLimiter.tryConsumeOrRetryAfterSeconds(
+                ClientIpResolver.resolve(request));
+        if (refreshRetrySec >= 0) {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                    .header(HttpHeaders.RETRY_AFTER, String.valueOf(refreshRetrySec))
+                    .body(ApiResponse.fail("Too many refresh attempts from this network. Please try again later."));
+        }
+
+        Cookie cookie = WebUtils.getCookie(request, CookieUtils.REFRESH_TOKEN_COOKIE_NAME);
+        String raw = cookie != null ? cookie.getValue() : null;
+        Optional<RefreshTokenService.RefreshRotationResult> result = refreshTokenService.rotate(raw);
+        if (result.isEmpty()) {
+            authCookieWriter.clearAuthCookies(response);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.fail("Session expired or invalid"));
+        }
+        RefreshTokenService.RefreshRotationResult r = result.get();
+        authCookieWriter.writeAuthCookies(
+                response,
+                r.payload().getToken(),
+                r.payload().getCsrfToken(),
+                r.newRefreshTokenRaw());
+        return ResponseEntity.ok(ApiResponse.ok(r.payload()));
     }
 
     @GetMapping("/me")
@@ -123,40 +152,23 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<Void>> logout(HttpServletResponse response) {
-        ResponseCookie jwt = cookie("", 0, true);
-        ResponseCookie csrf = cookie("", 0, false);
-
-        response.addHeader(HttpHeaders.SET_COOKIE, jwt.toString());
-        response.addHeader(HttpHeaders.SET_COOKIE, csrf.toString());
-
+    public ResponseEntity<ApiResponse<Void>> logout(HttpServletRequest request, HttpServletResponse response) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof UserEntity u) {
+            refreshTokenService.revokeAllForUser(u.getId());
+        }
+        Cookie refreshCookie = WebUtils.getCookie(request, CookieUtils.REFRESH_TOKEN_COOKIE_NAME);
+        if (refreshCookie != null) {
+            refreshTokenService.revokeByRawToken(refreshCookie.getValue());
+        }
+        authCookieWriter.clearAuthCookies(response);
         return ResponseEntity.ok(ApiResponse.ok(null));
     }
 
-    private void writeAuthCookies(HttpServletResponse response, AuthPayload payload) {
-        if (payload.getToken() != null) {
-            ResponseCookie jwt = cookie(payload.getToken(), jwtTtlSeconds, true);
-            response.addHeader(HttpHeaders.SET_COOKIE, jwt.toString());
-        }
-        if (payload.getCsrfToken() != null) {
-            ResponseCookie csrf = cookie(payload.getCsrfToken(), jwtTtlSeconds, false);
-            response.addHeader(HttpHeaders.SET_COOKIE, csrf.toString());
-        }
-    }
-
-    private ResponseCookie cookie(String value, long maxAgeSeconds, boolean httpOnly) {
-        ResponseCookie.ResponseCookieBuilder b = ResponseCookie
-                .from(httpOnly ? CookieUtils.JWT_COOKIE_NAME : CookieUtils.CSRF_COOKIE_NAME, value)
-                .httpOnly(httpOnly)
-                .secure(cookieSecure)
-                .path("/")
-                .maxAge(maxAgeSeconds)
-                .sameSite(cookieSameSite);
-
-        if (cookieDomain != null && !cookieDomain.isBlank()) {
-            b.domain(cookieDomain);
-        }
-
-        return b.build();
+    private void issueRefreshAndWriteCookies(HttpServletResponse response, AuthPayload payload) {
+        UserEntity user = userRepository.findById(payload.getUser().getId())
+                .orElseThrow(() -> new IllegalStateException("User not found after auth: " + payload.getUser().getId()));
+        String refreshRaw = refreshTokenService.issueRefreshToken(user);
+        authCookieWriter.writeAuthCookies(response, payload.getToken(), payload.getCsrfToken(), refreshRaw);
     }
 }
