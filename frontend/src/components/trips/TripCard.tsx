@@ -12,11 +12,12 @@ import { Calendar, Clock, MapPin, ArrowRight, Trash2, Loader2, Star } from 'luci
 interface TripCardProps {
   trip: Trip
   isDeleting?: boolean
+  isRated?: boolean
   onDelete: (trip: Trip) => void
   onView: (trip: Trip) => void
 }
 
-export function TripCard({ trip, isDeleting = false, onDelete, onView }: TripCardProps) {
+export function TripCard({ trip, isDeleting = false, isRated = false, onDelete, onView }: TripCardProps) {
   const { destinations: allDestinations } = useDestinations()
   const status = useMemo(
     () => calculateTripStatus(trip.departureDate, trip.returnDate),
@@ -132,8 +133,8 @@ export function TripCard({ trip, isDeleting = false, onDelete, onView }: TripCar
 
         <div className="border-t border-border" />
 
-        {/* Rate trip notice for completed trips */}
-        {status === 'completed' && (
+        {/* Rate trip notice for completed trips that haven't been rated yet */}
+        {status === 'completed' && !isRated && (
           <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-yellow-600 dark:text-yellow-400">
             <Star className="h-4 w-4 shrink-0" />
             <span className="text-xs font-medium">Rate your trip in Overview</span>

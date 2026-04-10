@@ -7,6 +7,7 @@ interface TripResultsSectionProps {
   trips: Trip[]
   deletingTripId: number | null
   hasActiveFilters: boolean
+  ratedTripIds: Set<number>
   onResetFilters: () => void
   onDeleteTrip: (trip: Trip) => void
   onViewTrip: (trip: Trip) => void
@@ -16,6 +17,7 @@ export function TripResultsSection({
   trips,
   deletingTripId,
   hasActiveFilters,
+  ratedTripIds,
   onResetFilters,
   onDeleteTrip,
   onViewTrip,
@@ -48,6 +50,7 @@ export function TripResultsSection({
           key={trip.id}
           trip={trip}
           isDeleting={deletingTripId === trip.id}
+          isRated={ratedTripIds.has(trip.id)}
           onDelete={onDeleteTrip}
           onView={onViewTrip}
         />
