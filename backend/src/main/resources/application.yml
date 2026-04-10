@@ -26,6 +26,7 @@ app:
   jwt:
     secret: ${JWT_SECRET}
     ttl-seconds: 3600
+    refresh-ttl-seconds: ${JWT_REFRESH_TTL_SECONDS:604800}
     issuer: univoyage
     audience: web
 
@@ -36,6 +37,8 @@ app:
       lock-duration: PT15M
       ip-max-attempts: 60
       ip-window: PT1M
+      refresh-ip-max-attempts: 120
+      refresh-ip-window: PT1M
 
   cookies:
     # Override via env in production/docker (e.g. COOKIE_SECURE=true)
