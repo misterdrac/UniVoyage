@@ -78,7 +78,6 @@ public class GoogleOAuthService {
      */
     @Transactional
     public AuthPayload handleCallback(String code) {
-        System.out.println(">>> GoogleOAuthService.handleCallback CALLED, code=" + code);
         try {
             String accessToken = exchangeCodeForAccessToken(code);
             Map<String, Object> userInfo = fetchUserInfo(accessToken);
