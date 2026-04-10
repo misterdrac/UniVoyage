@@ -30,7 +30,17 @@ public class LoginSecurityProperties {
     private int ipMaxAttempts = 60;
 
     /**
-     * Sliding window length for {@link #ipMaxAttempts}.
+     * Fixed window length for {@link #ipMaxAttempts}.
      */
     private Duration ipWindow = Duration.ofMinutes(1);
+
+    /**
+     * Max {@code POST /api/auth/refresh} calls per IP per {@link #refreshIpWindow}.
+     */
+    private int refreshIpMaxAttempts = 120;
+
+    /**
+     * Fixed window length for {@link #refreshIpMaxAttempts}.
+     */
+    private Duration refreshIpWindow = Duration.ofMinutes(1);
 }
