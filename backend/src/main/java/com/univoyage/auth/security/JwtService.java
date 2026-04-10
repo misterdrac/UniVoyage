@@ -15,6 +15,7 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 
 /** Service for handling JWT (JSON Web Tokens) and CSRF (Cross-Site Request Forgery) tokens.
@@ -60,6 +61,7 @@ public class JwtService {
         Instant now = Instant.now();
 
         return Jwts.builder()
+                .setId(UUID.randomUUID().toString())
                 .setSubject(subject)
                 .setIssuer(issuer)
                 .setAudience(audience)
@@ -107,6 +109,7 @@ public class JwtService {
             return Jwts.parserBuilder()
                     .setSigningKey(key)
                     .requireIssuer(issuer)
+                    .requireAudience(audience)
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
@@ -134,6 +137,11 @@ public class JwtService {
      *  */
     public String extractCsrfSecret(String token) {
         return extractClaim(token, c -> c.get(CSRF_CLAIM, String.class));
+    }
+
+    /** JWT ID claim ({@code jti}); unique per issued access token (e.g. for future revocation or audit). */
+    public String extractJti(String token) {
+        return extractClaim(token, Claims::getId);
     }
 
     /** Validating token

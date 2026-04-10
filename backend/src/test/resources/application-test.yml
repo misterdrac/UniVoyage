@@ -28,5 +28,6 @@ app:
   jwt:
     secret: "thisIsAVeryLongSecretKeyForTestingPurposes1234567890"
     ttl-seconds: 3600
+    refresh-ttl-seconds: 604800
     issuer: "univoyage"
     audience: "web"
