@@ -4,6 +4,7 @@ import com.univoyage.common.response.ApiResponse;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -60,6 +61,16 @@ public class GlobalExceptionHandler {
         ApiResponse<Map<String, String>> response =
                 ApiResponse.of(false, errors, "Validation failed for the request payload.");
 
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Handles malformed JSON payloads and returns a consistent 400 response body.
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponse<Object>> handleHttpMessageNotReadableException(
+            HttpMessageNotReadableException ex, WebRequest request) {
+        ApiResponse<Object> response = ApiResponse.fail("Malformed JSON request payload.");
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
