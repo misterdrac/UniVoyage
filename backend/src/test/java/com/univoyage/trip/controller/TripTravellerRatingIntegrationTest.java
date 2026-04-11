@@ -8,6 +8,7 @@ import com.univoyage.reference.country.model.Country;
 import com.univoyage.reference.country.repository.CountryRepository;
 import com.univoyage.trip.model.TripEntity;
 import com.univoyage.trip.repository.TripRepository;
+import com.univoyage.trip.repository.TripTravellerRatingRepository;
 import com.univoyage.user.model.Role;
 import com.univoyage.user.model.UserEntity;
 import com.univoyage.user.repository.UserRepository;
@@ -47,6 +48,9 @@ class TripTravellerRatingIntegrationTest {
     private TripRepository tripRepository;
 
     @Autowired
+    private TripTravellerRatingRepository tripTravellerRatingRepository;
+
+    @Autowired
     private UserRepository userRepository;
 
     @Autowired
@@ -77,11 +81,20 @@ class TripTravellerRatingIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.rating.stars").value(4))
-                .andExpect(jsonPath("$.data.rating.comment").value("Great trip"));
+                .andExpect(jsonPath("$.data.rating.comment").value("Great trip"))
+                .andExpect(jsonPath("$.data.rating.moderationStatus").value("PENDING"));
 
         mockMvc.perform(get("/api/trips/{tripId}/rating", trip.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.rating.stars").value(4));
+
+        DestinationEntity beforeApprove = destinationRepository.findById(destination.getId()).orElseThrow();
+        Assertions.assertThat(beforeApprove.getTravellerRatingCount()).isZero();
+
+        approveReview(trip.getId(), user.getId());
+
+        mockMvc.perform(get("/api/trips/{tripId}/rating", trip.getId()))
+                .andExpect(jsonPath("$.data.rating.moderationStatus").value("APPROVED"));
 
         DestinationEntity refreshed = destinationRepository.findById(destination.getId()).orElseThrow();
         Assertions.assertThat(refreshed.getTravellerRatingCount()).isEqualTo(1);
@@ -182,7 +195,8 @@ class TripTravellerRatingIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"stars\":5}"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.rating.stars").value(5));
+                .andExpect(jsonPath("$.data.rating.stars").value(5))
+                .andExpect(jsonPath("$.data.rating.moderationStatus").value("APPROVED"));
     }
 
     @Test
@@ -199,7 +213,8 @@ class TripTravellerRatingIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"stars\":3}"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.rating.stars").value(3));
+                .andExpect(jsonPath("$.data.rating.stars").value(3))
+                .andExpect(jsonPath("$.data.rating.moderationStatus").value("APPROVED"));
     }
 
     @Test
@@ -215,14 +230,25 @@ class TripTravellerRatingIntegrationTest {
         mockMvc.perform(post("/api/trips/{tripId}/rating", trip.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"stars\":2,\"comment\":\"Meh\"}"))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.rating.moderationStatus").value("PENDING"));
+
+        approveReview(trip.getId(), user.getId());
+        Assertions.assertThat(destinationRepository.findById(destination.getId()).orElseThrow().getTravellerRatingCount())
+                .isEqualTo(1);
 
         mockMvc.perform(post("/api/trips/{tripId}/rating", trip.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"stars\":5,\"comment\":\"Actually great\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.rating.stars").value(5))
-                .andExpect(jsonPath("$.data.rating.comment").value("Actually great"));
+                .andExpect(jsonPath("$.data.rating.comment").value("Actually great"))
+                .andExpect(jsonPath("$.data.rating.moderationStatus").value("PENDING"));
+
+        Assertions.assertThat(destinationRepository.findById(destination.getId()).orElseThrow().getTravellerRatingCount())
+                .isZero();
+
+        approveReview(trip.getId(), user.getId());
 
         mockMvc.perform(get("/api/trips/{tripId}/rating", trip.getId()))
                 .andExpect(jsonPath("$.data.rating.stars").value(5));
@@ -247,7 +273,8 @@ class TripTravellerRatingIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"stars\":4,\"comment\":\"   \\t\"}"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.rating.comment").value(nullValue()));
+                .andExpect(jsonPath("$.data.rating.comment").value(nullValue()))
+                .andExpect(jsonPath("$.data.rating.moderationStatus").value("APPROVED"));
 
         mockMvc.perform(get("/api/trips/{tripId}/rating", trip.getId()))
                 .andExpect(jsonPath("$.data.rating.comment").value(nullValue()));
@@ -358,7 +385,8 @@ class TripTravellerRatingIntegrationTest {
                         .content("{\"stars\":1}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.rating.stars").value(1))
-                .andExpect(jsonPath("$.data.rating.comment").value(nullValue()));
+                .andExpect(jsonPath("$.data.rating.comment").value(nullValue()))
+                .andExpect(jsonPath("$.data.rating.moderationStatus").value("APPROVED"));
     }
 
     @Test
@@ -374,13 +402,16 @@ class TripTravellerRatingIntegrationTest {
         when(currentUser.id()).thenReturn(userA.getId());
         mockMvc.perform(post("/api/trips/{tripId}/rating", tripA.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"stars\":4}"));
+                        .content("{\"stars\":4}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.rating.moderationStatus").value("APPROVED"));
 
         when(currentUser.id()).thenReturn(userB.getId());
         mockMvc.perform(post("/api/trips/{tripId}/rating", tripB.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"stars\":2}"))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.rating.moderationStatus").value("APPROVED"));
 
         DestinationEntity refreshed = destinationRepository.findById(destination.getId()).orElseThrow();
         Assertions.assertThat(refreshed.getTravellerRatingCount()).isEqualTo(2);
@@ -405,6 +436,12 @@ class TripTravellerRatingIntegrationTest {
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.error").value(
                         "You can rate this trip only after it has ended (return date has passed or status is completed)."));
+    }
+
+    private void approveReview(long tripId, long userId) throws Exception {
+        long ratingId = tripTravellerRatingRepository.findByTripIdAndUserId(tripId, userId).orElseThrow().getId();
+        mockMvc.perform(post("/api/admin/reviews/{ratingId}/approve", ratingId))
+                .andExpect(status().isOk());
     }
 
     private Country saveCountry(String isoCode, String countryName, String currencyCode, String currencyName) {

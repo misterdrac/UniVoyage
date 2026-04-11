@@ -36,6 +36,11 @@ public class TripTravellerRatingEntity {
     @Column(columnDefinition = "TEXT")
     private String comment;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "moderation_status", nullable = false, length = 20)
+    @Builder.Default
+    private ReviewModerationStatus moderationStatus = ReviewModerationStatus.APPROVED;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
