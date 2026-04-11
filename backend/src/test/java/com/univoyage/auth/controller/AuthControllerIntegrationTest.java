@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.univoyage.reference.country.model.Country;
 import com.univoyage.reference.country.repository.CountryRepository;
 import com.univoyage.reference.hobby.repository.HobbyRepository;
-import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -227,42 +224,45 @@ class AuthControllerIntegrationTest {
     }
 
     /**
-     * Unknown ISO code causes {@link IllegalArgumentException} in the service; it is not mapped by
-     * {@link com.univoyage.exception.GlobalExceptionHandler}, so MockMvc surfaces a {@link ServletException}.
+     * Unknown ISO code causes {@link IllegalArgumentException} in the service; {@link com.univoyage.exception.GlobalExceptionHandler} maps it to 400 JSON.
      */
     @Test
-    @DisplayName("POST /api/auth/register propagates IllegalArgumentException for unknown country code")
+    @DisplayName("POST /api/auth/register returns 400 JSON for unknown country code")
     void registerUnknownCountryCode() throws Exception {
-        ServletException ex = assertThrows(ServletException.class, () -> mockMvc.perform(post("/api/auth/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(Map.of(
-                        "email", "unknownco@example.com",
-                        "password", "Str0ng!Pass",
-                        "name", "A",
-                        "surname", "B",
-                        "countryCode", "QQ"
-                )))));
-        assertInstanceOf(IllegalArgumentException.class, ex.getCause());
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "email", "unknownco@example.com",
+                                "password", "Str0ng!Pass",
+                                "name", "A",
+                                "surname", "B",
+                                "countryCode", "QQ"
+                        ))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error").value("Invalid country code: QQ"));
     }
 
     /**
      * Invalid hobby id fails inside {@link com.univoyage.auth.service.AuthService#register} with
-     * {@link IllegalArgumentException} (uncaught by controller advice in {@link MockMvc}).
+     * {@link IllegalArgumentException}, normalized by {@link com.univoyage.exception.GlobalExceptionHandler}.
      */
     @Test
-    @DisplayName("POST /api/auth/register propagates when hobby id does not exist")
+    @DisplayName("POST /api/auth/register returns 400 JSON when hobby id does not exist")
     void registerInvalidHobbyId() throws Exception {
-        ServletException ex = assertThrows(ServletException.class, () -> mockMvc.perform(post("/api/auth/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(Map.of(
-                        "email", "badhobby@example.com",
-                        "password", "Str0ng!Pass",
-                        "name", "A",
-                        "surname", "B",
-                        "countryCode", "FR",
-                        "hobbyIds", List.of(999_999L)
-                )))));
-        assertInstanceOf(IllegalArgumentException.class, ex.getCause());
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "email", "badhobby@example.com",
+                                "password", "Str0ng!Pass",
+                                "name", "A",
+                                "surname", "B",
+                                "countryCode", "FR",
+                                "hobbyIds", List.of(999_999L)
+                        ))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error").value("Invalid hobby id: 999999"));
     }
 
     /**
@@ -327,41 +327,45 @@ class AuthControllerIntegrationTest {
     }
 
     /**
-     * Invalid visited country code during register throws from the service (HTTP 500).
+     * Invalid visited country code throws {@link IllegalArgumentException}; mapped to 400 JSON.
      */
     @Test
-    @DisplayName("POST /api/auth/register propagates when visited country code is invalid")
+    @DisplayName("POST /api/auth/register returns 400 JSON when visited country code is invalid")
     void registerInvalidVisitedCountryCode() throws Exception {
-        ServletException ex = assertThrows(ServletException.class, () -> mockMvc.perform(post("/api/auth/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(Map.of(
-                        "email", "badvisit@example.com",
-                        "password", "Str0ng!Pass",
-                        "name", "A",
-                        "surname", "B",
-                        "countryCode", "FR",
-                        "visitedCountryCodes", Set.of("QQ")
-                )))));
-        assertInstanceOf(IllegalArgumentException.class, ex.getCause());
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "email", "badvisit@example.com",
+                                "password", "Str0ng!Pass",
+                                "name", "A",
+                                "surname", "B",
+                                "countryCode", "FR",
+                                "visitedCountryCodes", Set.of("QQ")
+                        ))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error").value("Invalid visited country code: QQ"));
     }
 
     /**
      * Unknown language code in {@code languageCodes} throws {@link IllegalArgumentException} from the service.
      */
     @Test
-    @DisplayName("POST /api/auth/register propagates when language code does not exist")
+    @DisplayName("POST /api/auth/register returns 400 JSON when language code does not exist")
     void registerInvalidLanguageCode() throws Exception {
-        ServletException ex = assertThrows(ServletException.class, () -> mockMvc.perform(post("/api/auth/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(Map.of(
-                        "email", "badlang@example.com",
-                        "password", "Str0ng!Pass",
-                        "name", "A",
-                        "surname", "B",
-                        "countryCode", "FR",
-                        "languageCodes", Set.of("xx")
-                )))));
-        assertInstanceOf(IllegalArgumentException.class, ex.getCause());
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "email", "badlang@example.com",
+                                "password", "Str0ng!Pass",
+                                "name", "A",
+                                "surname", "B",
+                                "countryCode", "FR",
+                                "languageCodes", Set.of("xx")
+                        ))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error").value("Invalid language code: xx"));
     }
 
     /**
