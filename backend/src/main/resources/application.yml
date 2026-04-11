@@ -46,6 +46,13 @@ app:
     secure: ${COOKIE_SECURE:false}
     same-site: ${COOKIE_SAMESITE:Lax}
 
+  trip:
+    rating:
+      ip-max-attempts: 40
+      ip-window: PT1M
+      user-max-attempts: 30
+      user-window: PT1M
+
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}
 

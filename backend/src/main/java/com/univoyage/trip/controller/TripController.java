@@ -1,5 +1,6 @@
 package com.univoyage.trip.controller;
 
+import com.univoyage.auth.security.ClientIpResolver;
 import com.univoyage.auth.security.CurrentUser;
 import com.univoyage.common.response.ApiResponse;
 import com.univoyage.trip.dto.CreateTripRequest;
@@ -9,12 +10,17 @@ import com.univoyage.trip.dto.TripCurrencyResponse;
 import com.univoyage.trip.dto.TripResponse;
 import com.univoyage.trip.dto.TripTravellerRatingRequest;
 import com.univoyage.trip.dto.TripTravellerRatingResponse;
+import com.univoyage.trip.security.TripRatingIpRateLimiter;
+import com.univoyage.trip.security.TripRatingUserRateLimiter;
 import com.univoyage.trip.service.TripCurrencyService;
 import com.univoyage.trip.service.TripService;
 import com.univoyage.trip.service.TripTravellerRatingService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,6 +39,8 @@ public class TripController {
     private final TripCurrencyService tripCurrencyService;
     private final TripService tripService;
     private final TripTravellerRatingService tripTravellerRatingService;
+    private final TripRatingIpRateLimiter tripRatingIpRateLimiter;
+    private final TripRatingUserRateLimiter tripRatingUserRateLimiter;
     private final CurrentUser currentUser;
 
     @PostMapping
@@ -135,9 +143,25 @@ public class TripController {
     @PostMapping("/{tripId}/rating")
     public ResponseEntity<ApiResponse<Map<String, Object>>> submitTripRating(
             @PathVariable Long tripId,
-            @Valid @RequestBody TripTravellerRatingRequest request
+            @Valid @RequestBody TripTravellerRatingRequest request,
+            HttpServletRequest httpRequest
     ) {
+        long ipRetry = tripRatingIpRateLimiter.tryConsumeOrRetryAfterSeconds(
+                ClientIpResolver.resolve(httpRequest));
+        if (ipRetry >= 0) {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                    .header(HttpHeaders.RETRY_AFTER, String.valueOf(ipRetry))
+                    .body(ApiResponse.fail("Too many rating submissions from this network. Please try again later."));
+        }
+
         Long userId = currentUser.id();
+        long userRetry = tripRatingUserRateLimiter.tryConsumeOrRetryAfterSeconds(userId);
+        if (userRetry >= 0) {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                    .header(HttpHeaders.RETRY_AFTER, String.valueOf(userRetry))
+                    .body(ApiResponse.fail("Too many rating submissions for this account. Please try again later."));
+        }
+
         TripTravellerRatingResponse rating = tripTravellerRatingService.submitRating(userId, tripId, request);
         return ResponseEntity.ok(ApiResponse.ok(Map.of("rating", rating)));
     }
