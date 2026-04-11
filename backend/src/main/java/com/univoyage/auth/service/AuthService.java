@@ -1,5 +1,6 @@
 package com.univoyage.auth.service;
 
+import com.univoyage.auth.config.LoginSecurityProperties;
 import com.univoyage.auth.dto.AuthPayload;
 import com.univoyage.auth.dto.LoginRequestDto;
 import com.univoyage.auth.dto.RegisterRequestDto;
@@ -28,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Collections;
@@ -49,6 +51,8 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final Clock clock;
+    private final LoginSecurityProperties loginSecurityProperties;
 
     private final CountryRepository countryRepository;
     private final HobbyRepository hobbyRepository;
@@ -163,20 +167,31 @@ public class AuthService {
     @Transactional
     public AuthPayload login(LoginRequestDto request) {
 
+        Instant now = clock.instant();
         UserEntity user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
 
-        // System.out.println("FOUND USER id=" + user.getId() + " role=" + user.getRole());
-        // System.out.println("HASH=" + user.getPasswordHash());
+        if (user.getLockedUntil() != null) {
+            if (user.getLockedUntil().isAfter(now)) {
+                return AuthPayload.fail("Invalid credentials");
+            }
+            user.setLockedUntil(null);
+            user.setFailedLoginAttempts(0);
+        }
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
+            int failures = user.getFailedLoginAttempts() + 1;
+            user.setFailedLoginAttempts(failures);
+            if (failures >= loginSecurityProperties.getMaxFailedAttempts()) {
+                user.setLockedUntil(now.plus(loginSecurityProperties.getLockDuration()));
+            }
+            userRepository.save(user);
             return AuthPayload.fail("Invalid credentials");
         }
 
-        // boolean ok = passwordEncoder.matches(request.getPassword(), user.getPasswordHash());
-        // System.out.println("PASSWORD MATCH=" + ok);
-
-        user.setDateOfLastSignin(Instant.now());
+        user.setFailedLoginAttempts(0);
+        user.setLockedUntil(null);
+        user.setDateOfLastSignin(now);
         userRepository.save(user);
 
         JwtService.TokenPair pair = jwtService.generateForUser(user);

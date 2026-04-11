@@ -96,6 +96,10 @@ class AuthSessionEndpointsIntegrationTest {
                 c.startsWith(CookieUtils.CSRF_COOKIE_NAME + "=") && c.contains("Max-Age=0")))
                 .as("CSRF cleared")
                 .isTrue();
+        assertThat(setCookies.stream().anyMatch(c ->
+                c.startsWith(CookieUtils.REFRESH_TOKEN_COOKIE_NAME + "=") && c.contains("Max-Age=0")))
+                .as("Refresh token cleared")
+                .isTrue();
     }
 
     private static RequestPostProcessor securityContextFor(UserEntity principal) {

@@ -9,9 +9,6 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.WebUtils;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
-
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -38,6 +35,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+    private final AuthCookieWriter authCookieWriter;
 
     // Cookie name for the HttpOnly JWT (Token A)
     private static final String JWT_COOKIE_NAME = CookieUtils.JWT_COOKIE_NAME;
@@ -64,25 +62,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private void clearAuthCookies(HttpServletResponse response) {
-
-        ResponseCookie jwtCookie = ResponseCookie.from(CookieUtils.JWT_COOKIE_NAME, "")
-                .httpOnly(true)
-                .secure(true)      // in prod TRUE
-                .path("/")
-                .maxAge(0)
-                .sameSite("None")
-                .build();
-
-        ResponseCookie csrfCookie = ResponseCookie.from(CookieUtils.CSRF_COOKIE_NAME, "")
-                .httpOnly(false)
-                .secure(true)
-                .path("/")
-                .maxAge(0)
-                .sameSite("None")
-                .build();
-
-        response.addHeader(HttpHeaders.SET_COOKIE, jwtCookie.toString());
-        response.addHeader(HttpHeaders.SET_COOKIE, csrfCookie.toString());
+        authCookieWriter.clearAuthCookies(response);
     }
 
     /**
@@ -102,6 +82,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (path.contains("/api/auth/login") ||
                 path.contains("/api/auth/register") ||
+                path.contains("/api/auth/refresh") ||
                 path.contains("/api/auth/google") ||
                 path.contains("/api/destinations") ||
                 path.contains("/api/quiz") ||

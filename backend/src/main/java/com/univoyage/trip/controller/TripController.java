@@ -86,7 +86,7 @@ public class TripController {
     @PutMapping("/{tripId}/accommodation")
     public ResponseEntity<ApiResponse<Object>> saveAccommodation(
             @PathVariable Long tripId,
-            @RequestBody TripAccommodationRequest req
+            @Valid @RequestBody TripAccommodationRequest req
     ) {
         Long userId = currentUser.id();
         tripService.saveAccommodation(userId, tripId, req);

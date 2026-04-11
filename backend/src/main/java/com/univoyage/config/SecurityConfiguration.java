@@ -48,6 +48,7 @@ public class SecurityConfiguration {
 
                         // Specific public routes for authentication
                         .requestMatchers("/api/auth/login/**", "/api/auth/register/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/refresh", "/api/auth/refresh/").permitAll()
                         .requestMatchers("/api/auth/google/**").permitAll()
 
                         // Public routes for destinations
