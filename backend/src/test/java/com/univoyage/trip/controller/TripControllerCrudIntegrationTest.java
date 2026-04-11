@@ -355,7 +355,7 @@ class TripControllerCrudIntegrationTest {
 
     /**
      * Non-ISO date strings cause {@link java.time.format.DateTimeParseException} in the service;
-     * {@link com.univoyage.exception.GlobalExceptionHandler} maps it to HTTP 500 with a generic JSON error.
+     * {@link com.univoyage.exception.GlobalExceptionHandler} maps it to HTTP 500 with generic JSON (no message leak).
      */
     @Test
     @DisplayName("POST /api/trips returns 500 JSON when date format is invalid")
@@ -378,7 +378,7 @@ class TripControllerCrudIntegrationTest {
 
     /**
      * Database {@code trips_dates_chk} rejects {@code return_date < departure_date}; the persistence error
-     * is handled by {@link com.univoyage.exception.GlobalExceptionHandler} as HTTP 500 with a generic JSON error.
+     * is mapped to HTTP 500 with generic JSON by {@link com.univoyage.exception.GlobalExceptionHandler} (no message leak).
      */
     @Test
     @DisplayName("POST /api/trips returns 500 JSON when return date is before departure date")
@@ -578,6 +578,70 @@ class TripControllerCrudIntegrationTest {
                                 "accommodationPhone", "P"))))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").value("Trip not found"));
+    }
+
+    @Test
+    @DisplayName("PUT /api/trips/{id}/budget returns 400 and consistent error for malformed JSON")
+    void putBudgetMalformedJson_returns400ConsistentError() throws Exception {
+        UserEntity user = saveUser("bad-budget-json@example.com");
+        TripEntity trip = saveTrip(user.getId(), saveDestination("BadBudgetJson", country("HU")));
+        when(currentUser.id()).thenReturn(user.getId());
+
+        mockMvc.perform(put("/api/trips/{tripId}/budget", trip.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"total\": 123"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error").isString());
+    }
+
+    @Test
+    @DisplayName("PUT /api/trips/{id}/itinerary returns 400 and consistent error for malformed JSON")
+    void putItineraryMalformedJson_returns400ConsistentError() throws Exception {
+        UserEntity user = saveUser("bad-itinerary-json@example.com");
+        TripEntity trip = saveTrip(user.getId(), saveDestination("BadItineraryJson", country("RO")));
+        when(currentUser.id()).thenReturn(user.getId());
+
+        mockMvc.perform(put("/api/trips/{tripId}/itinerary", trip.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"days\": [}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error").isString());
+    }
+
+    @Test
+    @DisplayName("PUT /api/trips/{id}/accommodation returns 400 when required fields are missing")
+    void putAccommodationMissingRequiredFields_returns400Validation() throws Exception {
+        UserEntity user = saveUser("missing-acc-fields@example.com");
+        TripEntity trip = saveTrip(user.getId(), saveDestination("MissingAccFields", country("BG")));
+        when(currentUser.id()).thenReturn(user.getId());
+
+        mockMvc.perform(put("/api/trips/{tripId}/accommodation", trip.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of(
+                                "accommodationPhone", "+359000000"
+                        ))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error").value("Validation failed for the request payload."))
+                .andExpect(jsonPath("$.data.accommodationName").exists())
+                .andExpect(jsonPath("$.data.accommodationAddress").exists());
+    }
+
+    @Test
+    @DisplayName("PUT /api/trips/{id}/accommodation returns 400 and consistent error for malformed JSON")
+    void putAccommodationMalformedJson_returns400ConsistentError() throws Exception {
+        UserEntity user = saveUser("bad-acc-json@example.com");
+        TripEntity trip = saveTrip(user.getId(), saveDestination("BadAccJson", country("HR")));
+        when(currentUser.id()).thenReturn(user.getId());
+
+        mockMvc.perform(put("/api/trips/{tripId}/accommodation", trip.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"accommodationName\":\"Hotel\","))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error").isString());
     }
 
     /**

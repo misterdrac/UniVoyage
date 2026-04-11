@@ -113,12 +113,14 @@ class TripControllerCurrencyWebMvcTest {
                 .thenThrow(new IllegalStateException("Destination country currency is not configured"));
 
         mockMvc.perform(get("/api/trips/{tripId}/currency", tripId))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error").value("Destination country currency is not configured"));
     }
 
     /**
      * Generic {@link RuntimeException} from the service is handled by {@link GlobalExceptionHandler}
-     * as HTTP 500 with a generic JSON error body (details logged server-side only).
+     * as HTTP 500 with a generic JSON body (no internal message leak; details logged server-side only).
      */
     @Test
     @DisplayName("Should return 500 JSON when service throws generic RuntimeException")

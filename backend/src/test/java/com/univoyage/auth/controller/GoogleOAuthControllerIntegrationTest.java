@@ -5,6 +5,9 @@ import com.univoyage.auth.dto.AuthPayload;
 import com.univoyage.auth.security.CookieUtils;
 import com.univoyage.auth.service.GoogleOAuthService;
 import com.univoyage.user.dto.UserDto;
+import com.univoyage.user.model.Role;
+import com.univoyage.user.model.UserEntity;
+import com.univoyage.user.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +19,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -35,6 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@Transactional
 class GoogleOAuthControllerIntegrationTest {
 
     private static final String GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth?client=test";
@@ -47,6 +53,9 @@ class GoogleOAuthControllerIntegrationTest {
 
     @MockBean
     private GoogleOAuthService googleOAuthService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Test
     @DisplayName("GET /api/auth/google returns 302 to authorization URL from service")
@@ -107,12 +116,15 @@ class GoogleOAuthControllerIntegrationTest {
     @Test
     @DisplayName("POST /api/auth/google/callback returns 200, payload, and auth cookies on success")
     void callback_success_setsCookiesAndBody() throws Exception {
-        UserDto user = UserDto.builder()
-                .id(99L)
-                .email("google-user@example.com")
+        UserEntity persisted = userRepository.save(UserEntity.builder()
                 .name("G")
                 .surname("User")
-                .build();
+                .email("google-user@example.com")
+                .passwordHash("{noop}unused")
+                .dateOfRegister(Instant.now())
+                .role(Role.USER)
+                .build());
+        UserDto user = UserDto.from(persisted);
         when(googleOAuthService.handleCallback("valid-code"))
                 .thenReturn(AuthPayload.ok(user, "test-jwt", "test-csrf"));
 
@@ -134,6 +146,9 @@ class GoogleOAuthControllerIntegrationTest {
                 .isTrue();
         assertThat(setCookies.stream().anyMatch(c -> c.startsWith(CookieUtils.CSRF_COOKIE_NAME + "=test-csrf")))
                 .as("CSRF cookie")
+                .isTrue();
+        assertThat(setCookies.stream().anyMatch(c -> c.startsWith(CookieUtils.REFRESH_TOKEN_COOKIE_NAME + "=")))
+                .as("Refresh cookie")
                 .isTrue();
     }
 }
