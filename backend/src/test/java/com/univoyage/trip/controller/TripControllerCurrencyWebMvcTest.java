@@ -7,7 +7,6 @@ import com.univoyage.exception.ResourceNotFoundException;
 import com.univoyage.trip.dto.TripCurrencyResponse;
 import com.univoyage.trip.service.TripCurrencyService;
 import com.univoyage.trip.service.TripService;
-import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +17,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -119,12 +117,12 @@ class TripControllerCurrencyWebMvcTest {
     }
 
     /**
-     * Generic {@link RuntimeException} from the service is not mapped by {@link GlobalExceptionHandler},
-     * so the dispatcher wraps it in {@link ServletException}.
+     * Generic {@link RuntimeException} from the service is handled by {@link GlobalExceptionHandler}
+     * as HTTP 500 with a generic JSON error body (details logged server-side only).
      */
     @Test
-    @DisplayName("Should propagate ServletException when service throws generic RuntimeException")
-    void shouldPropagateWhenServiceThrowsRuntimeException() throws Exception {
+    @DisplayName("Should return 500 JSON when service throws generic RuntimeException")
+    void shouldReturn500WhenServiceThrowsRuntimeException() throws Exception {
         Long userId = 10L;
         Long tripId = 25L;
 
@@ -132,6 +130,9 @@ class TripControllerCurrencyWebMvcTest {
         when(tripCurrencyService.getTripCurrency(userId, tripId))
                 .thenThrow(new RuntimeException("unexpected"));
 
-        assertThrows(ServletException.class, () -> mockMvc.perform(get("/api/trips/{tripId}/currency", tripId)));
+        mockMvc.perform(get("/api/trips/{tripId}/currency", tripId))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error").value("An unexpected error occurred."));
     }
 }
