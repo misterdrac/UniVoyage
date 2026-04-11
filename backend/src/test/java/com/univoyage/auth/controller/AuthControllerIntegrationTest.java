@@ -224,11 +224,10 @@ class AuthControllerIntegrationTest {
     }
 
     /**
-     * Unknown ISO code causes {@link IllegalArgumentException} in the service; handled as 400 by
-     * {@link com.univoyage.exception.GlobalExceptionHandler}.
+     * Unknown ISO code causes {@link IllegalArgumentException} in the service; {@link com.univoyage.exception.GlobalExceptionHandler} maps it to 400 JSON.
      */
     @Test
-    @DisplayName("POST /api/auth/register returns 400 for unknown country code")
+    @DisplayName("POST /api/auth/register returns 400 JSON for unknown country code")
     void registerUnknownCountryCode() throws Exception {
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -246,10 +245,10 @@ class AuthControllerIntegrationTest {
 
     /**
      * Invalid hobby id fails inside {@link com.univoyage.auth.service.AuthService#register} with
-     * {@link IllegalArgumentException}, mapped to 400 by {@link com.univoyage.exception.GlobalExceptionHandler}.
+     * {@link IllegalArgumentException}, normalized by {@link com.univoyage.exception.GlobalExceptionHandler}.
      */
     @Test
-    @DisplayName("POST /api/auth/register returns 400 when hobby id does not exist")
+    @DisplayName("POST /api/auth/register returns 400 JSON when hobby id does not exist")
     void registerInvalidHobbyId() throws Exception {
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -328,10 +327,10 @@ class AuthControllerIntegrationTest {
     }
 
     /**
-     * Invalid visited country code during register throws {@link IllegalArgumentException} → 400.
+     * Invalid visited country code throws {@link IllegalArgumentException}; mapped to 400 JSON.
      */
     @Test
-    @DisplayName("POST /api/auth/register returns 400 when visited country code is invalid")
+    @DisplayName("POST /api/auth/register returns 400 JSON when visited country code is invalid")
     void registerInvalidVisitedCountryCode() throws Exception {
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -352,7 +351,7 @@ class AuthControllerIntegrationTest {
      * Unknown language code in {@code languageCodes} throws {@link IllegalArgumentException} → 400.
      */
     @Test
-    @DisplayName("POST /api/auth/register returns 400 when language code does not exist")
+    @DisplayName("POST /api/auth/register returns 400 JSON when language code does not exist")
     void registerInvalidLanguageCode() throws Exception {
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
