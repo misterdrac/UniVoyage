@@ -1,6 +1,9 @@
 export { HeroSection } from './HeroSection';
 export { HeroCard } from './HeroCard';
+export { PersonalizedHeroCard } from './PersonalizedHeroCard';
 export { ExploreMoreButton } from './ExploreMoreButton';
 export { StatsDisplay } from './StatsDisplay';
 export { PopularDestinationsCarousel } from './PopularDestinationsCarousel';
 export { FeaturesSection } from './FeaturesSection';
+export { TravelHeatmapSection } from './TravelHeatmapSection';
+export { HeatmapTopDestinations } from './HeatmapTopDestinations';
