@@ -37,7 +37,7 @@ export const DesktopNavigation = ({ user }: DesktopNavigationProps) => {
           )}
           
           <NavigationMenuItem>
-            <NavigationMenuTrigger>Destinations</NavigationMenuTrigger>
+            <NavigationMenuTrigger disableHoverOpen>Destinations</NavigationMenuTrigger>
             <NavigationMenuContent>
               <ul className="grid sm:w-[400px] md:w-[500px] md:grid-cols-1 lg:w-[600px] rounded-b-lg">
                 {DESTINATION_NAV_ITEMS.map((destination) => (
