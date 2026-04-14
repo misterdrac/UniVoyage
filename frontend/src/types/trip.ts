@@ -31,5 +31,24 @@ export interface TripRating {
   stars: number;
   comment?: string;
   updatedAt: string;
+  moderationStatus?: 'APPROVED' | 'PENDING' | 'REJECTED';
+}
+
+/** A single published review for a destination */
+export interface DestinationReview {
+  id: number;
+  stars: number;
+  comment: string;
+  reviewerDisplayName: string;
+  submittedAt: string;
+}
+
+/** Paginated reviews response */
+export interface DestinationReviewsPage {
+  content: DestinationReview[];
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
 }
 

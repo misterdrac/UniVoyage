@@ -95,7 +95,7 @@ export interface TripsApi {
    * @param stars - Rating value between 1 and 5
    * @returns Promise resolving to success status and saved rating data
    */
-  submitTripRating(tripId: number, stars: number): Promise<{ success: boolean; rating?: TripRating; error?: string }>
+  submitTripRating(tripId: number, stars: number, comment?: string): Promise<{ success: boolean; rating?: TripRating; error?: string }>
 }
 
 /**
@@ -283,14 +283,14 @@ export const tripsApi: { [K in keyof TripsApi]: (this: ApiClient, ...args: Param
     }
   },
 
-  async submitTripRating(this: ApiClient, tripId, stars) {
+  async submitTripRating(this: ApiClient, tripId, stars, comment) {
     try {
       const res = await this.request<{ rating?: TripRating }>(
         `${API_CONFIG.ENDPOINTS.TRIPS.GET_BY_ID}/${tripId}/rating`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ stars }),
+          body: JSON.stringify({ stars, ...(comment ? { comment } : {}) }),
         }
       )
 

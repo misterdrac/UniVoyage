@@ -10,13 +10,17 @@ interface TripRatingSectionProps {
   destinationName: string
 }
 
+const MAX_COMMENT_LENGTH = 2000
+
 export function TripRatingSection({ tripId, destinationName }: TripRatingSectionProps) {
   const [rating, setRating] = useState<TripRating | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [hoveredStar, setHoveredStar] = useState<number | null>(null)
   const [selectedStar, setSelectedStar] = useState<number | null>(null)
+  const [comment, setComment] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [isEditing, setIsEditing] = useState(false)
 
   // Load existing rating on mount
   useEffect(() => {
@@ -29,6 +33,7 @@ export function TripRatingSection({ tripId, destinationName }: TripRatingSection
           setRating(result.rating ?? null)
           if (result.rating) {
             setSelectedStar(result.rating.stars)
+            setComment(result.rating.comment ?? '')
           }
         }
       } catch {
@@ -48,17 +53,30 @@ export function TripRatingSection({ tripId, destinationName }: TripRatingSection
     setError(null)
 
     try {
-      const result = await apiService.submitTripRating(tripId, selectedStar)
+      const result = await apiService.submitTripRating(tripId, selectedStar, comment.trim() || undefined)
       if (result.success && result.rating) {
         setRating(result.rating)
+        setIsEditing(false)
       } else {
         setError(result.error ?? 'Failed to submit rating')
       }
     } catch {
-      setError('Failed to submit rating')
+      setError('Failed to submit rating. Please try again later.')
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  const handleEdit = () => {
+    setIsEditing(true)
+    setError(null)
+  }
+
+  const handleCancelEdit = () => {
+    setIsEditing(false)
+    setSelectedStar(rating?.stars ?? null)
+    setComment(rating?.comment ?? '')
+    setError(null)
   }
 
   const displayStars = hoveredStar ?? selectedStar ?? 0
@@ -81,8 +99,8 @@ export function TripRatingSection({ tripId, destinationName }: TripRatingSection
         <p className="text-sm text-muted-foreground">Your Rating</p>
       </div>
 
-      {/* Case 2: already rated — show submitted rating */}
-      {rating ? (
+      {/* Already rated and not editing */}
+      {rating && !isEditing ? (
         <div className="space-y-3">
           <p className="text-sm text-muted-foreground">
             You rated your trip to {destinationName}:
@@ -96,20 +114,24 @@ export function TripRatingSection({ tripId, destinationName }: TripRatingSection
             ))}
             <span className="ml-2 text-sm font-semibold text-foreground">{rating.stars}/5</span>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setRating(null)}
-          >
+
+          {/* Comment */}
+          {rating.comment && (
+            <p className="text-sm text-muted-foreground italic">"{rating.comment}"</p>
+          )}
+
+          <Button variant="outline" size="sm" onClick={handleEdit}>
             Update rating
           </Button>
         </div>
       ) : (
-        /* Case 1: no rating yet — show star picker */
+        /* No rating yet or editing — show form */
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">
             How was your trip to {destinationName}?
           </p>
+
+          {/* Star picker */}
           <div className="flex items-center gap-1">
             {[1, 2, 3, 4, 5].map((star) => (
               <button
@@ -131,21 +153,49 @@ export function TripRatingSection({ tripId, destinationName }: TripRatingSection
               </button>
             ))}
           </div>
-          {error && <p className="text-xs text-destructive">{error}</p>}
-          <Button
-            size="sm"
-            disabled={!selectedStar || isSubmitting}
-            onClick={handleSubmit}
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="mr-2 size-4 animate-spin" />
-                Submitting...
-              </>
-            ) : (
-              'Submit Rating'
+
+          {/* Optional comment */}
+          <div className="space-y-1">
+            <textarea
+              value={comment}
+              onChange={(e) => setComment(e.target.value.slice(0, MAX_COMMENT_LENGTH))}
+              placeholder="Share your experience (optional)..."
+              rows={3}
+              className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary/50"
+            />
+            <p className="text-xs text-muted-foreground text-right">
+              {comment.length}/{MAX_COMMENT_LENGTH}
+            </p>
+            {comment.trim().length > 0 && (
+              <p className="text-xs text-muted-foreground">
+                Reviews with comments are subject to moderation before being published.
+              </p>
             )}
-          </Button>
+          </div>
+
+          {error && <p className="text-xs text-destructive">{error}</p>}
+
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              disabled={!selectedStar || isSubmitting}
+              onClick={handleSubmit}
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 size-4 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                'Submit Rating'
+              )}
+            </Button>
+            {isEditing && (
+              <Button variant="outline" size="sm" onClick={handleCancelEdit}>
+                Cancel
+              </Button>
+            )}
+          </div>
         </div>
       )}
     </Card>

@@ -34,6 +34,7 @@ export const API_CONFIG = {
             DESTINATIONS: {
               GET_ALL: '/destinations',
               SEARCH: '/destinations/search',
+              REVIEWS: '/destinations',
             },
             WEATHER: {
               CURRENT: '/weather/current',
