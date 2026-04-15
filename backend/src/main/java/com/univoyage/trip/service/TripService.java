@@ -18,6 +18,7 @@ import com.univoyage.trip.repository.TripAccommodationRepository;
 import com.univoyage.trip.repository.TripRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +31,7 @@ import java.util.List;
  */
 @Service
 @RequiredArgsConstructor
+@Log4j2
 public class TripService {
 
     private final TripRepository tripRepository;
@@ -51,7 +53,7 @@ public class TripService {
         DestinationEntity dest = destinationRepository.findById(req.getDestinationId())
                 .orElseThrow(() -> new ResourceNotFoundException("Destination not found"));
 
-        System.out.println("destinationId = " + req.getDestinationId());
+        log.debug("createTrip destinationId={} userId={}", req.getDestinationId(), userId);
 
         TripEntity trip = TripEntity.builder()
                 .userId(userId)
