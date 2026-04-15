@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN" monitorInterval="30">
     <Properties>
-        <Property name="LOG_DIR">${env:LOG_DIR:-logs}</Property>
+        <!-- Do not name this LOG_DIR: same key as env lookup causes infinite interpolation. -->
+        <Property name="app.log.dir">${env:LOG_DIR:-logs}</Property>
         <Property name="LOG_FILE_NAME">univoyage</Property>
         <Property name="PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} %5p [%t] %c{1.} - %m%n%wEx</Property>
     </Properties>
@@ -14,8 +15,8 @@
         </Console>
 
         <RollingFile name="RollingFile"
-                     fileName="${LOG_DIR}/${LOG_FILE_NAME}.log"
-                     filePattern="${LOG_DIR}/${LOG_FILE_NAME}-%d{yyyy-MM-dd}-%i.log.gz">
+                     fileName="${app.log.dir}/${LOG_FILE_NAME}.log"
+                     filePattern="${app.log.dir}/${LOG_FILE_NAME}-%d{yyyy-MM-dd}-%i.log.gz">
             <PatternLayout pattern="${PATTERN}" charset="UTF-8"/>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1" modulate="true"/>

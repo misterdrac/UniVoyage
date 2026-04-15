@@ -186,7 +186,7 @@ spring.datasource.password=${DB_PASSWORD}
   docker ps
 ```
 - or you can go to Docker Desktop and check the "Containers/Apps" section to see if the container is running. You should see Docker image named "backend" and under that image are two containers, one for the back-end application and another for the PostgreSQL database.
-- **Log files on disk (Docker):** Compose bind-mounts logs under `backend/logs/` — PostgreSQL server log at `logs/postgres/postgresql.log`, Spring Boot file log at `logs/spring/univoyage.log` (see `application-docker.yml`). The `logs/` directory is gitignored.
+- **Log files on disk (Docker):** Spring Boot file log is bind-mounted at `logs/spring/univoyage.log` (see `application-docker.yml`). PostgreSQL file logs use a **Docker named volume** (`postgres_logs`) so the server can always write under `/var/log/postgresql` (Windows bind-mounts on that path often caused a restart loop). Read Postgres logs with: `docker compose exec postgres tail -n 200 /var/log/postgresql/postgresql.log`. The `logs/` directory is gitignored.
 - This will build the Docker image for the back-end application and start it in a container. The application will be accessible at `http://localhost:8080` and it will be able to communicate with the front-end running on port 5173.
 - Using Docker is highly recommended as it simplifies the setup process and ensures that all dependencies are correctly configured.
 
