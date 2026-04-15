@@ -6,7 +6,7 @@ import com.univoyage.ai.dto.GeminiResponse;
 import com.univoyage.ai.dto.BudgetEstimateRequest;
 import com.univoyage.ai.dto.ItineraryRequest;
 import com.univoyage.ai.dto.PackingRequest;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
  * Logs errors for troubleshooting and monitoring.
  */
 @Service
-@Slf4j
+@Log4j2
 public class GeminiService {
 
     private static final String GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s";
@@ -168,7 +168,8 @@ public class GeminiService {
             return GeminiResponse.error("Failed to get response from AI service.");
             
         } catch (HttpClientErrorException e) {
-            log.error("Gemini API error: {} - {}", e.getStatusCode(), e.getResponseBodyAsString());
+            log.error("Gemini API HTTP error status={}", e.getStatusCode());
+            log.debug("Gemini API error body (truncated): {}", bodyPreviewForDebug(e.getResponseBodyAsString(), 512));
             
             if (e.getStatusCode() == HttpStatus.TOO_MANY_REQUESTS) {
                 return GeminiResponse.error("AI service is busy. Please wait a moment and try again.");
@@ -206,6 +207,14 @@ public class GeminiService {
             log.error("Error parsing Gemini response", e);
         }
         return null;
+    }
+
+    private static String bodyPreviewForDebug(String body, int maxLen) {
+        if (body == null || body.isBlank()) {
+            return "";
+        }
+        String singleLine = body.replace('\n', ' ').replace('\r', ' ');
+        return singleLine.length() > maxLen ? singleLine.substring(0, maxLen) + "…" : singleLine;
     }
 
     /**
