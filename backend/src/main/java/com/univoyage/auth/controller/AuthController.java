@@ -19,6 +19,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +34,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@Log4j2
 public class AuthController {
 
     private final AuthService authService;
@@ -69,6 +71,7 @@ public class AuthController {
         long retryAfterSec = loginIpRateLimiter.tryConsumeOrRetryAfterSeconds(
                 ClientIpResolver.resolve(httpRequest));
         if (retryAfterSec >= 0) {
+            log.warn("Login rate limited (too many attempts from client network)");
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
                     .header(HttpHeaders.RETRY_AFTER, String.valueOf(retryAfterSec))
                     .body(ApiResponse.fail("Too many login attempts from this network. Please try again later."));
@@ -77,6 +80,7 @@ public class AuthController {
             AuthPayload payload = authService.login(request);
 
             if (!payload.isSuccess()) {
+                log.info("Login failed: invalid credentials");
                 String msg = (payload.getError() != null && !payload.getError().isBlank())
                         ? payload.getError()
                         : "Invalid email or password";
@@ -84,9 +88,11 @@ public class AuthController {
             }
 
             issueRefreshAndWriteCookies(response, payload);
+            log.debug("Login succeeded userId={}", payload.getUser().getId());
             return ResponseEntity.ok(ApiResponse.ok(payload));
 
         } catch (IllegalArgumentException e) {
+            log.info("Login failed: invalid credentials");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.fail("Invalid email or password"));
         }
     }
@@ -102,6 +108,7 @@ public class AuthController {
         long refreshRetrySec = refreshIpRateLimiter.tryConsumeOrRetryAfterSeconds(
                 ClientIpResolver.resolve(request));
         if (refreshRetrySec >= 0) {
+            log.warn("Refresh token rate limited (too many attempts from client network)");
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
                     .header(HttpHeaders.RETRY_AFTER, String.valueOf(refreshRetrySec))
                     .body(ApiResponse.fail("Too many refresh attempts from this network. Please try again later."));
@@ -111,6 +118,7 @@ public class AuthController {
         String raw = cookie != null ? cookie.getValue() : null;
         Optional<RefreshTokenService.RefreshRotationResult> result = refreshTokenService.rotate(raw);
         if (result.isEmpty()) {
+            log.info("Refresh rejected: missing or invalid session");
             authCookieWriter.clearAuthCookies(response);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(ApiResponse.fail("Session expired or invalid"));

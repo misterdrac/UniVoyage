@@ -129,7 +129,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ApiResponse<Object>> handleRuntimeException(
             RuntimeException ex, WebRequest request) {
-        log.error("Unhandled runtime exception: {}", ex.getMessage(), ex);
+        log.error("Unhandled runtime exception", ex);
         return new ResponseEntity<>(
                 ApiResponse.fail("An unexpected error occurred."),
                 HttpStatus.INTERNAL_SERVER_ERROR);
@@ -140,7 +140,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Object>> handleGenericException(Exception ex, WebRequest request) {
-        log.error("Unhandled exception: {}", ex.getMessage(), ex);
+        log.error("Unhandled exception", ex);
         return new ResponseEntity<>(
                 ApiResponse.fail("An unexpected error occurred."),
                 HttpStatus.INTERNAL_SERVER_ERROR);

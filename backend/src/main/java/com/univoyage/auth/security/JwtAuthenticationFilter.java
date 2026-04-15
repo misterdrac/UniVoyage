@@ -16,7 +16,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
 import java.io.IOException;
 
@@ -30,7 +30,7 @@ import java.io.IOException;
  */
 @Component
 @RequiredArgsConstructor
-@Slf4j
+@Log4j2
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
@@ -112,7 +112,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             userIdString = jwtService.extractSubject(jwt);
             jwtCsrfSecret = jwtService.extractCsrfSecret(jwt);
         } catch (IllegalArgumentException e) {
-            // Invalid token (expired, tampered, malformed)
+            log.debug("JWT rejected: invalid or unparseable token");
             clearAuthCookies(response);
             SecurityContextHolder.clearContext();
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -122,6 +122,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // 4) Double submit CSRF check (only for state-changing)
         if (csrfRequired(request)) {
             if (headerCsrfSecret == null || !headerCsrfSecret.equals(jwtCsrfSecret)) {
+                log.debug("JWT rejected: CSRF header mismatch for state-changing request");
                 clearAuthCookies(response);
                 SecurityContextHolder.clearContext();
                 response.setStatus(HttpServletResponse.SC_FORBIDDEN);
@@ -143,7 +144,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             log.debug("Authentication set for user [{}] with authorities: {}", userIdString, userDetails.getAuthorities());
         } catch (UsernameNotFoundException ex) {
-            // user deleted / db reset / stale token
+            log.debug("JWT rejected: user not found for token subject");
             clearAuthCookies(response);
             SecurityContextHolder.clearContext();
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

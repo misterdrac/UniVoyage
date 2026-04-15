@@ -3,7 +3,7 @@ package com.univoyage.hotel.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.univoyage.hotel.dto.HotelResponse;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -26,7 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Handles authentication, token management, and hotel searches by city.
  */
 @Service
-@Slf4j
+@Log4j2
 public class HotelService {
 
     private static final String AMADEUS_AUTH_URL = "https://test.api.amadeus.com/v1/security/oauth2/token";
@@ -187,7 +187,8 @@ public class HotelService {
 
             throw new RuntimeException("Failed to obtain access token from Amadeus API");
         } catch (HttpClientErrorException e) {
-            log.error("Amadeus auth error: {} - {}", e.getStatusCode(), e.getResponseBodyAsString());
+            log.error("Amadeus auth HTTP error status={}", e.getStatusCode());
+            log.debug("Amadeus auth error body (truncated): {}", bodyPreviewForDebug(e.getResponseBodyAsString(), 512));
             throw new RuntimeException("Failed to authenticate with Amadeus API: " + e.getMessage());
         } catch (Exception e) {
             log.error("Error getting Amadeus access token", e);
@@ -221,7 +222,8 @@ public class HotelService {
             log.warn("Amadeus API returned empty response or non-2xx status");
             return List.of();
         } catch (HttpClientErrorException e) {
-            log.error("Amadeus hotel API error: {} - {}", e.getStatusCode(), e.getResponseBodyAsString());
+            log.error("Amadeus hotel API HTTP error status={}", e.getStatusCode());
+            log.debug("Amadeus hotel API error body (truncated): {}", bodyPreviewForDebug(e.getResponseBodyAsString(), 512));
             
             if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
                 log.info("Token expired, refreshing and retrying...");
@@ -357,11 +359,20 @@ public class HotelService {
                 String newToken = refreshToken();
                 return fetchCityCodeFromAmadeus(city, newToken);
             }
-            log.error("Amadeus city search API error: {} - {}", e.getStatusCode(), e.getResponseBodyAsString());
+            log.error("Amadeus city search API HTTP error status={}", e.getStatusCode());
+            log.debug("Amadeus city search error body (truncated): {}", bodyPreviewForDebug(e.getResponseBodyAsString(), 512));
             return null;
         } catch (Exception e) {
             log.error("Error fetching city code from Amadeus for city: {}", city, e);
             return null;
         }
+    }
+
+    private static String bodyPreviewForDebug(String body, int maxLen) {
+        if (body == null || body.isBlank()) {
+            return "";
+        }
+        String singleLine = body.replace('\n', ' ').replace('\r', ' ');
+        return singleLine.length() > maxLen ? singleLine.substring(0, maxLen) + "…" : singleLine;
     }
 }
