@@ -1,6 +1,29 @@
 import type { ApiClient } from './baseClient'
 
 /**
+ * Pending review for moderation
+ */
+export interface AdminPendingReview {
+  ratingId: number
+  tripId: number
+  destinationId: number
+  destinationName: string
+  userEmail: string
+  stars: number
+  comment: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface AdminPendingReviewPage {
+  content: AdminPendingReview[]
+  totalElements: number
+  totalPages: number
+  size: number
+  number: number
+}
+
+/**
  * Admin User data structure
  */
 export interface AdminUser {
@@ -143,6 +166,10 @@ export interface AdminApi {
    * @returns Promise that resolves when deletion is complete
    */
   deleteDestination(id: number): Promise<void>
+
+  getPendingReviews(params?: { page?: number; size?: number }): Promise<AdminPendingReviewPage>
+  approveReview(ratingId: number): Promise<void>
+  rejectReview(ratingId: number): Promise<void>
 }
 
 export const adminApi: { [K in keyof AdminApi]: (this: ApiClient, ...args: Parameters<AdminApi[K]>) => ReturnType<AdminApi[K]> } = {
@@ -233,6 +260,27 @@ export const adminApi: { [K in keyof AdminApi]: (this: ApiClient, ...args: Param
     await this.request<void>(`/admin/destinations/${id}`, {
       method: 'DELETE',
     })
+  },
+
+  async getPendingReviews(this: ApiClient, params = {}) {
+    const searchParams = new URLSearchParams()
+    if (params.page !== undefined) searchParams.append('page', params.page.toString())
+    if (params.size !== undefined) searchParams.append('size', params.size.toString())
+    const query = searchParams.toString()
+    const endpoint = `/admin/reviews/pending${query ? `?${query}` : ''}`
+    const response = await this.request<AdminPendingReviewPage>(endpoint)
+    if (!response.success || !response.data) {
+      throw new Error(response.error || 'Failed to fetch pending reviews')
+    }
+    return response.data
+  },
+
+  async approveReview(this: ApiClient, ratingId: number) {
+    await this.request<void>(`/admin/reviews/${ratingId}/approve`, { method: 'POST' })
+  },
+
+  async rejectReview(this: ApiClient, ratingId: number) {
+    await this.request<void>(`/admin/reviews/${ratingId}/reject`, { method: 'POST' })
   },
 }
 

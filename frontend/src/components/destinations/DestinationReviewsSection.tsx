@@ -83,7 +83,7 @@ export function DestinationReviewsSection({ destinationId }: DestinationReviewsS
           </div>
           <span className="text-xs text-muted-foreground">{review.reviewerDisplayName}</span>
         </div>
-        <p className="text-sm text-muted-foreground italic">"{review.comment}"</p>
+        <p className="text-sm text-muted-foreground italic break-words">"{review.comment}"</p>
       </div>
 
       {/* Navigation */}

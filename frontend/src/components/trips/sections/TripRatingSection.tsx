@@ -10,7 +10,7 @@ interface TripRatingSectionProps {
   destinationName: string
 }
 
-const MAX_COMMENT_LENGTH = 2000
+const MAX_COMMENT_LENGTH = 280
 
 export function TripRatingSection({ tripId, destinationName }: TripRatingSectionProps) {
   const [rating, setRating] = useState<TripRating | null>(null)
@@ -117,7 +117,7 @@ export function TripRatingSection({ tripId, destinationName }: TripRatingSection
 
           {/* Comment */}
           {rating.comment && (
-            <p className="text-sm text-muted-foreground italic">"{rating.comment}"</p>
+            <p className="text-sm text-muted-foreground italic break-words">"{rating.comment}"</p>
           )}
 
           <Button variant="outline" size="sm" onClick={handleEdit}>

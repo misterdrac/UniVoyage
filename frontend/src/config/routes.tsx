@@ -1,6 +1,6 @@
 import React from 'react';
 import { HomePage, AboutPage, ContactPage, ProfilePage, MyTripsPage, TripDetailPage, PlanTripPage, QuizPage, PopularDestinationsPage, EuropeDestinationsPage, NorthAmericaDestinationsPage, SouthAmericaDestinationsPage, AsiaDestinationsPage, AfricaDestinationsPage, OceaniaDestinationsPage } from '@/pages';
-import { AdminLoginPage, AdminDashboardPage, AdminUsersPage, AdminDestinationsPage } from '@/pages/admin';
+import { AdminLoginPage, AdminDashboardPage, AdminUsersPage, AdminDestinationsPage, AdminReviewsPage } from '@/pages/admin';
 import GoogleCallbackPage from '@/pages/GoogleCallbackPage';
 import { MainLayout } from '@/components/layout';
 import { ProtectedRoute, AdminProtectedRoute } from '@/guards';
@@ -58,6 +58,12 @@ export const routes: RouteConfig[] = [
   {
     path: '/admin/destinations',
     element: <AdminDestinationsPage />,
+    layout: false,
+    protected: 'admin',
+  },
+  {
+    path: '/admin/reviews',
+    element: <AdminReviewsPage />,
     layout: false,
     protected: 'admin',
   },
@@ -172,6 +178,7 @@ export const ROUTE_PATHS = {
   ADMIN_DASHBOARD: getRoutePath('/admin/dashboard'),
   ADMIN_USERS: getRoutePath('/admin/users'),
   ADMIN_DESTINATIONS: getRoutePath('/admin/destinations'),
+  ADMIN_REVIEWS: getRoutePath('/admin/reviews'),
   GOOGLE_CALLBACK: getRoutePath('/auth/google/callback'),
 } as const;
 
