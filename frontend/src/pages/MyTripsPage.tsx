@@ -15,12 +15,14 @@ import {
 import { sortTrips, type TripSortOption } from '@/lib/tripSorting';
 import { useDeleteTrip } from '@/hooks/useDeleteTrip';
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
+import { useRatedTripIds } from '@/hooks/useRatedTripIds';
 
 const MyTripsPage = () => {
   useDocumentTitle('My Trips');
   const { trips, isLoading, deleteTrip } = useTrips();
   const navigate = useNavigate();
   const [filters, setFilters] = useState<TripFilters>({ ...DEFAULT_TRIP_FILTERS });
+  const ratedTripIds = useRatedTripIds(trips);
 
   const {
     pendingDeleteTrip,
@@ -98,6 +100,7 @@ const MyTripsPage = () => {
               trips={sortedTrips}
               deletingTripId={pendingDeleteTrip?.id ?? null}
               hasActiveFilters={hasActiveFilters}
+              ratedTripIds={ratedTripIds}
               onResetFilters={handleResetFilters}
               onDeleteTrip={handleRequestDeleteTrip}
               onViewTrip={handleViewTrip}

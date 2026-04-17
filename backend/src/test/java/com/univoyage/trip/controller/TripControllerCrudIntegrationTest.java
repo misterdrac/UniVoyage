@@ -355,7 +355,7 @@ class TripControllerCrudIntegrationTest {
 
     /**
      * Non-ISO date strings cause {@link java.time.format.DateTimeParseException} in the service;
-     * {@link com.univoyage.exception.GlobalExceptionHandler} returns generic 500 JSON (no message leak).
+     * {@link com.univoyage.exception.GlobalExceptionHandler} maps it to HTTP 500 with generic JSON (no message leak).
      */
     @Test
     @DisplayName("POST /api/trips returns 500 JSON when date format is invalid")
@@ -377,8 +377,8 @@ class TripControllerCrudIntegrationTest {
     }
 
     /**
-     * Database {@code trips_dates_chk} rejects {@code return_date < departure_date}; persistence failure is
-     * mapped to generic 500 JSON by {@link com.univoyage.exception.GlobalExceptionHandler}.
+     * Database {@code trips_dates_chk} rejects {@code return_date < departure_date}; the persistence error
+     * is mapped to HTTP 500 with generic JSON by {@link com.univoyage.exception.GlobalExceptionHandler} (no message leak).
      */
     @Test
     @DisplayName("POST /api/trips returns 500 JSON when return date is before departure date")

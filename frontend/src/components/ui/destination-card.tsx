@@ -2,6 +2,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+import { StarRating } from '@/components/ui/star-rating';
 
 // Define the props for the DestinationCard component
 interface DestinationCardProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -15,6 +16,7 @@ interface DestinationCardProps extends React.HTMLAttributes<HTMLDivElement> {
   onPlanTrip: () => void;
   hideOverview?: boolean;
   buttonText?: string;
+  averageRating?: number;
 }
 
 const DestinationCard = React.forwardRef<HTMLDivElement, DestinationCardProps>(
@@ -31,6 +33,7 @@ const DestinationCard = React.forwardRef<HTMLDivElement, DestinationCardProps>(
       onPlanTrip,
       hideOverview = false,
       buttonText = "Plan Trip",
+      averageRating,
       ...props
     },
     ref
@@ -72,6 +75,12 @@ const DestinationCard = React.forwardRef<HTMLDivElement, DestinationCardProps>(
             <div>
               <h3 className="text-2xl sm:text-3xl font-bold text-white">{title}</h3>
               <p className="text-xs sm:text-sm text-white/80 dark:text-white/90">{location}</p>
+              <div className="mt-1">
+                {averageRating !== undefined
+                  ? <StarRating rating={averageRating} />
+                  : <p className="text-xs text-white/50">No ratings yet</p>
+                }
+              </div>
             </div>
             {!hideOverview && (
               <div>

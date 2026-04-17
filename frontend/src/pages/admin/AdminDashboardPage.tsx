@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Button } from '@/components/ui/button';
-import { Users, MapPin, LogOut, Sun, Moon, Shield, Settings, ExternalLink } from 'lucide-react';
+import { Users, MapPin, LogOut, Sun, Moon, Shield, Settings, ExternalLink, MessageSquare } from 'lucide-react';
 import { ROUTE_PATHS } from '@/config/routes';
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
@@ -67,11 +67,11 @@ const AdminDashboardPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-6 w-full max-w-xl">
+        <div className="grid w-full max-w-4xl grid-cols-1 gap-6 sm:grid-cols-3 sm:items-stretch">
           {/* Users Button */}
           <button
             onClick={() => navigate(ROUTE_PATHS.ADMIN_USERS)}
-            className="group flex-1 bg-card hover:bg-card/80 rounded-2xl p-8 border shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 text-left"
+            className="group flex h-full flex-col bg-card hover:bg-card/80 rounded-2xl p-8 border shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 text-left"
           >
             <div className="w-16 h-16 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform" style={{ background: 'linear-gradient(to bottom right, var(--admin-users-gradient-start), var(--admin-users-gradient-end))', boxShadow: `0 10px 15px -3px var(--admin-shadow-blue-30)` }}>
               <Users className="w-8 h-8" style={{ color: 'var(--ds-contrast-fg)' }} />
@@ -85,7 +85,7 @@ const AdminDashboardPage: React.FC = () => {
           {/* Destinations Button */}
           <button
             onClick={() => navigate(ROUTE_PATHS.ADMIN_DESTINATIONS)}
-            className="group flex-1 bg-card hover:bg-card/80 rounded-2xl p-8 border shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 text-left"
+            className="group flex h-full flex-col bg-card hover:bg-card/80 rounded-2xl p-8 border shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 text-left"
           >
             <div className="w-16 h-16 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform" style={{ background: 'linear-gradient(to bottom right, var(--admin-gradient-start), var(--admin-gradient-end))', boxShadow: `0 10px 15px -3px var(--admin-shadow-emerald-30)` }}>
               <MapPin className="w-8 h-8" style={{ color: 'var(--ds-contrast-fg)' }} />
@@ -93,6 +93,20 @@ const AdminDashboardPage: React.FC = () => {
             <h3 className="text-2xl font-bold text-foreground mb-2">DESTINATIONS</h3>
             <p className="text-muted-foreground">
               Manage travel destinations and content
+            </p>
+          </button>
+
+          {/* Reviews Button */}
+          <button
+            onClick={() => navigate(ROUTE_PATHS.ADMIN_REVIEWS)}
+            className="group flex h-full flex-col bg-card hover:bg-card/80 rounded-2xl p-8 border shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 text-left"
+          >
+            <div className="w-16 h-16 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform" style={{ background: 'linear-gradient(to bottom right, #f59e0b, #d97706)', boxShadow: `0 10px 15px -3px rgba(245, 158, 11, 0.3)` }}>
+              <MessageSquare className="w-8 h-8" style={{ color: 'var(--ds-contrast-fg)' }} />
+            </div>
+            <h3 className="text-2xl font-bold text-foreground mb-2">REVIEWS</h3>
+            <p className="text-muted-foreground">
+              Moderate traveller reviews and comments
             </p>
           </button>
         </div>

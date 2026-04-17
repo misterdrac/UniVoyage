@@ -348,7 +348,7 @@ class AuthControllerIntegrationTest {
     }
 
     /**
-     * Unknown language code in {@code languageCodes} throws {@link IllegalArgumentException} from the service.
+     * Unknown language code in {@code languageCodes} throws {@link IllegalArgumentException} → 400.
      */
     @Test
     @DisplayName("POST /api/auth/register returns 400 JSON when language code does not exist")

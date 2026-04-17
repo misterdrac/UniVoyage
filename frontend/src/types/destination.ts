@@ -15,5 +15,7 @@ export interface Destination {
   budgetPerDay?: number;
   whyVisit?: string;
   studentPerks?: string[];
+  averageRating?: number; // 0–5, admin-set rating
+  travellerRatingAverage?: number; // from submitted trip ratings
 }
 

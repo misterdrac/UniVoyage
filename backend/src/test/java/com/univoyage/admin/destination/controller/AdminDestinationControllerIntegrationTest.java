@@ -89,7 +89,7 @@ class AdminDestinationControllerIntegrationTest {
         String newName = "AdminPatchName-" + dest.getId();
 
         AdminPatchDestinationRequest body = new AdminPatchDestinationRequest(
-                newName, null, null, null, null, null, null, null, null);
+                newName, null, null, null, null, null, null, null, null, null, null);
 
         mockMvc.perform(patch("/api/admin/destinations/{id}", dest.getId())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -103,7 +103,7 @@ class AdminDestinationControllerIntegrationTest {
     @DisplayName("PATCH /api/admin/destinations/{id} returns 404 when destination missing")
     void patchDestination_notFound() throws Exception {
         AdminPatchDestinationRequest body = new AdminPatchDestinationRequest(
-                "X", null, null, null, null, null, null, null, null);
+                "X", null, null, null, null, null, null, null, null, null, null);
 
         mockMvc.perform(patch("/api/admin/destinations/{id}", 9_999_999_999L)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -116,7 +116,7 @@ class AdminDestinationControllerIntegrationTest {
     @DisplayName("PUT /api/admin/destinations/{id} returns 404 when destination missing")
     void putDestination_notFound() throws Exception {
         AdminUpdateDestinationRequest body = new AdminUpdateDestinationRequest(
-                "N", "Loc", "EU", null, null, null, null, null, java.util.List.of());
+                "N", "Loc", "EU", "DE", null, null, null, null, null, java.util.List.of(), null);
 
         mockMvc.perform(put("/api/admin/destinations/{id}", 9_999_999_999L)
                         .contentType(MediaType.APPLICATION_JSON)

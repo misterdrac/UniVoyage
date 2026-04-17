@@ -119,12 +119,12 @@ class TripControllerCurrencyWebMvcTest {
     }
 
     /**
-     * Generic {@link RuntimeException} from the service maps to HTTP 500 with a generic JSON body
-     * (no internal message leak) via {@link GlobalExceptionHandler}.
+     * Generic {@link RuntimeException} from the service is handled by {@link GlobalExceptionHandler}
+     * as HTTP 500 with a generic JSON body (no internal message leak; details logged server-side only).
      */
     @Test
     @DisplayName("Should return 500 JSON when service throws generic RuntimeException")
-    void shouldReturn500JsonWhenServiceThrowsRuntimeException() throws Exception {
+    void shouldReturn500WhenServiceThrowsRuntimeException() throws Exception {
         Long userId = 10L;
         Long tripId = 25L;
 

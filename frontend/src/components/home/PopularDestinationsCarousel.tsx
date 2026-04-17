@@ -57,6 +57,7 @@ export function PopularDestinationsCarousel() {
                   className="h-[350px] hover:-translate-y-2"
                   hideOverview={true}
                   buttonText="Explore Destinations"
+                  averageRating={destination.travellerRatingAverage ?? destination.averageRating}
                 />
               </CarouselItem>
             ))}

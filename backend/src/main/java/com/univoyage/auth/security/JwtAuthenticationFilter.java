@@ -142,6 +142,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authToken);
 
+            log.debug("Authentication set for user [{}] with authorities: {}", userIdString, userDetails.getAuthorities());
         } catch (UsernameNotFoundException ex) {
             log.debug("JWT rejected: user not found for token subject");
             clearAuthCookies(response);

@@ -151,6 +151,11 @@ summary,
   --travel-lang-button: rgb(147, 51, 234); /* purple-600 */
   --travel-lang-button-hover: rgb(126, 34, 206); /* purple-700 */
 
+  /* Trip rating moderation notice (reuses purple family; info, not alert) */
+  --trip-rating-notice-bg: var(--travel-lang-bg-from);
+  --trip-rating-notice-border: var(--travel-lang-badge-border);
+  --trip-rating-notice-title: var(--travel-lang-badge-text);
+
   --travel-hobby-bg-from: rgba(245, 158, 11, 0.1); /* amber-500/10 */
   --travel-hobby-bg-via: rgba(245, 158, 11, 0.05); /* amber-500/5 */
   --travel-hobby-bg-to: transparent;
@@ -376,6 +381,8 @@ summary,
   --travel-lang-badge-bg: rgba(31, 41, 55, 0.5); /* gray-800/50 */
   --travel-lang-badge-text: rgb(196, 181, 253); /* purple-300 */
   --travel-lang-icon: rgb(196, 181, 253); /* purple-400 */
+
+  --trip-rating-notice-bg: rgba(168, 85, 247, 0.14);
 
   --travel-hobby-badge-bg: rgba(31, 41, 55, 0.5); /* gray-800/50 */
   --travel-hobby-badge-text: rgb(253, 230, 138); /* amber-300 */

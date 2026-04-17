@@ -10,10 +10,12 @@ public record AdminPatchDestinationRequest(
         String name,
         String location,
         String continent,
+        String countryCode,
         String imageUrl,
         String imageAlt,
         String overview,
         Integer budgetPerDay,
         String whyVisit,
-        List<String> studentPerks
+        List<String> studentPerks,
+        Double averageRating
 ) {}

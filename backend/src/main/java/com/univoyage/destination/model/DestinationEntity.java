@@ -4,6 +4,7 @@ import com.univoyage.reference.country.model.Country;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 
@@ -57,6 +58,18 @@ public class DestinationEntity {
     @Column(name = "student_perks", columnDefinition = "TEXT[]")
     private List<String> studentPerks;
 
+    /** Average rating 0–5 (one decimal), optional. */
+    @Column(name = "average_rating", precision = 2, scale = 1)
+    private BigDecimal averageRating;
+
+    /** Rolling average from trip_traveller_ratings for this destination (separate from admin average_rating). */
+    @Column(name = "traveller_rating_average", precision = 2, scale = 1)
+    private BigDecimal travellerRatingAverage;
+
+    @Builder.Default
+    @Column(name = "traveller_rating_count", nullable = false)
+    private Integer travellerRatingCount = 0;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
@@ -68,6 +81,9 @@ public class DestinationEntity {
         Instant now = Instant.now();
         if (createdAt == null) createdAt = now;
         if (updatedAt == null) updatedAt = now;
+        if (travellerRatingCount == null) {
+            travellerRatingCount = 0;
+        }
     }
 
     @PreUpdate

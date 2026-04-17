@@ -16,6 +16,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Controller for Google OAuth 2.0: redirect to Google and callback that sets the same auth cookies as password login.
@@ -27,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@Slf4j
 public class GoogleOAuthController {
 
     private final GoogleOAuthService googleOAuthService;
@@ -45,6 +47,7 @@ public class GoogleOAuthController {
             @RequestBody GoogleCallbackRequestDto request,
             HttpServletResponse response
     ) {
+        log.debug("Google OAuth callback received");
         if (request.getCode() == null || request.getCode().isBlank()) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
