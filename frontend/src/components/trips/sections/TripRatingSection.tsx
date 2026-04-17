@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { Star, Loader2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -11,6 +11,53 @@ interface TripRatingSectionProps {
 }
 
 const MAX_COMMENT_LENGTH = 280
+
+function moderationInfoBox(children: ReactNode) {
+  return (
+    <div
+      className="rounded-lg border px-3 py-2 text-xs"
+      style={{
+        backgroundColor: 'var(--trip-rating-notice-bg)',
+        borderColor: 'var(--trip-rating-notice-border)',
+      }}
+      role="status"
+    >
+      {children}
+    </div>
+  )
+}
+
+function ModerationNotice({ rating }: { rating: TripRating }) {
+  const status = rating.moderationStatus ?? 'APPROVED'
+
+  if (status === 'PENDING') {
+    return moderationInfoBox(
+      <>
+        <p className="font-medium" style={{ color: 'var(--trip-rating-notice-title)' }}>
+          Review pending
+        </p>
+        <p className="mt-1.5 leading-relaxed text-muted-foreground">
+          Your submission is pending moderation and is not yet published.
+        </p>
+      </>,
+    )
+  }
+
+  if (status === 'REJECTED') {
+    return moderationInfoBox(
+      <>
+        <p className="font-medium" style={{ color: 'var(--trip-rating-notice-title)' }}>
+          Review not published
+        </p>
+        <p className="mt-1.5 leading-relaxed text-muted-foreground">
+          Your review did not align with our content policy. You may revise your rating or comment below and resubmit.
+        </p>
+      </>,
+    )
+  }
+
+  return null
+}
 
 export function TripRatingSection({ tripId, destinationName }: TripRatingSectionProps) {
   const [rating, setRating] = useState<TripRating | null>(null)
@@ -117,8 +164,10 @@ export function TripRatingSection({ tripId, destinationName }: TripRatingSection
 
           {/* Comment */}
           {rating.comment && (
-            <p className="text-sm text-muted-foreground italic break-words">"{rating.comment}"</p>
+            <p className="text-sm text-muted-foreground italic wrap-break-word">"{rating.comment}"</p>
           )}
+
+          <ModerationNotice rating={rating} />
 
           <Button variant="outline" size="sm" onClick={handleEdit}>
             Update rating
@@ -127,6 +176,8 @@ export function TripRatingSection({ tripId, destinationName }: TripRatingSection
       ) : (
         /* No rating yet or editing — show form */
         <div className="space-y-4">
+          {rating && <ModerationNotice rating={rating} />}
+
           <p className="text-sm text-muted-foreground">
             How was your trip to {destinationName}?
           </p>
@@ -166,11 +217,6 @@ export function TripRatingSection({ tripId, destinationName }: TripRatingSection
             <p className="text-xs text-muted-foreground text-right">
               {comment.length}/{MAX_COMMENT_LENGTH}
             </p>
-            {comment.trim().length > 0 && (
-              <p className="text-xs text-muted-foreground">
-                Reviews with comments are subject to moderation before being published.
-              </p>
-            )}
           </div>
 
           {error && <p className="text-xs text-destructive">{error}</p>}
