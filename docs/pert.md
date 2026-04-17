@@ -38,7 +38,3 @@ After integration:
 - Final deployment completes the project
 
 ---
-
-##  PERT Diagram
-
-![PERT Diagram](docs/diagrams/pert-diagram.svg)
