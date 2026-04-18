@@ -6,7 +6,7 @@ import { formatDateLong } from '@/lib/dateUtils'
 import { useTripBudget } from '@/hooks/useTripBudget'
 import { apiService } from '@/services/api'
 import { cn } from '@/lib/utils'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { TripRatingSection } from '@/components/trips/sections/TripRatingSection'
 
 interface TripOverviewSectionProps {
@@ -50,6 +50,62 @@ const getCountdownToDepartureStart = (departureDate: string): CountdownState => 
 
 const formatCountdownUnit = (value: number): string => value.toString().padStart(2, '0')
 
+function DepartureCountdownCard({ departureDate }: { departureDate: string }) {
+  const [countdown, setCountdown] = useState<CountdownState>(() =>
+    getCountdownToDepartureStart(departureDate)
+  )
+
+  useEffect(() => {
+    setCountdown(getCountdownToDepartureStart(departureDate))
+
+    const intervalId = window.setInterval(() => {
+      setCountdown(getCountdownToDepartureStart(departureDate))
+    }, 1000)
+
+    return () => {
+      window.clearInterval(intervalId)
+    }
+  }, [departureDate])
+
+  return (
+    <Card className="p-5 rounded-xl border bg-card hover:shadow-md transition-shadow">
+      <div className="mb-4">
+        <h4 className="text-base sm:text-lg lg:text-xl font-semibold text-foreground leading-tight wrap-break-word">
+          Countdown To Departure Day
+        </h4>
+        <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+          Time remaining until your trip officially starts
+        </p>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="rounded-lg border border-border/50 bg-muted/50 p-3 text-center">
+          <p className="text-xl sm:text-2xl font-bold text-foreground tabular-nums">{countdown.days}</p>
+          <p className="text-xs text-muted-foreground mt-1">Days</p>
+        </div>
+        <div className="rounded-lg border border-border/50 bg-muted/50 p-3 text-center">
+          <p className="text-xl sm:text-2xl font-bold text-foreground tabular-nums">
+            {formatCountdownUnit(countdown.hours)}
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">Hours</p>
+        </div>
+        <div className="rounded-lg border border-border/50 bg-muted/50 p-3 text-center">
+          <p className="text-xl sm:text-2xl font-bold text-foreground tabular-nums">
+            {formatCountdownUnit(countdown.minutes)}
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">Minutes</p>
+        </div>
+        <div className="rounded-lg border border-border/50 bg-muted/50 p-3 text-center">
+          <p className="text-xl sm:text-2xl font-bold text-foreground tabular-nums">
+            {formatCountdownUnit(countdown.seconds)}
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">Seconds</p>
+        </div>
+      </div>
+    </Card>
+  )
+}
+
 const formatCurrency = (amount: number): string => {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -65,14 +121,20 @@ export function TripOverviewSection({
   currentStatus,
 }: TripOverviewSectionProps) {
   const { totalBudget, totals } = useTripBudget(trip.id)
+  const forecastMode = useMemo(
+    () => ({
+      cityName: trip.destinationName,
+      locationName: trip.destinationLocation,
+      departureDate: trip.departureDate,
+      returnDate: trip.returnDate,
+    }),
+    [trip.destinationName, trip.destinationLocation, trip.departureDate, trip.returnDate]
+  )
   const [accommodation, setAccommodation] = useState<{
     accommodationName?: string
     accommodationAddress?: string
     accommodationPhone?: string
   } | null>(null)
-  const [countdown, setCountdown] = useState<CountdownState>(() =>
-    getCountdownToDepartureStart(trip.departureDate)
-  )
 
   const remainingBudget = totalBudget - totals.actualTotal
   const budgetPercentage = totalBudget > 0 ? (totals.actualTotal / totalBudget) * 100 : 0
@@ -99,23 +161,6 @@ export function TripOverviewSection({
     }
   }, [trip.id])
 
-  useEffect(() => {
-    if (currentStatus !== 'planned') {
-      setCountdown(ZERO_COUNTDOWN)
-      return
-    }
-
-    setCountdown(getCountdownToDepartureStart(trip.departureDate))
-
-    const intervalId = window.setInterval(() => {
-      setCountdown(getCountdownToDepartureStart(trip.departureDate))
-    }, 1000)
-
-    return () => {
-      window.clearInterval(intervalId)
-    }
-  }, [currentStatus, trip.departureDate])
-
   const hasAccommodation = accommodation && (accommodation.accommodationName || accommodation.accommodationAddress || accommodation.accommodationPhone)
 
   return (
@@ -131,45 +176,7 @@ export function TripOverviewSection({
       <div>
         <h3 className="text-xl font-semibold text-foreground mb-4">Quick Details</h3>
         <div className="space-y-4">
-          {currentStatus === 'planned' && (
-            <Card className="p-5 rounded-xl border bg-card hover:shadow-md transition-shadow">
-              <div className="mb-4">
-                <h4 className="text-base sm:text-lg lg:text-xl font-semibold text-foreground leading-tight wrap-break-word">
-                  Countdown To Departure Day
-                </h4>
-                <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                  Time remaining until your trip officially starts
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <div className="rounded-lg border border-border/50 bg-muted/50 p-3 text-center">
-                  <p className="text-xl sm:text-2xl font-bold text-foreground tabular-nums">
-                    {countdown.days}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">Days</p>
-                </div>
-                <div className="rounded-lg border border-border/50 bg-muted/50 p-3 text-center">
-                  <p className="text-xl sm:text-2xl font-bold text-foreground tabular-nums">
-                    {formatCountdownUnit(countdown.hours)}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">Hours</p>
-                </div>
-                <div className="rounded-lg border border-border/50 bg-muted/50 p-3 text-center">
-                  <p className="text-xl sm:text-2xl font-bold text-foreground tabular-nums">
-                    {formatCountdownUnit(countdown.minutes)}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">Minutes</p>
-                </div>
-                <div className="rounded-lg border border-border/50 bg-muted/50 p-3 text-center">
-                  <p className="text-xl sm:text-2xl font-bold text-foreground tabular-nums">
-                    {formatCountdownUnit(countdown.seconds)}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">Seconds</p>
-                </div>
-              </div>
-            </Card>
-          )}
+          {currentStatus === 'planned' && <DepartureCountdownCard departureDate={trip.departureDate} />}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Card className="p-5 rounded-xl border bg-card hover:shadow-md transition-shadow">
@@ -340,16 +347,7 @@ export function TripOverviewSection({
         ) : (
           <div className="space-y-3">
             <p className="text-sm text-muted-foreground">Weather Forecast for Your Trip</p>
-            <WeatherWidget
-              forecastMode={{
-                cityName: trip.destinationName,
-                locationName: trip.destinationLocation,
-                departureDate: trip.departureDate,
-                returnDate: trip.returnDate,
-              }}
-              width="100%"
-              animated
-            />
+            <WeatherWidget forecastMode={forecastMode} width="100%" animated />
           </div>
         )}
       </div>
