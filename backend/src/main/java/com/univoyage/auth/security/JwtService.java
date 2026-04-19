@@ -9,6 +9,8 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.security.Keys;
 
+import javax.crypto.SecretKey;
+
 import java.security.Key;
 import java.security.SecureRandom;
 import java.time.Instant;
@@ -106,13 +108,13 @@ public class JwtService {
      *  */
     private Claims parse(String token) {
         try {
-            return Jwts.parserBuilder()
-                    .setSigningKey(key)
+            return Jwts.parser()
+                    .verifyWith((SecretKey) key)
                     .requireIssuer(issuer)
                     .requireAudience(audience)
                     .build()
-                    .parseClaimsJws(token)
-                    .getBody();
+                    .parseSignedClaims(token)
+                    .getPayload();
         } catch (JwtException | IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid JWT: " + e.getMessage());
         }
