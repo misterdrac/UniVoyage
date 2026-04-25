@@ -1,0 +1,50 @@
+stages:
+  - build
+  - test
+
+default:
+  image: maven:3.9.9-eclipse-temurin-23
+  cache:
+    key: maven-cache
+    paths:
+      - .m2/repository
+
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
+  MAVEN_CLI_OPTS: "-B --no-transfer-progress"
+
+build_backend:
+  stage: build
+  rules:
+    - changes:
+        - backend/**/*
+        - .gitlab-ci.yml
+  script:
+    - cd backend
+    - chmod +x mvnw
+    - ./mvnw $MAVEN_CLI_OPTS -DskipTests clean package
+
+test_backend:
+  stage: test
+  needs: ["build_backend"]
+  services:
+    - name: postgres:16
+      alias: postgres
+  variables:
+    POSTGRES_DB: univoyage_test
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: admin
+    SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/univoyage_test
+    SPRING_DATASOURCE_USERNAME: postgres
+    SPRING_DATASOURCE_PASSWORD: admin
+    SPRING_FLYWAY_URL: jdbc:postgresql://postgres:5432/univoyage_test
+    SPRING_FLYWAY_USER: postgres
+    SPRING_FLYWAY_PASSWORD: admin
+  rules:
+    - changes:
+        - backend/**/*
+        - .gitlab-ci.yml
+  script:
+    - cd backend
+    - chmod +x mvnw
+    - ./mvnw $MAVEN_CLI_OPTS test
