@@ -1,5 +1,5 @@
-import { useAuth } from '@/contexts/AuthContext';
-import { Spinner } from '@/components/ui/spinner';
+import { useAuth } from "@/contexts/AuthContext";
+import { Spinner } from "@/components/ui/spinner";
 
 export function AuthLoadingOverlay() {
   const { isLoading } = useAuth();
@@ -17,4 +17,3 @@ export function AuthLoadingOverlay() {
     </div>
   );
 }
-

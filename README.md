@@ -6,6 +6,66 @@ The application brings together **trip creation**, **budget management**, **stud
 
 ---
 
+## Code Formatting Hook
+
+This repository includes a shared git pre-commit hook that formats backend Java code automatically before each commit.
+
+Setup (run once per local clone):
+
+```bash
+./scripts/setup-git-hooks.sh
+```
+
+What it does:
+- runs `./mvnw formatter:format` in `backend`
+- runs `npx prettier --write` for frontend source files
+- re-stages formatted backend and frontend files before commit
+
+---
+
+## Developer CI/CD Workflow
+
+Branch strategy:
+- default branch is `master`
+- commit pipelines run on feature branches (`push` with `branches-ignore: [ master ]`)
+- stricter pipelines run on PRs targeting `master`
+
+Workflows:
+- `.github/workflows/backend-ci.yml` (Backend commit pipeline)
+  - `[Build]` build Java project
+  - `[Test]` run backend tests (Postgres service)
+  - `[Security]` generate backend SBOM
+- `.github/workflows/frontend-ci.yml` (Frontend commit pipeline)
+  - `[Build]` quick frontend build
+  - `[Security]` generate frontend SBOM
+
+- `.github/workflows/backend-pr-ci.yml` (Backend PR pipeline, stricter)
+  - format validate, validate/build/test
+  - Docker build + Trivy scans
+  - codebase vulnerability scan
+  - dependency review
+- `.github/workflows/frontend-pr-ci.yml` (Frontend PR pipeline, stricter)
+  - lint + format check (Prettier check)
+  - npm audit + Trivy scans
+  - build artifact + SBOM generation
+  - dependency review
+
+- `.github/workflows/master-pipeline.yml` (post-merge integration on `master`)
+  - runs backend + frontend integration checks
+  - includes manual owner-only release stage (`workflow_dispatch`):
+    - `codebase_security_scan`
+    - `create_tag` (requires `release_tag` input)
+    - `create_release`
+
+Notes for contributors:
+- PR merge should be blocked unless PR checks are green.
+- If formatting fails in CI, run local commit hook setup:
+  - `./scripts/setup-git-hooks.sh`
+- Full pipeline map and Mermaid diagram:
+  - `docs/ci-cd-pipelines.md`
+
+---
+
 ## 🎯 What is UniVoyage?
 
 UniVoyage is a **smart travel companion** that supports users from the moment they decide to travel until they have a fully structured daily itinerary, packing list, and budget overview.

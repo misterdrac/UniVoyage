@@ -78,6 +78,29 @@ jobs:
       - name: Run lint
         run: npm run lint
 
+  format_frontend:
+    name: "[Test] Frontend format check"
+    runs-on: ubuntu-latest
+    container: node:22
+    timeout-minutes: 10
+    needs: install_dependencies
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Clone repository
+        working-directory: .
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+          git init .
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git fetch --depth=1 origin "${{ github.sha }}"
+          git checkout --detach FETCH_HEAD
+      - name: Install dependencies
+        run: npm ci
+      - name: Run Prettier check
+        run: npx prettier --check "src/**/*.{js,jsx,ts,tsx,css,scss,md,json}"
+
   npm_audit_frontend:
     name: "[Security] Frontend npm audit"
     runs-on: ubuntu-latest
@@ -131,7 +154,7 @@ jobs:
     runs-on: ubuntu-latest
     container: node:22
     timeout-minutes: 15
-    needs: [lint_frontend, npm_audit_frontend, trivy_frontend_fs_scan]
+    needs: [lint_frontend, format_frontend, npm_audit_frontend, trivy_frontend_fs_scan]
     defaults:
       run:
         working-directory: frontend

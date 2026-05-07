@@ -1,9 +1,9 @@
-import { useState, useCallback, useEffect, useMemo } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Avatar } from './Avatar';
+import { useState, useCallback, useEffect, useMemo } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Avatar } from "./Avatar";
 
-const AVATAR_BASE_URL = 'https://cdn.shadcnstudio.com/ss-assets/avatar/avatar-';
+const AVATAR_BASE_URL = "https://cdn.shadcnstudio.com/ss-assets/avatar/avatar-";
 const AVATAR_COUNT = 20;
 
 interface AvatarPickerProps {
@@ -54,7 +54,7 @@ export const AvatarPicker = ({
     } else if (currentAvatar === 1) {
       // From avatar 1 go to "no avatar"
       setCurrentAvatar(null);
-      onAvatarChange('');
+      onAvatarChange("");
     } else {
       // Go to previous avatar
       const newAvatar = currentAvatar - 1;
@@ -71,7 +71,7 @@ export const AvatarPicker = ({
     } else if (currentAvatar === AVATAR_COUNT) {
       // From last avatar go to "no avatar"
       setCurrentAvatar(null);
-      onAvatarChange('');
+      onAvatarChange("");
     } else {
       // Go to next avatar
       const newAvatar = currentAvatar + 1;
@@ -87,7 +87,9 @@ export const AvatarPicker = ({
 
   return (
     <div className="flex flex-col items-center gap-4">
-      <label className="text-sm font-medium text-foreground">Profile Avatar</label>
+      <label className="text-sm font-medium text-foreground">
+        Profile Avatar
+      </label>
       <div className="flex items-center gap-4">
         <Button
           type="button"
@@ -102,7 +104,13 @@ export const AvatarPicker = ({
         </Button>
 
         <div className="relative">
-          <Avatar src={currentAvatarUrl} alt={currentAvatar === null ? "No avatar" : `Avatar ${currentAvatar}`} size="lg" />
+          <Avatar
+            src={currentAvatarUrl}
+            alt={
+              currentAvatar === null ? "No avatar" : `Avatar ${currentAvatar}`
+            }
+            size="lg"
+          />
           {currentAvatar !== null && (
             <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded-full font-medium">
               {currentAvatar}/{AVATAR_COUNT}
@@ -128,4 +136,3 @@ export const AvatarPicker = ({
     </div>
   );
 };
-

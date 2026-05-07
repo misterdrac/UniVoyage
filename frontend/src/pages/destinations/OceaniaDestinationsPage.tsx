@@ -1,16 +1,19 @@
-import { useMemo } from 'react';
-import { DestinationsPageLayout, LoadingSpinner } from '@/components/destinations';
-import { getDestinationsByContinent } from '@/lib/destinationUtils';
-import { useDestinations } from '@/hooks/useDestinations';
+import { useMemo } from "react";
+import {
+  DestinationsPageLayout,
+  LoadingSpinner,
+} from "@/components/destinations";
+import { getDestinationsByContinent } from "@/lib/destinationUtils";
+import { useDestinations } from "@/hooks/useDestinations";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 const OceaniaDestinationsPage = () => {
-  useDocumentTitle('Oceania Destinations');
+  useDocumentTitle("Oceania Destinations");
   const { destinations: apiDestinations, isLoading } = useDestinations();
-  
-  const oceaniaDestinations = useMemo(() => 
-    getDestinationsByContinent(apiDestinations, 'Oceania'),
-    [apiDestinations]
+
+  const oceaniaDestinations = useMemo(
+    () => getDestinationsByContinent(apiDestinations, "Oceania"),
+    [apiDestinations],
   );
 
   if (isLoading) {
@@ -28,9 +31,10 @@ const OceaniaDestinationsPage = () => {
       title="Explore Oceania"
       description={
         <p className="text-center text-lg sm:text-xl text-muted-foreground">
-          From the stunning beaches of Australia to the breathtaking landscapes of New Zealand, Oceania 
-          offers incredible natural beauty, unique wildlife, and vibrant cultures. Experience world-class 
-          cities, pristine coastlines, and unforgettable adventures across the Pacific.
+          From the stunning beaches of Australia to the breathtaking landscapes
+          of New Zealand, Oceania offers incredible natural beauty, unique
+          wildlife, and vibrant cultures. Experience world-class cities,
+          pristine coastlines, and unforgettable adventures across the Pacific.
         </p>
       }
       destinations={oceaniaDestinations}
@@ -41,4 +45,3 @@ const OceaniaDestinationsPage = () => {
 };
 
 export default OceaniaDestinationsPage;
-

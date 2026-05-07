@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(git rev-parse --show-toplevel)"
+cd "$ROOT_DIR"
+
+echo "[pre-commit] Running backend formatter..."
+(
+  cd backend
+  chmod +x mvnw
+  ./mvnw -q --no-transfer-progress formatter:format
+)
+
+echo "[pre-commit] Running frontend formatter..."
+(
+  cd frontend
+  npx prettier --write "src/**/*.{js,jsx,ts,tsx,css,scss,md,json}"
+)
+
+echo "[pre-commit] Re-staging formatted files..."
+git add backend
+git add frontend
+
+echo "[pre-commit] Done."

@@ -22,13 +22,15 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
- * Web-layer tests for the trip currency tab endpoint with heavy dependencies stubbed.
+ * Web-layer tests for the trip currency tab endpoint with heavy dependencies
+ * stubbed.
  * <p>
  * Loads a slice of the full application ({@link SpringBootTest}) but replaces
  * {@link TripCurrencyService}, {@link TripService}, {@link CurrentUser}, and
- * {@link JwtAuthenticationFilter} with Mockito beans so the test does not touch JPA or security
- * filter behavior. {@link GlobalExceptionHandler} is imported explicitly so thrown domain exceptions
- * map to the same HTTP status codes as in production.
+ * {@link JwtAuthenticationFilter} with Mockito beans so the test does not touch
+ * JPA or security filter behavior. {@link GlobalExceptionHandler} is imported
+ * explicitly so thrown domain exceptions map to the same HTTP status codes as
+ * in production.
  * </p>
  */
 @SpringBootTest
@@ -37,104 +39,97 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(GlobalExceptionHandler.class)
 class TripControllerCurrencyWebMvcTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+  @Autowired
+  private MockMvc mockMvc;
 
-    @MockitoBean
-    private TripCurrencyService tripCurrencyService;
+  @MockitoBean
+  private TripCurrencyService tripCurrencyService;
 
-    @MockitoBean
-    private TripService tripService;
+  @MockitoBean
+  private TripService tripService;
 
-    @MockitoBean
-    private CurrentUser currentUser;
+  @MockitoBean
+  private CurrentUser currentUser;
 
-    @MockitoBean
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
+  @MockitoBean
+  private JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    /**
-     * When the service returns a {@link TripCurrencyResponse}, the controller wraps it as
-     * {@code data.currency} with HTTP 200.
-     */
-    @Test
-    @DisplayName("Should return currency payload when request is valid")
-    void shouldReturnCurrencyPayloadWhenRequestIsValid() throws Exception {
-        Long userId = 10L;
-        Long tripId = 25L;
+  /**
+   * When the service returns a {@link TripCurrencyResponse}, the controller wraps
+   * it as {@code data.currency} with HTTP 200.
+   */
+  @Test
+  @DisplayName("Should return currency payload when request is valid")
+  void shouldReturnCurrencyPayloadWhenRequestIsValid() throws Exception {
+    Long userId = 10L;
+    Long tripId = 25L;
 
-        TripCurrencyResponse response = new TripCurrencyResponse(
-                "JPY",
-                "Japanese Yen",
-                "EUR",
-                162.45
-        );
+    TripCurrencyResponse response = new TripCurrencyResponse("JPY", "Japanese Yen", "EUR", 162.45);
 
-        when(currentUser.id()).thenReturn(userId);
-        when(tripCurrencyService.getTripCurrency(userId, tripId)).thenReturn(response);
+    when(currentUser.id()).thenReturn(userId);
+    when(tripCurrencyService.getTripCurrency(userId, tripId)).thenReturn(response);
 
-        mockMvc.perform(get("/api/trips/{tripId}/currency", tripId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.currency.destinationCurrencyCode").value("JPY"))
-                .andExpect(jsonPath("$.data.currency.destinationCurrencyName").value("Japanese Yen"))
-                .andExpect(jsonPath("$.data.currency.baseCurrencyCode").value("EUR"))
-                .andExpect(jsonPath("$.data.currency.exchangeRate").value(162.45));
-    }
+    mockMvc.perform(get("/api/trips/{tripId}/currency", tripId)).andExpect(status().isOk())
+        .andExpect(jsonPath("$.success").value(true))
+        .andExpect(jsonPath("$.data.currency.destinationCurrencyCode").value("JPY"))
+        .andExpect(jsonPath("$.data.currency.destinationCurrencyName").value("Japanese Yen"))
+        .andExpect(jsonPath("$.data.currency.baseCurrencyCode").value("EUR"))
+        .andExpect(jsonPath("$.data.currency.exchangeRate").value(162.45));
+  }
 
-    /**
-     * {@link ResourceNotFoundException} from the service must produce HTTP 404 through
-     * {@link GlobalExceptionHandler}.
-     */
-    @Test
-    @DisplayName("Should return 404 when trip is not found")
-    void shouldReturn404WhenTripIsNotFound() throws Exception {
-        Long userId = 10L;
-        Long tripId = 999L;
+  /**
+   * {@link ResourceNotFoundException} from the service must produce HTTP 404
+   * through {@link GlobalExceptionHandler}.
+   */
+  @Test
+  @DisplayName("Should return 404 when trip is not found")
+  void shouldReturn404WhenTripIsNotFound() throws Exception {
+    Long userId = 10L;
+    Long tripId = 999L;
 
-        when(currentUser.id()).thenReturn(userId);
-        when(tripCurrencyService.getTripCurrency(userId, tripId))
-                .thenThrow(new ResourceNotFoundException("Trip not found"));
+    when(currentUser.id()).thenReturn(userId);
+    when(tripCurrencyService.getTripCurrency(userId, tripId))
+        .thenThrow(new ResourceNotFoundException("Trip not found"));
 
-        mockMvc.perform(get("/api/trips/{tripId}/currency", tripId))
-                .andExpect(status().isNotFound());
-    }
+    mockMvc.perform(get("/api/trips/{tripId}/currency", tripId)).andExpect(status().isNotFound());
+  }
 
-    /**
-     * {@link IllegalStateException} from the service (misconfigured destination currency) maps to HTTP 500.
-     */
-    @Test
-    @DisplayName("Should return 500 when destination currency is not configured")
-    void shouldReturn500WhenDestinationCurrencyIsNotConfigured() throws Exception {
-        Long userId = 10L;
-        Long tripId = 25L;
+  /**
+   * {@link IllegalStateException} from the service (misconfigured destination
+   * currency) maps to HTTP 500.
+   */
+  @Test
+  @DisplayName("Should return 500 when destination currency is not configured")
+  void shouldReturn500WhenDestinationCurrencyIsNotConfigured() throws Exception {
+    Long userId = 10L;
+    Long tripId = 25L;
 
-        when(currentUser.id()).thenReturn(userId);
-        when(tripCurrencyService.getTripCurrency(userId, tripId))
-                .thenThrow(new IllegalStateException("Destination country currency is not configured"));
+    when(currentUser.id()).thenReturn(userId);
+    when(tripCurrencyService.getTripCurrency(userId, tripId))
+        .thenThrow(new IllegalStateException("Destination country currency is not configured"));
 
-        mockMvc.perform(get("/api/trips/{tripId}/currency", tripId))
-                .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.error").value("Destination country currency is not configured"));
-    }
+    mockMvc.perform(get("/api/trips/{tripId}/currency", tripId))
+        .andExpect(status().isInternalServerError()).andExpect(jsonPath("$.success").value(false))
+        .andExpect(jsonPath("$.error").value("Destination country currency is not configured"));
+  }
 
-    /**
-     * Generic {@link RuntimeException} from the service is handled by {@link GlobalExceptionHandler}
-     * as HTTP 500 with a generic JSON body (no internal message leak; details logged server-side only).
-     */
-    @Test
-    @DisplayName("Should return 500 JSON when service throws generic RuntimeException")
-    void shouldReturn500WhenServiceThrowsRuntimeException() throws Exception {
-        Long userId = 10L;
-        Long tripId = 25L;
+  /**
+   * Generic {@link RuntimeException} from the service is handled by
+   * {@link GlobalExceptionHandler} as HTTP 500 with a generic JSON body (no
+   * internal message leak; details logged server-side only).
+   */
+  @Test
+  @DisplayName("Should return 500 JSON when service throws generic RuntimeException")
+  void shouldReturn500WhenServiceThrowsRuntimeException() throws Exception {
+    Long userId = 10L;
+    Long tripId = 25L;
 
-        when(currentUser.id()).thenReturn(userId);
-        when(tripCurrencyService.getTripCurrency(userId, tripId))
-                .thenThrow(new RuntimeException("unexpected"));
+    when(currentUser.id()).thenReturn(userId);
+    when(tripCurrencyService.getTripCurrency(userId, tripId))
+        .thenThrow(new RuntimeException("unexpected"));
 
-        mockMvc.perform(get("/api/trips/{tripId}/currency", tripId))
-                .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.error").value("An unexpected error occurred."));
-    }
+    mockMvc.perform(get("/api/trips/{tripId}/currency", tripId))
+        .andExpect(status().isInternalServerError()).andExpect(jsonPath("$.success").value(false))
+        .andExpect(jsonPath("$.error").value("An unexpected error occurred."));
+  }
 }

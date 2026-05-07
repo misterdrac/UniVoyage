@@ -1,4 +1,4 @@
-import { ROUTE_PATHS } from '@/config/routes';
+import { ROUTE_PATHS } from "@/config/routes";
 
 export const DESTINATION_NAV_ITEMS = [
   {
@@ -9,17 +9,20 @@ export const DESTINATION_NAV_ITEMS = [
   {
     title: "Europe",
     href: ROUTE_PATHS.DESTINATIONS_EUROPE,
-    description: "Explore historic cities and cultural landmarks across Europe.",
+    description:
+      "Explore historic cities and cultural landmarks across Europe.",
   },
   {
     title: "North America",
     href: ROUTE_PATHS.DESTINATIONS_NORTH_AMERICA,
-    description: "Experience diverse landscapes from the USA to Canada and Mexico.",
+    description:
+      "Experience diverse landscapes from the USA to Canada and Mexico.",
   },
   {
     title: "South America",
     href: ROUTE_PATHS.DESTINATIONS_SOUTH_AMERICA,
-    description: "Discover vibrant cultures and breathtaking landscapes across South America.",
+    description:
+      "Discover vibrant cultures and breathtaking landscapes across South America.",
   },
   {
     title: "Asia",
@@ -37,4 +40,3 @@ export const DESTINATION_NAV_ITEMS = [
     description: "Explore stunning beaches and landscapes in sunny Oceania.",
   },
 ] as const;
-

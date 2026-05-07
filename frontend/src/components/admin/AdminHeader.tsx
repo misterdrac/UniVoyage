@@ -1,9 +1,9 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useTheme } from '@/contexts/ThemeContext';
-import { Button } from '@/components/ui/button';
-import { Home, Sun, Moon } from 'lucide-react';
-import { ROUTE_PATHS } from '@/config/routes';
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { useTheme } from "@/contexts/ThemeContext";
+import { Button } from "@/components/ui/button";
+import { Home, Sun, Moon } from "lucide-react";
+import { ROUTE_PATHS } from "@/config/routes";
 
 interface AdminHeaderProps {
   title: string;
@@ -52,7 +52,7 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
             onClick={toggleTheme}
             className="rounded-full"
           >
-            {theme === 'dark' ? (
+            {theme === "dark" ? (
               <Sun className="h-5 w-5 text-amber-500" />
             ) : (
               <Moon className="h-5 w-5 text-slate-600" />
@@ -63,4 +63,3 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
     </header>
   );
 };
-

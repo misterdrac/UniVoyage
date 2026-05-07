@@ -1,4 +1,3 @@
-export * from './TripFiltersBar'
-export * from './TripResultsSection'
-export * from './DeleteTripDialog'
-
+export * from "./TripFiltersBar";
+export * from "./TripResultsSection";
+export * from "./DeleteTripDialog";

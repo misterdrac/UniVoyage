@@ -8,15 +8,18 @@ import lombok.*;
  */
 @Entity
 @Table(name = "languages")
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Language {
 
-    @Id
-    @Column(name = "lang_code", length = 2)
-    private String langCode;
+  @Id
+  @Column(name = "lang_code", length = 2)
+  private String langCode;
 
-    @Column(name = "lang_name", unique = true, nullable = false, length = 50)
-    private String langName;
+  @Column(name = "lang_name", unique = true, nullable = false, length = 50)
+  private String langName;
 
 }

@@ -18,32 +18,25 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class DestinationReviewService {
 
-    private final DestinationRepository destinationRepository;
-    private final TripTravellerRatingRepository tripTravellerRatingRepository;
+  private final DestinationRepository destinationRepository;
+  private final TripTravellerRatingRepository tripTravellerRatingRepository;
 
-    @Transactional(readOnly = true)
-    public DestinationReviewsPageResponse listPublishedReviews(Long destinationId, Pageable pageable) {
-        if (!destinationRepository.existsById(destinationId)) {
-            throw new ResourceNotFoundException("Destination not found");
-        }
-        Page<TripTravellerRatingEntity> page = tripTravellerRatingRepository.findPublishedTextReviews(
-                destinationId,
-                ReviewModerationStatus.APPROVED,
-                pageable);
-        return new DestinationReviewsPageResponse(
-                page.getContent().stream().map(this::toPublic).toList(),
-                page.getTotalElements(),
-                page.getTotalPages(),
-                page.getSize(),
-                page.getNumber());
+  @Transactional(readOnly = true)
+  public DestinationReviewsPageResponse listPublishedReviews(Long destinationId,
+      Pageable pageable) {
+    if (!destinationRepository.existsById(destinationId)) {
+      throw new ResourceNotFoundException("Destination not found");
     }
+    Page<TripTravellerRatingEntity> page = tripTravellerRatingRepository
+        .findPublishedTextReviews(destinationId, ReviewModerationStatus.APPROVED, pageable);
+    return new DestinationReviewsPageResponse(
+        page.getContent().stream().map(this::toPublic).toList(), page.getTotalElements(),
+        page.getTotalPages(), page.getSize(), page.getNumber());
+  }
 
-    private DestinationReviewPublicResponse toPublic(TripTravellerRatingEntity r) {
-        return new DestinationReviewPublicResponse(
-                r.getId(),
-                r.getStars() == null ? 0 : r.getStars().intValue(),
-                r.getComment(),
-                ReviewerDisplayNameFormatter.format(r.getUser()),
-                r.getUpdatedAt());
-    }
+  private DestinationReviewPublicResponse toPublic(TripTravellerRatingEntity r) {
+    return new DestinationReviewPublicResponse(r.getId(),
+        r.getStars() == null ? 0 : r.getStars().intValue(), r.getComment(),
+        ReviewerDisplayNameFormatter.format(r.getUser()), r.getUpdatedAt());
+  }
 }

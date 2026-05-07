@@ -22,8 +22,9 @@ export function HeroCard() {
         </h1>
 
         <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-          Plan unforgettable trips with fellow students. From city breaks to cultural exchanges,
-          UniVoyage connects you with amazing travel experiences designed for students.
+          Plan unforgettable trips with fellow students. From city breaks to
+          cultural exchanges, UniVoyage connects you with amazing travel
+          experiences designed for students.
         </p>
 
         <div className="flex justify-center mb-4">

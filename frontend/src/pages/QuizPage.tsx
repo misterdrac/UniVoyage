@@ -1,84 +1,182 @@
-import { useState, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, ArrowRight, Compass, Loader2, Sparkles, MapPin, Globe } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { QuizProgress, QuizQuestion, QuizResults } from '@/components/quiz'
-import type { QuizOption } from '@/components/quiz'
-import { apiService } from '@/services/api'
-import type { QuizRecommendationResponse } from '@/services/api/quizApi'
+import { useState, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Compass,
+  Loader2,
+  Sparkles,
+  MapPin,
+  Globe,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { QuizProgress, QuizQuestion, QuizResults } from "@/components/quiz";
+import type { QuizOption } from "@/components/quiz";
+import { apiService } from "@/services/api";
+import type { QuizRecommendationResponse } from "@/services/api/quizApi";
 
 interface QuizStep {
-  key: string
-  question: string
-  subtitle: string
-  options: QuizOption[]
-  columns?: 3 | 4
+  key: string;
+  question: string;
+  subtitle: string;
+  options: QuizOption[];
+  columns?: 3 | 4;
 }
 
 const QUIZ_STEPS: QuizStep[] = [
   {
-    key: 'budget',
+    key: "budget",
     question: "What's your daily budget?",
-    subtitle: 'How much are you comfortable spending per day?',
+    subtitle: "How much are you comfortable spending per day?",
     options: [
-      { value: 'low', label: 'Budget-Friendly', icon: '💰', description: 'Under $30/day' },
-      { value: 'medium', label: 'Moderate', icon: '💵', description: '$30 - $60/day' },
-      { value: 'high', label: 'Comfortable', icon: '💎', description: '$60+/day' },
+      {
+        value: "low",
+        label: "Budget-Friendly",
+        icon: "💰",
+        description: "Under $30/day",
+      },
+      {
+        value: "medium",
+        label: "Moderate",
+        icon: "💵",
+        description: "$30 - $60/day",
+      },
+      {
+        value: "high",
+        label: "Comfortable",
+        icon: "💎",
+        description: "$60+/day",
+      },
     ],
   },
   {
-    key: 'climate',
-    question: 'What climate do you prefer?',
-    subtitle: 'Pick the weather vibe that suits you best',
+    key: "climate",
+    question: "What climate do you prefer?",
+    subtitle: "Pick the weather vibe that suits you best",
     options: [
-      { value: 'tropical', label: 'Tropical & Warm', icon: '☀️', description: 'Sun, beaches, and heat' },
-      { value: 'temperate', label: 'Temperate & Mild', icon: '🌤️', description: 'Pleasant and moderate' },
-      { value: 'cold', label: 'Cold & Winter', icon: '❄️', description: 'Snow, mountains, cozy vibes' },
-      { value: 'any', label: 'No Preference', icon: '🌍', description: "I'm flexible!" },
+      {
+        value: "tropical",
+        label: "Tropical & Warm",
+        icon: "☀️",
+        description: "Sun, beaches, and heat",
+      },
+      {
+        value: "temperate",
+        label: "Temperate & Mild",
+        icon: "🌤️",
+        description: "Pleasant and moderate",
+      },
+      {
+        value: "cold",
+        label: "Cold & Winter",
+        icon: "❄️",
+        description: "Snow, mountains, cozy vibes",
+      },
+      {
+        value: "any",
+        label: "No Preference",
+        icon: "🌍",
+        description: "I'm flexible!",
+      },
     ],
   },
   {
-    key: 'activityType',
-    question: 'What type of activities do you enjoy?',
-    subtitle: 'Choose what excites you the most',
+    key: "activityType",
+    question: "What type of activities do you enjoy?",
+    subtitle: "Choose what excites you the most",
     options: [
-      { value: 'culture', label: 'Culture & History', icon: '🏛️', description: 'Museums, monuments, heritage' },
-      { value: 'adventure', label: 'Adventure & Nature', icon: '🏔️', description: 'Hiking, wildlife, outdoors' },
-      { value: 'beach', label: 'Beach & Relaxation', icon: '🏖️', description: 'Coastal vibes and chill' },
-      { value: 'food', label: 'Food & Nightlife', icon: '🍜', description: 'Culinary tours and going out' },
-      { value: 'mix', label: 'Mix of Everything', icon: '✨', description: 'A bit of everything!' },
+      {
+        value: "culture",
+        label: "Culture & History",
+        icon: "🏛️",
+        description: "Museums, monuments, heritage",
+      },
+      {
+        value: "adventure",
+        label: "Adventure & Nature",
+        icon: "🏔️",
+        description: "Hiking, wildlife, outdoors",
+      },
+      {
+        value: "beach",
+        label: "Beach & Relaxation",
+        icon: "🏖️",
+        description: "Coastal vibes and chill",
+      },
+      {
+        value: "food",
+        label: "Food & Nightlife",
+        icon: "🍜",
+        description: "Culinary tours and going out",
+      },
+      {
+        value: "mix",
+        label: "Mix of Everything",
+        icon: "✨",
+        description: "A bit of everything!",
+      },
     ],
   },
   {
-    key: 'continent',
-    question: 'Which continent interests you?',
-    subtitle: 'Where in the world do you want to go?',
+    key: "continent",
+    question: "Which continent interests you?",
+    subtitle: "Where in the world do you want to go?",
     columns: 4,
     options: [
-      { value: 'Europe', label: 'Europe', icon: '🏰' },
-      { value: 'Asia', label: 'Asia', icon: '⛩️' },
-      { value: 'North America', label: 'North America', icon: '🗽' },
-      { value: 'South America', label: 'South America', icon: '🌎' },
-      { value: 'Africa', label: 'Africa', icon: '🦁' },
-      { value: 'Oceania', label: 'Oceania', icon: '🐨' },
-      { value: 'any', label: 'No Preference', icon: '🌐', description: 'Surprise me!' },
+      { value: "Europe", label: "Europe", icon: "🏰" },
+      { value: "Asia", label: "Asia", icon: "⛩️" },
+      { value: "North America", label: "North America", icon: "🗽" },
+      { value: "South America", label: "South America", icon: "🌎" },
+      { value: "Africa", label: "Africa", icon: "🦁" },
+      { value: "Oceania", label: "Oceania", icon: "🐨" },
+      {
+        value: "any",
+        label: "No Preference",
+        icon: "🌐",
+        description: "Surprise me!",
+      },
     ],
   },
   {
-    key: 'travelStyle',
-    question: 'What is your travel style?',
-    subtitle: 'How do you like to experience a destination?',
+    key: "travelStyle",
+    question: "What is your travel style?",
+    subtitle: "How do you like to experience a destination?",
     options: [
-      { value: 'solo', label: 'Solo Explorer', icon: '🎒', description: 'Independent and self-guided' },
-      { value: 'backpacker', label: 'Backpacker', icon: '🗺️', description: 'Budget travel, hostels, trains' },
-      { value: 'luxury', label: 'Luxury', icon: '👑', description: 'Comfort and premium experiences' },
-      { value: 'group', label: 'Group / Social', icon: '👥', description: 'Meet people, group tours' },
-      { value: 'cultural', label: 'Cultural Immersion', icon: '🎭', description: 'Live like a local' },
+      {
+        value: "solo",
+        label: "Solo Explorer",
+        icon: "🎒",
+        description: "Independent and self-guided",
+      },
+      {
+        value: "backpacker",
+        label: "Backpacker",
+        icon: "🗺️",
+        description: "Budget travel, hostels, trains",
+      },
+      {
+        value: "luxury",
+        label: "Luxury",
+        icon: "👑",
+        description: "Comfort and premium experiences",
+      },
+      {
+        value: "group",
+        label: "Group / Social",
+        icon: "👥",
+        description: "Meet people, group tours",
+      },
+      {
+        value: "cultural",
+        label: "Cultural Immersion",
+        icon: "🎭",
+        description: "Live like a local",
+      },
     ],
   },
-]
+];
 
-type QuizAnswers = Record<string, string>
+type QuizAnswers = Record<string, string>;
 
 const slideVariants = {
   enter: (direction: number) => ({
@@ -93,54 +191,56 @@ const slideVariants = {
     x: direction > 0 ? -300 : 300,
     opacity: 0,
   }),
-}
+};
 
 const HERO_IMAGES = [
-  'https://images.unsplash.com/photo-1550340499-a6c60fc8287c?auto=format&fit=crop&q=80&w=600',
-  'https://images.unsplash.com/photo-1583422409516-2895a77efded?auto=format&fit=crop&q=80&w=600',
-  'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&q=80&w=600',
-  'https://images.unsplash.com/photo-1506929562872-bb421503ef21?auto=format&fit=crop&q=80&w=600',
-]
+  "https://images.unsplash.com/photo-1550340499-a6c60fc8287c?auto=format&fit=crop&q=80&w=600",
+  "https://images.unsplash.com/photo-1583422409516-2895a77efded?auto=format&fit=crop&q=80&w=600",
+  "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&q=80&w=600",
+  "https://images.unsplash.com/photo-1506929562872-bb421503ef21?auto=format&fit=crop&q=80&w=600",
+];
 
 export default function QuizPage() {
-  const [hasStarted, setHasStarted] = useState(false)
-  const [currentStep, setCurrentStep] = useState(0)
-  const [answers, setAnswers] = useState<QuizAnswers>({})
-  const [direction, setDirection] = useState(1)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [results, setResults] = useState<QuizRecommendationResponse | null>(null)
+  const [hasStarted, setHasStarted] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [answers, setAnswers] = useState<QuizAnswers>({});
+  const [direction, setDirection] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [results, setResults] = useState<QuizRecommendationResponse | null>(
+    null,
+  );
 
-  const step = QUIZ_STEPS[currentStep]
-  const isFirstStep = currentStep === 0
-  const isLastStep = currentStep === QUIZ_STEPS.length - 1
-  const currentAnswer = answers[step.key] ?? null
+  const step = QUIZ_STEPS[currentStep];
+  const isFirstStep = currentStep === 0;
+  const isLastStep = currentStep === QUIZ_STEPS.length - 1;
+  const currentAnswer = answers[step.key] ?? null;
 
   const handleSelect = useCallback(
     (value: string) => {
-      setAnswers((prev) => ({ ...prev, [step.key]: value }))
+      setAnswers((prev) => ({ ...prev, [step.key]: value }));
     },
-    [step.key]
-  )
+    [step.key],
+  );
 
   const goNext = useCallback(() => {
-    if (!currentAnswer) return
-    setDirection(1)
+    if (!currentAnswer) return;
+    setDirection(1);
     if (isLastStep) {
-      submitQuiz()
+      submitQuiz();
     } else {
-      setCurrentStep((prev) => prev + 1)
+      setCurrentStep((prev) => prev + 1);
     }
-  }, [currentAnswer, isLastStep])
+  }, [currentAnswer, isLastStep]);
 
   const goBack = useCallback(() => {
-    setDirection(-1)
-    setCurrentStep((prev) => Math.max(0, prev - 1))
-  }, [])
+    setDirection(-1);
+    setCurrentStep((prev) => Math.max(0, prev - 1));
+  }, []);
 
   const submitQuiz = async () => {
-    setIsLoading(true)
-    setError(null)
+    setIsLoading(true);
+    setError(null);
 
     try {
       const response = await apiService.getQuizRecommendation({
@@ -149,28 +249,30 @@ export default function QuizPage() {
         activityType: answers.activityType,
         continent: answers.continent,
         travelStyle: answers.travelStyle,
-      })
+      });
 
       if (response.success && response.data) {
-        setResults(response.data)
+        setResults(response.data);
       } else {
-        setError(response.error || 'Failed to get recommendations. Please try again.')
+        setError(
+          response.error || "Failed to get recommendations. Please try again.",
+        );
       }
     } catch {
-      setError('Something went wrong. Please try again.')
+      setError("Something went wrong. Please try again.");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleRetake = useCallback(() => {
-    setResults(null)
-    setAnswers({})
-    setCurrentStep(0)
-    setDirection(1)
-    setError(null)
-    setHasStarted(true)
-  }, [])
+    setResults(null);
+    setAnswers({});
+    setCurrentStep(0);
+    setDirection(1);
+    setError(null);
+    setHasStarted(true);
+  }, []);
 
   if (!hasStarted) {
     return (
@@ -192,8 +294,9 @@ export default function QuizPage() {
                   Can't decide where to go next?
                 </h1>
                 <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-lg">
-                  Take our quick quiz and let AI find the perfect destination for you. 
-                  5 questions, personalized results, your next adventure awaits.
+                  Take our quick quiz and let AI find the perfect destination
+                  for you. 5 questions, personalized results, your next
+                  adventure awaits.
                 </p>
               </div>
 
@@ -237,7 +340,7 @@ export default function QuizPage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.3 + i * 0.1 }}
-                    className={i % 2 === 1 ? 'lg:mt-8' : ''}
+                    className={i % 2 === 1 ? "lg:mt-8" : ""}
                   >
                     <img
                       src={src}
@@ -251,7 +354,7 @@ export default function QuizPage() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   if (isLoading) {
@@ -275,7 +378,7 @@ export default function QuizPage() {
           </div>
         </motion.div>
       </div>
-    )
+    );
   }
 
   if (results) {
@@ -285,7 +388,7 @@ export default function QuizPage() {
           <QuizResults data={results} onRetake={handleRetake} />
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -309,7 +412,10 @@ export default function QuizPage() {
         </motion.div>
 
         <div className="mb-8">
-          <QuizProgress currentStep={currentStep} totalSteps={QUIZ_STEPS.length} />
+          <QuizProgress
+            currentStep={currentStep}
+            totalSteps={QUIZ_STEPS.length}
+          />
         </div>
 
         <div className="relative overflow-hidden min-h-[380px]">
@@ -321,7 +427,7 @@ export default function QuizPage() {
               initial="enter"
               animate="center"
               exit="exit"
-              transition={{ duration: 0.3, ease: 'easeInOut' }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
             >
               <QuizQuestion
                 question={step.question}
@@ -377,5 +483,5 @@ export default function QuizPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

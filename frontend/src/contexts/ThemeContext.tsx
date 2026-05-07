@@ -1,6 +1,12 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
 
-type Theme = 'light' | 'dark';
+type Theme = "light" | "dark";
 
 /**
  * Theme context type
@@ -20,7 +26,7 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
  * Manages light/dark theme state with localStorage persistence
  * Automatically detects system preference on first load
  * Applies theme class to document root for Tailwind dark mode
- * 
+ *
  * @example
  * ```tsx
  * <ThemeProvider>
@@ -31,27 +37,27 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
     // Check localStorage first
-    const savedTheme = localStorage.getItem('theme') as Theme;
+    const savedTheme = localStorage.getItem("theme") as Theme;
     if (savedTheme) return savedTheme;
-    
+
     // Check system preference
-    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      return 'dark';
+    if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      return "dark";
     }
-    
-    return 'light';
+
+    return "light";
   });
 
   useEffect(() => {
     const root = document.documentElement;
-    
-    if (theme === 'dark') {
-      root.classList.add('dark');
+
+    if (theme === "dark") {
+      root.classList.add("dark");
     } else {
-      root.classList.remove('dark');
+      root.classList.remove("dark");
     }
-    
-    localStorage.setItem('theme', theme);
+
+    localStorage.setItem("theme", theme);
   }, [theme]);
 
   /**
@@ -59,7 +65,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
    * Updates state, localStorage, and DOM class
    */
   const toggleTheme = () => {
-    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+    setTheme((prev) => (prev === "light" ? "dark" : "light"));
   };
 
   return (
@@ -77,8 +83,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 export function useTheme() {
   const context = useContext(ThemeContext);
   if (context === undefined) {
-    throw new Error('useTheme must be used within a ThemeProvider');
+    throw new Error("useTheme must be used within a ThemeProvider");
   }
   return context;
 }
-

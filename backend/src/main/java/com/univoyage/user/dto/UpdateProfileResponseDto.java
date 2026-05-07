@@ -13,6 +13,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateProfileResponseDto {
-    private UserDto user;
+  private UserDto user;
 }
-

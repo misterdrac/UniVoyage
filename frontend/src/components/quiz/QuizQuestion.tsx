@@ -1,20 +1,20 @@
-import { cn } from '@/lib/utils'
-import { motion } from 'framer-motion'
+import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 export interface QuizOption {
-  value: string
-  label: string
-  icon: string
-  description?: string
+  value: string;
+  label: string;
+  icon: string;
+  description?: string;
 }
 
 interface QuizQuestionProps {
-  question: string
-  subtitle?: string
-  options: QuizOption[]
-  selectedValue: string | null
-  onSelect: (value: string) => void
-  columns?: 3 | 4
+  question: string;
+  subtitle?: string;
+  options: QuizOption[];
+  selectedValue: string | null;
+  onSelect: (value: string) => void;
+  columns?: 3 | 4;
 }
 
 export function QuizQuestion({
@@ -47,22 +47,22 @@ export function QuizQuestion({
             transition={{ duration: 0.3, delay: index * 0.06 }}
             onClick={() => onSelect(option.value)}
             className={cn(
-              'group relative flex flex-col items-center gap-3 p-6 rounded-2xl border-2 transition-all duration-200 cursor-pointer text-center w-full sm:w-[calc(50%-0.5rem)]',
+              "group relative flex flex-col items-center gap-3 p-6 rounded-2xl border-2 transition-all duration-200 cursor-pointer text-center w-full sm:w-[calc(50%-0.5rem)]",
               columns === 4
-                ? 'lg:w-[calc(25%-0.75rem)]'
-                : 'lg:w-[calc(33.333%-0.75rem)]',
+                ? "lg:w-[calc(25%-0.75rem)]"
+                : "lg:w-[calc(33.333%-0.75rem)]",
               selectedValue === option.value
-                ? 'border-primary bg-primary/10 shadow-md shadow-primary/10'
-                : 'border-border bg-card hover:border-primary/40 hover:bg-accent/50 hover:shadow-sm'
+                ? "border-primary bg-primary/10 shadow-md shadow-primary/10"
+                : "border-border bg-card hover:border-primary/40 hover:bg-accent/50 hover:shadow-sm",
             )}
           >
             <span className="text-3xl sm:text-4xl">{option.icon}</span>
             <span
               className={cn(
-                'font-semibold text-base sm:text-lg transition-colors',
+                "font-semibold text-base sm:text-lg transition-colors",
                 selectedValue === option.value
-                  ? 'text-primary'
-                  : 'text-foreground group-hover:text-primary'
+                  ? "text-primary"
+                  : "text-foreground group-hover:text-primary",
               )}
             >
               {option.label}
@@ -78,7 +78,7 @@ export function QuizQuestion({
                 className="absolute top-3 right-3 w-6 h-6 bg-primary rounded-full flex items-center justify-center"
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                transition={{ type: "spring", stiffness: 400, damping: 20 }}
               >
                 <svg
                   className="w-3.5 h-3.5 text-primary-foreground"
@@ -87,7 +87,11 @@ export function QuizQuestion({
                   stroke="currentColor"
                   strokeWidth={3}
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
               </motion.div>
             )}
@@ -95,5 +99,5 @@ export function QuizQuestion({
         ))}
       </div>
     </div>
-  )
+  );
 }

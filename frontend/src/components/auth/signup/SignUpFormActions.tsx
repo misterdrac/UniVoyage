@@ -17,8 +17,8 @@ export const SignUpFormActions = ({
   return (
     <>
       {/* Sign Up Button */}
-      <Button 
-        type="submit" 
+      <Button
+        type="submit"
         className="w-full"
         disabled={!isFormValid || isLoading}
       >
@@ -31,7 +31,9 @@ export const SignUpFormActions = ({
           <span className="w-full border-t border-border" />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+          <span className="bg-background px-2 text-muted-foreground">
+            Or continue with
+          </span>
         </div>
       </div>
 
@@ -60,4 +62,3 @@ export const SignUpFormActions = ({
     </>
   );
 };
-

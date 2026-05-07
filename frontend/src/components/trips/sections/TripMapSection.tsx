@@ -1,22 +1,22 @@
-import { useEffect, useState, useMemo } from 'react'
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
-import { Icon, DivIcon } from 'leaflet'
-import type { LatLngExpression } from 'leaflet'
-import { Card, CardContent } from '@/components/ui/card'
-import { MapPin, Loader2, AlertCircle } from 'lucide-react'
-import type { Trip } from '@/types/trip'
-import { cn } from '@/lib/utils'
-import { usePointsOfInterest } from '@/hooks/usePointsOfInterest'
-import { PlacesLoadingCard } from './PlacesLoadingCard'
-import { searchNominatim } from '@/services/external'
+import { useEffect, useState, useMemo } from "react";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { Icon, DivIcon } from "leaflet";
+import type { LatLngExpression } from "leaflet";
+import { Card, CardContent } from "@/components/ui/card";
+import { MapPin, Loader2, AlertCircle } from "lucide-react";
+import type { Trip } from "@/types/trip";
+import { cn } from "@/lib/utils";
+import { usePointsOfInterest } from "@/hooks/usePointsOfInterest";
+import { PlacesLoadingCard } from "./PlacesLoadingCard";
+import { searchNominatim } from "@/services/external";
 
 // Import Leaflet CSS
-import 'leaflet/dist/leaflet.css'
+import "leaflet/dist/leaflet.css";
 
 // Fix for default marker icons in Leaflet with bundlers
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png'
-import markerIcon from 'leaflet/dist/images/marker-icon.png'
-import markerShadow from 'leaflet/dist/images/marker-shadow.png'
+import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
+import markerIcon from "leaflet/dist/images/marker-icon.png";
+import markerShadow from "leaflet/dist/images/marker-shadow.png";
 
 // Configure default icon for destination
 const destinationIcon = new Icon({
@@ -27,12 +27,13 @@ const destinationIcon = new Icon({
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],
   shadowSize: [41, 41],
-})
+});
 
 // Custom POI marker icon (purple/primary colored)
-const createPoiIcon = () => new DivIcon({
-  className: 'custom-poi-marker',
-  html: `
+const createPoiIcon = () =>
+  new DivIcon({
+    className: "custom-poi-marker",
+    html: `
     <div style="
       width: 24px;
       height: 24px;
@@ -52,88 +53,88 @@ const createPoiIcon = () => new DivIcon({
       "></div>
     </div>
   `,
-  iconSize: [24, 24],
-  iconAnchor: [12, 12],
-  popupAnchor: [0, -12],
-})
+    iconSize: [24, 24],
+    iconAnchor: [12, 12],
+    popupAnchor: [0, -12],
+  });
 
-const poiIcon = createPoiIcon()
+const poiIcon = createPoiIcon();
 
 interface TripMapSectionProps {
-  trip: Trip
+  trip: Trip;
 }
 
 interface GeocodedLocation {
-  lat: number
-  lon: number
-  displayName: string
+  lat: number;
+  lon: number;
+  displayName: string;
 }
 
 // Component to recenter map when location changes
 function MapRecenter({ center }: { center: LatLngExpression }) {
-  const map = useMap()
+  const map = useMap();
   useEffect(() => {
-    map.setView(center, map.getZoom())
-  }, [center, map])
-  return null
+    map.setView(center, map.getZoom());
+  }, [center, map]);
+  return null;
 }
 
 export function TripMapSection({ trip }: TripMapSectionProps) {
-  const [location, setLocation] = useState<GeocodedLocation | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [location, setLocation] = useState<GeocodedLocation | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Get city name for POI search
-  const cityName = trip.destinationName || trip.destinationLocation
+  const cityName = trip.destinationName || trip.destinationLocation;
 
   // Fetch points of interest
   const { places, isLoading: isLoadingPoi } = usePointsOfInterest({
     city: cityName,
     limit: 22,
-  })
+  });
 
   // Filter POIs that have coordinates
   const poisWithCoords = useMemo(() => {
-    return places.filter(poi => poi.latitude && poi.longitude)
-  }, [places])
+    return places.filter((poi) => poi.latitude && poi.longitude);
+  }, [places]);
 
   // Combine destination name and location for better geocoding results
   const searchQuery = useMemo(() => {
-    return `${trip.destinationName}, ${trip.destinationLocation}`
-  }, [trip.destinationName, trip.destinationLocation])
+    return `${trip.destinationName}, ${trip.destinationLocation}`;
+  }, [trip.destinationName, trip.destinationLocation]);
 
   useEffect(() => {
-    let isMounted = true
+    let isMounted = true;
 
     const fetchLocation = async () => {
-      setIsLoading(true)
-      setError(null)
+      setIsLoading(true);
+      setError(null);
 
-      const nominatim = await searchNominatim(searchQuery)
+      const nominatim = await searchNominatim(searchQuery);
       const result: GeocodedLocation | null = nominatim
         ? {
             lat: nominatim.lat,
             lon: nominatim.lng,
-            displayName: nominatim.displayName ?? '',
+            displayName: nominatim.displayName ?? "",
           }
-        : null
+        : null;
 
-      if (!isMounted) return
+      if (!isMounted) return;
 
       if (result) {
-        setLocation(result)
+        setLocation(result);
       } else {
-        setError('Could not find location on map')
+        setError("Could not find location on map");
       }
-      setIsLoading(false)
-    }
+      setIsLoading(false);
+    };
 
-    fetchLocation()
+    fetchLocation();
 
     return () => {
-      isMounted = false
-    }
-  }, [searchQuery])
+      isMounted = false;
+    };
+  }, [searchQuery]);
 
   // Loading state
   if (isLoading) {
@@ -168,7 +169,7 @@ export function TripMapSection({ trip }: TripMapSectionProps) {
           </CardContent>
         </Card>
       </div>
-    )
+    );
   }
 
   // Error state
@@ -192,17 +193,17 @@ export function TripMapSection({ trip }: TripMapSectionProps) {
                   Unable to load map
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  {error || 'Could not find location for this destination'}
+                  {error || "Could not find location for this destination"}
                 </p>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
-    )
+    );
   }
 
-  const center: LatLngExpression = [location.lat, location.lon]
+  const center: LatLngExpression = [location.lat, location.lon];
 
   return (
     <div className="space-y-6">
@@ -214,7 +215,8 @@ export function TripMapSection({ trip }: TripMapSectionProps) {
           {trip.destinationName}, {trip.destinationLocation}
           {poisWithCoords.length > 0 && (
             <span className="ml-2">
-              • {poisWithCoords.length} place{poisWithCoords.length !== 1 ? 's' : ''} to visit
+              • {poisWithCoords.length} place
+              {poisWithCoords.length !== 1 ? "s" : ""} to visit
             </span>
           )}
         </p>
@@ -222,17 +224,14 @@ export function TripMapSection({ trip }: TripMapSectionProps) {
 
       {/* Show loading card while POIs are loading */}
       {isLoadingPoi && (
-        <PlacesLoadingCard
-          message="Loading places to show on map"
-          compact
-        />
+        <PlacesLoadingCard message="Loading places to show on map" compact />
       )}
 
       <Card className="overflow-hidden">
         <div
           className={cn(
-            'relative w-full',
-            'h-[400px] sm:h-[500px] lg:h-[600px]'
+            "relative w-full",
+            "h-[400px] sm:h-[500px] lg:h-[600px]",
           )}
         >
           <MapContainer
@@ -266,7 +265,9 @@ export function TripMapSection({ trip }: TripMapSectionProps) {
                 <Popup>
                   <div className="min-w-[150px]">
                     <p className="font-semibold text-sm">{poi.name}</p>
-                    <p className="text-xs text-primary font-medium">{poi.category}</p>
+                    <p className="text-xs text-primary font-medium">
+                      {poi.category}
+                    </p>
                     {poi.description && (
                       <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
                         {poi.description}
@@ -288,14 +289,20 @@ export function TripMapSection({ trip }: TripMapSectionProps) {
 
       <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-4 var(--profile-stat-blue) rounded-sm" style={{ clipPath: 'polygon(50% 0%, 100% 100%, 0% 100%)' }} />
+          <div
+            className="w-3 h-4 var(--profile-stat-blue) rounded-sm"
+            style={{ clipPath: "polygon(50% 0%, 100% 100%, 0% 100%)" }}
+          />
           <span>Destination</span>
         </div>
         {poisWithCoords.length > 0 && (
           <div className="flex items-center gap-1.5">
-            <div 
-              className="w-3 h-3 rounded-full border border-hero-text" 
-              style={{ background: 'linear-gradient(135deg, hsl(271, 91%, 65%) 0%, hsl(271, 81%, 55%) 100%)' }}
+            <div
+              className="w-3 h-3 rounded-full border border-hero-text"
+              style={{
+                background:
+                  "linear-gradient(135deg, hsl(271, 91%, 65%) 0%, hsl(271, 81%, 55%) 100%)",
+              }}
             />
             <span>Places to visit</span>
           </div>
@@ -306,6 +313,5 @@ export function TripMapSection({ trip }: TripMapSectionProps) {
         Map data © OpenStreetMap contributors
       </p>
     </div>
-  )
+  );
 }
-
