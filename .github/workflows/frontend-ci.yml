@@ -25,6 +25,7 @@ jobs:
       - name: Clone repository
         working-directory: .
         run: |
+          git config --global --add safe.directory "$(pwd)"
           git init .
           git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
           git fetch --depth=1 origin "${{ github.sha }}"
@@ -47,6 +48,7 @@ jobs:
       - name: Clone repository
         working-directory: .
         run: |
+          git config --global --add safe.directory "$(pwd)"
           git init .
           git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
           git fetch --depth=1 origin "${{ github.sha }}"
