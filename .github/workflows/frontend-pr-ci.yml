@@ -22,6 +22,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Clone repository
+        working-directory: .
         run: |
           git init .
           git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
@@ -43,6 +44,7 @@ jobs:
         working-directory: frontend
     steps:
       - name: Clone repository
+        working-directory: .
         run: |
           git init .
           git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
@@ -62,6 +64,7 @@ jobs:
         working-directory: frontend
     steps:
       - name: Clone repository
+        working-directory: .
         run: |
           git init .
           git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
@@ -83,6 +86,7 @@ jobs:
         working-directory: frontend
     steps:
       - name: Clone repository
+        working-directory: .
         run: |
           git init .
           git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
@@ -100,6 +104,7 @@ jobs:
     needs: install_dependencies
     steps:
       - name: Clone repository
+        working-directory: .
         run: |
           git init .
           git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
@@ -127,6 +132,7 @@ jobs:
         working-directory: frontend
     steps:
       - name: Clone repository
+        working-directory: .
         run: |
           git init .
           git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
@@ -148,6 +154,7 @@ jobs:
         working-directory: frontend
     steps:
       - name: Clone repository
+        working-directory: .
         run: |
           git init .
           git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
@@ -168,6 +175,7 @@ jobs:
         working-directory: frontend
     steps:
       - name: Clone repository
+        working-directory: .
         run: |
           git init .
           git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
@@ -184,6 +192,7 @@ jobs:
     needs: [build_frontend_artifact, frontend_sbom_generation_pr]
     steps:
       - name: Clone repository
+        working-directory: .
         run: |
           git init .
           git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"

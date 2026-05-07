@@ -23,6 +23,7 @@ jobs:
         working-directory: frontend
     steps:
       - name: Clone repository
+        working-directory: .
         run: |
           git init .
           git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
@@ -44,6 +45,7 @@ jobs:
         working-directory: frontend
     steps:
       - name: Clone repository
+        working-directory: .
         run: |
           git init .
           git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"

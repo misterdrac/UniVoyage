@@ -17,13 +17,14 @@ jobs:
   code_format_validate:
     name: "[Security] Backend code format validate"
     runs-on: ubuntu-latest
-    container: maven:3.9.8-eclipse-temurin-23
+    container: maven:3-eclipse-temurin-23
     timeout-minutes: 10
     defaults:
       run:
         working-directory: backend
     steps:
       - name: Clone repository
+        working-directory: .
         run: |
           git init .
           git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
@@ -37,7 +38,7 @@ jobs:
   validate_backend:
     name: "[Build] Backend Maven validate"
     runs-on: ubuntu-latest
-    container: maven:3.9.8-eclipse-temurin-23
+    container: maven:3-eclipse-temurin-23
     timeout-minutes: 15
     needs: code_format_validate
     defaults:
@@ -45,6 +46,7 @@ jobs:
         working-directory: backend
     steps:
       - name: Clone repository
+        working-directory: .
         run: |
           git init .
           git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
@@ -58,7 +60,7 @@ jobs:
   build_backend:
     name: "[Build] Backend package"
     runs-on: ubuntu-latest
-    container: maven:3.9.8-eclipse-temurin-23
+    container: maven:3-eclipse-temurin-23
     timeout-minutes: 15
     needs: validate_backend
     defaults:
@@ -66,6 +68,7 @@ jobs:
         working-directory: backend
     steps:
       - name: Clone repository
+        working-directory: .
         run: |
           git init .
           git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
@@ -79,7 +82,7 @@ jobs:
   test_backend:
     name: "[Test] Backend tests"
     runs-on: ubuntu-latest
-    container: maven:3.9.8-eclipse-temurin-23
+    container: maven:3-eclipse-temurin-23
     timeout-minutes: 20
     needs: build_backend
     services:
@@ -109,6 +112,7 @@ jobs:
       SPRING_FLYWAY_PASSWORD: admin
     steps:
       - name: Clone repository
+        working-directory: .
         run: |
           git init .
           git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
@@ -121,7 +125,7 @@ jobs:
   sbom_generation_pr:
     name: "[Security] Backend SBOM generation"
     runs-on: ubuntu-latest
-    container: maven:3.9.8-eclipse-temurin-23
+    container: maven:3-eclipse-temurin-23
     timeout-minutes: 10
     needs: build_backend
     defaults:
@@ -129,6 +133,7 @@ jobs:
         working-directory: backend
     steps:
       - name: Clone repository
+        working-directory: .
         run: |
           git init .
           git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
@@ -145,6 +150,7 @@ jobs:
     needs: test_backend
     steps:
       - name: Clone repository
+        working-directory: .
         run: |
           git init .
           git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
@@ -172,6 +178,7 @@ jobs:
     needs: [docker_and_security_scans_pr, sbom_generation_pr]
     steps:
       - name: Clone repository
+        working-directory: .
         run: |
           git init .
           git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
@@ -193,9 +200,10 @@ jobs:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    container: maven:3.9.8-eclipse-temurin-23
+    container: maven:3-eclipse-temurin-23
     steps:
       - name: Clone repository
+        working-directory: .
         run: |
           git init .
           git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
