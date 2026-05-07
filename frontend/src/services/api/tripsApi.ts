@@ -124,9 +124,7 @@ export interface ItineraryApi {
    * @param tripId - ID of the trip
    * @returns Promise resolving to success status and itinerary payload
    */
-  getTripItinerary(
-    tripId: number,
-  ): Promise<{
+  getTripItinerary(tripId: number): Promise<{
     success: boolean;
     itinerary?: StoredItineraryPayload;
     error?: string;

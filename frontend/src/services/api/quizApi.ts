@@ -27,9 +27,7 @@ export interface QuizRecommendationResponse {
 }
 
 export interface QuizApi {
-  getQuizRecommendation(
-    request: QuizRequest,
-  ): Promise<{
+  getQuizRecommendation(request: QuizRequest): Promise<{
     success: boolean;
     data?: QuizRecommendationResponse;
     error?: string;

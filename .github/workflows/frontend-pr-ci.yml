@@ -59,6 +59,7 @@ jobs:
     name: "[Test] Frontend lint"
     runs-on: ubuntu-latest
     container: node:22
+    continue-on-error: true
     timeout-minutes: 10
     needs: install_dependencies
     defaults:

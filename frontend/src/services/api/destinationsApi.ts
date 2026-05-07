@@ -45,9 +45,7 @@ export interface DestinationsApi {
    * @param query - Search query to match against destination names and locations
    * @returns Promise resolving to success status and array of matching destinations
    */
-  searchDestinations(
-    query: string,
-  ): Promise<{
+  searchDestinations(query: string): Promise<{
     success: boolean;
     destinations?: Destination[];
     error?: string;
