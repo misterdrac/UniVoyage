@@ -1,6 +1,6 @@
 import { API_CONFIG } from '@/config/apiConfig'
 import type { Destination, } from '@/types/destination'
-import type { DestinationReview, DestinationReviewsPage } from '@/types/trip'
+import type { DestinationReviewsPage } from '@/types/trip'
 import type { ApiClient } from './baseClient'
 
 /**
