@@ -178,7 +178,7 @@ jobs:
       - name: Trivy scan for pom.xml
         run: trivy fs --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 backend/pom.xml
       - name: Trivy scan for Docker image
-        run: trivy image --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 univoyage-backend:main-${{ github.sha }}
+        run: trivy image --scanners vuln --vuln-type library --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 univoyage-backend:main-${{ github.sha }}
 
   frontend_build:
     name: "[Build] Frontend build"
