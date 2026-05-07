@@ -24,6 +24,7 @@ concurrency:
 
 jobs:
   code_format_validate:
+    name: "[Security] Backend code format validate"
     runs-on: ubuntu-latest
     timeout-minutes: 10
     defaults:
@@ -42,6 +43,7 @@ jobs:
           ./mvnw -B --no-transfer-progress formatter:validate
 
   build_java_project:
+    name: "[Build] Backend Java project"
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: code_format_validate
@@ -61,6 +63,7 @@ jobs:
           ./mvnw -B --no-transfer-progress -DskipTests clean package
 
   run_backend_tests:
+    name: "[Test] Backend tests"
     runs-on: ubuntu-latest
     timeout-minutes: 20
     needs: build_java_project
@@ -111,6 +114,7 @@ jobs:
           if-no-files-found: ignore
 
   build_backend_docker:
+    name: "[Docker] Backend Docker build"
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: run_backend_tests
@@ -128,6 +132,7 @@ jobs:
           if-no-files-found: error
 
   sbom_generation:
+    name: "[Security] Backend SBOM generation"
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: build_java_project
@@ -155,6 +160,7 @@ jobs:
           if-no-files-found: error
 
   trivy_pom_scan:
+    name: "[Security] Backend Trivy pom scan"
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: [build_backend_docker, sbom_generation]
@@ -171,6 +177,7 @@ jobs:
           exit-code: "1"
 
   trivy_docker_scan:
+    name: "[Security] Backend Trivy image scan"
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: trivy_pom_scan
@@ -191,6 +198,7 @@ jobs:
           exit-code: "1"
 
   frontend_build:
+    name: "[Build] Frontend build"
     runs-on: ubuntu-latest
     timeout-minutes: 15
     defaults:
@@ -211,6 +219,7 @@ jobs:
         run: npm run build
 
   frontend_security_scan:
+    name: "[Security] Frontend security scan"
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: frontend_build
@@ -239,6 +248,7 @@ jobs:
           exit-code: "1"
 
   codebase_security_scan:
+    name: "[Security] Codebase security scan (manual)"
     runs-on: ubuntu-latest
     timeout-minutes: 10
     if: github.event_name == 'workflow_dispatch'
@@ -262,6 +272,7 @@ jobs:
           exit-code: "1"
 
   create_tag:
+    name: "[Release] Create tag (manual)"
     runs-on: ubuntu-latest
     timeout-minutes: 10
     if: github.event_name == 'workflow_dispatch' && inputs.release_tag != ''
@@ -282,6 +293,7 @@ jobs:
           git push origin "${{ inputs.release_tag }}"
 
   create_release:
+    name: "[Release] Create GitHub release (manual)"
     runs-on: ubuntu-latest
     timeout-minutes: 10
     if: github.event_name == 'workflow_dispatch' && inputs.release_tag != ''

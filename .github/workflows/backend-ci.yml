@@ -13,28 +13,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  code_format_validate:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    defaults:
-      run:
-        working-directory: backend
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "23"
-          cache: maven
-      - name: Validate code formatting
-        run: |
-          chmod +x mvnw
-          ./mvnw -B --no-transfer-progress formatter:validate
-
   build_java_project:
+    name: "[Build] Backend Java project"
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: code_format_validate
 
     defaults:
       run:
@@ -55,6 +37,7 @@ jobs:
           ./mvnw -B --no-transfer-progress -DskipTests clean package
 
   run_backend_tests:
+    name: "[Test] Backend tests"
     runs-on: ubuntu-latest
     timeout-minutes: 20
     needs: build_java_project
@@ -108,27 +91,11 @@ jobs:
             backend/target/failsafe-reports/**
           if-no-files-found: ignore
 
-  build_backend_docker:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    needs: run_backend_tests
-    steps:
-      - uses: actions/checkout@v4
-      - name: Build Docker image
-        run: docker build -t univoyage-backend:ci-${{ github.sha }} ./backend
-      - name: Save Docker image as artifact
-        run: docker save univoyage-backend:ci-${{ github.sha }} -o backend-image.tar
-      - name: Upload Docker image artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: backend-docker-image
-          path: backend-image.tar
-          if-no-files-found: error
-
   sbom_generation:
+    name: "[Security] Backend SBOM generation"
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    needs: build_java_project
+    needs: run_backend_tests
     defaults:
       run:
         working-directory: backend
@@ -152,38 +119,3 @@ jobs:
             backend/target/bom.json
           if-no-files-found: error
 
-  trivy_pom_scan:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    needs: [build_backend_docker, sbom_generation]
-    steps:
-      - uses: actions/checkout@v4
-      - name: Trivy scan for pom.xml
-        uses: aquasecurity/trivy-action@0.24.0
-        with:
-          scan-type: fs
-          scan-ref: backend/pom.xml
-          severity: HIGH,CRITICAL
-          ignore-unfixed: true
-          format: table
-          exit-code: "1"
-
-  trivy_docker_scan:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    needs: trivy_pom_scan
-    steps:
-      - name: Download Docker image artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: backend-docker-image
-      - name: Load Docker image
-        run: docker load -i backend-image.tar
-      - name: Trivy scan for Docker image
-        uses: aquasecurity/trivy-action@0.24.0
-        with:
-          image-ref: univoyage-backend:ci-${{ github.sha }}
-          severity: HIGH,CRITICAL
-          ignore-unfixed: true
-          format: table
-          exit-code: "1"

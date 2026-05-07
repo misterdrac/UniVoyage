@@ -14,7 +14,18 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  dependency_review_pr:
+    name: "[Security] Frontend dependency review"
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Dependency review
+        uses: actions/dependency-review-action@v4
+
   install_dependencies:
+    name: "[Build] Frontend install dependencies"
     runs-on: ubuntu-latest
     timeout-minutes: 10
     defaults:
@@ -31,6 +42,7 @@ jobs:
         run: npm ci
 
   lint_frontend:
+    name: "[Test] Frontend lint"
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: install_dependencies
@@ -50,6 +62,7 @@ jobs:
         run: npm run lint
 
   npm_audit_frontend:
+    name: "[Security] Frontend npm audit"
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: install_dependencies
@@ -69,6 +82,7 @@ jobs:
         run: npm audit --audit-level=high
 
   trivy_frontend_fs_scan:
+    name: "[Security] Frontend Trivy fs scan"
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: install_dependencies
@@ -85,6 +99,7 @@ jobs:
           exit-code: "1"
 
   build_frontend:
+    name: "[Build] Frontend build"
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: [lint_frontend, npm_audit_frontend, trivy_frontend_fs_scan]
@@ -102,3 +117,76 @@ jobs:
         run: npm ci
       - name: Build frontend
         run: npm run build
+
+  build_frontend_artifact:
+    name: "[Build] Frontend build artifact"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: build_frontend
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Build frontend artifact
+        run: npm run build
+      - name: Upload frontend build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist-pr
+          path: frontend/dist
+          if-no-files-found: error
+
+  frontend_sbom_generation_pr:
+    name: "[Security] Frontend SBOM generation"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: build_frontend
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Generate frontend SBOM (CycloneDX)
+        run: npx @cyclonedx/cyclonedx-npm --output-file bom.json
+      - name: Upload frontend SBOM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-sbom-pr
+          path: frontend/bom.json
+          if-no-files-found: error
+
+  trivy_frontend_dist_scan:
+    name: "[Security] Frontend Trivy dist scan"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [build_frontend_artifact, frontend_sbom_generation_pr]
+    steps:
+      - name: Download frontend build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist-pr
+          path: frontend-dist-pr
+      - name: Trivy scan built frontend artifact
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          scan-type: fs
+          scan-ref: frontend-dist-pr
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          format: table
+          exit-code: "1"

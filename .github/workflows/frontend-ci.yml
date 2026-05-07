@@ -14,6 +14,7 @@ concurrency:
 
 jobs:
   build_frontend_quick:
+    name: "[Build] Frontend quick build"
     runs-on: ubuntu-latest
     timeout-minutes: 15
     defaults:
@@ -31,7 +32,8 @@ jobs:
       - name: Quick frontend build
         run: npm run build
 
-  npm_audit_frontend:
+  frontend_sbom_generation:
+    name: "[Security] Frontend SBOM generation"
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: build_frontend_quick
@@ -47,21 +49,11 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - name: Install dependencies
         run: npm ci
-      - name: Run npm audit (high+critical)
-        run: npm audit --audit-level=high
-
-  trivy_frontend_fs_scan:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    needs: npm_audit_frontend
-    steps:
-      - uses: actions/checkout@v4
-      - name: Trivy filesystem scan for frontend
-        uses: aquasecurity/trivy-action@0.24.0
+      - name: Generate frontend SBOM (CycloneDX)
+        run: npx @cyclonedx/cyclonedx-npm --output-file bom.json
+      - name: Upload frontend SBOM artifact
+        uses: actions/upload-artifact@v4
         with:
-          scan-type: fs
-          scan-ref: frontend
-          severity: HIGH,CRITICAL
-          ignore-unfixed: true
-          format: table
-          exit-code: "1"
+          name: frontend-sbom
+          path: frontend/bom.json
+          if-no-files-found: error
