@@ -155,7 +155,7 @@ jobs:
     runs-on: ubuntu-latest
     container: node:22
     timeout-minutes: 15
-    needs: [lint_frontend, format_frontend, npm_audit_frontend, trivy_frontend_fs_scan]
+    needs: [format_frontend, npm_audit_frontend, trivy_frontend_fs_scan]
     defaults:
       run:
         working-directory: frontend
