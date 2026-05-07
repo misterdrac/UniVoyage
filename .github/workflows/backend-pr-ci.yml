@@ -17,17 +17,18 @@ jobs:
   code_format_validate:
     name: "[Security] Backend code format validate"
     runs-on: ubuntu-latest
+    container: maven:3.9.8-eclipse-temurin-23
     timeout-minutes: 10
     defaults:
       run:
         working-directory: backend
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "23"
-          cache: maven
+      - name: Clone repository
+        run: |
+          git init .
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git fetch --depth=1 origin "${{ github.sha }}"
+          git checkout --detach FETCH_HEAD
       - name: Validate code formatting
         run: |
           chmod +x mvnw
@@ -36,18 +37,19 @@ jobs:
   validate_backend:
     name: "[Build] Backend Maven validate"
     runs-on: ubuntu-latest
+    container: maven:3.9.8-eclipse-temurin-23
     timeout-minutes: 15
     needs: code_format_validate
     defaults:
       run:
         working-directory: backend
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "23"
-          cache: maven
+      - name: Clone repository
+        run: |
+          git init .
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git fetch --depth=1 origin "${{ github.sha }}"
+          git checkout --detach FETCH_HEAD
       - name: Validate Maven project
         run: |
           chmod +x mvnw
@@ -56,18 +58,19 @@ jobs:
   build_backend:
     name: "[Build] Backend package"
     runs-on: ubuntu-latest
+    container: maven:3.9.8-eclipse-temurin-23
     timeout-minutes: 15
     needs: validate_backend
     defaults:
       run:
         working-directory: backend
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "23"
-          cache: maven
+      - name: Clone repository
+        run: |
+          git init .
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git fetch --depth=1 origin "${{ github.sha }}"
+          git checkout --detach FETCH_HEAD
       - name: Build backend (skip tests)
         run: |
           chmod +x mvnw
@@ -76,6 +79,7 @@ jobs:
   test_backend:
     name: "[Test] Backend tests"
     runs-on: ubuntu-latest
+    container: maven:3.9.8-eclipse-temurin-23
     timeout-minutes: 20
     needs: build_backend
     services:
@@ -104,133 +108,101 @@ jobs:
       SPRING_FLYWAY_USER: postgres
       SPRING_FLYWAY_PASSWORD: admin
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "23"
-          cache: maven
+      - name: Clone repository
+        run: |
+          git init .
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git fetch --depth=1 origin "${{ github.sha }}"
+          git checkout --detach FETCH_HEAD
       - name: Run backend tests
         run: |
           chmod +x mvnw
           ./mvnw -B --no-transfer-progress test
-      - name: Upload test reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: backend-test-reports-pr
-          path: |
-            backend/target/surefire-reports/**
-            backend/target/failsafe-reports/**
-          if-no-files-found: ignore
-
   sbom_generation_pr:
     name: "[Security] Backend SBOM generation"
     runs-on: ubuntu-latest
+    container: maven:3.9.8-eclipse-temurin-23
     timeout-minutes: 10
     needs: build_backend
     defaults:
       run:
         working-directory: backend
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "23"
-          cache: maven
+      - name: Clone repository
+        run: |
+          git init .
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git fetch --depth=1 origin "${{ github.sha }}"
+          git checkout --detach FETCH_HEAD
       - name: Generate SBOM (CycloneDX)
         run: |
           chmod +x mvnw
           ./mvnw -B --no-transfer-progress org.cyclonedx:cyclonedx-maven-plugin:2.9.1:makeAggregateBom
-      - name: Upload SBOM artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: backend-sbom-pr
-          path: |
-            backend/target/bom.xml
-            backend/target/bom.json
-          if-no-files-found: error
-
-  build_backend_docker_pr:
-    name: "[Docker] Backend Docker build"
+  docker_and_security_scans_pr:
+    name: "[Docker/Security] Backend Docker and Trivy scans"
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     needs: test_backend
     steps:
-      - uses: actions/checkout@v4
+      - name: Clone repository
+        run: |
+          git init .
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git fetch --depth=1 origin "${{ github.sha }}"
+          git checkout --detach FETCH_HEAD
       - name: Build Docker image
         run: docker build -t univoyage-backend:pr-${{ github.sha }} ./backend
-      - name: Save Docker image as artifact
-        run: docker save univoyage-backend:pr-${{ github.sha }} -o backend-pr-image.tar
-      - name: Upload Docker image artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: backend-docker-image-pr
-          path: backend-pr-image.tar
-          if-no-files-found: error
-
-  trivy_pom_scan_pr:
-    name: "[Security] Backend Trivy pom scan"
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    needs: [build_backend_docker_pr, sbom_generation_pr]
-    steps:
-      - uses: actions/checkout@v4
+      - name: Install Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo gpg --dearmor -o /usr/share/keyrings/trivy.gpg
+          echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install -y trivy
       - name: Trivy scan for pom.xml
-        uses: aquasecurity/trivy-action@0.24.0
-        with:
-          scan-type: fs
-          scan-ref: backend/pom.xml
-          severity: HIGH,CRITICAL
-          ignore-unfixed: true
-          format: table
-          exit-code: "1"
-
-  trivy_docker_scan_pr:
-    name: "[Security] Backend Trivy image scan"
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    needs: trivy_pom_scan_pr
-    steps:
-      - name: Download Docker image artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: backend-docker-image-pr
-      - name: Load Docker image
-        run: docker load -i backend-pr-image.tar
+        run: trivy fs --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 backend/pom.xml
       - name: Trivy scan for Docker image
-        uses: aquasecurity/trivy-action@0.24.0
-        with:
-          image-ref: univoyage-backend:pr-${{ github.sha }}
-          severity: HIGH,CRITICAL
-          ignore-unfixed: true
-          format: table
-          exit-code: "1"
+        run: trivy image --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 univoyage-backend:pr-${{ github.sha }}
 
   trivy_backend_codebase_scan_pr:
     name: "[Security] Backend Trivy codebase scan"
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    needs: trivy_docker_scan_pr
+    needs: [docker_and_security_scans_pr, sbom_generation_pr]
     steps:
-      - uses: actions/checkout@v4
+      - name: Clone repository
+        run: |
+          git init .
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git fetch --depth=1 origin "${{ github.sha }}"
+          git checkout --detach FETCH_HEAD
+      - name: Install Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo gpg --dearmor -o /usr/share/keyrings/trivy.gpg
+          echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install -y trivy
       - name: Trivy full backend codebase scan
-        uses: aquasecurity/trivy-action@0.24.0
-        with:
-          scan-type: fs
-          scan-ref: backend
-          severity: HIGH,CRITICAL
-          ignore-unfixed: true
-          format: table
-          exit-code: "1"
+        run: trivy fs --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 backend
 
   dependency_review_pr:
     name: "[Security] Backend dependency review"
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    container: maven:3.9.8-eclipse-temurin-23
     steps:
-      - uses: actions/checkout@v4
-      - name: Dependency review
-        uses: actions/dependency-review-action@v4
+      - name: Clone repository
+        run: |
+          git init .
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git fetch --depth=1 origin "${{ github.sha }}"
+          git checkout --detach FETCH_HEAD
+      - name: Dependency check (Maven tree)
+        run: |
+          chmod +x backend/mvnw
+          cd backend
+          ./mvnw -B --no-transfer-progress dependency:tree
