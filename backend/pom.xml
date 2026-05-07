@@ -236,6 +236,17 @@
                 </configuration>
             </plugin>
 
+            <!-- Java formatter (Google-like style via Eclipse formatter config) -->
+            <plugin>
+                <groupId>net.revelc.code.formatter</groupId>
+                <artifactId>formatter-maven-plugin</artifactId>
+                <version>2.29.0</version>
+                <configuration>
+                    <configFile>${project.basedir}/code-formatter.xml</configFile>
+                    <lineEnding>LF</lineEnding>
+                </configuration>
+            </plugin>
+
             <!-- repackage is bound once by spring-boot-starter-parent; only add config here -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>

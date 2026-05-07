@@ -1,15 +1,25 @@
-name: Backend CI (Push)
+name: Master Pipeline
 
 on:
-  workflow_dispatch:
   push:
-    branches-ignore: [ master ]
+    branches: [ master ]
     paths:
       - "backend/**"
-      - ".github/workflows/backend-ci.yml"
+      - "frontend/**"
+      - ".github/workflows/master-pipeline.yml"
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Optional release tag (example: v1.2.3)"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  security-events: write
 
 concurrency:
-  group: backend-ci-push-${{ github.ref }}
+  group: master-pipeline-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -35,20 +45,16 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: code_format_validate
-
     defaults:
       run:
         working-directory: backend
-
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "23"
           cache: maven
-
       - name: Build Java project (skip tests)
         run: |
           chmod +x mvnw
@@ -58,7 +64,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     needs: build_java_project
-
     services:
       postgres:
         image: postgres:16
@@ -73,11 +78,9 @@ jobs:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=10
-
     defaults:
       run:
         working-directory: backend
-
     env:
       SPRING_PROFILES_ACTIVE: test
       SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/univoyage_test
@@ -86,7 +89,6 @@ jobs:
       SPRING_FLYWAY_URL: jdbc:postgresql://localhost:5432/univoyage_test
       SPRING_FLYWAY_USER: postgres
       SPRING_FLYWAY_PASSWORD: admin
-
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -102,7 +104,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: backend-test-reports-push
+          name: backend-main-test-reports
           path: |
             backend/target/surefire-reports/**
             backend/target/failsafe-reports/**
@@ -115,14 +117,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build Docker image
-        run: docker build -t univoyage-backend:ci-${{ github.sha }} ./backend
+        run: docker build -t univoyage-backend:main-${{ github.sha }} ./backend
       - name: Save Docker image as artifact
-        run: docker save univoyage-backend:ci-${{ github.sha }} -o backend-image.tar
+        run: docker save univoyage-backend:main-${{ github.sha }} -o backend-main-image.tar
       - name: Upload Docker image artifact
         uses: actions/upload-artifact@v4
         with:
-          name: backend-docker-image
-          path: backend-image.tar
+          name: backend-main-docker-image
+          path: backend-main-image.tar
           if-no-files-found: error
 
   sbom_generation:
@@ -146,7 +148,7 @@ jobs:
       - name: Upload SBOM artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: backend-sbom
+          name: backend-main-sbom
           path: |
             backend/target/bom.xml
             backend/target/bom.json
@@ -176,14 +178,125 @@ jobs:
       - name: Download Docker image artifact
         uses: actions/download-artifact@v4
         with:
-          name: backend-docker-image
+          name: backend-main-docker-image
       - name: Load Docker image
-        run: docker load -i backend-image.tar
+        run: docker load -i backend-main-image.tar
       - name: Trivy scan for Docker image
         uses: aquasecurity/trivy-action@0.24.0
         with:
-          image-ref: univoyage-backend:ci-${{ github.sha }}
+          image-ref: univoyage-backend:main-${{ github.sha }}
           severity: HIGH,CRITICAL
           ignore-unfixed: true
           format: table
           exit-code: "1"
+
+  frontend_build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint frontend
+        run: npm run lint
+      - name: Build frontend
+        run: npm run build
+
+  frontend_security_scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: frontend_build
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Run npm audit (high+critical)
+        run: npm audit --audit-level=high
+      - name: Trivy filesystem scan for frontend
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          scan-type: fs
+          scan-ref: frontend
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          format: table
+          exit-code: "1"
+
+  codebase_security_scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.event_name == 'workflow_dispatch'
+    needs: [trivy_docker_scan, frontend_security_scan]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Owner-only guard for manual jobs
+        run: |
+          if [ "${{ github.actor }}" != "${{ github.repository_owner }}" ]; then
+            echo "Only repository owner can run manual codebase/tag/release jobs."
+            exit 1
+          fi
+      - name: Trivy full backend codebase scan
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          scan-type: fs
+          scan-ref: backend
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          format: table
+          exit-code: "1"
+
+  create_tag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.event_name == 'workflow_dispatch' && inputs.release_tag != ''
+    needs: codebase_security_scan
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Owner-only guard for manual jobs
+        run: |
+          if [ "${{ github.actor }}" != "${{ github.repository_owner }}" ]; then
+            echo "Only repository owner can run manual codebase/tag/release jobs."
+            exit 1
+          fi
+      - name: Create and push release tag
+        run: |
+          git tag "${{ inputs.release_tag }}"
+          git push origin "${{ inputs.release_tag }}"
+
+  create_release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.event_name == 'workflow_dispatch' && inputs.release_tag != ''
+    needs: create_tag
+    steps:
+      - uses: actions/checkout@v4
+      - name: Owner-only guard for manual jobs
+        run: |
+          if [ "${{ github.actor }}" != "${{ github.repository_owner }}" ]; then
+            echo "Only repository owner can run manual codebase/tag/release jobs."
+            exit 1
+          fi
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.release_tag }}
+          name: Release ${{ inputs.release_tag }}
+          generate_release_notes: true
