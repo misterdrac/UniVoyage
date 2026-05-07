@@ -66,10 +66,10 @@ jobs:
 
     env:
       SPRING_PROFILES_ACTIVE: test
-      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/univoyage_test
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/univoyage_test
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: admin
-      SPRING_FLYWAY_URL: jdbc:postgresql://localhost:5432/univoyage_test
+      SPRING_FLYWAY_URL: jdbc:postgresql://postgres:5432/univoyage_test
       SPRING_FLYWAY_USER: postgres
       SPRING_FLYWAY_PASSWORD: admin
 
