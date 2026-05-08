@@ -305,6 +305,21 @@ jobs:
             echo "Only repository owner can run manual codebase/tag/release jobs."
             exit 1
           fi
+      - name: Clone repository
+        working-directory: .
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+          git init .
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git fetch --depth=1 origin "${{ github.sha }}"
+          git checkout --detach FETCH_HEAD
+      - name: Generate backend SBOM for release
+        run: |
+          docker run --rm \
+            -v "${PWD}:/workspace" \
+            -w /workspace/backend \
+            maven:3-eclipse-temurin-23 \
+            bash -lc "chmod +x mvnw && ./mvnw -B --no-transfer-progress org.cyclonedx:cyclonedx-maven-plugin:2.9.1:makeAggregateBom"
       - name: Create GitHub release via API
         env:
           GH_TOKEN: ${{ github.token }}
@@ -313,12 +328,46 @@ jobs:
             -H "Authorization: Bearer ${GH_TOKEN}" \
             -H "Accept: application/vnd.github+json" \
             https://api.github.com/repos/${{ github.repository }}/releases \
-            -d "{\"tag_name\":\"${{ inputs.release_tag }}\",\"name\":\"Release ${{ inputs.release_tag }}\",\"generate_release_notes\":true}"
+            -d "{\"tag_name\":\"${{ inputs.release_tag }}\",\"name\":\"Release ${{ inputs.release_tag }}\",\"generate_release_notes\":true}" \
+            > release-response.json
+      - name: Upload backend SBOM release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import pathlib
+          import subprocess
+          import sys
+
+          release = json.loads(pathlib.Path("release-response.json").read_text(encoding="utf-8"))
+          upload_url = release["upload_url"].split("{")[0]
+          assets = [
+              ("backend/target/bom.json", "application/json"),
+              ("backend/target/bom.xml", "application/xml"),
+          ]
+          for file_path, content_type in assets:
+              p = pathlib.Path(file_path)
+              if not p.exists():
+                  print(f"Missing release asset: {file_path}", file=sys.stderr)
+                  sys.exit(1)
+              url = f"{upload_url}?name={p.name}"
+              cmd = [
+                  "curl", "-sS", "-X", "POST",
+                  "-H", f"Authorization: Bearer {os.environ['GH_TOKEN']}",
+                  "-H", f"Content-Type: {content_type}",
+                  "--data-binary", f"@{file_path}",
+                  url,
+              ]
+              subprocess.check_call(cmd)
+          PY
 
   deploy_backend_railway:
     name: "[Deploy] Backend deploy to Railway (manual)"
     runs-on: ubuntu-latest
     container: node:22
+    environment: production
     timeout-minutes: 15
     if: github.event_name == 'workflow_dispatch' && inputs.release_tag != ''
     needs: create_release
@@ -347,11 +396,30 @@ jobs:
         run: |
           cd backend
           railway up --service "${RAILWAY_SERVICE}"
+      - name: Backend health check
+        env:
+          BACKEND_HEALTHCHECK_URL: ${{ secrets.BACKEND_HEALTHCHECK_URL }}
+        run: |
+          if [ -z "${BACKEND_HEALTHCHECK_URL:-}" ]; then
+            echo "Missing BACKEND_HEALTHCHECK_URL secret."
+            exit 1
+          fi
+          for i in 1 2 3 4 5 6; do
+            echo "Health check attempt ${i}/6..."
+            if curl -fsS "${BACKEND_HEALTHCHECK_URL}" > /tmp/backend-health.json; then
+              cat /tmp/backend-health.json
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Backend health check failed after retries."
+          exit 1
 
   deploy_frontend_vercel:
     name: "[Deploy] Frontend deploy to Vercel (manual)"
     runs-on: ubuntu-latest
     container: node:22
+    environment: production
     timeout-minutes: 15
     if: github.event_name == 'workflow_dispatch' && inputs.release_tag != ''
     needs: deploy_backend_railway
