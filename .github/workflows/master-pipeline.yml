@@ -315,13 +315,46 @@ jobs:
             https://api.github.com/repos/${{ github.repository }}/releases \
             -d "{\"tag_name\":\"${{ inputs.release_tag }}\",\"name\":\"Release ${{ inputs.release_tag }}\",\"generate_release_notes\":true}"
 
+  deploy_backend_railway:
+    name: "[Deploy] Backend deploy to Railway (manual)"
+    runs-on: ubuntu-latest
+    container: node:22
+    timeout-minutes: 15
+    if: github.event_name == 'workflow_dispatch' && inputs.release_tag != ''
+    needs: create_release
+    steps:
+      - name: Owner-only guard for manual jobs
+        run: |
+          if [ "${{ github.actor }}" != "${{ github.repository_owner }}" ]; then
+            echo "Only repository owner can run deploy jobs."
+            exit 1
+          fi
+      - name: Clone repository
+        working-directory: .
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+          git init .
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git fetch --depth=1 origin "${{ github.sha }}"
+          git checkout --detach FETCH_HEAD
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+      - name: Deploy backend to Railway (production)
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
+          RAILWAY_SERVICE: ${{ secrets.RAILWAY_SERVICE }}
+        run: |
+          cd backend
+          railway up --service "${RAILWAY_SERVICE}"
+
   deploy_frontend_vercel:
     name: "[Deploy] Frontend deploy to Vercel (manual)"
     runs-on: ubuntu-latest
     container: node:22
     timeout-minutes: 15
     if: github.event_name == 'workflow_dispatch' && inputs.release_tag != ''
-    needs: create_release
+    needs: deploy_backend_railway
     steps:
       - name: Owner-only guard for manual jobs
         run: |
