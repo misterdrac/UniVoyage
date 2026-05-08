@@ -314,3 +314,38 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             https://api.github.com/repos/${{ github.repository }}/releases \
             -d "{\"tag_name\":\"${{ inputs.release_tag }}\",\"name\":\"Release ${{ inputs.release_tag }}\",\"generate_release_notes\":true}"
+
+  deploy_frontend_vercel:
+    name: "[Deploy] Frontend deploy to Vercel (manual)"
+    runs-on: ubuntu-latest
+    container: node:22
+    timeout-minutes: 15
+    if: github.event_name == 'workflow_dispatch' && inputs.release_tag != ''
+    needs: create_release
+    steps:
+      - name: Owner-only guard for manual jobs
+        run: |
+          if [ "${{ github.actor }}" != "${{ github.repository_owner }}" ]; then
+            echo "Only repository owner can run deploy jobs."
+            exit 1
+          fi
+      - name: Clone repository
+        working-directory: .
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+          git init .
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git fetch --depth=1 origin "${{ github.sha }}"
+          git checkout --detach FETCH_HEAD
+      - name: Install Vercel CLI
+        run: npm install -g vercel
+      - name: Deploy frontend to Vercel (production)
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          cd frontend
+          vercel pull --yes --environment=production --token "${VERCEL_TOKEN}"
+          vercel build --prod --token "${VERCEL_TOKEN}"
+          vercel deploy --prebuilt --prod --token "${VERCEL_TOKEN}"
