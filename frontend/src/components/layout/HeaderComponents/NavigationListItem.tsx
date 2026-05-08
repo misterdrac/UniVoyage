@@ -1,7 +1,5 @@
 import { Link } from "react-router-dom";
-import {
-  NavigationMenuLink,
-} from "@/components/ui/navigation-menu";
+import { NavigationMenuLink } from "@/components/ui/navigation-menu";
 
 interface NavigationListItemProps extends React.ComponentPropsWithoutRef<"li"> {
   title: string;
@@ -28,4 +26,3 @@ export const NavigationListItem = ({
     </li>
   );
 };
-

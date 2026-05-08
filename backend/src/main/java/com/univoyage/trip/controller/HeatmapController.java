@@ -13,18 +13,19 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Public controller exposing aggregated trip-per-destination data for the landing page heatmap.
+ * Public controller exposing aggregated trip-per-destination data for the
+ * landing page heatmap.
  */
 @RestController
 @RequestMapping("/api/heatmap")
 @RequiredArgsConstructor
 public class HeatmapController {
 
-    private final HeatmapService heatmapService;
+  private final HeatmapService heatmapService;
 
-    @GetMapping
-    public ResponseEntity<ApiResponse<Map<String, Object>>> getHeatmapData() {
-        List<HeatmapPointDto> points = heatmapService.getHeatmapData();
-        return ResponseEntity.ok(ApiResponse.ok(Map.of("points", points)));
-    }
+  @GetMapping
+  public ResponseEntity<ApiResponse<Map<String, Object>>> getHeatmapData() {
+    List<HeatmapPointDto> points = heatmapService.getHeatmapData();
+    return ResponseEntity.ok(ApiResponse.ok(Map.of("points", points)));
+  }
 }

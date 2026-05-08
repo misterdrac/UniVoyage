@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect } from "react";
 
 /**
  * Custom hook to set the document title
@@ -8,8 +8,8 @@ import { useEffect } from 'react';
 export function useDocumentTitle(title: string, dependencies: unknown[] = []) {
   useEffect(() => {
     const previousTitle = document.title;
-    document.title = title ? `${title} | UniVoyage` : 'UniVoyage';
-    
+    document.title = title ? `${title} | UniVoyage` : "UniVoyage";
+
     return () => {
       document.title = previousTitle;
     };

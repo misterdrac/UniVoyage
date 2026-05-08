@@ -15,10 +15,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class HeatmapService {
 
-    private final TripRepository tripRepository;
+  private final TripRepository tripRepository;
 
-    @Transactional(readOnly = true)
-    public List<HeatmapPointDto> getHeatmapData() {
-        return tripRepository.findHeatmapData();
-    }
+  @Transactional(readOnly = true)
+  public List<HeatmapPointDto> getHeatmapData() {
+    return tripRepository.findHeatmapData();
+  }
 }

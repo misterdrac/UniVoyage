@@ -8,59 +8,59 @@ export const API_CONFIG = {
   // In production, use full URL or environment variable
   //BASE_URL: import.meta.env.VITE_API_URL || 'https://univoyage-production-d7c5.up.railway.app/api',
 
-    BASE_URL: '/api',
+  BASE_URL: "/api",
   // API endpoints
   ENDPOINTS: {
     AUTH: {
-      LOGIN: '/auth/login',
-      REGISTER: '/auth/register',
-      LOGOUT: '/auth/logout',
-      ME: '/auth/me',
-      GOOGLE: '/auth/google',
-      GOOGLE_CALLBACK: '/auth/google/callback',
+      LOGIN: "/auth/login",
+      REGISTER: "/auth/register",
+      LOGOUT: "/auth/logout",
+      ME: "/auth/me",
+      GOOGLE: "/auth/google",
+      GOOGLE_CALLBACK: "/auth/google/callback",
     },
     USER: {
-      UPDATE_PROFILE: '/user/profile',
-      UPDATE_PROFILE_PICTURE: '/user/profile-picture',
+      UPDATE_PROFILE: "/user/profile",
+      UPDATE_PROFILE_PICTURE: "/user/profile-picture",
     },
     TRIPS: {
-      CREATE: '/trips',
-      GET_ALL: '/trips',
-      GET_BY_ID: '/trips',
-      UPDATE: '/trips',
-      DELETE: '/trips',
-      BUDGET: '/trips', // budget sub-resources
+      CREATE: "/trips",
+      GET_ALL: "/trips",
+      GET_BY_ID: "/trips",
+      UPDATE: "/trips",
+      DELETE: "/trips",
+      BUDGET: "/trips", // budget sub-resources
     },
-            DESTINATIONS: {
-              GET_ALL: '/destinations',
-              SEARCH: '/destinations/search',
-              REVIEWS: '/destinations',
-            },
-            WEATHER: {
-              CURRENT: '/weather/current',
-              FORECAST: '/weather/forecast',
-            },
-            PLACES: {
-              SEARCH: '/places/search',
-            },
-            AI: {
-              ITINERARY: '/ai/itinerary',
-              PACKING: '/ai/packing',
-              BUDGET_ESTIMATE: '/ai/budget-estimate',
-              STATUS: '/ai/status',
-            },
-            HOTELS: {
-              SEARCH: '/hotels/search',
-              STATUS: '/hotels/status',
-            },
-            HEATMAP: {
-              GET: '/heatmap',
-            },
-            QUIZ: {
-              RECOMMEND: '/quiz/recommend',
-            },
-          },
-  
+    DESTINATIONS: {
+      GET_ALL: "/destinations",
+      SEARCH: "/destinations/search",
+      REVIEWS: "/destinations",
+    },
+    WEATHER: {
+      CURRENT: "/weather/current",
+      FORECAST: "/weather/forecast",
+    },
+    PLACES: {
+      SEARCH: "/places/search",
+    },
+    AI: {
+      ITINERARY: "/ai/itinerary",
+      PACKING: "/ai/packing",
+      BUDGET_ESTIMATE: "/ai/budget-estimate",
+      STATUS: "/ai/status",
+    },
+    HOTELS: {
+      SEARCH: "/hotels/search",
+      STATUS: "/hotels/status",
+    },
+    HEATMAP: {
+      GET: "/heatmap",
+    },
+    QUIZ: {
+      RECOMMEND: "/quiz/recommend",
+    },
+  },
+
   // Request timeout
   TIMEOUT: 10000,
 };
@@ -86,15 +86,10 @@ export class ApiError extends Error {
   status?: number;
   code?: string;
 
-  constructor(
-    message: string,
-    status?: number,
-    code?: string
-  ) {
+  constructor(message: string, status?: number, code?: string) {
     super(message);
-    this.name = 'ApiError';
+    this.name = "ApiError";
     this.status = status;
     this.code = code;
   }
 }
-

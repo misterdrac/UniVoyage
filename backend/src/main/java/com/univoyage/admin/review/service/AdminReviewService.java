@@ -17,62 +17,54 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AdminReviewService {
 
-    private final TripTravellerRatingRepository ratingRepository;
-    private final TripTravellerRatingService tripTravellerRatingService;
+  private final TripTravellerRatingRepository ratingRepository;
+  private final TripTravellerRatingService tripTravellerRatingService;
 
-    @Transactional(readOnly = true)
-    public AdminPendingReviewPageResponse listPending(Pageable pageable) {
-        Page<TripTravellerRatingEntity> page = ratingRepository.findByModerationStatusOrderByUpdatedAtAsc(
-                ReviewModerationStatus.PENDING,
-                pageable);
-        return new AdminPendingReviewPageResponse(
-                page.getContent().stream().map(this::toPendingDto).toList(),
-                page.getTotalElements(),
-                page.getTotalPages(),
-                page.getSize(),
-                page.getNumber());
-    }
+  @Transactional(readOnly = true)
+  public AdminPendingReviewPageResponse listPending(Pageable pageable) {
+    Page<TripTravellerRatingEntity> page = ratingRepository
+        .findByModerationStatusOrderByUpdatedAtAsc(ReviewModerationStatus.PENDING, pageable);
+    return new AdminPendingReviewPageResponse(
+        page.getContent().stream().map(this::toPendingDto).toList(), page.getTotalElements(),
+        page.getTotalPages(), page.getSize(), page.getNumber());
+  }
 
-    @Transactional
-    public void approve(long ratingId) {
-        TripTravellerRatingEntity r = ratingRepository.findById(ratingId)
-                .orElseThrow(() -> new ResourceNotFoundException("Review not found"));
-        if (r.getModerationStatus() == ReviewModerationStatus.APPROVED) {
-            return;
-        }
-        if (r.getModerationStatus() != ReviewModerationStatus.PENDING) {
-            throw new IllegalArgumentException("Only pending reviews can be approved.");
-        }
-        r.setModerationStatus(ReviewModerationStatus.APPROVED);
-        ratingRepository.save(r);
-        tripTravellerRatingService.recomputeTravellerStatsForDestination(r.getTrip().getDestination().getId());
+  @Transactional
+  public void approve(long ratingId) {
+    TripTravellerRatingEntity r = ratingRepository.findById(ratingId)
+        .orElseThrow(() -> new ResourceNotFoundException("Review not found"));
+    if (r.getModerationStatus() == ReviewModerationStatus.APPROVED) {
+      return;
     }
+    if (r.getModerationStatus() != ReviewModerationStatus.PENDING) {
+      throw new IllegalArgumentException("Only pending reviews can be approved.");
+    }
+    r.setModerationStatus(ReviewModerationStatus.APPROVED);
+    ratingRepository.save(r);
+    tripTravellerRatingService
+        .recomputeTravellerStatsForDestination(r.getTrip().getDestination().getId());
+  }
 
-    @Transactional
-    public void reject(long ratingId) {
-        TripTravellerRatingEntity r = ratingRepository.findById(ratingId)
-                .orElseThrow(() -> new ResourceNotFoundException("Review not found"));
-        if (r.getModerationStatus() == ReviewModerationStatus.REJECTED) {
-            return;
-        }
-        if (r.getModerationStatus() != ReviewModerationStatus.PENDING) {
-            throw new IllegalArgumentException("Only pending reviews can be rejected.");
-        }
-        r.setModerationStatus(ReviewModerationStatus.REJECTED);
-        ratingRepository.save(r);
-        tripTravellerRatingService.recomputeTravellerStatsForDestination(r.getTrip().getDestination().getId());
+  @Transactional
+  public void reject(long ratingId) {
+    TripTravellerRatingEntity r = ratingRepository.findById(ratingId)
+        .orElseThrow(() -> new ResourceNotFoundException("Review not found"));
+    if (r.getModerationStatus() == ReviewModerationStatus.REJECTED) {
+      return;
     }
+    if (r.getModerationStatus() != ReviewModerationStatus.PENDING) {
+      throw new IllegalArgumentException("Only pending reviews can be rejected.");
+    }
+    r.setModerationStatus(ReviewModerationStatus.REJECTED);
+    ratingRepository.save(r);
+    tripTravellerRatingService
+        .recomputeTravellerStatsForDestination(r.getTrip().getDestination().getId());
+  }
 
-    private AdminPendingReviewResponse toPendingDto(TripTravellerRatingEntity r) {
-        return new AdminPendingReviewResponse(
-                r.getId(),
-                r.getTrip().getId(),
-                r.getTrip().getDestination().getId(),
-                r.getTrip().getDestination().getName(),
-                r.getUser().getEmail(),
-                r.getStars() == null ? 0 : r.getStars().intValue(),
-                r.getComment(),
-                r.getCreatedAt(),
-                r.getUpdatedAt());
-    }
+  private AdminPendingReviewResponse toPendingDto(TripTravellerRatingEntity r) {
+    return new AdminPendingReviewResponse(r.getId(), r.getTrip().getId(),
+        r.getTrip().getDestination().getId(), r.getTrip().getDestination().getName(),
+        r.getUser().getEmail(), r.getStars() == null ? 0 : r.getStars().intValue(), r.getComment(),
+        r.getCreatedAt(), r.getUpdatedAt());
+  }
 }

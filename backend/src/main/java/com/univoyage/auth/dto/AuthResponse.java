@@ -9,6 +9,6 @@ import lombok.Getter;
 @Getter
 @Builder
 public class AuthResponse {
-    private final String token;
-    private final String csrfSecret;
+  private final String token;
+  private final String csrfSecret;
 }

@@ -22,8 +22,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * {@link GlobalExceptionHandler} JSON for {@link IllegalArgumentException}; {@link AdminUserService} mocked
- * (same MockMvc style as {@link com.univoyage.trip.controller.TripControllerCurrencyWebMvcTest}).
+ * {@link GlobalExceptionHandler} JSON for {@link IllegalArgumentException};
+ * {@link AdminUserService} mocked (same MockMvc style as
+ * {@link com.univoyage.trip.controller.TripControllerCurrencyWebMvcTest}).
  */
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
@@ -31,26 +32,25 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(GlobalExceptionHandler.class)
 class GlobalExceptionHandlerIllegalArgumentWebMvcTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+  @Autowired
+  private MockMvc mockMvc;
 
-    @MockitoBean
-    private AdminUserService adminUserService;
+  @MockitoBean
+  private AdminUserService adminUserService;
 
-    @MockitoBean
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
+  @MockitoBean
+  private JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    @Test
-    @DisplayName("IllegalArgumentException maps to 400 with ApiResponse error message")
-    void illegalArgument_mapsTo400Json() throws Exception {
-        when(adminUserService.updateRole(anyLong(), any(Role.class), any()))
-                .thenThrow(new IllegalArgumentException("Business rule violated for test."));
+  @Test
+  @DisplayName("IllegalArgumentException maps to 400 with ApiResponse error message")
+  void illegalArgument_mapsTo400Json() throws Exception {
+    when(adminUserService.updateRole(anyLong(), any(Role.class), any()))
+        .thenThrow(new IllegalArgumentException("Business rule violated for test."));
 
-        mockMvc.perform(patch("/api/admin/users/2/role")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"role\":\"USER\"}"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.error").value("Business rule violated for test."));
-    }
+    mockMvc
+        .perform(patch("/api/admin/users/2/role").contentType(MediaType.APPLICATION_JSON)
+            .content("{\"role\":\"USER\"}"))
+        .andExpect(status().isBadRequest()).andExpect(jsonPath("$.success").value(false))
+        .andExpect(jsonPath("$.error").value("Business rule violated for test."));
+  }
 }

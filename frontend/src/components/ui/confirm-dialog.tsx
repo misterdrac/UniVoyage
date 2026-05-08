@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button'
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -6,29 +6,29 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Loader2 } from 'lucide-react'
+} from "@/components/ui/dialog";
+import { Loader2 } from "lucide-react";
 
 interface ConfirmDialogProps {
-  open: boolean
-  title: string
-  description?: string
-  confirmLabel?: string
-  cancelLabel?: string
-  confirmVariant?: 'default' | 'destructive' | 'outline' | 'secondary'
-  isConfirming?: boolean
-  errorMessage?: string | null
-  onConfirm: () => void
-  onCancel: () => void
+  open: boolean;
+  title: string;
+  description?: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
+  confirmVariant?: "default" | "destructive" | "outline" | "secondary";
+  isConfirming?: boolean;
+  errorMessage?: string | null;
+  onConfirm: () => void;
+  onCancel: () => void;
 }
 
 export function ConfirmDialog({
   open,
   title,
   description,
-  confirmLabel = 'Confirm',
-  cancelLabel = 'Cancel',
-  confirmVariant = 'destructive',
+  confirmLabel = "Confirm",
+  cancelLabel = "Cancel",
+  confirmVariant = "destructive",
   isConfirming = false,
   errorMessage = null,
   onConfirm,
@@ -39,10 +39,16 @@ export function ConfirmDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
-          {description ? <DialogDescription>{description}</DialogDescription> : null}
+          {description ? (
+            <DialogDescription>{description}</DialogDescription>
+          ) : null}
         </DialogHeader>
         {errorMessage ? (
-          <p className="text-sm text-destructive" role="alert" aria-live="assertive">
+          <p
+            className="text-sm text-destructive"
+            role="alert"
+            aria-live="assertive"
+          >
             {errorMessage}
           </p>
         ) : null}
@@ -62,7 +68,5 @@ export function ConfirmDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
-
-

@@ -12,18 +12,21 @@ import java.time.Instant;
  */
 @Entity
 @Table(name = "trip_budgets")
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class TripBudgetEntity {
 
-    @Id
-    @Column(name = "trip_id")
-    private Long tripId;
+  @Id
+  @Column(name = "trip_id")
+  private Long tripId;
 
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "payload", columnDefinition = "jsonb", nullable = false)
-    private String payload;
+  @JdbcTypeCode(SqlTypes.JSON)
+  @Column(name = "payload", columnDefinition = "jsonb", nullable = false)
+  private String payload;
 
-    @Column(name="updated_at", nullable = false)
-    private Instant updatedAt;
+  @Column(name = "updated_at", nullable = false)
+  private Instant updatedAt;
 }

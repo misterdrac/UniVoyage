@@ -1,14 +1,20 @@
-import { useCallback, useMemo } from 'react';
-import { Edit2, Save, X, Mail, MapPin, AlertCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
-import { AutoComplete, type Option } from '@/components/ui/autocomplete';
-import { COUNTRIES } from '@/lib/constants';
-import type { User as UserType } from '@/types/user';
-import { toast } from 'sonner';
-import { AvatarPicker } from './AvatarPicker';
-import { Avatar } from './Avatar';
+import { useCallback, useMemo } from "react";
+import { Edit2, Save, X, Mail, MapPin, AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardDescription,
+} from "@/components/ui/card";
+import { AutoComplete, type Option } from "@/components/ui/autocomplete";
+import { COUNTRIES } from "@/lib/constants";
+import type { User as UserType } from "@/types/user";
+import { toast } from "sonner";
+import { AvatarPicker } from "./AvatarPicker";
+import { Avatar } from "./Avatar";
 
 interface ProfileHeaderCardProps {
   user: UserType;
@@ -20,7 +26,12 @@ interface ProfileHeaderCardProps {
   profileImagePath?: string;
   onEdit: () => void;
   onCancel: () => void;
-  onSave: (data: { name: string; surname?: string; countryCode?: string; profileImagePath?: string }) => Promise<void>;
+  onSave: (data: {
+    name: string;
+    surname?: string;
+    countryCode?: string;
+    profileImagePath?: string;
+  }) => Promise<void>;
   onNameChange: (value: string) => void;
   onSurnameChange: (value: string) => void;
   onCountryChange: (value: Option | undefined) => void;
@@ -55,12 +66,12 @@ export const ProfileHeaderCard = ({
 
   const handleSave = useCallback(async () => {
     if (!name.trim()) {
-      toast.error('Name is required');
+      toast.error("Name is required");
       return;
     }
 
     if (name.trim().length < 2) {
-      toast.error('Name must be at least 2 characters');
+      toast.error("Name must be at least 2 characters");
       return;
     }
 
@@ -69,7 +80,10 @@ export const ProfileHeaderCard = ({
       surname: surname.trim() || undefined,
       countryCode: country?.value || undefined,
       // Send empty string to remove avatar, undefined to not update, or the URL to set it
-      profileImagePath: profileImagePath === undefined ? undefined : (profileImagePath?.trim() || ""),
+      profileImagePath:
+        profileImagePath === undefined
+          ? undefined
+          : profileImagePath?.trim() || "",
     });
   }, [name, surname, country, profileImagePath, onSave]);
 
@@ -81,7 +95,7 @@ export const ProfileHeaderCard = ({
             <div className="relative">
               <Avatar src={user.profileImagePath} alt="Profile" size="md" />
               {isProfileIncomplete && !isEditing && (
-                <div 
+                <div
                   className="absolute -top-1 -right-1 bg-primary text-primary-foreground rounded-full p-1.5 shadow-lg group cursor-pointer hover:bg-primary/90 transition-colors"
                   onClick={onEdit}
                   title={"Complete your profile"}
@@ -160,7 +174,7 @@ export const ProfileHeaderCard = ({
           ) : (
             <>
               <h2 className="text-2xl font-bold text-foreground mb-2">
-                {user.name} {user.surname || ''}
+                {user.name} {user.surname || ""}
               </h2>
               <div className="flex items-center gap-2 text-muted-foreground mb-4">
                 <Mail className="w-4 h-4" />
@@ -171,7 +185,9 @@ export const ProfileHeaderCard = ({
                   <div className="flex items-center gap-2 text-sm">
                     <MapPin className="w-4 h-4 text-muted-foreground" />
                     <span className="text-muted-foreground">
-                      <span className="font-medium text-foreground">Country:</span>{' '}
+                      <span className="font-medium text-foreground">
+                        Country:
+                      </span>{" "}
                       {user.countryOfOrigin.countryName}
                     </span>
                   </div>
@@ -200,7 +216,7 @@ export const ProfileHeaderCard = ({
               className="flex items-center gap-2"
             >
               <Save className="w-3.5 h-3.5" />
-              {isSaving ? 'Saving...' : 'Save'}
+              {isSaving ? "Saving..." : "Save"}
             </Button>
           </div>
         )}
@@ -208,4 +224,3 @@ export const ProfileHeaderCard = ({
     </Card>
   );
 };
-

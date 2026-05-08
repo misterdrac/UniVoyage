@@ -1,0 +1,112 @@
+name: Backend CI (Push)
+
+on:
+  workflow_dispatch:
+  push:
+    branches-ignore: [ master ]
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-ci.yml"
+
+concurrency:
+  group: backend-ci-push-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build_java_project:
+    name: "[Build] Backend Java project"
+    runs-on: ubuntu-latest
+    container: maven:3-eclipse-temurin-23
+    timeout-minutes: 15
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Clone repository
+        working-directory: .
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+          git init .
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git fetch --depth=1 origin "${{ github.sha }}"
+          git checkout --detach FETCH_HEAD
+
+      - name: Build Java project (skip tests)
+        run: |
+          chmod +x mvnw
+          ./mvnw -B --no-transfer-progress -DskipTests clean package
+
+  run_backend_tests:
+    name: "[Test] Backend tests"
+    runs-on: ubuntu-latest
+    container: maven:3-eclipse-temurin-23
+    timeout-minutes: 20
+    needs: build_java_project
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: univoyage_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: admin
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d univoyage_test"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    defaults:
+      run:
+        working-directory: backend
+
+    env:
+      SPRING_PROFILES_ACTIVE: test
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/univoyage_test
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: admin
+      SPRING_FLYWAY_URL: jdbc:postgresql://postgres:5432/univoyage_test
+      SPRING_FLYWAY_USER: postgres
+      SPRING_FLYWAY_PASSWORD: admin
+
+    steps:
+      - name: Clone repository
+        working-directory: .
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+          git init .
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git fetch --depth=1 origin "${{ github.sha }}"
+          git checkout --detach FETCH_HEAD
+      - name: Run backend tests
+        run: |
+          chmod +x mvnw
+          ./mvnw -B --no-transfer-progress test
+
+  sbom_generation:
+    name: "[Security] Backend SBOM generation"
+    runs-on: ubuntu-latest
+    container: maven:3-eclipse-temurin-23
+    timeout-minutes: 10
+    needs: run_backend_tests
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Clone repository
+        working-directory: .
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+          git init .
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git fetch --depth=1 origin "${{ github.sha }}"
+          git checkout --detach FETCH_HEAD
+      - name: Generate SBOM (CycloneDX)
+        run: |
+          chmod +x mvnw
+          ./mvnw -B --no-transfer-progress org.cyclonedx:cyclonedx-maven-plugin:2.9.1:makeAggregateBom
+

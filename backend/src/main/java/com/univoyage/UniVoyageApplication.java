@@ -15,8 +15,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @EntityScan(basePackages = "com.univoyage")
 public class UniVoyageApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(UniVoyageApplication.class, args);
-	}
+  public static void main(String[] args) {
+    SpringApplication.run(UniVoyageApplication.class, args);
+  }
 
 }

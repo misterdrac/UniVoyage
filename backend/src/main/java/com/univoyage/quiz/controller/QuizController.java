@@ -14,20 +14,19 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class QuizController {
 
-    private final QuizService quizService;
+  private final QuizService quizService;
 
-    @PostMapping("/recommend")
-    public ResponseEntity<ApiResponse<QuizRecommendationResponse>> recommend(
-            @Valid @RequestBody QuizRequest request
-    ) {
-        QuizRecommendationResponse response = quizService.recommend(request);
+  @PostMapping("/recommend")
+  public ResponseEntity<ApiResponse<QuizRecommendationResponse>> recommend(
+      @Valid @RequestBody QuizRequest request) {
+    QuizRecommendationResponse response = quizService.recommend(request);
 
-        if (response.getRecommendations() != null && !response.getRecommendations().isEmpty()) {
-            return ResponseEntity.ok(ApiResponse.ok(response));
-        }
-
-        return ResponseEntity.ok(ApiResponse.fail(
-                response.getClosingNote() != null ? response.getClosingNote() : "Unable to generate recommendations."
-        ));
+    if (response.getRecommendations() != null && !response.getRecommendations().isEmpty()) {
+      return ResponseEntity.ok(ApiResponse.ok(response));
     }
+
+    return ResponseEntity.ok(ApiResponse.fail(response.getClosingNote() != null
+        ? response.getClosingNote()
+        : "Unable to generate recommendations."));
+  }
 }

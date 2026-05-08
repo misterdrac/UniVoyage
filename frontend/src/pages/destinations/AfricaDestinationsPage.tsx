@@ -1,16 +1,19 @@
-import { useMemo } from 'react';
-import { DestinationsPageLayout, LoadingSpinner } from '@/components/destinations';
-import { getDestinationsByContinent } from '@/lib/destinationUtils';
-import { useDestinations } from '@/hooks/useDestinations';
+import { useMemo } from "react";
+import {
+  DestinationsPageLayout,
+  LoadingSpinner,
+} from "@/components/destinations";
+import { getDestinationsByContinent } from "@/lib/destinationUtils";
+import { useDestinations } from "@/hooks/useDestinations";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 const AfricaDestinationsPage = () => {
-  useDocumentTitle('Africa Destinations');
+  useDocumentTitle("Africa Destinations");
   const { destinations: apiDestinations, isLoading } = useDestinations();
-  
-  const africaDestinations = useMemo(() => 
-    getDestinationsByContinent(apiDestinations, 'Africa'),
-    [apiDestinations]
+
+  const africaDestinations = useMemo(
+    () => getDestinationsByContinent(apiDestinations, "Africa"),
+    [apiDestinations],
   );
 
   if (isLoading) {
@@ -28,10 +31,11 @@ const AfricaDestinationsPage = () => {
       title="Experience Africa"
       description={
         <p className="text-center text-lg sm:text-xl text-muted-foreground">
-          Where the world began. Witness the Great Migration in Tanzania's Serengeti, wander 
-          Marrakech's labyrinthine souks, and summit Table Mountain in Cape Town. Africa isn't 
-          just a destination—it's where epic adventures meet incredible value, where culture runs 
-          deep, and where every moment becomes a memory you'll chase forever.
+          Where the world began. Witness the Great Migration in Tanzania's
+          Serengeti, wander Marrakech's labyrinthine souks, and summit Table
+          Mountain in Cape Town. Africa isn't just a destination—it's where epic
+          adventures meet incredible value, where culture runs deep, and where
+          every moment becomes a memory you'll chase forever.
         </p>
       }
       destinations={africaDestinations}

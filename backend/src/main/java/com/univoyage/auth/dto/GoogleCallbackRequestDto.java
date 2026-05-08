@@ -8,5 +8,5 @@ import lombok.*;
 @Getter
 @Setter
 public class GoogleCallbackRequestDto {
-    private String code;
+  private String code;
 }

@@ -2,7 +2,13 @@ import { useCallback, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LoginDialog, SignUpDialog } from "@/components/auth";
-import { HeaderLogo, DesktopNavigation, MobileNavigation, UserMenuButton, ThemeToggleButton } from "./HeaderComponents";
+import {
+  HeaderLogo,
+  DesktopNavigation,
+  MobileNavigation,
+  UserMenuButton,
+  ThemeToggleButton,
+} from "./HeaderComponents";
 import { useAuth } from "@/contexts/AuthContext";
 
 export function Header() {
@@ -12,7 +18,7 @@ export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleMobileMenuToggle = useCallback(() => {
-    setIsMobileMenuOpen(prev => !prev);
+    setIsMobileMenuOpen((prev) => !prev);
   }, []);
 
   const handleMobileMenuClose = useCallback(() => {
@@ -55,8 +61,8 @@ export function Header() {
             {user ? (
               <UserMenuButton user={user} />
             ) : (
-              <Button 
-                variant="secondary" 
+              <Button
+                variant="secondary"
                 size="default"
                 onClick={handleLoginClick}
                 className="hidden sm:block"
@@ -69,22 +75,22 @@ export function Header() {
           </div>
         </div>
       </div>
-      
+
       <MobileNavigation
         isOpen={isMobileMenuOpen}
         onClose={handleMobileMenuClose}
         user={user}
         onLoginClick={handleLoginClick}
       />
-      
-      <LoginDialog 
-        open={isLoginOpen} 
+
+      <LoginDialog
+        open={isLoginOpen}
         onOpenChange={setIsLoginOpen}
         onSignUpClick={handleSignUpClick}
       />
-      
-      <SignUpDialog 
-        open={isSignUpOpen} 
+
+      <SignUpDialog
+        open={isSignUpOpen}
         onOpenChange={setIsSignUpOpen}
         onLoginClick={handleLoginClick}
       />

@@ -1,7 +1,13 @@
-import { useMemo } from 'react';
-import { Star } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
-import type { User } from '@/types/user';
+import { useMemo } from "react";
+import { Star } from "lucide-react";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardDescription,
+} from "@/components/ui/card";
+import type { User } from "@/types/user";
 
 interface ProfileCompletionCardProps {
   user: User;
@@ -41,10 +47,14 @@ export const ProfileCompletionCard = ({ user }: ProfileCompletionCardProps) => {
             <Star className="w-5 h-5 text-primary" />
             Profile Completion
           </span>
-          <span className="text-2xl font-bold text-primary">{profileCompletion}%</span>
+          <span className="text-2xl font-bold text-primary">
+            {profileCompletion}%
+          </span>
         </CardTitle>
         <CardDescription>
-          Complete your profile info, add hobbies, languages you speak and countries you have visited to get more personalized suggestions and recommendations
+          Complete your profile info, add hobbies, languages you speak and
+          countries you have visited to get more personalized suggestions and
+          recommendations
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -61,4 +71,3 @@ export const ProfileCompletionCard = ({ user }: ProfileCompletionCardProps) => {
     </Card>
   );
 };
-

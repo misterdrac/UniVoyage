@@ -1,9 +1,15 @@
-import { useMemo } from 'react';
-import { Trophy } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
-import { calculateAchievements } from './utils/achievements';
-import { AchievementBadge } from './AchievementBadge';
-import type { User } from '@/types/user';
+import { useMemo } from "react";
+import { Trophy } from "lucide-react";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardDescription,
+} from "@/components/ui/card";
+import { calculateAchievements } from "./utils/achievements";
+import { AchievementBadge } from "./AchievementBadge";
+import type { User } from "@/types/user";
 
 interface AchievementsSectionProps {
   user: User;
@@ -17,31 +23,44 @@ export const AchievementsSection = ({ user }: AchievementsSectionProps) => {
       interests: user.hobbies?.length || 0,
       memberFor: user.dateOfRegister
         ? Math.floor(
-            (new Date().getTime() - new Date(user.dateOfRegister).getTime()) / (1000 * 60 * 60 * 24)
+            (new Date().getTime() - new Date(user.dateOfRegister).getTime()) /
+              (1000 * 60 * 60 * 24),
           )
         : 0,
     };
 
     return calculateAchievements(stats);
-  }, [user.languages, user.visitedCountries, user.hobbies, user.dateOfRegister]);
+  }, [
+    user.languages,
+    user.visitedCountries,
+    user.hobbies,
+    user.dateOfRegister,
+  ]);
 
   return (
     <Card className="mb-6">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Trophy className="w-5 h-5" style={{ color: 'var(--profile-achievement-trophy)' }} />
+          <Trophy
+            className="w-5 h-5"
+            style={{ color: "var(--profile-achievement-trophy)" }}
+          />
           Achievements
         </CardTitle>
-        <CardDescription>Unlock achievements by completing various milestones</CardDescription>
+        <CardDescription>
+          Unlock achievements by completing various milestones
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {achievements.map((achievement, index) => (
-            <AchievementBadge key={`${achievement.type}-${index}`} achievement={achievement} />
+            <AchievementBadge
+              key={`${achievement.type}-${index}`}
+              achievement={achievement}
+            />
           ))}
         </div>
       </CardContent>
     </Card>
   );
 };
-

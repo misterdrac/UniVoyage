@@ -20,53 +20,44 @@ import lombok.RequiredArgsConstructor;
 /**
  * Controller for user-related operations.
  */
-@CrossOrigin(
-        origins = {"http://localhost:5173","http://127.0.0.1:5173"},
-        allowCredentials = "true"
-)
+@CrossOrigin(origins = {"http://localhost:5173",
+    "http://127.0.0.1:5173"}, allowCredentials = "true")
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
 public class UserController {
 
-    private final AuthService authService;
+  private final AuthService authService;
 
-    @PatchMapping("/profile")
-    @Transactional
-    public ResponseEntity<ApiResponse<UpdateProfileResponseDto>> updateProfile(
-            @Valid @RequestBody UpdateProfileRequestDto request
-    ) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity
-                    .status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.fail("Not authenticated"));
-        }
+  @PatchMapping("/profile")
+  @Transactional
+  public ResponseEntity<ApiResponse<UpdateProfileResponseDto>> updateProfile(
+      @Valid @RequestBody UpdateProfileRequestDto request) {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        Object principal = authentication.getPrincipal();
-        if (!(principal instanceof UserEntity)) {
-            return ResponseEntity
-                    .status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.fail("Invalid authentication"));
-        }
-
-        UserEntity userEntity = (UserEntity) principal;
-        Long userId = userEntity.getId();
-
-        try {
-            UserDto updatedUser = authService.updateProfile(userId, request);
-            UpdateProfileResponseDto response = new UpdateProfileResponseDto(updatedUser);
-            return ResponseEntity.ok(ApiResponse.ok(response));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.fail(e.getMessage()));
-        } catch (Exception e) {
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.fail("Failed to update profile: " + e.getMessage()));
-        }
+    if (authentication == null || !authentication.isAuthenticated()) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+          .body(ApiResponse.fail("Not authenticated"));
     }
-}
 
+    Object principal = authentication.getPrincipal();
+    if (!(principal instanceof UserEntity)) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+          .body(ApiResponse.fail("Invalid authentication"));
+    }
+
+    UserEntity userEntity = (UserEntity) principal;
+    Long userId = userEntity.getId();
+
+    try {
+      UserDto updatedUser = authService.updateProfile(userId, request);
+      UpdateProfileResponseDto response = new UpdateProfileResponseDto(updatedUser);
+      return ResponseEntity.ok(ApiResponse.ok(response));
+    } catch (IllegalArgumentException e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.fail(e.getMessage()));
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body(ApiResponse.fail("Failed to update profile: " + e.getMessage()));
+    }
+  }
+}

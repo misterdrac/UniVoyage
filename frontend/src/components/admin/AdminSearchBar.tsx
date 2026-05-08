@@ -1,6 +1,6 @@
-import React from 'react';
-import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
+import React from "react";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
 
 interface AdminSearchBarProps {
   value: string;
@@ -11,7 +11,7 @@ interface AdminSearchBarProps {
 export const AdminSearchBar: React.FC<AdminSearchBarProps> = ({
   value,
   onChange,
-  placeholder = 'Search...',
+  placeholder = "Search...",
 }) => {
   return (
     <div className="p-4 border-b bg-muted/30 shrink-0">
@@ -27,4 +27,3 @@ export const AdminSearchBar: React.FC<AdminSearchBarProps> = ({
     </div>
   );
 };
-

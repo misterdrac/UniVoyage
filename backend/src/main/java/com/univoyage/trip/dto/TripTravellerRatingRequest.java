@@ -11,10 +11,10 @@ import lombok.Data;
 @Data
 public class TripTravellerRatingRequest {
 
-    @Min(1)
-    @Max(5)
-    private int stars;
+  @Min(1)
+  @Max(5)
+  private int stars;
 
-    @Size(max = 2000)
-    private String comment;
+  @Size(max = 2000)
+  private String comment;
 }

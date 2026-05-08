@@ -1,12 +1,20 @@
-import React, { useState, useCallback } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { ThemeProvider, AuthProvider, DestinationProvider, TripProvider } from '@/contexts';
-import { ScrollToTop } from '@/components';
-import { AuthLoadingOverlay } from '@/components/layout/AuthLoadingOverlay';
-import { Toaster } from '@/components/ui/sonner';
-import { LoginDialog, SignUpDialog } from '@/components/auth';
-import { useDestination, RouteChangeHandler } from '@/contexts/DestinationContext';
-import { routes, createRouteElement } from '@/config/routes';
+import React, { useState, useCallback } from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {
+  ThemeProvider,
+  AuthProvider,
+  DestinationProvider,
+  TripProvider,
+} from "@/contexts";
+import { ScrollToTop } from "@/components";
+import { AuthLoadingOverlay } from "@/components/layout/AuthLoadingOverlay";
+import { Toaster } from "@/components/ui/sonner";
+import { LoginDialog, SignUpDialog } from "@/components/auth";
+import {
+  useDestination,
+  RouteChangeHandler,
+} from "@/contexts/DestinationContext";
+import { routes, createRouteElement } from "@/config/routes";
 
 /**
  * AppRoutes component that renders all routes from centralized configuration
@@ -62,18 +70,18 @@ function AppContent() {
         <AppRoutes />
         <Toaster />
       </Router>
-      
-      <LoginDialog 
-        open={isLoginOpen} 
+
+      <LoginDialog
+        open={isLoginOpen}
         onOpenChange={(open) => {
           setIsLoginOpen(open);
           if (!open) setShowAuthDialog(false);
         }}
         onSignUpClick={handleSignUpClick}
       />
-      
-      <SignUpDialog 
-        open={isSignUpOpen} 
+
+      <SignUpDialog
+        open={isSignUpOpen}
         onOpenChange={(open) => {
           setIsSignUpOpen(open);
           if (!open) setShowAuthDialog(false);

@@ -22,13 +22,19 @@ export const SignUpPasswordFields = ({
 }: SignUpPasswordFieldsProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const passwordsMatch = useMemo(() => password === confirmPassword, [password, confirmPassword]);
+  const passwordsMatch = useMemo(
+    () => password === confirmPassword,
+    [password, confirmPassword],
+  );
 
   return (
     <>
       {/* Password Input */}
       <div className="space-y-2">
-        <label htmlFor="signup-password" className="text-sm font-medium text-foreground">
+        <label
+          htmlFor="signup-password"
+          className="text-sm font-medium text-foreground"
+        >
           Password <span className="text-destructive">*</span>
         </label>
         <div className="relative">
@@ -55,14 +61,17 @@ export const SignUpPasswordFields = ({
             )}
           </button>
         </div>
-        
+
         {/* Password Strength Indicator */}
         <PasswordStrength password={password} />
       </div>
 
       {/* Confirm Password Input */}
       <div className="space-y-2">
-        <label htmlFor="signup-confirm-password" className="text-sm font-medium text-foreground">
+        <label
+          htmlFor="signup-confirm-password"
+          className="text-sm font-medium text-foreground"
+        >
           Confirm Password <span className="text-destructive">*</span>
         </label>
         <div className="relative">
@@ -101,4 +110,3 @@ export const SignUpPasswordFields = ({
     </>
   );
 };
-

@@ -1,16 +1,19 @@
-import { useMemo } from 'react';
-import { DestinationsPageLayout, LoadingSpinner } from '@/components/destinations';
-import { getDestinationsByContinent } from '@/lib/destinationUtils';
-import { useDestinations } from '@/hooks/useDestinations';
+import { useMemo } from "react";
+import {
+  DestinationsPageLayout,
+  LoadingSpinner,
+} from "@/components/destinations";
+import { getDestinationsByContinent } from "@/lib/destinationUtils";
+import { useDestinations } from "@/hooks/useDestinations";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 const EuropeDestinationsPage = () => {
-  useDocumentTitle('Europe Destinations');
+  useDocumentTitle("Europe Destinations");
   const { destinations: apiDestinations, isLoading } = useDestinations();
-  
-  const europeDestinations = useMemo(() => 
-    getDestinationsByContinent(apiDestinations, 'Europe'),
-    [apiDestinations]
+
+  const europeDestinations = useMemo(
+    () => getDestinationsByContinent(apiDestinations, "Europe"),
+    [apiDestinations],
   );
 
   if (isLoading) {
@@ -28,10 +31,11 @@ const EuropeDestinationsPage = () => {
       title="Explore Europe"
       description={
         <p className="text-center text-lg sm:text-xl text-muted-foreground">
-          Where culture begins and history lives. From the charming streets of Paris to the 
-          fairytale architecture of Prague, Europe offers an unparalleled journey through 
-          centuries of art, culture, and discovery. Experience the continent where every 
-          cobblestone tells a story and every city boasts its own unique character.
+          Where culture begins and history lives. From the charming streets of
+          Paris to the fairytale architecture of Prague, Europe offers an
+          unparalleled journey through centuries of art, culture, and discovery.
+          Experience the continent where every cobblestone tells a story and
+          every city boasts its own unique character.
         </p>
       }
       destinations={europeDestinations}

@@ -12,22 +12,20 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 
 /**
- * Controller for managing destinations in the admin panel.
- * Provides endpoints for CRUD operations on destinations.
- * All endpoints are prefixed with /api/admin/destinations.
- * Requires authentication and admin privileges.
- * Uses AdminDestinationService for business logic.
- * Returns responses wrapped in ApiResponse for consistent API structure.
- * Supports pagination and searching for listing destinations.
- * Validates request bodies for create and update operations.
- * Handles exceptions and returns appropriate HTTP status codes.
- * endpoints:
- * - GET /api/admin/destinations : List destinations with optional search and pagination.
- * - GET /api/admin/destinations/{id} : Get details of a specific destination by ID.
- * - POST /api/admin/destinations : Create a new destination.
- * - PUT /api/admin/destinations/{id} : Fully update an existing destination by ID.
- * - PATCH /api/admin/destinations/{id} : Partially update an existing destination by ID.
- * - DELETE /api/admin/destinations/{id} : Delete a destination by ID.
+ * Controller for managing destinations in the admin panel. Provides endpoints
+ * for CRUD operations on destinations. All endpoints are prefixed with
+ * /api/admin/destinations. Requires authentication and admin privileges. Uses
+ * AdminDestinationService for business logic. Returns responses wrapped in
+ * ApiResponse for consistent API structure. Supports pagination and searching
+ * for listing destinations. Validates request bodies for create and update
+ * operations. Handles exceptions and returns appropriate HTTP status codes.
+ * endpoints: - GET /api/admin/destinations : List destinations with optional
+ * search and pagination. - GET /api/admin/destinations/{id} : Get details of a
+ * specific destination by ID. - POST /api/admin/destinations : Create a new
+ * destination. - PUT /api/admin/destinations/{id} : Fully update an existing
+ * destination by ID. - PATCH /api/admin/destinations/{id} : Partially update an
+ * existing destination by ID. - DELETE /api/admin/destinations/{id} : Delete a
+ * destination by ID.
  *
  */
 @RestController
@@ -35,47 +33,41 @@ import org.springframework.data.web.PageableDefault;
 @RequiredArgsConstructor
 public class AdminDestinationController {
 
-    private final AdminDestinationService adminDestinationService;
+  private final AdminDestinationService adminDestinationService;
 
-    @GetMapping
-    public ResponseEntity<ApiResponse<AdminDestinationPageResponse>> list(
-            @RequestParam(required = false) String search,
-            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
-    ) {
-        return ResponseEntity.ok(ApiResponse.ok(adminDestinationService.list(search, pageable)));
-    }
+  @GetMapping
+  public ResponseEntity<ApiResponse<AdminDestinationPageResponse>> list(
+      @RequestParam(required = false) String search,
+      @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+    return ResponseEntity.ok(ApiResponse.ok(adminDestinationService.list(search, pageable)));
+  }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<AdminDestinationResponse>> get(@PathVariable long id) {
-        return ResponseEntity.ok(ApiResponse.ok(adminDestinationService.get(id)));
-    }
+  @GetMapping("/{id}")
+  public ResponseEntity<ApiResponse<AdminDestinationResponse>> get(@PathVariable long id) {
+    return ResponseEntity.ok(ApiResponse.ok(adminDestinationService.get(id)));
+  }
 
-    @PostMapping
-    public ResponseEntity<ApiResponse<AdminDestinationResponse>> create(
-            @Valid @RequestBody AdminCreateDestinationRequest req
-    ) {
-        return ResponseEntity.ok(ApiResponse.ok(adminDestinationService.create(req)));
-    }
+  @PostMapping
+  public ResponseEntity<ApiResponse<AdminDestinationResponse>> create(
+      @Valid @RequestBody AdminCreateDestinationRequest req) {
+    return ResponseEntity.ok(ApiResponse.ok(adminDestinationService.create(req)));
+  }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<AdminDestinationResponse>> putUpdate(
-            @PathVariable long id,
-            @Valid @RequestBody AdminUpdateDestinationRequest req
-    ) {
-        return ResponseEntity.ok(ApiResponse.ok(adminDestinationService.putUpdate(id, req)));
-    }
+  @PutMapping("/{id}")
+  public ResponseEntity<ApiResponse<AdminDestinationResponse>> putUpdate(@PathVariable long id,
+      @Valid @RequestBody AdminUpdateDestinationRequest req) {
+    return ResponseEntity.ok(ApiResponse.ok(adminDestinationService.putUpdate(id, req)));
+  }
 
-    @PatchMapping("/{id}")
-    public ResponseEntity<ApiResponse<AdminDestinationResponse>> patchUpdate(
-            @PathVariable long id,
-            @RequestBody AdminPatchDestinationRequest req
-    ) {
-        return ResponseEntity.ok(ApiResponse.ok(adminDestinationService.patchUpdate(id, req)));
-    }
+  @PatchMapping("/{id}")
+  public ResponseEntity<ApiResponse<AdminDestinationResponse>> patchUpdate(@PathVariable long id,
+      @RequestBody AdminPatchDestinationRequest req) {
+    return ResponseEntity.ok(ApiResponse.ok(adminDestinationService.patchUpdate(id, req)));
+  }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable long id) {
-        adminDestinationService.delete(id);
-        return ResponseEntity.ok(ApiResponse.ok(null));
-    }
+  @DeleteMapping("/{id}")
+  public ResponseEntity<ApiResponse<Void>> delete(@PathVariable long id) {
+    adminDestinationService.delete(id);
+    return ResponseEntity.ok(ApiResponse.ok(null));
+  }
 }

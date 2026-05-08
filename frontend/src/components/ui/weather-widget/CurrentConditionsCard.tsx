@@ -1,14 +1,17 @@
-import { motion } from 'framer-motion'
-import { MapPin } from 'lucide-react'
-import type { WeatherData } from './types'
-import { weatherAnimations, getWeatherIcon } from './AnimatedIcons'
+import { motion } from "framer-motion";
+import { MapPin } from "lucide-react";
+import type { WeatherData } from "./types";
+import { weatherAnimations, getWeatherIcon } from "./AnimatedIcons";
 
 interface CurrentConditionsCardProps {
-  weather: WeatherData
-  animated: boolean
+  weather: WeatherData;
+  animated: boolean;
 }
 
-export function CurrentConditionsCard({ weather, animated }: CurrentConditionsCardProps) {
+export function CurrentConditionsCard({
+  weather,
+  animated,
+}: CurrentConditionsCardProps) {
   return (
     <motion.div
       key="weather"
@@ -50,6 +53,5 @@ export function CurrentConditionsCard({ weather, animated }: CurrentConditionsCa
         </motion.div>
       </div>
     </motion.div>
-  )
+  );
 }
-

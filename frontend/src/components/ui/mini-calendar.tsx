@@ -42,7 +42,9 @@ export const MiniCalendar: React.FC<MiniCalendarProps> = ({
 }) => {
   const initialDate = selected ?? new Date();
   const [currentWeek, setCurrentWeek] = React.useState<Date>(initialDate);
-  const [internalSelected, setInternalSelected] = React.useState<Date | null>(selected ?? null);
+  const [internalSelected, setInternalSelected] = React.useState<Date | null>(
+    selected ?? null,
+  );
 
   React.useEffect(() => {
     if (selected) {
@@ -74,7 +76,12 @@ export const MiniCalendar: React.FC<MiniCalendarProps> = ({
   };
 
   return (
-    <div className={cn("w-full overflow-hidden rounded-lg border bg-card text-card-foreground shadow", className)}>
+    <div
+      className={cn(
+        "w-full overflow-hidden rounded-lg border bg-card text-card-foreground shadow",
+        className,
+      )}
+    >
       <div className="flex items-center justify-between p-3">
         <Button
           type="button"
@@ -91,7 +98,9 @@ export const MiniCalendar: React.FC<MiniCalendarProps> = ({
         </Button>
         <div className="flex items-center gap-2 text-sm font-medium">
           <span>{format(currentWeek, "MMMM")}</span>
-          <span className="text-muted-foreground">{format(currentWeek, "yyyy")}</span>
+          <span className="text-muted-foreground">
+            {format(currentWeek, "yyyy")}
+          </span>
         </div>
         <Button
           type="button"
@@ -117,8 +126,10 @@ export const MiniCalendar: React.FC<MiniCalendarProps> = ({
       <div className="grid grid-cols-7 gap-1 p-3 pt-0">
         {weekDays.map((day) => {
           const iso = format(day, "yyyy-MM-dd");
-          const isSelected = internalSelected && format(internalSelected, "yyyy-MM-dd") === iso;
-          const isDisabled = (minDate && day < minDate) || (maxDate && day > maxDate);
+          const isSelected =
+            internalSelected && format(internalSelected, "yyyy-MM-dd") === iso;
+          const isDisabled =
+            (minDate && day < minDate) || (maxDate && day > maxDate);
 
           return (
             <Button
@@ -127,7 +138,8 @@ export const MiniCalendar: React.FC<MiniCalendarProps> = ({
               variant={isSelected ? "default" : "ghost"}
               className={cn(
                 "h-9 w-9 p-0 text-sm font-normal",
-                isSelected && "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
+                isSelected &&
+                  "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
               )}
               onClick={() => handleSelectDay(day)}
               disabled={isDisabled}

@@ -1,8 +1,8 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback } from "react";
 
 interface UseAdminTableOptions<T extends string> {
   defaultSortField: T;
-  defaultSortDirection?: 'asc' | 'desc';
+  defaultSortDirection?: "asc" | "desc";
   defaultPageSize?: number;
 }
 
@@ -13,7 +13,7 @@ interface UseAdminTableReturn<T extends string> {
   setPage: (page: number) => void;
   // Sorting
   sortField: T;
-  sortDirection: 'asc' | 'desc';
+  sortDirection: "asc" | "desc";
   sortString: string;
   isUsingDefaultSort: boolean;
   handleSort: (field: T) => void;
@@ -27,11 +27,11 @@ interface UseAdminTableReturn<T extends string> {
  * Manages admin table state (pagination, sorting, search)
  */
 export function useAdminTable<T extends string>(
-  options: UseAdminTableOptions<T>
+  options: UseAdminTableOptions<T>,
 ): UseAdminTableReturn<T> {
   const {
     defaultSortField,
-    defaultSortDirection = 'desc',
+    defaultSortDirection = "desc",
     defaultPageSize = 10,
   } = options;
 
@@ -41,37 +41,50 @@ export function useAdminTable<T extends string>(
 
   // Sorting state - track if we're using default or custom sort
   const [sortField, setSortField] = useState<T>(defaultSortField);
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(defaultSortDirection);
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">(
+    defaultSortDirection,
+  );
   const [isUsingDefaultSort, setIsUsingDefaultSort] = useState(true);
 
   // Search state
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Sort string for API
   const sortString = `${sortField},${sortDirection}`;
 
   // Handle sort click - three states: asc -> desc -> reset to default -> asc
-  const handleSort = useCallback((field: T) => {
-    const isActiveField = sortField === field && !isUsingDefaultSort;
-    
-    if (isActiveField) {
-      if (sortDirection === 'asc') {
-        // Second click: desc
-        setSortDirection('desc');
+  const handleSort = useCallback(
+    (field: T) => {
+      const isActiveField = sortField === field && !isUsingDefaultSort;
+
+      if (isActiveField) {
+        if (sortDirection === "asc") {
+          // Second click: desc
+          setSortDirection("desc");
+        } else {
+          // Third click: reset to default
+          setSortField(defaultSortField);
+          setSortDirection(defaultSortDirection);
+          setIsUsingDefaultSort(true);
+        }
       } else {
-        // Third click: reset to default
-        setSortField(defaultSortField);
-        setSortDirection(defaultSortDirection);
-        setIsUsingDefaultSort(true);
+        // First click on this field or switching fields: asc
+        setSortField(field);
+        setSortDirection("asc");
+        setIsUsingDefaultSort(
+          field === defaultSortField && "asc" === defaultSortDirection,
+        );
       }
-    } else {
-      // First click on this field or switching fields: asc
-      setSortField(field);
-      setSortDirection('asc');
-      setIsUsingDefaultSort(field === defaultSortField && 'asc' === defaultSortDirection);
-    }
-    setPage(0);
-  }, [sortField, sortDirection, isUsingDefaultSort, defaultSortField, defaultSortDirection]);
+      setPage(0);
+    },
+    [
+      sortField,
+      sortDirection,
+      isUsingDefaultSort,
+      defaultSortField,
+      defaultSortDirection,
+    ],
+  );
 
   // Handle search change
   const handleSearchChange = useCallback((query: string) => {
@@ -93,4 +106,3 @@ export function useAdminTable<T extends string>(
     handleSearchChange,
   };
 }
-

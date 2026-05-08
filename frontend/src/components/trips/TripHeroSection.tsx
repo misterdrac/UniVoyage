@@ -1,19 +1,19 @@
-import { Button } from '@/components/ui/button'
-import { formatDateLong } from '@/lib/dateUtils'
-import { getStatusConfig, type TripStatusConfig } from '@/lib/tripStatusUtils'
-import { cn } from '@/lib/utils'
-import type { Trip } from '@/types/trip'
-import { ArrowLeft, Calendar, Clock, Loader2, Trash2 } from 'lucide-react'
+import { Button } from "@/components/ui/button";
+import { formatDateLong } from "@/lib/dateUtils";
+import { getStatusConfig, type TripStatusConfig } from "@/lib/tripStatusUtils";
+import { cn } from "@/lib/utils";
+import type { Trip } from "@/types/trip";
+import { ArrowLeft, Calendar, Clock, Loader2, Trash2 } from "lucide-react";
 
 interface TripHeroSectionProps {
-  trip: Trip
-  duration: number
-  status: string
-  statusConfig?: TripStatusConfig
-  imageUrl: string
-  isDeleting?: boolean
-  onBack?: () => void
-  onDelete?: () => void
+  trip: Trip;
+  duration: number;
+  status: string;
+  statusConfig?: TripStatusConfig;
+  imageUrl: string;
+  isDeleting?: boolean;
+  onBack?: () => void;
+  onDelete?: () => void;
 }
 
 export function TripHeroSection({
@@ -28,7 +28,11 @@ export function TripHeroSection({
 }: TripHeroSectionProps) {
   return (
     <div className="relative w-full h-[400px] sm:h-[500px] overflow-hidden">
-      <img src={imageUrl} alt={trip.destinationName} className="w-full h-full object-cover" />
+      <img
+        src={imageUrl}
+        alt={trip.destinationName}
+        className="w-full h-full object-cover"
+      />
       <div className="absolute inset-0 bg-linear-to-b from-black/20 via-black/10 to-black/60" />
 
       <div className="absolute inset-0 flex items-end">
@@ -57,20 +61,23 @@ export function TripHeroSection({
               <div className="flex items-center gap-2">
                 <Calendar className="size-5" />
                 <span className="text-lg">
-                  {formatDateLong(trip.departureDate)} - {formatDateLong(trip.returnDate)}
+                  {formatDateLong(trip.departureDate)} -{" "}
+                  {formatDateLong(trip.returnDate)}
                 </span>
               </div>
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2">
                   <Clock className="size-5" />
-                  <span className="text-lg">{duration} day{duration !== 1 ? 's' : ''}</span>
+                  <span className="text-lg">
+                    {duration} day{duration !== 1 ? "s" : ""}
+                  </span>
                 </div>
                 <span
                   className={cn(
-                    'inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full border backdrop-blur-sm',
+                    "inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full border backdrop-blur-sm",
                     statusConfig.bg,
                     statusConfig.text,
-                    statusConfig.border
+                    statusConfig.border,
                   )}
                 >
                   <span>{statusConfig.icon}</span>
@@ -98,7 +105,5 @@ export function TripHeroSection({
         </div>
       </div>
     </div>
-  )
+  );
 }
-
-

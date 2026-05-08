@@ -1,16 +1,16 @@
-import { AnimatePresence } from 'framer-motion'
-import { Loader2, Cloud, Calendar, Thermometer } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import type { ForecastDay } from './types'
-import { getForecastWeatherIcon } from './AnimatedIcons'
+import { AnimatePresence } from "framer-motion";
+import { Loader2, Cloud, Calendar, Thermometer } from "lucide-react";
+import { cn } from "@/lib/utils";
+import type { ForecastDay } from "./types";
+import { getForecastWeatherIcon } from "./AnimatedIcons";
 
 interface TripForecastPanelProps {
-  loading: boolean
-  error: string | null
-  isTooFarAway: boolean
-  isFinalTripDay: boolean
-  forecast: ForecastDay[]
-  animated: boolean
+  loading: boolean;
+  error: string | null;
+  isTooFarAway: boolean;
+  isFinalTripDay: boolean;
+  forecast: ForecastDay[];
+  animated: boolean;
 }
 
 export function TripForecastPanel({
@@ -43,7 +43,8 @@ export function TripForecastPanel({
             </p>
             <p className="text-xs text-muted-foreground">
               Weather forecasts are only available up to 5 days in advance.
-              Check back closer to your trip date for accurate weather information.
+              Check back closer to your trip date for accurate weather
+              information.
             </p>
           </div>
         ) : isFinalTripDay ? (
@@ -53,7 +54,8 @@ export function TripForecastPanel({
               You're on the final day of this trip.
             </p>
             <p className="text-xs text-muted-foreground">
-              Future-day forecasts wrap up once the journey ends, but you can keep checking the current conditions above.
+              Future-day forecasts wrap up once the journey ends, but you can
+              keep checking the current conditions above.
             </p>
           </div>
         ) : forecast.length === 0 ? (
@@ -69,14 +71,18 @@ export function TripForecastPanel({
                 key={day.date}
                 className={cn(
                   "flex flex-col items-center p-4 rounded-lg border bg-card",
-                  "hover:shadow-md transition-shadow"
+                  "hover:shadow-md transition-shadow",
                 )}
               >
                 <div className="text-sm font-medium text-muted-foreground mb-2">
                   {day.dateLabel}
                 </div>
                 <div className="mb-3 text-3xl">
-                  {getForecastWeatherIcon(day.weatherType, day.icon.includes('d'), animated)}
+                  {getForecastWeatherIcon(
+                    day.weatherType,
+                    day.icon.includes("d"),
+                    animated,
+                  )}
                 </div>
                 <div className="text-center mb-2">
                   <div className="flex items-center gap-2 justify-center">
@@ -97,12 +103,16 @@ export function TripForecastPanel({
           </div>
         )}
       </AnimatePresence>
-      {forecast.length > 0 && !isFinalTripDay && !loading && !error && !isTooFarAway && (
-        <p className="text-xs text-muted-foreground text-center mt-4">
-          Note: weather forecasts are not 100% accurate and should be used as a guide only.
-        </p>
-      )}
+      {forecast.length > 0 &&
+        !isFinalTripDay &&
+        !loading &&
+        !error &&
+        !isTooFarAway && (
+          <p className="text-xs text-muted-foreground text-center mt-4">
+            Note: weather forecasts are not 100% accurate and should be used as
+            a guide only.
+          </p>
+        )}
     </>
-  )
+  );
 }
-

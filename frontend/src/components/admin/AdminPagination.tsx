@@ -1,6 +1,6 @@
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface AdminPaginationProps {
   currentCount: number;
@@ -17,7 +17,7 @@ export const AdminPagination: React.FC<AdminPaginationProps> = ({
   page,
   totalPages,
   onPageChange,
-  itemLabel = 'items',
+  itemLabel = "items",
 }) => {
   return (
     <div className="p-4 border-t bg-muted/30 flex items-center justify-between shrink-0">
@@ -48,4 +48,3 @@ export const AdminPagination: React.FC<AdminPaginationProps> = ({
     </div>
   );
 };
-

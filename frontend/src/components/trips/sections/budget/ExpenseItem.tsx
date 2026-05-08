@@ -1,62 +1,70 @@
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Edit2, Trash2, Undo2, Shredder } from 'lucide-react'
-import { format } from 'date-fns'
-import { toast } from 'sonner'
-import { cn } from '@/lib/utils'
-import { CATEGORY_CONFIG } from './categoryConfig'
-import type { TripBudgetExpense } from '@/types/budget'
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Edit2, Trash2, Undo2, Shredder } from "lucide-react";
+import { format } from "date-fns";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+import { CATEGORY_CONFIG } from "./categoryConfig";
+import type { TripBudgetExpense } from "@/types/budget";
 
 const formatCurrency = (amount: number): string => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(amount)
-}
+  }).format(amount);
+};
 
 interface ExpenseItemProps {
-  expense: TripBudgetExpense
-  onEdit: () => void
-  onDelete: () => void
+  expense: TripBudgetExpense;
+  onEdit: () => void;
+  onDelete: () => void;
 }
 
 export function ExpenseItem({ expense, onEdit, onDelete }: ExpenseItemProps) {
-  const [isDeleting, setIsDeleting] = useState(false)
-  const expenseConfig = CATEGORY_CONFIG[expense.category]
+  const [isDeleting, setIsDeleting] = useState(false);
+  const expenseConfig = CATEGORY_CONFIG[expense.category];
 
   const handleDeleteClick = () => {
-    setIsDeleting(true)
-  }
+    setIsDeleting(true);
+  };
 
   const handleConfirmDelete = () => {
-    onDelete()
-    setIsDeleting(false)
-    toast.success('Expense deleted successfully')
-  }
+    onDelete();
+    setIsDeleting(false);
+    toast.success("Expense deleted successfully");
+  };
 
   const handleCancelDelete = () => {
-    setIsDeleting(false)
-  }
+    setIsDeleting(false);
+  };
 
   return (
-    <div className={cn(
-      'p-2 sm:p-3 rounded-lg border bg-background/50 backdrop-blur-sm',
-      'border-border/50'
-    )}>
+    <div
+      className={cn(
+        "p-2 sm:p-3 rounded-lg border bg-background/50 backdrop-blur-sm",
+        "border-border/50",
+      )}
+    >
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
         <div className="flex-1 min-w-0">
-          <p className="font-medium text-sm text-foreground truncate">{expense.description}</p>
+          <p className="font-medium text-sm text-foreground truncate">
+            {expense.description}
+          </p>
           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-1">
             {expense.date && (
               <span className="text-xs text-muted-foreground whitespace-nowrap">
-                {format(new Date(expense.date), 'MMM d, yyyy')}
+                {format(new Date(expense.date), "MMM d, yyyy")}
               </span>
             )}
             {expense.notes && (
               <>
-                {expense.date && <span className="text-xs text-muted-foreground hidden sm:inline">·</span>}
+                {expense.date && (
+                  <span className="text-xs text-muted-foreground hidden sm:inline">
+                    ·
+                  </span>
+                )}
                 <span className="text-xs text-muted-foreground italic truncate max-w-[150px] sm:max-w-[200px]">
                   {expense.notes}
                 </span>
@@ -65,7 +73,12 @@ export function ExpenseItem({ expense, onEdit, onDelete }: ExpenseItemProps) {
           </div>
         </div>
         <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3">
-          <span className={cn('font-semibold text-sm sm:text-base', expenseConfig.textColor)}>
+          <span
+            className={cn(
+              "font-semibold text-sm sm:text-base",
+              expenseConfig.textColor,
+            )}
+          >
             {formatCurrency(expense.amount)}
           </span>
           <Button
@@ -108,6 +121,5 @@ export function ExpenseItem({ expense, onEdit, onDelete }: ExpenseItemProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }
-

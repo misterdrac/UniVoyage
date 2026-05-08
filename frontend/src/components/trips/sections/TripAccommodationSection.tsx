@@ -1,110 +1,140 @@
-import { Card, CardContent } from '@/components/ui/card'
-import { Hotel, Loader2, AlertCircle, RefreshCw, Building, ExternalLink, MapPin, Star, Users, Phone, Save, Check, Trash2 } from 'lucide-react'
-import type { Trip } from '@/types/trip'
-import { useHotels } from '@/hooks/useHotels'
-import { usePaginatedItems } from '@/hooks/usePaginatedItems'
-import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { useState, useEffect } from 'react'
-import { toast } from 'sonner'
-import { apiService } from '@/services/api'
-import { ConfirmDialog } from '@/components/ui/confirm-dialog'
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Hotel,
+  Loader2,
+  AlertCircle,
+  RefreshCw,
+  Building,
+  ExternalLink,
+  MapPin,
+  Star,
+  Users,
+  Phone,
+  Save,
+  Check,
+  Trash2,
+} from "lucide-react";
+import type { Trip } from "@/types/trip";
+import { useHotels } from "@/hooks/useHotels";
+import { usePaginatedItems } from "@/hooks/usePaginatedItems";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useState, useEffect } from "react";
+import { toast } from "sonner";
+import { apiService } from "@/services/api";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 interface TripAccommodationSectionProps {
-  trip: Trip
+  trip: Trip;
 }
 
 interface BookingPartner {
-  name: string
-  description: string
-  url: string
-  icon: React.ReactNode
-  color: string
-  bestFor: string
+  name: string;
+  description: string;
+  url: string;
+  icon: React.ReactNode;
+  color: string;
+  bestFor: string;
 }
 
-export function TripAccommodationSection({ trip }: TripAccommodationSectionProps) {
-  const cityName = trip.destinationName || trip.destinationLocation
-  
-  // State for user's saved accommodation details - single source of truth
-  const [accommodationName, setAccommodationName] = useState('')
-  const [accommodationAddress, setAccommodationAddress] = useState('')
-  const [accommodationPhone, setAccommodationPhone] = useState('')
-  const [isSaved, setIsSaved] = useState(false)
-  const [isLoadingAccommodation, setIsLoadingAccommodation] = useState(true)
-  const [showClearDialog, setShowClearDialog] = useState(false)
+export function TripAccommodationSection({
+  trip,
+}: TripAccommodationSectionProps) {
+  const cityName = trip.destinationName || trip.destinationLocation;
 
-  const checkIn = trip.departureDate
-  const checkOut = trip.returnDate
+  // State for user's saved accommodation details - single source of truth
+  const [accommodationName, setAccommodationName] = useState("");
+  const [accommodationAddress, setAccommodationAddress] = useState("");
+  const [accommodationPhone, setAccommodationPhone] = useState("");
+  const [isSaved, setIsSaved] = useState(false);
+  const [isLoadingAccommodation, setIsLoadingAccommodation] = useState(true);
+  const [showClearDialog, setShowClearDialog] = useState(false);
+
+  const checkIn = trip.departureDate;
+  const checkOut = trip.returnDate;
 
   // Load accommodation data from backend on mount - single source of truth
   useEffect(() => {
-    let isMounted = true
+    let isMounted = true;
 
     const loadAccommodation = async () => {
-      setIsLoadingAccommodation(true)
+      setIsLoadingAccommodation(true);
       try {
-        const result = await apiService.getTripAccommodation(trip.id)
+        const result = await apiService.getTripAccommodation(trip.id);
         if (isMounted && result.success && result.accommodation) {
-          setAccommodationName(result.accommodation.accommodationName || '')
-          setAccommodationAddress(result.accommodation.accommodationAddress || '')
-          setAccommodationPhone(result.accommodation.accommodationPhone || '')
+          setAccommodationName(result.accommodation.accommodationName || "");
+          setAccommodationAddress(
+            result.accommodation.accommodationAddress || "",
+          );
+          setAccommodationPhone(result.accommodation.accommodationPhone || "");
           // Mark as saved if any data exists
-          if (result.accommodation.accommodationName || result.accommodation.accommodationAddress || result.accommodation.accommodationPhone) {
-            setIsSaved(true)
+          if (
+            result.accommodation.accommodationName ||
+            result.accommodation.accommodationAddress ||
+            result.accommodation.accommodationPhone
+          ) {
+            setIsSaved(true);
           }
         }
       } catch (err) {
-        console.error('Failed to load accommodation:', err)
+        console.error("Failed to load accommodation:", err);
       } finally {
         if (isMounted) {
-          setIsLoadingAccommodation(false)
+          setIsLoadingAccommodation(false);
         }
       }
-    }
+    };
 
-    loadAccommodation()
+    loadAccommodation();
 
     return () => {
-      isMounted = false
-    }
-  }, [trip.id])
+      isMounted = false;
+    };
+  }, [trip.id]);
 
   // Fetch hotel suggestions for the destination city
   const { hotels, isLoading, error, refetch } = useHotels({
     city: cityName,
     limit: 10,
     enabled: !!cityName,
-  })
+  });
 
   // Paginate hotels with load more functionality
-  const { displayedItems: displayedHotels, hasMore: canLoadMore, loadMore: handleLoadMore } = usePaginatedItems(hotels, 6, 6)
+  const {
+    displayedItems: displayedHotels,
+    hasMore: canLoadMore,
+    loadMore: handleLoadMore,
+  } = usePaginatedItems(hotels, 6, 6);
 
   const formatDateForBooking = (dateStr: string | undefined) => {
-    return dateStr || ''
-  }
+    return dateStr || "";
+  };
 
-  const safeCityName = cityName || 'destination'
+  const safeCityName = cityName || "destination";
   // Booking partner configurations with URLs and metadata
   const bookingPartners: BookingPartner[] = [
     {
-      name: 'Hostelworld',
-      description: 'The cheapest accommodation option. Find hostels, shared rooms, and budget-friendly stays perfect for students.',
-      url: `https://www.hostelworld.com/st/hostels/${encodeURIComponent(safeCityName.toLowerCase().replace(/\s+/g, '-'))}/?dateFrom=${formatDateForBooking(checkIn)}&dateTo=${formatDateForBooking(checkOut)}`,
+      name: "Hostelworld",
+      description:
+        "The cheapest accommodation option. Find hostels, shared rooms, and budget-friendly stays perfect for students.",
+      url: `https://www.hostelworld.com/st/hostels/${encodeURIComponent(safeCityName.toLowerCase().replace(/\s+/g, "-"))}/?dateFrom=${formatDateForBooking(checkIn)}&dateTo=${formatDateForBooking(checkOut)}`,
       icon: <Users className="h-8 w-8" />,
-      color: 'from-[var(--booking-partner-orange-from)] to-[var(--booking-partner-orange-to)]',
-      bestFor: 'Cheapest Option',
+      color:
+        "from-[var(--booking-partner-orange-from)] to-[var(--booking-partner-orange-to)]",
+      bestFor: "Cheapest Option",
     },
     {
-      name: 'Booking.com',
-      description: 'Wide selection of hotels, apartments, and hostels with free cancellation options and flexible booking.',
+      name: "Booking.com",
+      description:
+        "Wide selection of hotels, apartments, and hostels with free cancellation options and flexible booking.",
       url: `https://www.booking.com/searchresults.html?ss=${encodeURIComponent(safeCityName)}&checkin=${formatDateForBooking(checkIn)}&checkout=${formatDateForBooking(checkOut)}`,
       icon: <Building className="h-8 w-8" />,
-      color: 'from-[var(--booking-partner-blue-from)] to-[var(--booking-partner-blue-to)]',
-      bestFor: 'Hotels & Apartments',
+      color:
+        "from-[var(--booking-partner-blue-from)] to-[var(--booking-partner-blue-to)]",
+      bestFor: "Hotels & Apartments",
     },
-  ]
+  ];
 
   // Save user's accommodation details to backend
   const handleSave = async () => {
@@ -113,20 +143,23 @@ export function TripAccommodationSection({ trip }: TripAccommodationSectionProps
         accommodationName: accommodationName.trim() || undefined,
         accommodationAddress: accommodationAddress.trim() || undefined,
         accommodationPhone: accommodationPhone.trim() || undefined,
-      })
+      });
 
       if (result.success) {
-        setIsSaved(true)
-        toast.success('Accommodation details saved!')
+        setIsSaved(true);
+        toast.success("Accommodation details saved!");
       } else {
-        toast.error(result.error || 'Failed to save accommodation details')
+        toast.error(result.error || "Failed to save accommodation details");
       }
     } catch (err) {
-      toast.error('Failed to save accommodation details')
+      toast.error("Failed to save accommodation details");
     }
-  }
+  };
 
-  const hasAccommodationInfo = accommodationName.trim() || accommodationAddress.trim() || accommodationPhone.trim()
+  const hasAccommodationInfo =
+    accommodationName.trim() ||
+    accommodationAddress.trim() ||
+    accommodationPhone.trim();
 
   const handleClear = async () => {
     try {
@@ -134,22 +167,22 @@ export function TripAccommodationSection({ trip }: TripAccommodationSectionProps
         accommodationName: undefined,
         accommodationAddress: undefined,
         accommodationPhone: undefined,
-      })
+      });
 
       if (result.success) {
-        setAccommodationName('')
-        setAccommodationAddress('')
-        setAccommodationPhone('')
-        setIsSaved(false)
-        setShowClearDialog(false)
-        toast.success('Accommodation details cleared')
+        setAccommodationName("");
+        setAccommodationAddress("");
+        setAccommodationPhone("");
+        setIsSaved(false);
+        setShowClearDialog(false);
+        toast.success("Accommodation details cleared");
       } else {
-        toast.error(result.error || 'Failed to clear accommodation details')
+        toast.error(result.error || "Failed to clear accommodation details");
       }
     } catch (err) {
-      toast.error('Failed to clear accommodation details')
+      toast.error("Failed to clear accommodation details");
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -158,7 +191,8 @@ export function TripAccommodationSection({ trip }: TripAccommodationSectionProps
           Accommodation in {cityName}
         </h3>
         <p className="text-sm text-muted-foreground">
-          Save your booking details or find accommodation from our trusted partners
+          Save your booking details or find accommodation from our trusted
+          partners
         </p>
       </div>
 
@@ -197,14 +231,20 @@ export function TripAccommodationSection({ trip }: TripAccommodationSectionProps
             <div className="p-4 space-y-3">
               <Input
                 value={accommodationName}
-                onChange={(e) => { setAccommodationName(e.target.value); setIsSaved(false) }}
+                onChange={(e) => {
+                  setAccommodationName(e.target.value);
+                  setIsSaved(false);
+                }}
                 placeholder="Hotel / Hostel name"
                 className="h-9 text-sm"
                 disabled={isLoadingAccommodation}
               />
               <Input
                 value={accommodationAddress}
-                onChange={(e) => { setAccommodationAddress(e.target.value); setIsSaved(false) }}
+                onChange={(e) => {
+                  setAccommodationAddress(e.target.value);
+                  setIsSaved(false);
+                }}
                 placeholder="Address"
                 className="h-9 text-sm"
                 disabled={isLoadingAccommodation}
@@ -214,20 +254,29 @@ export function TripAccommodationSection({ trip }: TripAccommodationSectionProps
                   <Phone className="absolute left-2.5 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
                   <Input
                     value={accommodationPhone}
-                    onChange={(e) => { setAccommodationPhone(e.target.value); setIsSaved(false) }}
+                    onChange={(e) => {
+                      setAccommodationPhone(e.target.value);
+                      setIsSaved(false);
+                    }}
                     placeholder="Phone"
                     type="tel"
                     className="h-9 text-sm pl-8"
                     disabled={isLoadingAccommodation}
                   />
                 </div>
-                <Button 
-                  size="sm" 
+                <Button
+                  size="sm"
                   onClick={handleSave}
-                  disabled={!hasAccommodationInfo || isSaved || isLoadingAccommodation}
+                  disabled={
+                    !hasAccommodationInfo || isSaved || isLoadingAccommodation
+                  }
                   className="h-9 px-3"
                 >
-                  {isSaved ? <Check className="h-4 w-4" /> : <Save className="h-4 w-4" />}
+                  {isSaved ? (
+                    <Check className="h-4 w-4" />
+                  ) : (
+                    <Save className="h-4 w-4" />
+                  )}
                 </Button>
               </div>
             </div>
@@ -243,18 +292,27 @@ export function TripAccommodationSection({ trip }: TripAccommodationSectionProps
         >
           <Card className="h-full overflow-hidden border-2 transition-all duration-300 hover:shadow-xl hover:scale-[1.02] hover:border-primary/50">
             <CardContent className="p-0 flex flex-col h-full">
-              <div className={cn('bg-linear-to-r p-5 text-hero-text', bookingPartners[0].color)}>
+              <div
+                className={cn(
+                  "bg-linear-to-r p-5 text-hero-text",
+                  bookingPartners[0].color,
+                )}
+              >
                 <div className="flex items-center justify-between">
                   {bookingPartners[0].icon}
                   <ExternalLink className="h-5 w-5 opacity-70 group-hover:opacity-100 transition-opacity" />
                 </div>
-                <h4 className="text-lg font-bold mt-3">{bookingPartners[0].name}</h4>
+                <h4 className="text-lg font-bold mt-3">
+                  {bookingPartners[0].name}
+                </h4>
                 <span className="text-xs bg-hero-text/20 px-2 py-0.5 rounded-full mt-2 inline-block">
                   {bookingPartners[0].bestFor}
                 </span>
               </div>
               <div className="p-4 flex flex-col flex-1">
-                <p className="text-sm text-muted-foreground mb-3">{bookingPartners[0].description}</p>
+                <p className="text-sm text-muted-foreground mb-3">
+                  {bookingPartners[0].description}
+                </p>
                 <div className="text-xs text-muted-foreground mb-3 space-y-1">
                   <p>✓ Dorm beds from $10/night</p>
                   <p>✓ Social atmosphere</p>
@@ -277,18 +335,27 @@ export function TripAccommodationSection({ trip }: TripAccommodationSectionProps
         >
           <Card className="h-full overflow-hidden border-2 transition-all duration-300 hover:shadow-xl hover:scale-[1.02] hover:border-primary/50">
             <CardContent className="p-0 flex flex-col h-full">
-              <div className={cn('bg-linear-to-r p-5 text-hero-text', bookingPartners[1].color)}>
+              <div
+                className={cn(
+                  "bg-linear-to-r p-5 text-hero-text",
+                  bookingPartners[1].color,
+                )}
+              >
                 <div className="flex items-center justify-between">
                   {bookingPartners[1].icon}
                   <ExternalLink className="h-5 w-5 opacity-70 group-hover:opacity-100 transition-opacity" />
                 </div>
-                <h4 className="text-lg font-bold mt-3">{bookingPartners[1].name}</h4>
+                <h4 className="text-lg font-bold mt-3">
+                  {bookingPartners[1].name}
+                </h4>
                 <span className="text-xs bg-hero-text/20 px-2 py-0.5 rounded-full mt-2 inline-block">
                   {bookingPartners[1].bestFor}
                 </span>
               </div>
               <div className="p-4 flex flex-col flex-1">
-                <p className="text-sm text-muted-foreground mb-3">{bookingPartners[1].description}</p>
+                <p className="text-sm text-muted-foreground mb-3">
+                  {bookingPartners[1].description}
+                </p>
                 <div className="text-xs text-muted-foreground mb-3 space-y-1">
                   <p>✓ 28M+ listings worldwide</p>
                   <p>✓ Price match guarantee</p>
@@ -317,39 +384,53 @@ export function TripAccommodationSection({ trip }: TripAccommodationSectionProps
             <CardContent className="py-12">
               <div className="flex flex-col items-center justify-center space-y-4">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <p className="text-sm text-muted-foreground">Loading hotel suggestions...</p>
+                <p className="text-sm text-muted-foreground">
+                  Loading hotel suggestions...
+                </p>
               </div>
             </CardContent>
           </Card>
         ) : error ? (
           <>
             {/* Error state with retry option */}
-            <Card className={error === 'NO_HOTELS_FOUND' ? 'border-muted bg-muted/30' : 'border-destructive/50 bg-destructive/5'}>
-            <CardContent className="py-8 text-center">
-              {error === 'NO_HOTELS_FOUND' ? (
-                <>
-                  <Hotel className="h-12 w-12 text-muted-foreground/50 mx-auto mb-3" />
-                  <p className="text-foreground font-medium mb-2">No hotel suggestions available</p>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    We couldn't find hotel data for {cityName} in our database. 
-                    Don't worry! You can still use the booking options above to find great accommodation.
-                  </p>
-                </>
-              ) : (
-                <>
-                  <AlertCircle className="h-8 w-8 text-destructive mx-auto mb-2" />
-                  <p className="text-destructive font-medium mb-2">Couldn't load hotel suggestions</p>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    There was an issue loading hotel data. Please try again or use the booking options above.
-                  </p>
-                  <Button variant="outline" size="sm" onClick={refetch}>
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Try again
-                  </Button>
-                </>
-              )}
-            </CardContent>
-          </Card>
+            <Card
+              className={
+                error === "NO_HOTELS_FOUND"
+                  ? "border-muted bg-muted/30"
+                  : "border-destructive/50 bg-destructive/5"
+              }
+            >
+              <CardContent className="py-8 text-center">
+                {error === "NO_HOTELS_FOUND" ? (
+                  <>
+                    <Hotel className="h-12 w-12 text-muted-foreground/50 mx-auto mb-3" />
+                    <p className="text-foreground font-medium mb-2">
+                      No hotel suggestions available
+                    </p>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      We couldn't find hotel data for {cityName} in our
+                      database. Don't worry! You can still use the booking
+                      options above to find great accommodation.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <AlertCircle className="h-8 w-8 text-destructive mx-auto mb-2" />
+                    <p className="text-destructive font-medium mb-2">
+                      Couldn't load hotel suggestions
+                    </p>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      There was an issue loading hotel data. Please try again or
+                      use the booking options above.
+                    </p>
+                    <Button variant="outline" size="sm" onClick={refetch}>
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Try again
+                    </Button>
+                  </>
+                )}
+              </CardContent>
+            </Card>
           </>
         ) : hotels.length > 0 ? (
           <>
@@ -358,7 +439,7 @@ export function TripAccommodationSection({ trip }: TripAccommodationSectionProps
               {displayedHotels.map((hotel, index) => (
                 <a
                   key={hotel.hotelId || index}
-                  href={`https://www.google.com/search?q=${encodeURIComponent(hotel.hotelName + ' ' + cityName + ' booking')}`}
+                  href={`https://www.google.com/search?q=${encodeURIComponent(hotel.hotelName + " " + cityName + " booking")}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block group"
@@ -389,7 +470,12 @@ export function TripAccommodationSection({ trip }: TripAccommodationSectionProps
             {/* Load more button when more hotels are available */}
             {canLoadMore && (
               <div className="flex justify-center pt-2">
-                <Button variant="ghost" size="sm" onClick={handleLoadMore} className="text-muted-foreground">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleLoadMore}
+                  className="text-muted-foreground"
+                >
                   Show more suggestions
                 </Button>
               </div>
@@ -399,10 +485,13 @@ export function TripAccommodationSection({ trip }: TripAccommodationSectionProps
           <Card className="border-muted bg-muted/30">
             <CardContent className="py-8 text-center">
               <Hotel className="h-12 w-12 text-muted-foreground/50 mx-auto mb-3" />
-              <p className="text-foreground font-medium mb-2">No hotel suggestions available</p>
+              <p className="text-foreground font-medium mb-2">
+                No hotel suggestions available
+              </p>
               <p className="text-sm text-muted-foreground">
-                We couldn't find hotel data for {cityName} in our database. 
-                Don't worry! You can still use the booking options above to find great accommodation.
+                We couldn't find hotel data for {cityName} in our database.
+                Don't worry! You can still use the booking options above to find
+                great accommodation.
               </p>
             </CardContent>
           </Card>
@@ -417,11 +506,13 @@ export function TripAccommodationSection({ trip }: TripAccommodationSectionProps
               <Star className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <h5 className="text-sm font-medium text-foreground">Student Travel Tip</h5>
+              <h5 className="text-sm font-medium text-foreground">
+                Student Travel Tip
+              </h5>
               <p className="text-xs text-muted-foreground mt-1">
-                Hostels are often the best value for students. They offer social atmospheres, 
-                shared kitchens to save on food, and opportunities to meet other travelers. 
-                Book early for the best rates!
+                Hostels are often the best value for students. They offer social
+                atmospheres, shared kitchens to save on food, and opportunities
+                to meet other travelers. Book early for the best rates!
               </p>
             </div>
           </div>
@@ -439,5 +530,5 @@ export function TripAccommodationSection({ trip }: TripAccommodationSectionProps
         onCancel={() => setShowClearDialog(false)}
       />
     </div>
-  )
+  );
 }

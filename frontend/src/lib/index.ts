@@ -1,6 +1,6 @@
 // Utility functions
-export * from './utils';
-export * from './destinationUtils';
+export * from "./utils";
+export * from "./destinationUtils";
 
 // Constants
-export * from './constants';
+export * from "./constants";

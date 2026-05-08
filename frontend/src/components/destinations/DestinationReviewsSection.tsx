@@ -1,53 +1,67 @@
-import { useEffect, useState } from 'react'
-import { Star, Loader2, MessageSquare, ChevronLeft, ChevronRight } from 'lucide-react'
-import { apiService } from '@/services/api'
-import type { DestinationReview } from '@/types/trip'
+import { useEffect, useState } from "react";
+import {
+  Star,
+  Loader2,
+  MessageSquare,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+import { apiService } from "@/services/api";
+import type { DestinationReview } from "@/types/trip";
 
 interface DestinationReviewsSectionProps {
-  destinationId: number
+  destinationId: number;
 }
 
-export function DestinationReviewsSection({ destinationId }: DestinationReviewsSectionProps) {
-  const [reviews, setReviews] = useState<DestinationReview[]>([])
-  const [totalElements, setTotalElements] = useState(0)
-  const [isLoading, setIsLoading] = useState(true)
-  const [currentIndex, setCurrentIndex] = useState(0)
+export function DestinationReviewsSection({
+  destinationId,
+}: DestinationReviewsSectionProps) {
+  const [reviews, setReviews] = useState<DestinationReview[]>([]);
+  const [totalElements, setTotalElements] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
-    let isMounted = true
-    setIsLoading(true)
+    let isMounted = true;
+    setIsLoading(true);
 
     const load = async () => {
       try {
         // Fetch all reviews at once (max 50)
-        const result = await apiService.getDestinationReviews(destinationId, 0, 50)
+        const result = await apiService.getDestinationReviews(
+          destinationId,
+          0,
+          50,
+        );
         if (isMounted && result.success && result.reviews) {
-          const content = result.reviews.content
-          setReviews(content)
-          setTotalElements(result.reviews.totalElements)
+          const content = result.reviews.content;
+          setReviews(content);
+          setTotalElements(result.reviews.totalElements);
           // Start at a random index
           if (content.length > 0) {
-            setCurrentIndex(Math.floor(Math.random() * content.length))
+            setCurrentIndex(Math.floor(Math.random() * content.length));
           }
         }
       } catch {
         // silently fail
       } finally {
-        if (isMounted) setIsLoading(false)
+        if (isMounted) setIsLoading(false);
       }
-    }
+    };
 
-    load()
-    return () => { isMounted = false }
-  }, [destinationId])
+    load();
+    return () => {
+      isMounted = false;
+    };
+  }, [destinationId]);
 
   const handlePrev = () => {
-    setCurrentIndex((prev) => (prev - 1 + reviews.length) % reviews.length)
-  }
+    setCurrentIndex((prev) => (prev - 1 + reviews.length) % reviews.length);
+  };
 
   const handleNext = () => {
-    setCurrentIndex((prev) => (prev + 1) % reviews.length)
-  }
+    setCurrentIndex((prev) => (prev + 1) % reviews.length);
+  };
 
   if (isLoading) {
     return (
@@ -55,12 +69,12 @@ export function DestinationReviewsSection({ destinationId }: DestinationReviewsS
         <Loader2 className="size-4 animate-spin" />
         <p className="text-sm">Loading reviews...</p>
       </div>
-    )
+    );
   }
 
-  if (reviews.length === 0) return null
+  if (reviews.length === 0) return null;
 
-  const review = reviews[currentIndex]
+  const review = reviews[currentIndex];
 
   return (
     <div className="space-y-3">
@@ -77,13 +91,17 @@ export function DestinationReviewsSection({ destinationId }: DestinationReviewsS
             {[1, 2, 3, 4, 5].map((star) => (
               <Star
                 key={star}
-                className={`size-3 ${star <= review.stars ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground/30'}`}
+                className={`size-3 ${star <= review.stars ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30"}`}
               />
             ))}
           </div>
-          <span className="text-xs text-muted-foreground">{review.reviewerDisplayName}</span>
+          <span className="text-xs text-muted-foreground">
+            {review.reviewerDisplayName}
+          </span>
         </div>
-        <p className="text-sm text-muted-foreground italic break-words">"{review.comment}"</p>
+        <p className="text-sm text-muted-foreground italic break-words">
+          "{review.comment}"
+        </p>
       </div>
 
       {/* Navigation */}
@@ -109,5 +127,5 @@ export function DestinationReviewsSection({ destinationId }: DestinationReviewsS
         </div>
       )}
     </div>
-  )
+  );
 }
