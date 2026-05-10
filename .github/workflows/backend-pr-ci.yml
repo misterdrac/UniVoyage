@@ -1,0 +1,224 @@
+name: Backend CI (Pull Request)
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [ master ]
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-pr-ci.yml"
+      - ".github/workflows/backend-ci.yml"
+
+concurrency:
+  group: backend-ci-pr-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  code_format_validate:
+    name: "[Security] Backend code format validate"
+    runs-on: ubuntu-latest
+    container: maven:3-eclipse-temurin-23
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Clone repository
+        working-directory: .
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+          git init .
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git fetch --depth=1 origin "${{ github.sha }}"
+          git checkout --detach FETCH_HEAD
+      - name: Validate code formatting
+        run: |
+          chmod +x mvnw
+          ./mvnw -B --no-transfer-progress formatter:validate
+
+  validate_backend:
+    name: "[Build] Backend Maven validate"
+    runs-on: ubuntu-latest
+    container: maven:3-eclipse-temurin-23
+    timeout-minutes: 15
+    needs: code_format_validate
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Clone repository
+        working-directory: .
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+          git init .
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git fetch --depth=1 origin "${{ github.sha }}"
+          git checkout --detach FETCH_HEAD
+      - name: Validate Maven project
+        run: |
+          chmod +x mvnw
+          ./mvnw -B --no-transfer-progress validate
+
+  build_backend:
+    name: "[Build] Backend package"
+    runs-on: ubuntu-latest
+    container: maven:3-eclipse-temurin-23
+    timeout-minutes: 15
+    needs: validate_backend
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Clone repository
+        working-directory: .
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+          git init .
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git fetch --depth=1 origin "${{ github.sha }}"
+          git checkout --detach FETCH_HEAD
+      - name: Build backend (skip tests)
+        run: |
+          chmod +x mvnw
+          ./mvnw -B --no-transfer-progress -DskipTests clean package
+
+  test_backend:
+    name: "[Test] Backend tests"
+    runs-on: ubuntu-latest
+    container: maven:3-eclipse-temurin-23
+    timeout-minutes: 20
+    needs: build_backend
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: univoyage_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: admin
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d univoyage_test"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      SPRING_PROFILES_ACTIVE: test
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/univoyage_test
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: admin
+      SPRING_FLYWAY_URL: jdbc:postgresql://postgres:5432/univoyage_test
+      SPRING_FLYWAY_USER: postgres
+      SPRING_FLYWAY_PASSWORD: admin
+    steps:
+      - name: Clone repository
+        working-directory: .
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+          git init .
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git fetch --depth=1 origin "${{ github.sha }}"
+          git checkout --detach FETCH_HEAD
+      - name: Run backend tests
+        run: |
+          chmod +x mvnw
+          ./mvnw -B --no-transfer-progress test
+  sbom_generation_pr:
+    name: "[Security] Backend SBOM generation"
+    runs-on: ubuntu-latest
+    container: maven:3-eclipse-temurin-23
+    timeout-minutes: 10
+    needs: build_backend
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Clone repository
+        working-directory: .
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+          git init .
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git fetch --depth=1 origin "${{ github.sha }}"
+          git checkout --detach FETCH_HEAD
+      - name: Generate SBOM (CycloneDX)
+        run: |
+          chmod +x mvnw
+          ./mvnw -B --no-transfer-progress org.cyclonedx:cyclonedx-maven-plugin:2.9.1:makeAggregateBom
+  docker_and_security_scans_pr:
+    name: "[Docker/Security] Backend Docker and Trivy scans"
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: test_backend
+    steps:
+      - name: Clone repository
+        working-directory: .
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+          git init .
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git fetch --depth=1 origin "${{ github.sha }}"
+          git checkout --detach FETCH_HEAD
+      - name: Build Docker image
+        run: docker build -t univoyage-backend:pr-${{ github.sha }} ./backend
+      - name: Install Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo gpg --dearmor -o /usr/share/keyrings/trivy.gpg
+          echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install -y trivy
+      - name: Trivy scan for pom.xml
+        run: trivy fs --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 backend/pom.xml
+      - name: Trivy scan for Docker image
+        run: trivy image --scanners vuln --pkg-types library --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 univoyage-backend:pr-${{ github.sha }}
+
+  trivy_backend_codebase_scan_pr:
+    name: "[Security] Backend Trivy codebase scan"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [docker_and_security_scans_pr, sbom_generation_pr]
+    steps:
+      - name: Clone repository
+        working-directory: .
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+          git init .
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git fetch --depth=1 origin "${{ github.sha }}"
+          git checkout --detach FETCH_HEAD
+      - name: Install Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo gpg --dearmor -o /usr/share/keyrings/trivy.gpg
+          echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install -y trivy
+      - name: Trivy full backend codebase scan
+        run: trivy fs --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 backend
+
+  dependency_review_pr:
+    name: "[Security] Backend dependency review"
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    container: maven:3-eclipse-temurin-23
+    steps:
+      - name: Clone repository
+        working-directory: .
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+          git init .
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git fetch --depth=1 origin "${{ github.sha }}"
+          git checkout --detach FETCH_HEAD
+      - name: Dependency check (Maven tree)
+        run: |
+          chmod +x backend/mvnw
+          cd backend
+          ./mvnw -B --no-transfer-progress dependency:tree
