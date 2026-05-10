@@ -17,14 +17,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  validate_backend:
-    name: "[Build] Backend Maven validate"
+  backend_build_and_docker_pr:
+    name: "[Build] Backend validate, package & Docker image"
     runs-on: ubuntu-latest
-    container: maven:3-eclipse-temurin-23
-    timeout-minutes: 15
-    defaults:
-      run:
-        working-directory: backend
+    timeout-minutes: 25
     steps:
       - name: Clone repository
         working-directory: .
@@ -34,51 +30,26 @@ jobs:
           git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
           git fetch --depth=1 origin "${{ github.sha }}"
           git checkout --detach FETCH_HEAD
-      - name: Validate Maven project
+      - name: Prepare JDK 23 + Maven cache
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "23"
+          cache: maven
+          cache-dependency-path: backend/pom.xml
+      - name: 1 / 3 — Maven validate
+        working-directory: backend
         run: |
           chmod +x mvnw
           ./mvnw -B --no-transfer-progress validate
-
-  build_backend:
-    name: "[Build] Backend package"
-    runs-on: ubuntu-latest
-    container: maven:3-eclipse-temurin-23
-    timeout-minutes: 15
-    needs: validate_backend
-    defaults:
-      run:
+      - name: 2 / 3 — Maven package (skip tests)
         working-directory: backend
-    steps:
-      - name: Clone repository
-        working-directory: .
-        run: |
-          git config --global --add safe.directory "$(pwd)"
-          git init .
-          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
-          git fetch --depth=1 origin "${{ github.sha }}"
-          git checkout --detach FETCH_HEAD
-      - name: Build backend (skip tests)
         run: |
           chmod +x mvnw
           ./mvnw -B --no-transfer-progress -DskipTests clean package
-
-  docker_build_backend_pr:
-    name: "[Docker] Backend Docker build"
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    needs: build_backend
-    steps:
-      - name: Clone repository
-        working-directory: .
-        run: |
-          git config --global --add safe.directory "$(pwd)"
-          git init .
-          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
-          git fetch --depth=1 origin "${{ github.sha }}"
-          git checkout --detach FETCH_HEAD
-      - name: Build Docker image
+      - name: 3 / 3 — Docker build image
         run: docker build -t univoyage-backend:pr-${{ github.sha }} ./backend
-      - name: Save image for Trivy job
+      - name: 3 / 3 — Save image for Trivy (gzip + artifact)
         run: docker save univoyage-backend:pr-${{ github.sha }} | gzip > backend-image.tar.gz
       - uses: actions/upload-artifact@v4.6.2
         with:
@@ -90,7 +61,7 @@ jobs:
     runs-on: ubuntu-latest
     container: maven:3-eclipse-temurin-23
     timeout-minutes: 20
-    needs: docker_build_backend_pr
+    needs: backend_build_and_docker_pr
     services:
       postgres:
         image: postgres:16
@@ -165,7 +136,7 @@ jobs:
     name: "[Security] Backend Trivy scans"
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    needs: [docker_build_backend_pr, backend_maven_quality_pr]
+    needs: [backend_build_and_docker_pr, backend_maven_quality_pr]
     steps:
       - name: Clone repository
         working-directory: .

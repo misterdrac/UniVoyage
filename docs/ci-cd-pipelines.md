@@ -35,26 +35,26 @@ flowchart TB
 
     subgraph BEPR["Backend PR"]
       direction TB
-      BEPR1[validate_backend] --> BEPR2[build_backend] --> BEPR3[docker_build_backend_pr]
-      BEPR3 --> BEPR4[test_backend]
-      BEPR4 --> BEPR5[backend_maven_quality_pr]
-      BEPR5 --> BEPR6[trivy_backend_security_pr]
+      BEPR1[backend_build_and_docker_pr]
+      BEPR1 --> BEPR2[test_backend]
+      BEPR2 --> BEPR3[backend_maven_quality_pr]
+      BEPR3 --> BEPR4[trivy_backend_security_pr]
     end
   end
 
   PR --> FEPR1
   PR --> BEPR1
   FEPR4 --> MERGE[All required PR checks green]
-  BEPR6 --> MERGE
+  BEPR4 --> MERGE
   MERGE --> MASTER_PUSH[Merge to master]
 
   subgraph MASTER["Master Pipeline"]
     direction TB
     subgraph MASTER_BE["Backend CI lane — no frontend depends-on"]
       direction TB
-      MV[validate_backend] --> M1[build_java_project] --> M2[build_backend_docker] --> M3[run_backend_tests]
+      MB[backend_build_and_docker] --> M3[run_backend_tests]
       M3 --> MQ[backend_maven_quality]
-      M2 --> M6[trivy_backend_scans]
+      MB --> M6[trivy_backend_scans]
       MQ --> M6
     end
 
@@ -74,7 +74,7 @@ flowchart TB
     end
   end
 
-  MASTER_PUSH --> MV
+  MASTER_PUSH --> MB
   MASTER_PUSH --> MF1
   M6 --> MM1
   MF2 --> MM1
@@ -110,7 +110,7 @@ flowchart TB
 - File: `.github/workflows/backend-pr-ci.yml`
 - Trigger: `pull_request` to `master`, `workflow_dispatch`
 - Jobs (four backend segments, aligned with master):
-  1. **Build:** `validate_backend` → `build_backend` → `docker_build_backend_pr` (Docker image artifact for Trivy)
+  1. **Build:** `backend_build_and_docker_pr` — jedan job: Maven `validate` → `package` (-DskipTests) → Docker image + artefakt za Trivy (koraci su strogo redom).
   2. **Test:** `test_backend`
   3. **Maven quality:** `backend_maven_quality_pr` (formatter + CycloneDX SBOM + `dependency:tree`)
   4. **Security scans:** `trivy_backend_security_pr` (pom, image after artifact load, full backend codebase)
@@ -119,7 +119,7 @@ flowchart TB
 - File: `.github/workflows/master-pipeline.yml`
 - Trigger: `push` to `master`, `workflow_dispatch`
 - Automatic CI is **two parallel DAGs** with **no cross-edges** until manual release steps:
-  - **Backend lane (four segments):** (1) `validate_backend` → `build_java_project` → `build_backend_docker` → (2) `run_backend_tests` → (3) `backend_maven_quality` (format + SBOM + `dependency:tree`) → (4) `trivy_backend_scans` (pom, Docker image, full backend dir). No frontend `needs` on backend jobs.
+  - **Backend lane (four segments):** (1) `backend_build_and_docker` — Maven validate → package → Docker image + artefakt u jednom jobu; (2) `run_backend_tests`; (3) `backend_maven_quality`; (4) `trivy_backend_scans`. No frontend `needs` on backend jobs.
   - **Frontend lane:** `frontend_build` → `frontend_security_scan`.
 - Manual owner-only jobs:
   1. `codebase_security_scan` (`workflow_dispatch` only) — **`needs: [trivy_backend_scans, frontend_security_scan]`** (last backend Trivy job + last frontend security job)
