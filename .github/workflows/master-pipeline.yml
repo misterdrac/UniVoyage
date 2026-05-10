@@ -57,7 +57,8 @@ jobs:
         run: docker build -t univoyage-backend:main-${{ github.sha }} ./backend
       - name: 3 / 3 — Save image for Trivy (gzip + artifact)
         run: docker save univoyage-backend:main-${{ github.sha }} | gzip > backend-image.tar.gz
-      - uses: actions/upload-artifact@v4.6.2
+      - name: Upload Docker image artifact for Trivy
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: backend-docker-image
           path: backend-image.tar.gz
@@ -152,7 +153,8 @@ jobs:
           git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
           git fetch --depth=1 origin "${{ github.sha }}"
           git checkout --detach FETCH_HEAD
-      - uses: actions/download-artifact@v4.3.0
+      - name: Download Docker image artifact
+        uses: actions/download-artifact@v8.0.1
         with:
           name: backend-docker-image
       - name: Load Docker image

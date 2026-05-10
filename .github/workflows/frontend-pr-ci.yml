@@ -96,7 +96,8 @@ jobs:
       - name: Archive dist for Trivy
         working-directory: .
         run: tar -czf frontend-dist.tar.gz -C frontend dist
-      - uses: actions/upload-artifact@v4.6.2
+      - name: Upload frontend dist for Trivy
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: frontend-dist-pr
           path: frontend-dist.tar.gz
@@ -115,7 +116,8 @@ jobs:
           git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
           git fetch --depth=1 origin "${{ github.sha }}"
           git checkout --detach FETCH_HEAD
-      - uses: actions/download-artifact@v4.3.0
+      - name: Download frontend dist artifact
+        uses: actions/download-artifact@v8.0.1
         with:
           name: frontend-dist-pr
       - name: Extract dist
