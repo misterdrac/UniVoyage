@@ -23,34 +23,11 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  code_format_validate:
-    name: "[Security] Backend code format validate"
-    runs-on: ubuntu-latest
-    container: maven:3-eclipse-temurin-23
-    timeout-minutes: 10
-    defaults:
-      run:
-        working-directory: backend
-    steps:
-      - name: Clone repository
-        working-directory: .
-        run: |
-          git config --global --add safe.directory "$(pwd)"
-          git init .
-          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
-          git fetch --depth=1 origin "${{ github.sha }}"
-          git checkout --detach FETCH_HEAD
-      - name: Validate code formatting
-        run: |
-          chmod +x mvnw
-          ./mvnw -B --no-transfer-progress formatter:validate
-
   build_java_project:
     name: "[Build] Backend Java project"
     runs-on: ubuntu-latest
     container: maven:3-eclipse-temurin-23
     timeout-minutes: 15
-    needs: code_format_validate
     defaults:
       run:
         working-directory: backend
@@ -68,12 +45,35 @@ jobs:
           chmod +x mvnw
           ./mvnw -B --no-transfer-progress -DskipTests clean package
 
+  build_backend_docker:
+    name: "[Docker] Backend Docker build"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: build_java_project
+    steps:
+      - name: Clone repository
+        working-directory: .
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+          git init .
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git fetch --depth=1 origin "${{ github.sha }}"
+          git checkout --detach FETCH_HEAD
+      - name: Build Docker image
+        run: docker build -t univoyage-backend:main-${{ github.sha }} ./backend
+      - name: Save image for Trivy job
+        run: docker save univoyage-backend:main-${{ github.sha }} | gzip > backend-image.tar.gz
+      - uses: actions/upload-artifact@v4.6.2
+        with:
+          name: backend-docker-image
+          path: backend-image.tar.gz
+
   run_backend_tests:
     name: "[Test] Backend tests"
     runs-on: ubuntu-latest
     container: maven:3-eclipse-temurin-23
     timeout-minutes: 20
-    needs: build_java_project
+    needs: build_backend_docker
     services:
       postgres:
         image: postgres:16
@@ -113,11 +113,15 @@ jobs:
           chmod +x mvnw
           ./mvnw -B --no-transfer-progress test
 
-  build_backend_docker:
-    name: "[Docker] Backend Docker build"
+  code_format_validate:
+    name: "[Security] Backend code format validate"
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    container: maven:3-eclipse-temurin-23
+    timeout-minutes: 10
     needs: run_backend_tests
+    defaults:
+      run:
+        working-directory: backend
     steps:
       - name: Clone repository
         working-directory: .
@@ -127,21 +131,17 @@ jobs:
           git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
           git fetch --depth=1 origin "${{ github.sha }}"
           git checkout --detach FETCH_HEAD
-      - name: Build Docker image
-        run: docker build -t univoyage-backend:main-${{ github.sha }} ./backend
-      - name: Save image for Trivy job
-        run: docker save univoyage-backend:main-${{ github.sha }} | gzip > backend-image.tar.gz
-      - uses: actions/upload-artifact@v4
-        with:
-          name: backend-docker-image
-          path: backend-image.tar.gz
+      - name: Validate code formatting
+        run: |
+          chmod +x mvnw
+          ./mvnw -B --no-transfer-progress formatter:validate
 
   sbom_generation:
     name: "[Security] Backend SBOM generation"
     runs-on: ubuntu-latest
     container: maven:3-eclipse-temurin-23
     timeout-minutes: 10
-    needs: build_java_project
+    needs: code_format_validate
     defaults:
       run:
         working-directory: backend
@@ -173,7 +173,7 @@ jobs:
           git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
           git fetch --depth=1 origin "${{ github.sha }}"
           git checkout --detach FETCH_HEAD
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4.3.0
         with:
           name: backend-docker-image
       - name: Load Docker image
