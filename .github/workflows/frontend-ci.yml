@@ -8,6 +8,9 @@ on:
       - "frontend/**"
       - ".github/workflows/frontend-ci.yml"
 
+permissions:
+  contents: read
+
 concurrency:
   group: frontend-ci-push-${{ github.ref }}
   cancel-in-progress: true
