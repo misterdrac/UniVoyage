@@ -30,7 +30,10 @@ export const SignUpBasicFields = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* First Name Input */}
         <div className="space-y-2">
-          <label htmlFor="signup-firstname" className="text-sm font-medium text-foreground">
+          <label
+            htmlFor="signup-firstname"
+            className="text-sm font-medium text-foreground"
+          >
             Name <span className="text-destructive">*</span>
           </label>
           <div className="relative">
@@ -49,7 +52,10 @@ export const SignUpBasicFields = ({
 
         {/* Surname Input */}
         <div className="space-y-2">
-          <label htmlFor="signup-surname" className="text-sm font-medium text-foreground">
+          <label
+            htmlFor="signup-surname"
+            className="text-sm font-medium text-foreground"
+          >
             Surname
           </label>
           <div className="relative">
@@ -70,7 +76,10 @@ export const SignUpBasicFields = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Email Input */}
         <div className="space-y-2">
-          <label htmlFor="signup-email" className="text-sm font-medium text-foreground">
+          <label
+            htmlFor="signup-email"
+            className="text-sm font-medium text-foreground"
+          >
             Email <span className="text-destructive">*</span>
           </label>
           <div className="relative">
@@ -104,4 +113,3 @@ export const SignUpBasicFields = ({
     </>
   );
 };
-

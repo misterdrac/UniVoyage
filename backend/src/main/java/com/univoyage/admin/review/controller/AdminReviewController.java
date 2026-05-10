@@ -14,23 +14,23 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AdminReviewController {
 
-    private final AdminReviewService adminReviewService;
+  private final AdminReviewService adminReviewService;
 
-    @GetMapping("/pending")
-    public ResponseEntity<ApiResponse<AdminPendingReviewPageResponse>> listPending(
-            @PageableDefault(size = 20) Pageable pageable) {
-        return ResponseEntity.ok(ApiResponse.ok(adminReviewService.listPending(pageable)));
-    }
+  @GetMapping("/pending")
+  public ResponseEntity<ApiResponse<AdminPendingReviewPageResponse>> listPending(
+      @PageableDefault(size = 20) Pageable pageable) {
+    return ResponseEntity.ok(ApiResponse.ok(adminReviewService.listPending(pageable)));
+  }
 
-    @PostMapping("/{ratingId}/approve")
-    public ResponseEntity<ApiResponse<Void>> approve(@PathVariable long ratingId) {
-        adminReviewService.approve(ratingId);
-        return ResponseEntity.ok(ApiResponse.ok(null));
-    }
+  @PostMapping("/{ratingId}/approve")
+  public ResponseEntity<ApiResponse<Void>> approve(@PathVariable long ratingId) {
+    adminReviewService.approve(ratingId);
+    return ResponseEntity.ok(ApiResponse.ok(null));
+  }
 
-    @PostMapping("/{ratingId}/reject")
-    public ResponseEntity<ApiResponse<Void>> reject(@PathVariable long ratingId) {
-        adminReviewService.reject(ratingId);
-        return ResponseEntity.ok(ApiResponse.ok(null));
-    }
+  @PostMapping("/{ratingId}/reject")
+  public ResponseEntity<ApiResponse<Void>> reject(@PathVariable long ratingId) {
+    adminReviewService.reject(ratingId);
+    return ResponseEntity.ok(ApiResponse.ok(null));
+  }
 }

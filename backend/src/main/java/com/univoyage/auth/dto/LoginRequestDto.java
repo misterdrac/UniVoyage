@@ -6,8 +6,8 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 /**
- * Request DTO for user login.
- * Contains fields for email and password with validation constraints.
+ * Request DTO for user login. Contains fields for email and password with
+ * validation constraints.
  */
 @Getter
 @Setter
@@ -16,10 +16,10 @@ import lombok.*;
 @Builder
 public class LoginRequestDto {
 
-    @NotBlank(message = "Email is required.")
-    @Email(message = "Invalid email format.")
-    private String email;
+  @NotBlank(message = "Email is required.")
+  @Email(message = "Invalid email format.")
+  private String email;
 
-    @NotBlank(message = "Password is required.")
-    private String password;
+  @NotBlank(message = "Password is required.")
+  private String password;
 }

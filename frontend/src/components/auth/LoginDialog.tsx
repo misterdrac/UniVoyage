@@ -1,51 +1,73 @@
-import React, { useState } from "react"
-import { Eye, EyeOff, Mail, Lock, MapPin, Sparkles, Plane, Globe } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import { useAuth } from "@/contexts/AuthContext"
-import { apiService } from "@/services/api"
-import { toast } from "sonner"
-import { VALIDATION } from "@/lib/constants"
-import { BrandGoogle } from "@mynaui/icons-react"
-import univoyageIcon from "@/assets/univoyage_icon.svg"
+import React, { useState } from "react";
+import {
+  Eye,
+  EyeOff,
+  Mail,
+  Lock,
+  MapPin,
+  Sparkles,
+  Plane,
+  Globe,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { useAuth } from "@/contexts/AuthContext";
+import { apiService } from "@/services/api";
+import { toast } from "sonner";
+import { VALIDATION } from "@/lib/constants";
+import { BrandGoogle } from "@mynaui/icons-react";
+import univoyageIcon from "@/assets/univoyage_icon.svg";
 
 interface LoginDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onSignUpClick?: () => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSignUpClick?: () => void;
 }
 
-export function LoginDialog({ open, onOpenChange, onSignUpClick }: LoginDialogProps) {
-  const [showPassword, setShowPassword] = useState(false)
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const { login, loadUser } = useAuth()
+export function LoginDialog({
+  open,
+  onOpenChange,
+  onSignUpClick,
+}: LoginDialogProps) {
+  const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const { login, loadUser } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError("")
-    setIsLoading(true)
-    
-    const result = await login(email, password)
-    
+    e.preventDefault();
+    setError("");
+    setIsLoading(true);
+
+    const result = await login(email, password);
+
     if (result.success) {
-      toast.success("Welcome back! You've been logged in successfully.")
-      onOpenChange(false)
-      setEmail("")
-      setPassword("")
+      toast.success("Welcome back! You've been logged in successfully.");
+      onOpenChange(false);
+      setEmail("");
+      setPassword("");
     } else {
-      setError(result.error || "Login failed")
-      toast.error(result.error || "Login failed")
+      setError(result.error || "Login failed");
+      toast.error(result.error || "Login failed");
     }
-    
-    setIsLoading(false)
-  }
+
+    setIsLoading(false);
+  };
 
   // Check if form is valid
-  const isFormValid = email.trim() !== "" && password.trim().length >= VALIDATION.MIN_PASSWORD_LENGTH && VALIDATION.EMAIL_REGEX.test(email)
+  const isFormValid =
+    email.trim() !== "" &&
+    password.trim().length >= VALIDATION.MIN_PASSWORD_LENGTH &&
+    VALIDATION.EMAIL_REGEX.test(email);
 
   const handleGoogleSignIn = async () => {
     try {
@@ -56,12 +78,13 @@ export function LoginDialog({ open, onOpenChange, onSignUpClick }: LoginDialogPr
       toast.success("Signed in with Google!");
       onOpenChange(false);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Google sign in failed";
+      const errorMessage =
+        error instanceof Error ? error.message : "Google sign in failed";
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -70,9 +93,9 @@ export function LoginDialog({ open, onOpenChange, onSignUpClick }: LoginDialogPr
           {/* Logo with decorative icons */}
           <div className="flex flex-col items-center mb-2 relative">
             <div className="flex items-center gap-3 mb-3">
-              <img 
-                src={univoyageIcon} 
-                alt="UniVoyage Logo" 
+              <img
+                src={univoyageIcon}
+                alt="UniVoyage Logo"
                 className="w-14 h-14"
               />
               <DialogTitle className="text-3xl font-bold">
@@ -80,7 +103,8 @@ export function LoginDialog({ open, onOpenChange, onSignUpClick }: LoginDialogPr
               </DialogTitle>
             </div>
             <DialogDescription className="sr-only">
-              Sign in to your UniVoyage account to access your trips and travel planning features
+              Sign in to your UniVoyage account to access your trips and travel
+              planning features
             </DialogDescription>
             {/* Decorative plane icon */}
             <div className="absolute -right-4 top-0 opacity-20 rotate-12">
@@ -91,12 +115,10 @@ export function LoginDialog({ open, onOpenChange, onSignUpClick }: LoginDialogPr
               <Globe className="w-14 h-14 text-primary" />
             </div>
           </div>
-          
+
           {/* Welcome Message */}
           <div className="text-center space-y-2">
-            <h2 className="text-2xl font-semibold">
-              Welcome back!
-            </h2>
+            <h2 className="text-2xl font-semibold">Welcome back!</h2>
             <p className="text-sm text-muted-foreground">
               Sign in to continue planning your next adventure
             </p>
@@ -118,11 +140,14 @@ export function LoginDialog({ open, onOpenChange, onSignUpClick }: LoginDialogPr
             </div>
           </div>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Email Input */}
           <div className="space-y-2">
-            <label htmlFor="email" className="text-sm font-medium text-foreground">
+            <label
+              htmlFor="email"
+              className="text-sm font-medium text-foreground"
+            >
               Email
             </label>
             <div className="relative">
@@ -141,7 +166,10 @@ export function LoginDialog({ open, onOpenChange, onSignUpClick }: LoginDialogPr
 
           {/* Password Input */}
           <div className="space-y-2">
-            <label htmlFor="password" className="text-sm font-medium text-foreground">
+            <label
+              htmlFor="password"
+              className="text-sm font-medium text-foreground"
+            >
               Password
             </label>
             <div className="relative">
@@ -171,14 +199,12 @@ export function LoginDialog({ open, onOpenChange, onSignUpClick }: LoginDialogPr
 
           {/* Error Message */}
           {error && (
-            <div className="text-sm text-destructive text-center">
-              {error}
-            </div>
+            <div className="text-sm text-destructive text-center">{error}</div>
           )}
 
           {/* Login Button */}
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             className="w-full"
             disabled={!isFormValid || isLoading}
           >
@@ -191,7 +217,9 @@ export function LoginDialog({ open, onOpenChange, onSignUpClick }: LoginDialogPr
               <span className="w-full border-t border-border" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+              <span className="bg-background px-2 text-muted-foreground">
+                Or continue with
+              </span>
             </div>
           </div>
 
@@ -208,13 +236,15 @@ export function LoginDialog({ open, onOpenChange, onSignUpClick }: LoginDialogPr
 
           {/* Sign Up Link */}
           <div className="text-center text-sm">
-            <span className="text-muted-foreground">Don't have an account? </span>
+            <span className="text-muted-foreground">
+              Don't have an account?{" "}
+            </span>
             <button
               type="button"
               className="text-primary hover:underline font-medium"
               onClick={() => {
-                onOpenChange(false)
-                onSignUpClick?.()
+                onOpenChange(false);
+                onSignUpClick?.();
               }}
             >
               Sign up
@@ -222,7 +252,6 @@ export function LoginDialog({ open, onOpenChange, onSignUpClick }: LoginDialogPr
           </div>
         </form>
       </DialogContent>
-      
     </Dialog>
-  )
+  );
 }

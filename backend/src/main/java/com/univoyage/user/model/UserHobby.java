@@ -7,8 +7,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 /**
- * Entity representing the association between User and Hobby.
- * This is a join table for the many-to-many relationship.
+ * Entity representing the association between User and Hobby. This is a join
+ * table for the many-to-many relationship.
  */
 @Entity
 @Table(name = "user_hobbies")
@@ -19,31 +19,31 @@ import lombok.*;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class UserHobby {
 
-    @EmbeddedId
-    @EqualsAndHashCode.Include
-    private UserHobbyId id;
+  @EmbeddedId
+  @EqualsAndHashCode.Include
+  private UserHobbyId id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("userId") // maps id.userId → user.id
-    @JoinColumn(name = "user_id", nullable = false)
-    @ToString.Exclude
-    private UserEntity user;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @MapsId("userId") // maps id.userId → user.id
+  @JoinColumn(name = "user_id", nullable = false)
+  @ToString.Exclude
+  private UserEntity user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("hobbyId") // maps id.hobbyId → hobby.id
-    @JoinColumn(name = "hobby_id", nullable = false)
-    @ToString.Exclude
-    private Hobby hobby;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @MapsId("hobbyId") // maps id.hobbyId → hobby.id
+  @JoinColumn(name = "hobby_id", nullable = false)
+  @ToString.Exclude
+  private Hobby hobby;
 
-    // Factory method - najbolji način da kreiraš ovaj entitet
-    public static UserHobby of(UserEntity user, Hobby hobby) {
-        UserHobbyId key = new UserHobbyId(user.getId(), hobby.getId());
+  // Factory method - najbolji način da kreiraš ovaj entitet
+  public static UserHobby of(UserEntity user, Hobby hobby) {
+    UserHobbyId key = new UserHobbyId(user.getId(), hobby.getId());
 
-        UserHobby entity = new UserHobby();
-        entity.setId(key);
-        entity.setUser(user);
-        entity.setHobby(hobby);
+    UserHobby entity = new UserHobby();
+    entity.setId(key);
+    entity.setUser(user);
+    entity.setHobby(hobby);
 
-        return entity;
-    }
+    return entity;
+  }
 }

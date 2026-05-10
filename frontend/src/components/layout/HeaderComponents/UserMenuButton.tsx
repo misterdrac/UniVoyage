@@ -10,7 +10,10 @@ interface UserMenuButtonProps {
   variant?: "desktop" | "mobile";
 }
 
-export const UserMenuButton = ({ user, variant = "desktop" }: UserMenuButtonProps) => {
+export const UserMenuButton = ({
+  user,
+  variant = "desktop",
+}: UserMenuButtonProps) => {
   const navigate = useNavigate();
 
   const handleProfileClick = useCallback(() => {
@@ -18,14 +21,14 @@ export const UserMenuButton = ({ user, variant = "desktop" }: UserMenuButtonProp
   }, [navigate]);
 
   const userDisplayName = useMemo(
-    () => `${user.name ?? ''} ${user.surname ?? ''}`.trim() || user.email,
-    [user.name, user.surname, user.email]
+    () => `${user.name ?? ""} ${user.surname ?? ""}`.trim() || user.email,
+    [user.name, user.surname, user.email],
   );
 
   if (variant === "mobile") {
     return (
-      <Button 
-        variant="ghost" 
+      <Button
+        variant="ghost"
         onClick={handleProfileClick}
         className="w-full justify-start rounded-md"
       >
@@ -36,8 +39,8 @@ export const UserMenuButton = ({ user, variant = "desktop" }: UserMenuButtonProp
   }
 
   return (
-    <Button 
-      variant="ghost" 
+    <Button
+      variant="ghost"
       onClick={handleProfileClick}
       className="hidden sm:flex items-center gap-2 rounded-md"
     >
@@ -46,4 +49,3 @@ export const UserMenuButton = ({ user, variant = "desktop" }: UserMenuButtonProp
     </Button>
   );
 };
-

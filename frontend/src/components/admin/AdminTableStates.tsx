@@ -1,5 +1,5 @@
-import React from 'react';
-import { Loader2 } from 'lucide-react';
+import React from "react";
+import { Loader2 } from "lucide-react";
 
 interface AdminLoadingStateProps {
   colSpan: number;
@@ -8,7 +8,7 @@ interface AdminLoadingStateProps {
 
 export const AdminLoadingState: React.FC<AdminLoadingStateProps> = ({
   colSpan,
-  message = 'Loading...',
+  message = "Loading...",
 }) => {
   return (
     <tr>
@@ -27,11 +27,14 @@ interface AdminEmptyStateProps {
 
 export const AdminEmptyState: React.FC<AdminEmptyStateProps> = ({
   colSpan,
-  message = 'No items found',
+  message = "No items found",
 }) => {
   return (
     <tr>
-      <td colSpan={colSpan} className="px-4 py-12 text-center text-muted-foreground">
+      <td
+        colSpan={colSpan}
+        className="px-4 py-12 text-center text-muted-foreground"
+      >
         {message}
       </td>
     </tr>
@@ -59,4 +62,3 @@ export const AdminEmptySelection: React.FC<AdminEmptySelectionProps> = ({
     </div>
   );
 };
-

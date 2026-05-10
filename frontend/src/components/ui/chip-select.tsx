@@ -1,16 +1,16 @@
-import React, { useState, useRef } from "react"
-import { X } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { Input } from "./input"
-import type { Option } from "./autocomplete"
+import React, { useState, useRef } from "react";
+import { X } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Input } from "./input";
+import type { Option } from "./autocomplete";
 
 interface ChipSelectProps {
-  options: Option[]
-  value: string[]
-  onChange: (value: string[]) => void
-  placeholder?: string
-  disabled?: boolean
-  className?: string
+  options: Option[];
+  value: string[];
+  onChange: (value: string[]) => void;
+  placeholder?: string;
+  disabled?: boolean;
+  className?: string;
 }
 
 export function ChipSelect({
@@ -21,66 +21,64 @@ export function ChipSelect({
   disabled = false,
   className,
 }: ChipSelectProps) {
-  const [inputValue, setInputValue] = useState("")
-  const [isOpen, setIsOpen] = useState(false)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const [inputValue, setInputValue] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Filter out already selected options
-  const availableOptions = options.filter(
-    (opt) => !value.includes(opt.value)
-  )
+  const availableOptions = options.filter((opt) => !value.includes(opt.value));
 
   // Filter options based on search
   const filteredOptions = availableOptions.filter((opt) =>
-    opt.label.toLowerCase().includes(inputValue.toLowerCase())
-  )
+    opt.label.toLowerCase().includes(inputValue.toLowerCase()),
+  );
 
   const handleSelect = (option: Option) => {
     if (!value.includes(option.value)) {
-      onChange([...value, option.value])
+      onChange([...value, option.value]);
     }
-    setInputValue("")
+    setInputValue("");
     // Keep dropdown open and input focused for continuous selection
     setTimeout(() => {
-      setIsOpen(true)
-      inputRef.current?.focus()
-    }, 0)
-  }
+      setIsOpen(true);
+      inputRef.current?.focus();
+    }, 0);
+  };
 
   const handleRemove = (valueToRemove: string) => {
-    onChange(value.filter((v) => v !== valueToRemove))
-  }
+    onChange(value.filter((v) => v !== valueToRemove));
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && inputValue.trim() !== "") {
-      e.preventDefault()
+      e.preventDefault();
       // Try to find matching option or add as custom value
       const exactMatch = filteredOptions.find(
-        (opt) => opt.label.toLowerCase() === inputValue.toLowerCase()
-      )
+        (opt) => opt.label.toLowerCase() === inputValue.toLowerCase(),
+      );
       if (exactMatch) {
-        handleSelect(exactMatch)
+        handleSelect(exactMatch);
       } else {
         // Allow adding custom values if not in options
-        const newValue = inputValue.trim()
+        const newValue = inputValue.trim();
         if (!value.includes(newValue)) {
-          onChange([...value, newValue])
-          setInputValue("")
+          onChange([...value, newValue]);
+          setInputValue("");
         }
       }
     } else if (e.key === "Backspace" && inputValue === "" && value.length > 0) {
       // Remove last chip when backspace is pressed on empty input
-      handleRemove(value[value.length - 1])
+      handleRemove(value[value.length - 1]);
     }
-  }
+  };
 
   return (
     <div className={cn("space-y-0", className)}>
       {/* Selected Chips */}
       <div className="flex flex-wrap gap-2 min-h-10 p-2 border border-input rounded-xl bg-background">
         {value.map((val) => {
-          const option = options.find((opt) => opt.value === val)
-          const label = option?.label || val
+          const option = options.find((opt) => opt.value === val);
+          const label = option?.label || val;
           return (
             <div
               key={val}
@@ -96,26 +94,26 @@ export function ChipSelect({
                 <X className="h-3 w-3" />
               </button>
             </div>
-          )
+          );
         })}
-        
+
         {/* Input */}
         <Input
           ref={inputRef}
           type="text"
           value={inputValue}
           onChange={(e) => {
-            setInputValue(e.target.value)
-            setIsOpen(true)
+            setInputValue(e.target.value);
+            setIsOpen(true);
           }}
           onKeyDown={handleKeyDown}
           onFocus={() => setIsOpen(true)}
           onBlur={() => {
             // Clear input and close dropdown
             setTimeout(() => {
-              setIsOpen(false)
-              setInputValue("")
-            }, 200)
+              setIsOpen(false);
+              setInputValue("");
+            }, 200);
           }}
           placeholder={value.length === 0 ? placeholder : ""}
           disabled={disabled}
@@ -133,8 +131,8 @@ export function ChipSelect({
                   key={option.value}
                   className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
                   onMouseDown={(e) => {
-                    e.preventDefault()
-                    handleSelect(option)
+                    e.preventDefault();
+                    handleSelect(option);
                   }}
                 >
                   {option.label}
@@ -145,6 +143,5 @@ export function ChipSelect({
         )}
       </div>
     </div>
-  )
+  );
 }
-

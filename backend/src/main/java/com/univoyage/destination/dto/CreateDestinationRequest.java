@@ -10,15 +10,19 @@ import lombok.Data;
  */
 @Data
 public class CreateDestinationRequest {
-    @NotBlank @Size(max = 200)
-    private String name;
+  @NotBlank
+  @Size(max = 200)
+  private String name;
 
-    @NotBlank @Size(max = 250)
-    private String location;
+  @NotBlank
+  @Size(max = 250)
+  private String location;
 
-    @NotBlank @Size(max = 50)
-    private String continent;
+  @NotBlank
+  @Size(max = 50)
+  private String continent;
 
-    @NotBlank @Size(max = 2)
-    private String countryCode;
+  @NotBlank
+  @Size(max = 2)
+  private String countryCode;
 }

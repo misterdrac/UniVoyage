@@ -74,9 +74,9 @@ flowchart TB
     direction TB
     subgraph MASTER_CI["Automatic CI on master"]
       direction TB
-      M1[code_format_validate] --> M2[build_java_project] --> M3[run_backend_tests]
+      M1[code_format_validate] --> M2[build_java_project] --> M3[run_backend_tests] --> M4[build_backend_docker]
       M2 --> M5[sbom_generation]
-      M3 --> M6[trivy_backend_scans Docker build plus Trivy]
+      M4 --> M6[trivy_backend_scans]
       M5 --> M6
       MF1[frontend_build] --> MF2[frontend_security_scan]
       M6 --> CI_DONE[Master CI green]
@@ -151,10 +151,11 @@ flowchart TB
   1. `code_format_validate`
   2. `build_java_project`
   3. `run_backend_tests`
-  4. `sbom_generation`
-  5. `trivy_backend_scans` (Docker image build and Trivy scans on the same runner)
-  6. `frontend_build`
-  7. `frontend_security_scan`
+  4. `build_backend_docker`
+  5. `sbom_generation`
+  6. `trivy_backend_scans`
+  7. `frontend_build`
+  8. `frontend_security_scan`
 - Manual owner-only jobs:
   1. `codebase_security_scan`
   2. `create_tag`

@@ -1,15 +1,21 @@
-import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Loader2, Trash2 } from 'lucide-react'
-import type { Trip } from '@/types/trip'
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Loader2, Trash2 } from "lucide-react";
+import type { Trip } from "@/types/trip";
 
 interface DeleteTripDialogProps {
-  open: boolean
-  isConfirming: boolean
-  trip: Trip | null
-  errorMessage: string | null
-  onCancel: () => void
-  onConfirm: () => void
+  open: boolean;
+  isConfirming: boolean;
+  trip: Trip | null;
+  errorMessage: string | null;
+  onCancel: () => void;
+  onConfirm: () => void;
 }
 
 export function DeleteTripDialog({
@@ -34,7 +40,7 @@ export function DeleteTripDialog({
             <DialogDescription className="text-sm leading-relaxed text-muted-foreground sm:text-base">
               {trip
                 ? `Removing your trip to ${trip.destinationName} can’t be undone. You’ll lose all related plans and details.`
-                : 'Removing this trip can’t be undone. You’ll lose all related plans and details.'}
+                : "Removing this trip can’t be undone. You’ll lose all related plans and details."}
             </DialogDescription>
           </DialogHeader>
         </div>
@@ -74,6 +80,5 @@ export function DeleteTripDialog({
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
-

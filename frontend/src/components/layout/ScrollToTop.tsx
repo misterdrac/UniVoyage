@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 
 /**
  * ScrollToTop component that automatically scrolls to the top of the page
@@ -15,4 +15,3 @@ export function ScrollToTop() {
 
   return null;
 }
-

@@ -15,15 +15,15 @@ import java.util.Optional;
  */
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
-    Optional<UserEntity> findByEmail(String email);
+  Optional<UserEntity> findByEmail(String email);
 
-    boolean existsByEmail(String email);
+  boolean existsByEmail(String email);
 
-    @Query("""
-        SELECT u FROM UserEntity u
-        WHERE lower(u.email) LIKE concat('%', :q, '%')
-           OR lower(u.name) LIKE concat('%', :q, '%')
-           OR lower(u.surname) LIKE concat('%', :q, '%')
-    """)
-    Page<UserEntity> searchAdminUsers(@Param("q") String q, Pageable pageable);
+  @Query("""
+          SELECT u FROM UserEntity u
+          WHERE lower(u.email) LIKE concat('%', :q, '%')
+             OR lower(u.name) LIKE concat('%', :q, '%')
+             OR lower(u.surname) LIKE concat('%', :q, '%')
+      """)
+  Page<UserEntity> searchAdminUsers(@Param("q") String q, Pageable pageable);
 }

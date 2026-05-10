@@ -6,36 +6,36 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * Response DTO for Destination entity.
- * Contains detailed information about a travel destination.
+ * Response DTO for Destination entity. Contains detailed information about a
+ * travel destination.
  */
 @Data
 @Builder
 public class DestinationResponse {
-    private Long id;
-    private String title;
-    private String location;
-    private String continent;
-    private CountryResponse country;
-    private String imageUrl;
-    private String imageAlt;
-    private String overview;
-    private Integer budgetPerDay;
-    private String whyVisit;
-    private List<String> studentPerks;
-    /** 0–5, one decimal; null if not set. */
-    private Double averageRating;
+  private Long id;
+  private String title;
+  private String location;
+  private String continent;
+  private CountryResponse country;
+  private String imageUrl;
+  private String imageAlt;
+  private String overview;
+  private Integer budgetPerDay;
+  private String whyVisit;
+  private List<String> studentPerks;
+  /** 0–5, one decimal; null if not set. */
+  private Double averageRating;
 
-    /** From submitted trip ratings; null when no traveller ratings yet. */
-    private Double travellerRatingAverage;
-    private Integer travellerRatingCount;
+  /** From submitted trip ratings; null when no traveller ratings yet. */
+  private Double travellerRatingAverage;
+  private Integer travellerRatingCount;
 
-    @Data
-    @Builder
-    public static class CountryResponse {
-        private String isoCode;
-        private String countryName;
-        private String currencyCode;
-        private String currencyName;
-    }
+  @Data
+  @Builder
+  public static class CountryResponse {
+    private String isoCode;
+    private String countryName;
+    private String currencyCode;
+    private String currencyName;
+  }
 }

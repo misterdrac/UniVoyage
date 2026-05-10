@@ -33,4 +33,3 @@ export interface User {
   dateOfRegister?: string;
   dateOfLastSignin?: string;
 }
-

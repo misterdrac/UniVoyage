@@ -7,7 +7,7 @@ export interface Trip {
   departureDate: string; // ISO date string
   returnDate: string; // ISO date string
   createdAt: string; // ISO date string
-  status: 'planned' | 'ongoing' | 'completed';
+  status: "planned" | "ongoing" | "completed";
 }
 
 export interface CreateTripRequest {
@@ -31,7 +31,7 @@ export interface TripRating {
   stars: number;
   comment?: string;
   updatedAt: string;
-  moderationStatus?: 'APPROVED' | 'PENDING' | 'REJECTED';
+  moderationStatus?: "APPROVED" | "PENDING" | "REJECTED";
 }
 
 /** A single published review for a destination */
@@ -51,4 +51,3 @@ export interface DestinationReviewsPage {
   size: number;
   number: number;
 }
-

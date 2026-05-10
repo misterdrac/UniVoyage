@@ -23,21 +23,29 @@ export const DesktopNavigation = ({ user }: DesktopNavigationProps) => {
       <NavigationMenu>
         <NavigationMenuList>
           <NavigationMenuItem>
-            <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+            <NavigationMenuLink
+              asChild
+              className={navigationMenuTriggerStyle()}
+            >
               <Link to={ROUTE_PATHS.HOME}>Home</Link>
             </NavigationMenuLink>
           </NavigationMenuItem>
-          
+
           {user && (
             <NavigationMenuItem>
-              <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+              <NavigationMenuLink
+                asChild
+                className={navigationMenuTriggerStyle()}
+              >
                 <Link to={ROUTE_PATHS.MY_TRIPS}>My Trips</Link>
               </NavigationMenuLink>
             </NavigationMenuItem>
           )}
-          
+
           <NavigationMenuItem>
-            <NavigationMenuTrigger disableHoverOpen>Destinations</NavigationMenuTrigger>
+            <NavigationMenuTrigger disableHoverOpen>
+              Destinations
+            </NavigationMenuTrigger>
             <NavigationMenuContent>
               <ul className="grid sm:w-[400px] md:w-[500px] md:grid-cols-1 lg:w-[600px] rounded-b-lg">
                 {DESTINATION_NAV_ITEMS.map((destination) => (
@@ -54,26 +62,38 @@ export const DesktopNavigation = ({ user }: DesktopNavigationProps) => {
           </NavigationMenuItem>
 
           <NavigationMenuItem>
-            <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+            <NavigationMenuLink
+              asChild
+              className={navigationMenuTriggerStyle()}
+            >
               <Link to={ROUTE_PATHS.QUIZ}>Where to Go?</Link>
             </NavigationMenuLink>
           </NavigationMenuItem>
 
           <NavigationMenuItem>
-            <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+            <NavigationMenuLink
+              asChild
+              className={navigationMenuTriggerStyle()}
+            >
               <Link to={ROUTE_PATHS.ABOUT}>About</Link>
             </NavigationMenuLink>
           </NavigationMenuItem>
 
           <NavigationMenuItem>
-            <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+            <NavigationMenuLink
+              asChild
+              className={navigationMenuTriggerStyle()}
+            >
               <Link to={ROUTE_PATHS.CONTACT}>Contact</Link>
             </NavigationMenuLink>
           </NavigationMenuItem>
 
-          {user && (user.role === 'ADMIN' || user.role === 'HEAD_ADMIN') && (
+          {user && (user.role === "ADMIN" || user.role === "HEAD_ADMIN") && (
             <NavigationMenuItem>
-              <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+              <NavigationMenuLink
+                asChild
+                className={navigationMenuTriggerStyle()}
+              >
                 <Link to={ROUTE_PATHS.ADMIN_DASHBOARD}>Admin</Link>
               </NavigationMenuLink>
             </NavigationMenuItem>
@@ -83,4 +103,3 @@ export const DesktopNavigation = ({ user }: DesktopNavigationProps) => {
     </div>
   );
 };
-

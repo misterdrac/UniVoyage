@@ -18,4 +18,3 @@ export interface Destination {
   averageRating?: number; // 0–5, admin-set rating
   travellerRatingAverage?: number; // from submitted trip ratings
 }
-

@@ -12,9 +12,12 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TripTravellerRatingResponse {
-    private int stars;
-    private String comment;
-    private Instant updatedAt;
-    /** {@link com.univoyage.trip.model.ReviewModerationStatus} name: PENDING, APPROVED, or REJECTED. */
-    private String moderationStatus;
+  private int stars;
+  private String comment;
+  private Instant updatedAt;
+  /**
+   * {@link com.univoyage.trip.model.ReviewModerationStatus} name: PENDING,
+   * APPROVED, or REJECTED.
+   */
+  private String moderationStatus;
 }

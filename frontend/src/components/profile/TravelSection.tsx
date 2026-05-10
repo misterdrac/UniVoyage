@@ -1,6 +1,6 @@
-import { Edit2, Check, Trash2, X, type LucideIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { AutoComplete, type Option } from '@/components/ui/autocomplete';
+import { Edit2, Check, Trash2, X, type LucideIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { AutoComplete, type Option } from "@/components/ui/autocomplete";
 
 interface TravelSectionConfig {
   title: string;
@@ -138,7 +138,7 @@ export const TravelSection = ({
         <>
           <div className="mb-3">
             <AutoComplete
-              options={options.filter(opt => !tempItems.includes(opt.value))}
+              options={options.filter((opt) => !tempItems.includes(opt.value))}
               onValueChange={(option) => onAdd(option)}
               placeholder={placeholder}
               emptyMessage={emptyMessage}
@@ -157,7 +157,7 @@ export const TravelSection = ({
                     borderColor: `var(${badgeBorderVar})`,
                   }}
                 >
-                {getLabel(value)}
+                  {getLabel(value)}
                   <button
                     onClick={() => onRemove(value)}
                     className="hover:text-destructive transition-colors"
@@ -168,7 +168,9 @@ export const TravelSection = ({
                 </span>
               ))
             ) : (
-              <span className="text-xs text-muted-foreground italic">No items added</span>
+              <span className="text-xs text-muted-foreground italic">
+                No items added
+              </span>
             )}
           </div>
         </>
@@ -189,11 +191,12 @@ export const TravelSection = ({
               </span>
             ))
           ) : (
-            <span className="text-xs text-muted-foreground italic">None added</span>
+            <span className="text-xs text-muted-foreground italic">
+              None added
+            </span>
           )}
         </div>
       )}
     </div>
   );
 };
-

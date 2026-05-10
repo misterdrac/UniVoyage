@@ -1,6 +1,6 @@
-import { Card, CardContent } from '@/components/ui/card';
-import { AnimatedCounter } from '@/components/animations/AnimatedCounter';
-import type { LucideIcon } from 'lucide-react';
+import { Card, CardContent } from "@/components/ui/card";
+import { AnimatedCounter } from "@/components/animations/AnimatedCounter";
+import type { LucideIcon } from "lucide-react";
 
 interface StatCardProps {
   label: string;
@@ -26,7 +26,9 @@ export const StatCard = ({
       <CardContent className="pt-6">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-muted-foreground mb-1">{label}</p>
+            <p className="text-sm font-medium text-muted-foreground mb-1">
+              {label}
+            </p>
             <p className="text-2xl font-bold text-foreground">
               <AnimatedCounter end={value} />
             </p>
@@ -47,4 +49,3 @@ export const StatCard = ({
     </Card>
   );
 };
-

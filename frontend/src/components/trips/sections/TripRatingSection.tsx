@@ -1,132 +1,148 @@
-import { useEffect, useState, type ReactNode } from 'react'
-import { Star, Loader2 } from 'lucide-react'
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { apiService } from '@/services/api'
-import type { TripRating } from '@/types/trip'
+import { useEffect, useState, type ReactNode } from "react";
+import { Star, Loader2 } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { apiService } from "@/services/api";
+import type { TripRating } from "@/types/trip";
 
 interface TripRatingSectionProps {
-  tripId: number
-  destinationName: string
+  tripId: number;
+  destinationName: string;
 }
 
-const MAX_COMMENT_LENGTH = 280
+const MAX_COMMENT_LENGTH = 280;
 
 function moderationInfoBox(children: ReactNode) {
   return (
     <div
       className="rounded-lg border px-3 py-2 text-xs"
       style={{
-        backgroundColor: 'var(--trip-rating-notice-bg)',
-        borderColor: 'var(--trip-rating-notice-border)',
+        backgroundColor: "var(--trip-rating-notice-bg)",
+        borderColor: "var(--trip-rating-notice-border)",
       }}
       role="status"
     >
       {children}
     </div>
-  )
+  );
 }
 
 function ModerationNotice({ rating }: { rating: TripRating }) {
-  const status = rating.moderationStatus ?? 'APPROVED'
+  const status = rating.moderationStatus ?? "APPROVED";
 
-  if (status === 'PENDING') {
+  if (status === "PENDING") {
     return moderationInfoBox(
       <>
-        <p className="font-medium" style={{ color: 'var(--trip-rating-notice-title)' }}>
+        <p
+          className="font-medium"
+          style={{ color: "var(--trip-rating-notice-title)" }}
+        >
           Review pending
         </p>
         <p className="mt-1.5 leading-relaxed text-muted-foreground">
           Your submission is pending moderation and is not yet published.
         </p>
       </>,
-    )
+    );
   }
 
-  if (status === 'REJECTED') {
+  if (status === "REJECTED") {
     return moderationInfoBox(
       <>
-        <p className="font-medium" style={{ color: 'var(--trip-rating-notice-title)' }}>
+        <p
+          className="font-medium"
+          style={{ color: "var(--trip-rating-notice-title)" }}
+        >
           Review not published
         </p>
         <p className="mt-1.5 leading-relaxed text-muted-foreground">
-          Your review did not align with our content policy. You may revise your rating or comment below and resubmit.
+          Your review did not align with our content policy. You may revise your
+          rating or comment below and resubmit.
         </p>
       </>,
-    )
+    );
   }
 
-  return null
+  return null;
 }
 
-export function TripRatingSection({ tripId, destinationName }: TripRatingSectionProps) {
-  const [rating, setRating] = useState<TripRating | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [hoveredStar, setHoveredStar] = useState<number | null>(null)
-  const [selectedStar, setSelectedStar] = useState<number | null>(null)
-  const [comment, setComment] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const [isEditing, setIsEditing] = useState(false)
+export function TripRatingSection({
+  tripId,
+  destinationName,
+}: TripRatingSectionProps) {
+  const [rating, setRating] = useState<TripRating | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hoveredStar, setHoveredStar] = useState<number | null>(null);
+  const [selectedStar, setSelectedStar] = useState<number | null>(null);
+  const [comment, setComment] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
 
   // Load existing rating on mount
   useEffect(() => {
-    let isMounted = true
+    let isMounted = true;
 
     const loadRating = async () => {
       try {
-        const result = await apiService.getTripRating(tripId)
+        const result = await apiService.getTripRating(tripId);
         if (isMounted) {
-          setRating(result.rating ?? null)
+          setRating(result.rating ?? null);
           if (result.rating) {
-            setSelectedStar(result.rating.stars)
-            setComment(result.rating.comment ?? '')
+            setSelectedStar(result.rating.stars);
+            setComment(result.rating.comment ?? "");
           }
         }
       } catch {
         // No rating yet — that's fine
       } finally {
-        if (isMounted) setIsLoading(false)
+        if (isMounted) setIsLoading(false);
       }
-    }
+    };
 
-    loadRating()
-    return () => { isMounted = false }
-  }, [tripId])
+    loadRating();
+    return () => {
+      isMounted = false;
+    };
+  }, [tripId]);
 
   const handleSubmit = async () => {
-    if (!selectedStar) return
-    setIsSubmitting(true)
-    setError(null)
+    if (!selectedStar) return;
+    setIsSubmitting(true);
+    setError(null);
 
     try {
-      const result = await apiService.submitTripRating(tripId, selectedStar, comment.trim() || undefined)
+      const result = await apiService.submitTripRating(
+        tripId,
+        selectedStar,
+        comment.trim() || undefined,
+      );
       if (result.success && result.rating) {
-        setRating(result.rating)
-        setIsEditing(false)
+        setRating(result.rating);
+        setIsEditing(false);
       } else {
-        setError(result.error ?? 'Failed to submit rating')
+        setError(result.error ?? "Failed to submit rating");
       }
     } catch {
-      setError('Failed to submit rating. Please try again later.')
+      setError("Failed to submit rating. Please try again later.");
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const handleEdit = () => {
-    setIsEditing(true)
-    setError(null)
-  }
+    setIsEditing(true);
+    setError(null);
+  };
 
   const handleCancelEdit = () => {
-    setIsEditing(false)
-    setSelectedStar(rating?.stars ?? null)
-    setComment(rating?.comment ?? '')
-    setError(null)
-  }
+    setIsEditing(false);
+    setSelectedStar(rating?.stars ?? null);
+    setComment(rating?.comment ?? "");
+    setError(null);
+  };
 
-  const displayStars = hoveredStar ?? selectedStar ?? 0
+  const displayStars = hoveredStar ?? selectedStar ?? 0;
 
   if (isLoading) {
     return (
@@ -136,7 +152,7 @@ export function TripRatingSection({ tripId, destinationName }: TripRatingSection
           <p className="text-sm">Loading your rating...</p>
         </div>
       </Card>
-    )
+    );
   }
 
   return (
@@ -156,15 +172,19 @@ export function TripRatingSection({ tripId, destinationName }: TripRatingSection
             {[1, 2, 3, 4, 5].map((star) => (
               <Star
                 key={star}
-                className={`size-6 ${star <= rating.stars ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground/30'}`}
+                className={`size-6 ${star <= rating.stars ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/30"}`}
               />
             ))}
-            <span className="ml-2 text-sm font-semibold text-foreground">{rating.stars}/5</span>
+            <span className="ml-2 text-sm font-semibold text-foreground">
+              {rating.stars}/5
+            </span>
           </div>
 
           {/* Comment */}
           {rating.comment && (
-            <p className="text-sm text-muted-foreground italic wrap-break-word">"{rating.comment}"</p>
+            <p className="text-sm text-muted-foreground italic wrap-break-word">
+              "{rating.comment}"
+            </p>
           )}
 
           <ModerationNotice rating={rating} />
@@ -192,13 +212,13 @@ export function TripRatingSection({ tripId, destinationName }: TripRatingSection
                 onMouseEnter={() => setHoveredStar(star)}
                 onMouseLeave={() => setHoveredStar(null)}
                 className="cursor-pointer transition-transform hover:scale-110"
-                aria-label={`Rate ${star} star${star !== 1 ? 's' : ''}`}
+                aria-label={`Rate ${star} star${star !== 1 ? "s" : ""}`}
               >
                 <Star
                   className={`size-7 transition-colors ${
                     star <= displayStars
-                      ? 'fill-yellow-400 text-yellow-400'
-                      : 'text-muted-foreground/30'
+                      ? "fill-yellow-400 text-yellow-400"
+                      : "text-muted-foreground/30"
                   }`}
                 />
               </button>
@@ -209,7 +229,9 @@ export function TripRatingSection({ tripId, destinationName }: TripRatingSection
           <div className="space-y-1">
             <textarea
               value={comment}
-              onChange={(e) => setComment(e.target.value.slice(0, MAX_COMMENT_LENGTH))}
+              onChange={(e) =>
+                setComment(e.target.value.slice(0, MAX_COMMENT_LENGTH))
+              }
               placeholder="Share your experience (optional)..."
               rows={3}
               className="w-full px-3 py-2 text-sm rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary/50"
@@ -233,7 +255,7 @@ export function TripRatingSection({ tripId, destinationName }: TripRatingSection
                   Submitting...
                 </>
               ) : (
-                'Submit Rating'
+                "Submit Rating"
               )}
             </Button>
             {isEditing && (
@@ -245,5 +267,5 @@ export function TripRatingSection({ tripId, destinationName }: TripRatingSection
         </div>
       )}
     </Card>
-  )
+  );
 }

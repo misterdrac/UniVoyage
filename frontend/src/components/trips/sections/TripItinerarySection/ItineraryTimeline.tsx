@@ -1,11 +1,14 @@
-import { Card, CardContent } from '@/components/ui/card'
-import { CalendarDays, Clock, ClipboardCheck, Sparkles } from 'lucide-react'
-import type { NormalizedItinerary, NormalizedItinerarySegment } from '@/types/itinerary'
+import { Card, CardContent } from "@/components/ui/card";
+import { CalendarDays, Clock, ClipboardCheck, Sparkles } from "lucide-react";
+import type {
+  NormalizedItinerary,
+  NormalizedItinerarySegment,
+} from "@/types/itinerary";
 
 interface ItineraryTimelineProps {
-  itinerary: NormalizedItinerary
-  locationLabel: string
-  durationInDays: number
+  itinerary: NormalizedItinerary;
+  locationLabel: string;
+  durationInDays: number;
 }
 
 const TimelineDot = () => (
@@ -15,27 +18,44 @@ const TimelineDot = () => (
     </div>
     <div className="mt-2 w-px flex-1 bg-linear-to-b from-primary/70 via-primary/20 to-transparent" />
   </div>
-)
+);
 
-const SegmentsGrid = ({ segments }: { segments: NormalizedItinerarySegment[] }) => {
-  if (!segments.length) return null
+const SegmentsGrid = ({
+  segments,
+}: {
+  segments: NormalizedItinerarySegment[];
+}) => {
+  if (!segments.length) return null;
   return (
     <div className="mt-4 grid gap-3 md:grid-cols-3">
       {segments.map((segment, idx) => (
-        <div key={`${segment.time}-${idx}`} className="rounded-xl border bg-card/80 p-3 shadow-sm">
+        <div
+          key={`${segment.time}-${idx}`}
+          className="rounded-xl border bg-card/80 p-3 shadow-sm"
+        >
           <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             <Clock className="h-3.5 w-3.5 text-primary" />
             {segment.time}
           </div>
-          <p className="mt-2 text-sm font-medium text-foreground">{segment.activity}</p>
-          {segment.details && <p className="mt-1 text-sm text-muted-foreground">{segment.details}</p>}
+          <p className="mt-2 text-sm font-medium text-foreground">
+            {segment.activity}
+          </p>
+          {segment.details && (
+            <p className="mt-1 text-sm text-muted-foreground">
+              {segment.details}
+            </p>
+          )}
         </div>
       ))}
     </div>
-  )
-}
+  );
+};
 
-export function ItineraryTimeline({ itinerary, locationLabel, durationInDays }: ItineraryTimelineProps) {
+export function ItineraryTimeline({
+  itinerary,
+  locationLabel,
+  durationInDays,
+}: ItineraryTimelineProps) {
   return (
     <div className="space-y-8">
       {(itinerary.intro || itinerary.days.length === 0) && (
@@ -44,15 +64,18 @@ export function ItineraryTimeline({ itinerary, locationLabel, durationInDays }: 
             <div className="flex items-start gap-3">
               <Sparkles className="h-5 w-5 text-primary" />
               <div>
-                <p className="text-sm font-semibold text-foreground">{itinerary.intro || 'Live trip insights'}</p>
+                <p className="text-sm font-semibold text-foreground">
+                  {itinerary.intro || "Live trip insights"}
+                </p>
                 <p className="text-sm text-muted-foreground">
-                  {locationLabel} • {durationInDays} {durationInDays === 1 ? 'day' : 'days'}
+                  {locationLabel} • {durationInDays}{" "}
+                  {durationInDays === 1 ? "day" : "days"}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <CalendarDays className="h-4 w-4 text-primary" />
-              {itinerary.days[0]?.dateLabel ?? ''}
+              {itinerary.days[0]?.dateLabel ?? ""}
             </div>
           </CardContent>
         </Card>
@@ -60,7 +83,10 @@ export function ItineraryTimeline({ itinerary, locationLabel, durationInDays }: 
 
       <div className="space-y-10">
         {itinerary.days.map((day) => (
-          <div key={`itinerary-day-${day.dayNumber}-${day.title}`} className="grid grid-cols-[32px_1fr] gap-6">
+          <div
+            key={`itinerary-day-${day.dayNumber}-${day.title}`}
+            className="grid grid-cols-[32px_1fr] gap-6"
+          >
             <TimelineDot />
             <div className="rounded-2xl border bg-linear-to-br from-background via-card to-background p-5 shadow-sm">
               <div className="flex flex-wrap items-center justify-between gap-3">
@@ -68,7 +94,9 @@ export function ItineraryTimeline({ itinerary, locationLabel, durationInDays }: 
                   <p className="text-xs uppercase tracking-wide text-muted-foreground">
                     Day {day.dayNumber} • {day.dateLabel}
                   </p>
-                  <h4 className="text-lg font-semibold text-foreground">{day.title}</h4>
+                  <h4 className="text-lg font-semibold text-foreground">
+                    {day.title}
+                  </h4>
                 </div>
                 {day.vibe && (
                   <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
@@ -76,7 +104,11 @@ export function ItineraryTimeline({ itinerary, locationLabel, durationInDays }: 
                   </span>
                 )}
               </div>
-              {day.summary && <p className="mt-2 text-sm text-muted-foreground">{day.summary}</p>}
+              {day.summary && (
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {day.summary}
+                </p>
+              )}
               <SegmentsGrid segments={day.segments} />
 
               {(day.dining.length > 0 || day.tips.length > 0) && (
@@ -127,9 +159,16 @@ export function ItineraryTimeline({ itinerary, locationLabel, durationInDays }: 
               </p>
               <div className="grid gap-4 sm:grid-cols-2">
                 {itinerary.logistics.map((item, idx) => (
-                  <div key={`${item.title}-${idx}`} className="rounded-xl border bg-muted/30 p-4">
-                    <p className="text-sm font-semibold text-foreground">{item.title}</p>
-                    <p className="text-sm text-muted-foreground mt-1">{item.detail}</p>
+                  <div
+                    key={`${item.title}-${idx}`}
+                    className="rounded-xl border bg-muted/30 p-4"
+                  >
+                    <p className="text-sm font-semibold text-foreground">
+                      {item.title}
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {item.detail}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -141,12 +180,12 @@ export function ItineraryTimeline({ itinerary, locationLabel, durationInDays }: 
       {itinerary.closingNote && (
         <Card className="border-0 bg-card/80 text-center shadow-md">
           <CardContent className="p-6">
-            <p className="text-sm text-muted-foreground">{itinerary.closingNote}</p>
+            <p className="text-sm text-muted-foreground">
+              {itinerary.closingNote}
+            </p>
           </CardContent>
         </Card>
       )}
     </div>
-  )
+  );
 }
-
-

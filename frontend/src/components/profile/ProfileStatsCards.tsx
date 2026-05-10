@@ -1,7 +1,7 @@
-import { useMemo } from 'react';
-import { Globe, Languages, Award, Timer } from 'lucide-react';
-import { StatCard } from './StatCard';
-import type { User } from '@/types/user';
+import { useMemo } from "react";
+import { Globe, Languages, Award, Timer } from "lucide-react";
+import { StatCard } from "./StatCard";
+import type { User } from "@/types/user";
 
 interface ProfileStatsCardsProps {
   user: User;
@@ -16,11 +16,11 @@ export const ProfileStatsCards = ({ user }: ProfileStatsCardsProps) => {
       memberFor: user.dateOfRegister
         ? Math.floor(
             (new Date().getTime() - new Date(user.dateOfRegister).getTime()) /
-            (1000 * 60 * 60 * 24)
+              (1000 * 60 * 60 * 24),
           )
         : 0,
     }),
-    [user.visitedCountries, user.languages, user.hobbies, user.dateOfRegister]
+    [user.visitedCountries, user.languages, user.hobbies, user.dateOfRegister],
   );
 
   return (
@@ -61,4 +61,3 @@ export const ProfileStatsCards = ({ user }: ProfileStatsCardsProps) => {
     </div>
   );
 };
-
