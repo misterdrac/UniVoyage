@@ -129,6 +129,12 @@ jobs:
           git checkout --detach FETCH_HEAD
       - name: Build Docker image
         run: docker build -t univoyage-backend:main-${{ github.sha }} ./backend
+      - name: Save image for Trivy job
+        run: docker save univoyage-backend:main-${{ github.sha }} | gzip > backend-image.tar.gz
+      - uses: actions/upload-artifact@v4
+        with:
+          name: backend-docker-image
+          path: backend-image.tar.gz
 
   sbom_generation:
     name: "[Security] Backend SBOM generation"
@@ -167,6 +173,11 @@ jobs:
           git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
           git fetch --depth=1 origin "${{ github.sha }}"
           git checkout --detach FETCH_HEAD
+      - uses: actions/download-artifact@v4
+        with:
+          name: backend-docker-image
+      - name: Load Docker image
+        run: gunzip -c backend-image.tar.gz | docker load
       - name: Install Trivy
         run: |
           sudo apt-get update
@@ -178,7 +189,7 @@ jobs:
       - name: Trivy scan for pom.xml
         run: trivy fs --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 backend/pom.xml
       - name: Trivy scan for Docker image
-        run: trivy image --scanners vuln --vuln-type library --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 univoyage-backend:main-${{ github.sha }}
+        run: trivy image --scanners vuln --pkg-types library --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 univoyage-backend:main-${{ github.sha }}
 
   frontend_build:
     name: "[Build] Frontend build"
