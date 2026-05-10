@@ -17,27 +17,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  dependency_review_pr:
-    name: "[Security] Backend dependency review"
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    container: maven:3-eclipse-temurin-23
-    steps:
-      - name: Clone repository
-        working-directory: .
-        run: |
-          git config --global --add safe.directory "$(pwd)"
-          git init .
-          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
-          git fetch --depth=1 origin "${{ github.sha }}"
-          git checkout --detach FETCH_HEAD
-      - name: Dependency check (Maven tree)
-        run: |
-          chmod +x backend/mvnw
-          cd backend
-          ./mvnw -B --no-transfer-progress dependency:tree
-
   validate_backend:
     name: "[Build] Backend Maven validate"
     runs-on: ubuntu-latest
@@ -83,10 +62,10 @@ jobs:
           chmod +x mvnw
           ./mvnw -B --no-transfer-progress -DskipTests clean package
 
-  docker_and_security_scans_pr:
-    name: "[Docker/Security] Backend Docker and Trivy scans"
+  docker_build_backend_pr:
+    name: "[Docker] Backend Docker build"
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     needs: build_backend
     steps:
       - name: Clone repository
@@ -99,25 +78,19 @@ jobs:
           git checkout --detach FETCH_HEAD
       - name: Build Docker image
         run: docker build -t univoyage-backend:pr-${{ github.sha }} ./backend
-      - name: Install Trivy
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y wget gnupg lsb-release
-          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo gpg --dearmor -o /usr/share/keyrings/trivy.gpg
-          echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/trivy.list
-          sudo apt-get update
-          sudo apt-get install -y trivy
-      - name: Trivy scan for pom.xml
-        run: trivy fs --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 backend/pom.xml
-      - name: Trivy scan for Docker image
-        run: trivy image --scanners vuln --pkg-types library --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 univoyage-backend:pr-${{ github.sha }}
+      - name: Save image for Trivy job
+        run: docker save univoyage-backend:pr-${{ github.sha }} | gzip > backend-image.tar.gz
+      - uses: actions/upload-artifact@v4.6.2
+        with:
+          name: backend-docker-image-pr
+          path: backend-image.tar.gz
 
   test_backend:
     name: "[Test] Backend tests"
     runs-on: ubuntu-latest
     container: maven:3-eclipse-temurin-23
     timeout-minutes: 20
-    needs: docker_and_security_scans_pr
+    needs: docker_build_backend_pr
     services:
       postgres:
         image: postgres:16
@@ -157,11 +130,11 @@ jobs:
           chmod +x mvnw
           ./mvnw -B --no-transfer-progress test
 
-  code_format_validate:
-    name: "[Security] Backend code format validate"
+  backend_maven_quality_pr:
+    name: "[Security] Backend format, SBOM & dependency review"
     runs-on: ubuntu-latest
     container: maven:3-eclipse-temurin-23
-    timeout-minutes: 10
+    timeout-minutes: 15
     needs: test_backend
     defaults:
       run:
@@ -179,35 +152,20 @@ jobs:
         run: |
           chmod +x mvnw
           ./mvnw -B --no-transfer-progress formatter:validate
-
-  sbom_generation_pr:
-    name: "[Security] Backend SBOM generation"
-    runs-on: ubuntu-latest
-    container: maven:3-eclipse-temurin-23
-    timeout-minutes: 10
-    needs: code_format_validate
-    defaults:
-      run:
-        working-directory: backend
-    steps:
-      - name: Clone repository
-        working-directory: .
-        run: |
-          git config --global --add safe.directory "$(pwd)"
-          git init .
-          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
-          git fetch --depth=1 origin "${{ github.sha }}"
-          git checkout --detach FETCH_HEAD
       - name: Generate SBOM (CycloneDX)
         run: |
           chmod +x mvnw
           ./mvnw -B --no-transfer-progress org.cyclonedx:cyclonedx-maven-plugin:2.9.1:makeAggregateBom
+      - name: Dependency tree (review)
+        run: |
+          chmod +x mvnw
+          ./mvnw -B --no-transfer-progress dependency:tree
 
-  trivy_backend_codebase_scan_pr:
-    name: "[Security] Backend Trivy codebase scan"
+  trivy_backend_security_pr:
+    name: "[Security] Backend Trivy scans"
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    needs: [docker_and_security_scans_pr, sbom_generation_pr]
+    timeout-minutes: 20
+    needs: [docker_build_backend_pr, backend_maven_quality_pr]
     steps:
       - name: Clone repository
         working-directory: .
@@ -217,6 +175,11 @@ jobs:
           git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
           git fetch --depth=1 origin "${{ github.sha }}"
           git checkout --detach FETCH_HEAD
+      - uses: actions/download-artifact@v4.3.0
+        with:
+          name: backend-docker-image-pr
+      - name: Load Docker image
+        run: gunzip -c backend-image.tar.gz | docker load
       - name: Install Trivy
         run: |
           sudo apt-get update
@@ -225,5 +188,9 @@ jobs:
           echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/trivy.list
           sudo apt-get update
           sudo apt-get install -y trivy
+      - name: Trivy scan for pom.xml
+        run: trivy fs --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 backend/pom.xml
+      - name: Trivy scan for Docker image
+        run: trivy image --scanners vuln --pkg-types library --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 univoyage-backend:pr-${{ github.sha }}
       - name: Trivy full backend codebase scan
         run: trivy fs --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 backend
