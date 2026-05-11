@@ -8,6 +8,9 @@ For product/business overview, see:
 For full CI/CD and pipeline diagrams, see:
 - `docs/ci-cd-pipelines.md`
 
+Docker stack logging (paths, rotation, env knobs):
+- `docs/logging-docker.md`
+
 ---
 
 ## Repository Structure

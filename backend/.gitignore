@@ -5,7 +5,7 @@ target/
 !**/src/test/**/target/
 
 *.log
-# Docker Compose host bind mount (./logs/spring → /app/logs)
+# Docker Compose bind mounts (./logs/backend, ./logs/postgres → containers)
 logs/
 *.tmp
 *.bak
@@ -48,5 +48,3 @@ flyway.toml.bak
 flyway.user.toml
 flyway.log
 
-# Docker Compose log mounts (spring + postgres)
-logs/
