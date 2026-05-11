@@ -336,9 +336,7 @@ const AdminCountriesPage: React.FC = () => {
                     onChange={(e) =>
                       setForm((f) => ({
                         ...f,
-                        currencyCode: e.target.value
-                          .slice(0, 3)
-                          .toUpperCase(),
+                        currencyCode: e.target.value.slice(0, 3).toUpperCase(),
                       }))
                     }
                     maxLength={3}
@@ -371,13 +369,17 @@ const AdminCountriesPage: React.FC = () => {
               </div>
             ) : (
               <div className="p-6 flex flex-col gap-4 flex-1 text-sm overflow-y-auto">
-                <h3 className="text-lg font-semibold">{selected?.countryName}</h3>
+                <h3 className="text-lg font-semibold">
+                  {selected?.countryName}
+                </h3>
                 <dl className="space-y-3 text-muted-foreground">
                   <div>
                     <dt className="text-xs uppercase tracking-wide text-muted-foreground/80">
                       ISO
                     </dt>
-                    <dd className="font-mono text-sm mt-1">{selected?.isoCode}</dd>
+                    <dd className="font-mono text-sm mt-1">
+                      {selected?.isoCode}
+                    </dd>
                   </div>
                   <div>
                     <dt className="text-xs uppercase tracking-wide text-muted-foreground/80">

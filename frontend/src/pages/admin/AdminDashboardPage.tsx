@@ -211,9 +211,7 @@ const AdminDashboardPage: React.FC = () => {
                 style={{ color: "var(--ds-contrast-fg)" }}
               />
             </div>
-            <h3 className="text-2xl font-bold text-foreground mb-2">
-              HOBBIES
-            </h3>
+            <h3 className="text-2xl font-bold text-foreground mb-2">HOBBIES</h3>
             <p className="text-muted-foreground">
               Manage interest tags for profiles and signup
             </p>

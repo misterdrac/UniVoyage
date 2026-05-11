@@ -95,8 +95,7 @@ const AdminDestinationsPage: React.FC = () => {
 
   const { data: reference } = useReferenceDictionaries();
   const countryOptions = useMemo(
-    () =>
-      reference?.countries ? countriesToOptions(reference.countries) : [],
+    () => (reference?.countries ? countriesToOptions(reference.countries) : []),
     [reference?.countries],
   );
 

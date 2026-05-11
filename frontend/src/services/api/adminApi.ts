@@ -680,8 +680,11 @@ export const adminApi: {
   },
 
   async deleteAdminCountry(this: ApiClient, isoCode: string) {
-    await this.request<void>(`/admin/countries/${encodeURIComponent(isoCode)}`, {
-      method: "DELETE",
-    });
+    await this.request<void>(
+      `/admin/countries/${encodeURIComponent(isoCode)}`,
+      {
+        method: "DELETE",
+      },
+    );
   },
 };

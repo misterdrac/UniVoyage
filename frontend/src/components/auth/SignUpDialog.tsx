@@ -40,8 +40,7 @@ export function SignUpDialog({
     useReferenceDictionaries();
 
   const countryOptions = useMemo(
-    () =>
-      reference?.countries ? countriesToOptions(reference.countries) : [],
+    () => (reference?.countries ? countriesToOptions(reference.countries) : []),
     [reference?.countries],
   );
   const hobbyOptions = useMemo(
@@ -49,8 +48,7 @@ export function SignUpDialog({
     [reference?.hobbies],
   );
   const languageOptions = useMemo(
-    () =>
-      reference?.languages ? languagesToOptions(reference.languages) : [],
+    () => (reference?.languages ? languagesToOptions(reference.languages) : []),
     [reference?.languages],
   );
 
