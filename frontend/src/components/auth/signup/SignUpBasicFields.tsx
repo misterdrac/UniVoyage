@@ -1,7 +1,6 @@
 import { User, Mail } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { AutoComplete, type Option } from "@/components/ui/autocomplete";
-import { COUNTRIES } from "@/lib/constants";
 
 interface SignUpBasicFieldsProps {
   name: string;
@@ -12,6 +11,8 @@ interface SignUpBasicFieldsProps {
   setEmail: (value: string) => void;
   country: Option | undefined;
   setCountry: (value: Option | undefined) => void;
+  countryOptions: Option[];
+  referenceLoading?: boolean;
 }
 
 export const SignUpBasicFields = ({
@@ -23,6 +24,8 @@ export const SignUpBasicFields = ({
   setEmail,
   country,
   setCountry,
+  countryOptions,
+  referenceLoading = false,
 }: SignUpBasicFieldsProps) => {
   return (
     <>
@@ -102,11 +105,12 @@ export const SignUpBasicFields = ({
             Country of Origin <span className="text-destructive">*</span>
           </label>
           <AutoComplete
-            options={COUNTRIES}
+            options={countryOptions}
             placeholder="Select your country..."
             emptyMessage="No countries found"
             value={country}
             onValueChange={setCountry}
+            disabled={referenceLoading}
           />
         </div>
       </div>

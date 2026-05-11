@@ -13,6 +13,9 @@ import {
   Settings,
   ExternalLink,
   MessageSquare,
+  Sparkles,
+  Languages,
+  Globe2,
 } from "lucide-react";
 import { ROUTE_PATHS } from "@/config/routes";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
@@ -111,12 +114,12 @@ const AdminDashboardPage: React.FC = () => {
           <h2 className="text-4xl font-bold text-foreground mb-3">
             Admin Dashboard
           </h2>
-          <p className="text-muted-foreground text-lg max-w-md">
-            Manage users and destinations for the UniVoyage platform
+          <p className="text-muted-foreground text-lg max-w-md mx-auto">
+            Manage users, destinations, and reference data
           </p>
         </div>
 
-        <div className="grid w-full max-w-4xl grid-cols-1 gap-6 sm:grid-cols-3 sm:items-stretch">
+        <div className="grid w-full max-w-5xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 sm:items-stretch">
           {/* Users Button */}
           <button
             onClick={() => navigate(ROUTE_PATHS.ADMIN_USERS)}
@@ -188,6 +191,81 @@ const AdminDashboardPage: React.FC = () => {
             <h3 className="text-2xl font-bold text-foreground mb-2">REVIEWS</h3>
             <p className="text-muted-foreground">
               Moderate traveller reviews and comments
+            </p>
+          </button>
+
+          <button
+            onClick={() => navigate(ROUTE_PATHS.ADMIN_HOBBIES)}
+            className="group flex h-full flex-col bg-card hover:bg-card/80 rounded-2xl p-8 border shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 text-left"
+          >
+            <div
+              className="w-16 h-16 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform"
+              style={{
+                background:
+                  "linear-gradient(to bottom right, #8b5cf6, #6d28d9)",
+                boxShadow: `0 10px 15px -3px rgba(139, 92, 246, 0.35)`,
+              }}
+            >
+              <Sparkles
+                className="w-8 h-8"
+                style={{ color: "var(--ds-contrast-fg)" }}
+              />
+            </div>
+            <h3 className="text-2xl font-bold text-foreground mb-2">
+              HOBBIES
+            </h3>
+            <p className="text-muted-foreground">
+              Manage interest tags for profiles and signup
+            </p>
+          </button>
+
+          <button
+            onClick={() => navigate(ROUTE_PATHS.ADMIN_LANGUAGES)}
+            className="group flex h-full flex-col bg-card hover:bg-card/80 rounded-2xl p-8 border shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 text-left"
+          >
+            <div
+              className="w-16 h-16 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform"
+              style={{
+                background:
+                  "linear-gradient(to bottom right, #0ea5e9, #0369a1)",
+                boxShadow: `0 10px 15px -3px rgba(14, 165, 233, 0.35)`,
+              }}
+            >
+              <Languages
+                className="w-8 h-8"
+                style={{ color: "var(--ds-contrast-fg)" }}
+              />
+            </div>
+            <h3 className="text-2xl font-bold text-foreground mb-2">
+              LANGUAGES
+            </h3>
+            <p className="text-muted-foreground">
+              Manage spoken languages for profiles
+            </p>
+          </button>
+
+          <button
+            onClick={() => navigate(ROUTE_PATHS.ADMIN_COUNTRIES)}
+            className="group flex h-full flex-col bg-card hover:bg-card/80 rounded-2xl p-8 border shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 text-left"
+          >
+            <div
+              className="w-16 h-16 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform"
+              style={{
+                background:
+                  "linear-gradient(to bottom right, #10b981, #047857)",
+                boxShadow: `0 10px 15px -3px rgba(16, 185, 129, 0.35)`,
+              }}
+            >
+              <Globe2
+                className="w-8 h-8"
+                style={{ color: "var(--ds-contrast-fg)" }}
+              />
+            </div>
+            <h3 className="text-2xl font-bold text-foreground mb-2">
+              COUNTRIES
+            </h3>
+            <p className="text-muted-foreground">
+              Manage countries for profiles and destinations
             </p>
           </button>
         </div>

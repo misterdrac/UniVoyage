@@ -1,3 +1,4 @@
+-- sort_order, active use column defaults from V1 (0, true); manage via CMS / API as needed.
 INSERT INTO countries (iso_code, country_name, currency_code, currency_name) VALUES
 ('AF', 'Afghanistan', 'AFN', 'Afghan Afghani'),
 ('AL', 'Albania', 'ALL', 'Albanian Lek'),

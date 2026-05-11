@@ -15,11 +15,12 @@ public class LanguageDto {
 
   private String langCode;
   private String langName;
+  private String emoji;
 
   public static LanguageDto from(Language entity) {
     if (entity == null)
       return null;
     return LanguageDto.builder().langCode(entity.getLangCode()).langName(entity.getLangName())
-        .build();
+        .emoji(entity.getEmoji()).build();
   }
 }
