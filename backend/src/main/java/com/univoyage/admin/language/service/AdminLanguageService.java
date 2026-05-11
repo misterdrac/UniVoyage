@@ -21,9 +21,9 @@ public class AdminLanguageService {
 
   @Transactional(readOnly = true)
   public AdminLanguagePageResponse list(String search, Pageable pageable) {
-    Page<Language> page =
-        (search == null || search.isBlank()) ? languageRepository.findAll(pageable)
-            : languageRepository.search(search.trim(), pageable);
+    Page<Language> page = (search == null || search.isBlank())
+        ? languageRepository.findAll(pageable)
+        : languageRepository.search(search.trim(), pageable);
     return new AdminLanguagePageResponse(page.getContent().stream().map(this::toDto).toList(),
         page.getTotalElements(), page.getTotalPages(), page.getSize(), page.getNumber());
   }
@@ -95,8 +95,8 @@ public class AdminLanguageService {
   }
 
   private AdminLanguageResponse toDto(Language l) {
-    return new AdminLanguageResponse(l.getLangCode(), l.getLangName(), l.getEmoji(), l.getSortOrder(),
-        l.isActive());
+    return new AdminLanguageResponse(l.getLangCode(), l.getLangName(), l.getEmoji(),
+        l.getSortOrder(), l.isActive());
   }
 
   private static String trimToNull(String s) {

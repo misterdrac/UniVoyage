@@ -21,9 +21,9 @@ public class AdminHobbyService {
 
   @Transactional(readOnly = true)
   public AdminHobbyPageResponse list(String search, Pageable pageable) {
-    Page<Hobby> page =
-        (search == null || search.isBlank()) ? hobbyRepository.findAll(pageable)
-            : hobbyRepository.search(search.trim(), pageable);
+    Page<Hobby> page = (search == null || search.isBlank())
+        ? hobbyRepository.findAll(pageable)
+        : hobbyRepository.search(search.trim(), pageable);
     return new AdminHobbyPageResponse(page.getContent().stream().map(this::toDto).toList(),
         page.getTotalElements(), page.getTotalPages(), page.getSize(), page.getNumber());
   }
@@ -107,7 +107,6 @@ public class AdminHobbyService {
 
   private static void validateHobbySlug(String key) {
     if (key.isBlank() || !key.matches("[a-z][a-z0-9_]{0,49}"))
-      throw new IllegalArgumentException(
-          "Invalid hobby key; must match [a-z][a-z0-9_]{0,49}");
+      throw new IllegalArgumentException("Invalid hobby key; must match [a-z][a-z0-9_]{0,49}");
   }
 }
