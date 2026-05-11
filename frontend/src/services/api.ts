@@ -15,6 +15,7 @@ import { hotelsApi, type HotelsApi } from "./api/hotelsApi";
 import { adminApi, type AdminApi } from "./api/adminApi";
 import { heatmapApi, type HeatmapApi } from "./api/heatmapApi";
 import { quizApi, type QuizApi } from "./api/quizApi";
+import { referenceApi, type ReferenceApi } from "./api/referenceApi";
 
 /**
  * Main API service class
@@ -38,6 +39,7 @@ Object.assign(
   adminApi,
   heatmapApi,
   quizApi,
+  referenceApi,
 );
 
 /**
@@ -57,7 +59,8 @@ interface ApiService
     HotelsApi,
     AdminApi,
     HeatmapApi,
-    QuizApi {}
+    QuizApi,
+    ReferenceApi {}
 
 /**
  * Singleton API service instance

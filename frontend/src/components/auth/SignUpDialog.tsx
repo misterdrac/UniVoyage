@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
@@ -16,6 +16,12 @@ import {
   SignUpFormActions,
   useSignUpForm,
 } from "./signup";
+import { useReferenceDictionaries } from "@/hooks/useReferenceDictionaries";
+import {
+  countriesToOptions,
+  hobbiesToOptions,
+  languagesToOptions,
+} from "@/lib/referenceOptions";
 
 interface SignUpDialogProps {
   open: boolean;
@@ -29,6 +35,24 @@ export function SignUpDialog({
   onLoginClick,
 }: SignUpDialogProps) {
   const { signup, loadUser } = useAuth();
+
+  const { data: reference, isLoading: referenceLoading } =
+    useReferenceDictionaries();
+
+  const countryOptions = useMemo(
+    () =>
+      reference?.countries ? countriesToOptions(reference.countries) : [],
+    [reference?.countries],
+  );
+  const hobbyOptions = useMemo(
+    () => (reference?.hobbies ? hobbiesToOptions(reference.hobbies) : []),
+    [reference?.hobbies],
+  );
+  const languageOptions = useMemo(
+    () =>
+      reference?.languages ? languagesToOptions(reference.languages) : [],
+    [reference?.languages],
+  );
 
   const handleSuccess = useCallback(() => {
     toast.success("Account created successfully! Welcome to UniVoyage!");
@@ -126,6 +150,8 @@ export function SignUpDialog({
             setEmail={setEmail}
             country={country}
             setCountry={setCountry}
+            countryOptions={countryOptions}
+            referenceLoading={referenceLoading}
           />
 
           <SignUpInterestsFields
@@ -133,6 +159,9 @@ export function SignUpDialog({
             setHobbies={setHobbies}
             languages={languages}
             setLanguages={setLanguages}
+            hobbyOptions={hobbyOptions}
+            languageOptions={languageOptions}
+            referenceLoading={referenceLoading}
           />
 
           <SignUpPasswordFields

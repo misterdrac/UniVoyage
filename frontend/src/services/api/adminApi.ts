@@ -103,6 +103,97 @@ export interface CreateDestinationRequest {
  */
 export interface UpdateDestinationRequest extends CreateDestinationRequest {}
 
+export interface AdminHobby {
+  id: number;
+  hobbyName: string;
+  displayLabel: string;
+  emoji: string | null;
+  sortOrder: number;
+  active: boolean;
+}
+
+export interface AdminHobbyPage {
+  content: AdminHobby[];
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
+}
+
+export interface CreateAdminHobbyRequest {
+  hobbyName: string;
+  displayLabel: string;
+  emoji: string;
+}
+
+export interface PatchAdminHobbyRequest {
+  hobbyName?: string;
+  displayLabel?: string;
+  emoji?: string | null;
+  sortOrder?: number;
+  active?: boolean;
+}
+
+export interface AdminLanguage {
+  langCode: string;
+  langName: string;
+  emoji: string | null;
+  sortOrder: number;
+  active: boolean;
+}
+
+export interface AdminLanguagePage {
+  content: AdminLanguage[];
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
+}
+
+export interface CreateAdminLanguageRequest {
+  langCode: string;
+  langName: string;
+}
+
+export interface PatchAdminLanguageRequest {
+  langName?: string;
+  emoji?: string | null;
+  sortOrder?: number;
+  active?: boolean;
+}
+
+export interface AdminCountry {
+  isoCode: string;
+  countryName: string;
+  currencyCode: string | null;
+  currencyName: string | null;
+  sortOrder: number;
+  active: boolean;
+}
+
+export interface AdminCountryPage {
+  content: AdminCountry[];
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
+}
+
+export interface CreateAdminCountryRequest {
+  isoCode: string;
+  countryName: string;
+  currencyCode: string;
+  currencyName?: string | null;
+}
+
+export interface PatchAdminCountryRequest {
+  countryName?: string;
+  currencyCode?: string | null;
+  currencyName?: string | null;
+  sortOrder?: number;
+  active?: boolean;
+}
+
 /**
  * Admin API interface
  * Handles administrative operations for users and destinations
@@ -189,6 +280,60 @@ export interface AdminApi {
   }): Promise<AdminPendingReviewPage>;
   approveReview(ratingId: number): Promise<void>;
   rejectReview(ratingId: number): Promise<void>;
+
+  getAdminHobbies(params?: {
+    page?: number;
+    size?: number;
+    sort?: string;
+    search?: string;
+  }): Promise<AdminHobbyPage>;
+  getAdminHobby(id: number): Promise<AdminHobby>;
+  createAdminHobby(data: CreateAdminHobbyRequest): Promise<AdminHobby>;
+  updateAdminHobby(
+    id: number,
+    data: CreateAdminHobbyRequest,
+  ): Promise<AdminHobby>;
+  patchAdminHobby(
+    id: number,
+    data: PatchAdminHobbyRequest,
+  ): Promise<AdminHobby>;
+  deleteAdminHobby(id: number): Promise<void>;
+
+  getAdminLanguages(params?: {
+    page?: number;
+    size?: number;
+    sort?: string;
+    search?: string;
+  }): Promise<AdminLanguagePage>;
+  getAdminLanguage(langCode: string): Promise<AdminLanguage>;
+  createAdminLanguage(data: CreateAdminLanguageRequest): Promise<AdminLanguage>;
+  updateAdminLanguage(
+    langCode: string,
+    data: CreateAdminLanguageRequest,
+  ): Promise<AdminLanguage>;
+  patchAdminLanguage(
+    langCode: string,
+    data: PatchAdminLanguageRequest,
+  ): Promise<AdminLanguage>;
+  deleteAdminLanguage(langCode: string): Promise<void>;
+
+  getAdminCountries(params?: {
+    page?: number;
+    size?: number;
+    sort?: string;
+    search?: string;
+  }): Promise<AdminCountryPage>;
+  getAdminCountry(isoCode: string): Promise<AdminCountry>;
+  createAdminCountry(data: CreateAdminCountryRequest): Promise<AdminCountry>;
+  updateAdminCountry(
+    isoCode: string,
+    data: CreateAdminCountryRequest,
+  ): Promise<AdminCountry>;
+  patchAdminCountry(
+    isoCode: string,
+    data: PatchAdminCountryRequest,
+  ): Promise<AdminCountry>;
+  deleteAdminCountry(isoCode: string): Promise<void>;
 }
 
 export const adminApi: {
@@ -330,6 +475,213 @@ export const adminApi: {
   async rejectReview(this: ApiClient, ratingId: number) {
     await this.request<void>(`/admin/reviews/${ratingId}/reject`, {
       method: "POST",
+    });
+  },
+
+  async getAdminHobbies(this: ApiClient, params = {}) {
+    const searchParams = new URLSearchParams();
+    if (params.page !== undefined)
+      searchParams.append("page", params.page.toString());
+    if (params.size !== undefined)
+      searchParams.append("size", params.size.toString());
+    if (params.sort) searchParams.append("sort", params.sort);
+    if (params.search) searchParams.append("search", params.search);
+    const q = searchParams.toString();
+    const res = await this.request<AdminHobbyPage>(
+      `/admin/hobbies${q ? `?${q}` : ""}`,
+    );
+    if (!res.success || !res.data)
+      throw new Error(res.error || "Failed to fetch hobbies");
+    return res.data;
+  },
+
+  async getAdminHobby(this: ApiClient, id: number) {
+    const res = await this.request<AdminHobby>(`/admin/hobbies/${id}`);
+    if (!res.success || !res.data)
+      throw new Error(res.error || "Failed to fetch hobby");
+    return res.data;
+  },
+
+  async createAdminHobby(this: ApiClient, data: CreateAdminHobbyRequest) {
+    const res = await this.request<AdminHobby>("/admin/hobbies", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+    if (!res.success || !res.data)
+      throw new Error(res.error || "Failed to create hobby");
+    return res.data;
+  },
+
+  async updateAdminHobby(
+    this: ApiClient,
+    id: number,
+    data: CreateAdminHobbyRequest,
+  ) {
+    const res = await this.request<AdminHobby>(`/admin/hobbies/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+    if (!res.success || !res.data)
+      throw new Error(res.error || "Failed to update hobby");
+    return res.data;
+  },
+
+  async patchAdminHobby(
+    this: ApiClient,
+    id: number,
+    data: PatchAdminHobbyRequest,
+  ) {
+    const res = await this.request<AdminHobby>(`/admin/hobbies/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+    if (!res.success || !res.data)
+      throw new Error(res.error || "Failed to update hobby");
+    return res.data;
+  },
+
+  async deleteAdminHobby(this: ApiClient, id: number) {
+    await this.request<void>(`/admin/hobbies/${id}`, { method: "DELETE" });
+  },
+
+  async getAdminLanguages(this: ApiClient, params = {}) {
+    const searchParams = new URLSearchParams();
+    if (params.page !== undefined)
+      searchParams.append("page", params.page.toString());
+    if (params.size !== undefined)
+      searchParams.append("size", params.size.toString());
+    if (params.sort) searchParams.append("sort", params.sort);
+    if (params.search) searchParams.append("search", params.search);
+    const q = searchParams.toString();
+    const res = await this.request<AdminLanguagePage>(
+      `/admin/languages${q ? `?${q}` : ""}`,
+    );
+    if (!res.success || !res.data)
+      throw new Error(res.error || "Failed to fetch languages");
+    return res.data;
+  },
+
+  async getAdminLanguage(this: ApiClient, langCode: string) {
+    const res = await this.request<AdminLanguage>(
+      `/admin/languages/${encodeURIComponent(langCode)}`,
+    );
+    if (!res.success || !res.data)
+      throw new Error(res.error || "Failed to fetch language");
+    return res.data;
+  },
+
+  async createAdminLanguage(this: ApiClient, data: CreateAdminLanguageRequest) {
+    const res = await this.request<AdminLanguage>("/admin/languages", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+    if (!res.success || !res.data)
+      throw new Error(res.error || "Failed to create language");
+    return res.data;
+  },
+
+  async updateAdminLanguage(
+    this: ApiClient,
+    langCode: string,
+    data: CreateAdminLanguageRequest,
+  ) {
+    const res = await this.request<AdminLanguage>(
+      `/admin/languages/${encodeURIComponent(langCode)}`,
+      { method: "PUT", body: JSON.stringify(data) },
+    );
+    if (!res.success || !res.data)
+      throw new Error(res.error || "Failed to update language");
+    return res.data;
+  },
+
+  async patchAdminLanguage(
+    this: ApiClient,
+    langCode: string,
+    data: PatchAdminLanguageRequest,
+  ) {
+    const res = await this.request<AdminLanguage>(
+      `/admin/languages/${encodeURIComponent(langCode)}`,
+      { method: "PATCH", body: JSON.stringify(data) },
+    );
+    if (!res.success || !res.data)
+      throw new Error(res.error || "Failed to update language");
+    return res.data;
+  },
+
+  async deleteAdminLanguage(this: ApiClient, langCode: string) {
+    await this.request<void>(
+      `/admin/languages/${encodeURIComponent(langCode)}`,
+      { method: "DELETE" },
+    );
+  },
+
+  async getAdminCountries(this: ApiClient, params = {}) {
+    const searchParams = new URLSearchParams();
+    if (params.page !== undefined)
+      searchParams.append("page", params.page.toString());
+    if (params.size !== undefined)
+      searchParams.append("size", params.size.toString());
+    if (params.sort) searchParams.append("sort", params.sort);
+    if (params.search) searchParams.append("search", params.search);
+    const q = searchParams.toString();
+    const res = await this.request<AdminCountryPage>(
+      `/admin/countries${q ? `?${q}` : ""}`,
+    );
+    if (!res.success || !res.data)
+      throw new Error(res.error || "Failed to fetch countries");
+    return res.data;
+  },
+
+  async getAdminCountry(this: ApiClient, isoCode: string) {
+    const res = await this.request<AdminCountry>(
+      `/admin/countries/${encodeURIComponent(isoCode)}`,
+    );
+    if (!res.success || !res.data)
+      throw new Error(res.error || "Failed to fetch country");
+    return res.data;
+  },
+
+  async createAdminCountry(this: ApiClient, data: CreateAdminCountryRequest) {
+    const res = await this.request<AdminCountry>("/admin/countries", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+    if (!res.success || !res.data)
+      throw new Error(res.error || "Failed to create country");
+    return res.data;
+  },
+
+  async updateAdminCountry(
+    this: ApiClient,
+    isoCode: string,
+    data: CreateAdminCountryRequest,
+  ) {
+    const res = await this.request<AdminCountry>(
+      `/admin/countries/${encodeURIComponent(isoCode)}`,
+      { method: "PUT", body: JSON.stringify(data) },
+    );
+    if (!res.success || !res.data)
+      throw new Error(res.error || "Failed to update country");
+    return res.data;
+  },
+
+  async patchAdminCountry(
+    this: ApiClient,
+    isoCode: string,
+    data: PatchAdminCountryRequest,
+  ) {
+    const res = await this.request<AdminCountry>(
+      `/admin/countries/${encodeURIComponent(isoCode)}`,
+      { method: "PATCH", body: JSON.stringify(data) },
+    );
+    if (!res.success || !res.data)
+      throw new Error(res.error || "Failed to update country");
+    return res.data;
+  },
+
+  async deleteAdminCountry(this: ApiClient, isoCode: string) {
+    await this.request<void>(`/admin/countries/${encodeURIComponent(isoCode)}`, {
+      method: "DELETE",
     });
   },
 };

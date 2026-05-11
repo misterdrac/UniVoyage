@@ -51,6 +51,8 @@ public class SecurityConfiguration {
             .requestMatchers(HttpMethod.GET, "/api/destinations/**").permitAll()
             // Public quiz endpoint
             .requestMatchers("/api/quiz/**").permitAll()
+            // Public reference data for forms (hobbies, languages, countries)
+            .requestMatchers(HttpMethod.GET, "/api/reference/**").permitAll()
             // Public heatmap endpoint (landing page)
             .requestMatchers(HttpMethod.GET, "/api/heatmap/**").permitAll()
             // Admin routes

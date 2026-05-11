@@ -7,11 +7,12 @@ import {
   CardContent,
   CardDescription,
 } from "@/components/ui/card";
-import { LANGUAGES, TRAVEL_INTERESTS, COUNTRIES } from "@/lib/constants";
 import type { User } from "@/types/user";
 import { toast } from "sonner";
 import { TravelSection } from "./TravelSection";
 import type { Option } from "@/components/ui/autocomplete";
+import type { TravelSectionConfig } from "./TravelSection";
+import { formatHobbyLabel } from "@/lib/referenceOptions";
 
 interface TravelInformationCardProps {
   user: User;
@@ -20,6 +21,10 @@ interface TravelInformationCardProps {
   hobbies: string[];
   languages: string[];
   visited: string[];
+  hobbyOptions: Option[];
+  languageOptions: Option[];
+  countryOptions: Option[];
+  referenceLoading?: boolean;
   onEdit: () => void;
   onCancel: () => void;
   onSave: (data: {
@@ -34,7 +39,10 @@ interface TravelInformationCardProps {
 
 type SectionType = "languages" | "hobbies" | "countries";
 
-const SECTION_CONFIG = {
+const STYLE_BASE: Record<
+  SectionType,
+  Omit<TravelSectionConfig, "getLabel">
+> = {
   languages: {
     title: "Languages Spoken",
     icon: Languages,
@@ -51,8 +59,6 @@ const SECTION_CONFIG = {
     bgToVar: "--travel-lang-bg-to",
     placeholder: "Search and add a language...",
     emptyMessage: "No languages found",
-    getLabel: (value: string) =>
-      LANGUAGES.find((l) => l.value === value)?.label || value,
   },
   hobbies: {
     title: "Hobbies & Interests",
@@ -70,8 +76,6 @@ const SECTION_CONFIG = {
     bgToVar: "--travel-hobby-bg-to",
     placeholder: "Search and add an interest...",
     emptyMessage: "No interests found",
-    getLabel: (value: string) =>
-      TRAVEL_INTERESTS.find((h) => h.value === value)?.label || value,
   },
   countries: {
     title: "Countries Visited",
@@ -89,8 +93,6 @@ const SECTION_CONFIG = {
     bgToVar: "--travel-country-bg-to",
     placeholder: "Search and add a country...",
     emptyMessage: "No countries found",
-    getLabel: (value: string) =>
-      COUNTRIES.find((c) => c.value === value)?.label || value,
   },
 };
 
@@ -107,29 +109,34 @@ export const TravelInformationCard = ({
   onHobbiesChange,
   onLanguagesChange,
   onVisitedChange,
+  hobbyOptions,
+  languageOptions,
+  countryOptions,
+  referenceLoading = false,
 }: TravelInformationCardProps) => {
-  const languageOptions = useMemo(
-    () => LANGUAGES.map((lang) => ({ value: lang.value, label: lang.label })),
-    [],
-  );
+  const langsConfig = useMemo((): TravelSectionConfig => {
+    return {
+      ...STYLE_BASE.languages,
+      getLabel: (value: string) =>
+        languageOptions.find((o) => o.value === value)?.label ?? value,
+    };
+  }, [languageOptions]);
 
-  const hobbyOptions = useMemo(
-    () =>
-      TRAVEL_INTERESTS.map((interest) => ({
-        value: interest.value,
-        label: interest.label,
-      })),
-    [],
-  );
+  const hobbiesConfig = useMemo((): TravelSectionConfig => {
+    return {
+      ...STYLE_BASE.hobbies,
+      getLabel: (value: string) =>
+        hobbyOptions.find((o) => o.value === value)?.label ?? value,
+    };
+  }, [hobbyOptions]);
 
-  const countryOptions = useMemo(
-    () =>
-      COUNTRIES.map((country) => ({
-        value: country.value,
-        label: country.label,
-      })),
-    [],
-  );
+  const countriesConfig = useMemo((): TravelSectionConfig => {
+    return {
+      ...STYLE_BASE.countries,
+      getLabel: (value: string) =>
+        countryOptions.find((o) => o.value === value)?.label ?? value,
+    };
+  }, [countryOptions]);
 
   const [activeSection, setActiveSection] = useState<SectionType | null>(null);
   const [tempLanguages, setTempLanguages] = useState<string[]>(languages);
@@ -147,7 +154,12 @@ export const TravelInformationCard = ({
   }, [isEditing, languages, hobbies, visited]);
 
   const createAddHandler = (section: SectionType) => (option: Option) => {
-    const config = SECTION_CONFIG[section];
+    const config =
+      section === "languages"
+        ? langsConfig
+        : section === "hobbies"
+          ? hobbiesConfig
+          : countriesConfig;
     const tempState =
       section === "languages"
         ? tempLanguages
@@ -168,7 +180,12 @@ export const TravelInformationCard = ({
   };
 
   const createRemoveHandler = (section: SectionType) => (value: string) => {
-    const config = SECTION_CONFIG[section];
+    const config =
+      section === "languages"
+        ? langsConfig
+        : section === "hobbies"
+          ? hobbiesConfig
+          : countriesConfig;
     const tempState =
       section === "languages"
         ? tempLanguages
@@ -229,29 +246,30 @@ export const TravelInformationCard = ({
       return (user.languages || []).map((lang) => ({
         value: lang.langCode,
         label:
-          LANGUAGES.find((l) => l.value === lang.langCode)?.label ||
+          languageOptions.find((o) => o.value === lang.langCode)?.label ||
           lang.langName ||
           lang.langCode,
       }));
-    } else if (section === "hobbies") {
+    }
+    if (section === "hobbies") {
       return (user.hobbies || []).map((hobby) => ({
         value: String(hobby.id),
-        label:
-          TRAVEL_INTERESTS.find((h) => Number(h.value) === hobby.id)?.label ||
-          hobby.hobbyName ||
-          `Hobby ${hobby.id}`,
+        label: formatHobbyLabel({
+          displayLabel: hobby.displayLabel ?? hobby.hobbyName,
+          hobbyName: hobby.hobbyName,
+          emoji: hobby.emoji ?? null,
+        }),
       }));
-    } else {
-      return (user.visitedCountries || []).map((vc) => {
-        const country = vc.isoCode
-          ? COUNTRIES.find((c) => c.value === vc.isoCode)
-          : undefined;
-        return {
-          value: vc.isoCode || "",
-          label: country?.label || vc.countryName || vc.isoCode || "Unknown",
-        };
-      });
     }
+    return (user.visitedCountries || []).map((vc) => {
+      const opt = vc.isoCode
+        ? countryOptions.find((c) => c.value === vc.isoCode)
+        : undefined;
+      return {
+        value: vc.isoCode || "",
+        label: opt?.label || vc.countryName || vc.isoCode || "Unknown",
+      };
+    });
   };
 
   const getTempItems = (section: SectionType) => {
@@ -269,6 +287,8 @@ export const TravelInformationCard = ({
         ? hobbyOptions
         : countryOptions;
   };
+
+  const pickerDisabled = isSaving || referenceLoading;
 
   return (
     <Card className="mb-6 overflow-visible border-2 hover:border-primary/30 transition-all duration-300 hover:shadow-xl bg-linear-to-br from-background to-muted/20">
@@ -293,9 +313,9 @@ export const TravelInformationCard = ({
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <TravelSection
-              config={SECTION_CONFIG.languages}
+              config={langsConfig}
               isActive={activeSection === "languages"}
-              isSaving={isSaving}
+              isSaving={pickerDisabled}
               options={getOptions("languages")}
               tempItems={getTempItems("languages")}
               displayItems={getDisplayItems("languages")}
@@ -310,9 +330,9 @@ export const TravelInformationCard = ({
             />
 
             <TravelSection
-              config={SECTION_CONFIG.hobbies}
+              config={hobbiesConfig}
               isActive={activeSection === "hobbies"}
-              isSaving={isSaving}
+              isSaving={pickerDisabled}
               options={getOptions("hobbies")}
               tempItems={getTempItems("hobbies")}
               displayItems={getDisplayItems("hobbies")}
@@ -328,9 +348,9 @@ export const TravelInformationCard = ({
           </div>
 
           <TravelSection
-            config={SECTION_CONFIG.countries}
+            config={countriesConfig}
             isActive={activeSection === "countries"}
-            isSaving={isSaving}
+            isSaving={pickerDisabled}
             options={getOptions("countries")}
             tempItems={getTempItems("countries")}
             displayItems={getDisplayItems("countries")}
