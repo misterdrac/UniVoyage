@@ -28,59 +28,39 @@ flowchart TB
     direction TB
     subgraph FEPR["Frontend PR"]
       direction TB
-      FEPR0[dependency_review_pr]
-      FEPR1[install_dependencies]
-      FEPR2[lint_frontend informational]
-      FEPR3[format_frontend]
-      FEPR4[npm_audit_frontend]
-      FEPR5[trivy_frontend_fs_scan]
-      FEPR6[build_frontend]
-      FEPR7[build_frontend_artifact]
-      FEPR8[frontend_sbom_generation_pr]
-      FEPR9[trivy_frontend_dist_scan]
-      FEPR1 --> FEPR2
-      FEPR1 --> FEPR3
-      FEPR1 --> FEPR4
-      FEPR1 --> FEPR5
-      FEPR3 --> FEPR6
-      FEPR4 --> FEPR6
-      FEPR5 --> FEPR6
-      FEPR6 --> FEPR7
-      FEPR6 --> FEPR8
-      FEPR7 --> FEPR9
-      FEPR8 --> FEPR9
+      FEPR1[frontend_build_pr] --> FEPR2[frontend_quality_pr]
+      FEPR2 --> FEPR3[frontend_sbom_and_artifact_pr]
+      FEPR3 --> FEPR4[frontend_trivy_security_pr]
     end
 
     subgraph BEPR["Backend PR"]
       direction TB
-      BEPR0[dependency_review_pr]
-      BEPR1[code_format_validate] --> BEPR2[validate_backend] --> BEPR3[build_backend] --> BEPR4[test_backend]
-      BEPR3 --> BEPR5[sbom_generation_pr]
-      BEPR4 --> BEPR6[docker_and_security_scans_pr]
-      BEPR5 --> BEPR7[trivy_backend_codebase_scan_pr]
-      BEPR6 --> BEPR7
+      BEPR1[backend_build_and_docker_pr]
+      BEPR1 --> BEPR2[test_backend]
+      BEPR2 --> BEPR3[backend_maven_quality_pr]
+      BEPR3 --> BEPR4[trivy_backend_security_pr]
     end
   end
 
-  PR --> FEPR0
   PR --> FEPR1
-  PR --> BEPR0
   PR --> BEPR1
-  FEPR9 --> MERGE[All required PR checks green]
-  BEPR7 --> MERGE
+  FEPR4 --> MERGE[All required PR checks green]
+  BEPR4 --> MERGE
   MERGE --> MASTER_PUSH[Merge to master]
 
   subgraph MASTER["Master Pipeline"]
     direction TB
-    subgraph MASTER_CI["Automatic CI on master"]
+    subgraph MASTER_BE["Backend CI lane — no frontend depends-on"]
       direction TB
-      M1[code_format_validate] --> M2[build_java_project] --> M3[run_backend_tests] --> M4[build_backend_docker]
-      M2 --> M5[sbom_generation]
-      M4 --> M6[trivy_backend_scans]
-      M5 --> M6
+      MB[backend_build_and_docker] --> M3[run_backend_tests]
+      M3 --> MQ[backend_maven_quality]
+      MB --> M6[trivy_backend_scans]
+      MQ --> M6
+    end
+
+    subgraph MASTER_FE["Frontend CI lane — parallel, independent DAG"]
+      direction TB
       MF1[frontend_build] --> MF2[frontend_security_scan]
-      M6 --> CI_DONE[Master CI green]
-      MF2 --> CI_DONE
     end
 
     subgraph MASTER_MANUAL["Manual owner-only release and deploy"]
@@ -94,9 +74,10 @@ flowchart TB
     end
   end
 
-  MASTER_PUSH --> M1
+  MASTER_PUSH --> MB
   MASTER_PUSH --> MF1
-  CI_DONE --> MM1
+  M6 --> MM1
+  MF2 --> MM1
 ```
 
 ## Workflow Summary
@@ -111,17 +92,11 @@ flowchart TB
 ### Frontend PR Pipeline
 - File: `.github/workflows/frontend-pr-ci.yml`
 - Trigger: `pull_request` to `master`, `workflow_dispatch`
-- Jobs:
-  1. `dependency_review_pr`
-  2. `install_dependencies`
-  3. `lint_frontend` (informational)
-  4. `format_frontend`
-  5. `npm_audit_frontend`
-  6. `trivy_frontend_fs_scan`
-  7. `build_frontend`
-  8. `build_frontend_artifact`
-  9. `frontend_sbom_generation_pr`
-  10. `trivy_frontend_dist_scan`
+- Jobs (four frontend segments, aligned with backend PR style):
+  1. **Build:** `frontend_build_pr` — `npm ci` + `npm run build`
+  2. **Quality:** `frontend_quality_pr` — lint (informational), Prettier check, `npm audit` (replaces standalone dependency review)
+  3. **SBOM + artifact:** `frontend_sbom_and_artifact_pr` — CycloneDX SBOM, production build, upload `frontend-dist-pr` tarball for Trivy
+  4. **Security scans:** `frontend_trivy_security_pr` — Trivy on frontend tree + `frontend/dist` (after artifact extract)
 
 ### Backend Commit Pipeline
 - File: `.github/workflows/backend-ci.yml`
@@ -134,30 +109,20 @@ flowchart TB
 ### Backend PR Pipeline
 - File: `.github/workflows/backend-pr-ci.yml`
 - Trigger: `pull_request` to `master`, `workflow_dispatch`
-- Jobs:
-  1. `dependency_review_pr`
-  2. `code_format_validate`
-  3. `validate_backend`
-  4. `build_backend`
-  5. `test_backend`
-  6. `sbom_generation_pr`
-  7. `docker_and_security_scans_pr`
-  8. `trivy_backend_codebase_scan_pr`
+- Jobs (four backend segments, aligned with master):
+  1. **Build:** `backend_build_and_docker_pr` — jedan job: Maven `validate` → `package` (-DskipTests) → Docker image + artefakt za Trivy (koraci su strogo redom).
+  2. **Test:** `test_backend`
+  3. **Maven quality:** `backend_maven_quality_pr` (formatter + CycloneDX SBOM + `dependency:tree`)
+  4. **Security scans:** `trivy_backend_security_pr` (pom, image after artifact load, full backend codebase)
 
 ### Master Pipeline
 - File: `.github/workflows/master-pipeline.yml`
 - Trigger: `push` to `master`, `workflow_dispatch`
-- Automatic CI jobs:
-  1. `code_format_validate`
-  2. `build_java_project`
-  3. `run_backend_tests`
-  4. `build_backend_docker`
-  5. `sbom_generation`
-  6. `trivy_backend_scans`
-  7. `frontend_build`
-  8. `frontend_security_scan`
+- Automatic CI is **two parallel DAGs** with **no cross-edges** until manual release steps:
+  - **Backend lane (four segments):** (1) `backend_build_and_docker` — Maven validate → package → Docker image + artefakt u jednom jobu; (2) `run_backend_tests`; (3) `backend_maven_quality`; (4) `trivy_backend_scans`. No frontend `needs` on backend jobs.
+  - **Frontend lane:** `frontend_build` → `frontend_security_scan`.
 - Manual owner-only jobs:
-  1. `codebase_security_scan`
+  1. `codebase_security_scan` (`workflow_dispatch` only) — **`needs: [trivy_backend_scans, frontend_security_scan]`** (last backend Trivy job + last frontend security job)
   2. `create_tag`
   3. `create_release`
   4. `deploy_backend_railway`

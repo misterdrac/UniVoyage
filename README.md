@@ -1,26 +1,23 @@
-# UniVoyage - Developer Guide
+# UniVoyage — Developer guide
 
-This README is focused on helping a new developer clone the project, run it locally, and start contributing quickly.
+This README helps you clone the repo, run frontend and backend locally, and contribute.
 
-For product/business overview, see:
-- `docs/project-overview.md`
-
-For full CI/CD and pipeline diagrams, see:
-- `docs/ci-cd-pipelines.md`
+- Product and feature overview: [`docs/project-overview.md`](docs/project-overview.md)
+- CI/CD workflows, Mermaid flow, and deployment secrets: [`docs/ci-cd-pipelines.md`](docs/ci-cd-pipelines.md)
 
 Docker stack logging (paths, rotation, env knobs):
 - `docs/logging-docker.md`
 
 ---
 
-## Repository Structure
+## Repository layout
 
-- `frontend/` - React + TypeScript + Vite application
-- `backend/` - Java 23 + Spring Boot API
-- `.github/workflows/` - CI/CD workflows
-- `docs/` - technical and project documentation
-- `.githooks/` - shared git hooks
-- `scripts/` - local setup scripts
+- `frontend/` — React + TypeScript + Vite
+- `backend/` — Java 23 + Spring Boot
+- `.github/workflows/` — GitHub Actions
+- `docs/` — documentation
+- `.githooks/` — shared Git hooks
+- `scripts/` — local setup helpers
 
 ---
 
@@ -28,14 +25,13 @@ Docker stack logging (paths, rotation, env knobs):
 
 - Node.js 22+ and npm
 - Java 23
-- Docker Desktop (recommended for local PostgreSQL)
+- Docker Desktop (recommended for local PostgreSQL via Compose)
 
-Optional:
-- Maven installed globally (not required if using `./mvnw`)
+Optional: Maven installed globally (not required if you use `./mvnw`).
 
 ---
 
-## 1) Clone the project
+## 1) Clone
 
 ```bash
 git clone https://github.com/misterdrac/UniVoyage
@@ -44,7 +40,7 @@ cd UniVoyage
 
 ---
 
-## 2) Setup git hooks (recommended)
+## 2) Git hooks (recommended)
 
 Run once per clone:
 
@@ -52,126 +48,105 @@ Run once per clone:
 ./scripts/setup-git-hooks.sh
 ```
 
-Windows note:
-- Run the command in Git Bash or WSL.
-- If you use PowerShell only, configure hooks path manually:
+**Windows:** run that in **Git Bash** or **WSL**. If you only use PowerShell, point Git at the hooks directory:
 
 ```powershell
 git config core.hooksPath .githooks
 ```
 
-Pre-commit hook currently:
-- formats backend via Maven formatter
-- formats frontend via Prettier
-- re-stages formatted files automatically
+The pre-commit hook formats backend (Maven formatter) and frontend (Prettier) and re-stages changed files.
 
 ---
 
-## 3) Frontend local setup (first)
+## 3) Frontend (run first)
 
 ```bash
 cd frontend
 npm ci
 ```
 
-Create `.env` in `frontend/` (or copy from `env.example`):
+Create `frontend/.env` (see `frontend/env.example`):
 
 ```env
 VITE_API_URL=http://localhost:8080/api
 ```
 
-Start frontend:
+Start dev server:
 
 ```bash
 npm run dev
 ```
 
-Default local URL:
-- `http://localhost:5173`
+Default URL: `http://localhost:5173`
 
 ---
 
-## 4) Backend local setup (second)
-
-Open a second terminal:
+## 4) Backend (second terminal)
 
 ```bash
 cd backend
 ```
 
-Create `.env` from backend example and fill required values:
+Create `backend/.env` from the example:
 
 ```bash
-cd backend
 cp env.example .env
 ```
 
-PowerShell alternative:
+PowerShell:
 
 ```powershell
-cd backend
 Copy-Item env.example .env
 ```
 
-- `DB_PASSWORD`
-- `POSTGRES_PASSWORD`
-- `JWT_SECRET`
-- API keys you use (`OPENWEATHER_API_KEY`, `GEOAPIFY_API_KEY`, `GEMINI_API_KEY`, `AMADEUS_API_KEY`, `AMADEUS_API_SECRET`)
+Fill at least: `DB_PASSWORD`, `POSTGRES_PASSWORD`, `JWT_SECRET`, and any API keys you need (`OPENWEATHER_API_KEY`, `GEOAPIFY_API_KEY`, `GEMINI_API_KEY`, `AMADEUS_API_KEY`, `AMADEUS_API_SECRET`).
 
-### Recommended: run backend with Docker Compose
+### Recommended: Docker Compose
+
+From `backend/`:
 
 ```bash
 docker compose up --build -d
 ```
 
-If Windows blocks 5432 binding, host DB port may be `5433` (as already documented in backend notes).
+If Windows blocks port `5432`, the mapped host port may be `5433` (see backend Compose/docs).
 
-Stop services:
+Stop:
 
 ```bash
 docker compose down
 ```
 
-### Alternative: run directly with Maven wrapper
+### Alternative: Maven only
 
 ```bash
 ./mvnw spring-boot:run
 ```
 
-Backend local URL:
-- `http://localhost:8080`
-
-Health endpoint:
-- `http://localhost:8080/actuator/health`
+Backend: `http://localhost:8080`  
+Health: `http://localhost:8080/actuator/health`
 
 ---
 
-## 5) How frontend connects to backend
+## 5) How frontend talks to backend
 
-- Frontend API base is configured to `/api` in `frontend/src/config/apiConfig.ts`
-- Backend CORS is configured in `backend/src/main/java/com/univoyage/config/CorsFilterConfig.java`
-- Local allowed origins default to:
-  - `http://localhost:5173`
-  - `http://127.0.0.1:5173`
+- API base path is configured under `/api` (see `frontend/src/config/apiConfig.ts`).
+- CORS is configured server-side (see `backend/src/main/java/com/univoyage/config/CorsFilterConfig.java`).
+- Local origins typically allowed include `http://localhost:5173` and `http://127.0.0.1:5173`.
 
 ---
 
-## 6) Quick sanity check (after startup)
+## 6) Quick sanity check after startup
 
-After starting both services, verify:
+- Frontend loads at `http://localhost:5173`.
+- Backend health is UP at `http://localhost:8080/actuator/health`.
+- Browser console shows no CORS errors when calling the API.
 
-- Frontend opens at `http://localhost:5173`
-- Backend health returns UP at `http://localhost:8080/actuator/health`
-- Frontend can call backend API (no CORS errors in browser console)
-
-If backend health fails:
-- confirm Docker/PostgreSQL is running
-- confirm backend `.env` exists in `backend/.env`
-- confirm DB credentials in `.env` match your local database/container
+If health fails: confirm Compose/Postgres is up, `backend/.env` exists, and DB credentials match the container.
 
 ---
 
-## 7) Useful local commands
+## 7) Useful commands
 
 Frontend:
 
@@ -193,17 +168,11 @@ cd backend
 
 ---
 
-## 8) CI/CD quick notes
+## 8) CI/CD (short)
 
-- default branch: `master`
-- commit pipelines run on feature branches
-- stricter checks run on PR pipelines
-- release/deploy flow runs from `master-pipeline.yml` (manual release inputs + deploy chain)
+- Default branch: `master`
+- Push pipelines on feature branches give fast feedback
+- PR pipelines add stricter checks before merge
+- Full master workflow plus manual release/deploy: see [`docs/ci-cd-pipelines.md`](docs/ci-cd-pipelines.md)
 
-Deployment targets:
-- backend: Railway
-- frontend: Vercel
-
-Required deployment secrets are documented in:
-- `docs/ci-cd-pipelines.md`
-
+Deploy targets: backend **Railway**, frontend **Vercel**. Required GitHub secrets are listed in that doc.
