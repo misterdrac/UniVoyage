@@ -8,7 +8,7 @@
     </Properties>
 
     <Appenders>
-        <!-- INFO+ on stdout (DEBUG stays in file only for com.univoyage) -->
+        <!-- INFO+ on stdout (DEBUG stays below Threshold unless elevated via filters elsewhere). -->
         <Console name="Console" target="SYSTEM_OUT">
             <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout pattern="${PATTERN}" charset="UTF-8"/>
@@ -20,14 +20,14 @@
             <PatternLayout pattern="${PATTERN}" charset="UTF-8"/>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
-                <SizeBasedTriggeringPolicy size="10 MB"/>
+                <SizeBasedTriggeringPolicy size="${env:LOG_FILE_MAX_SIZE:-10 MB}"/>
             </Policies>
-            <DefaultRolloverStrategy max="14"/>
+            <DefaultRolloverStrategy max="${env:LOG_ROLLING_MAX_FILES:-14}"/>
         </RollingFile>
     </Appenders>
 
     <Loggers>
-        <!-- Application DEBUG in log file; console still INFO+ via ThresholdFilter -->
+        <!-- Boot baseline DEBUG here; Spring overrides via logging.level.com.univoyage (e.g. application-docker.yml). -->
         <Logger name="com.univoyage" level="debug" additivity="false">
             <AppenderRef ref="Console"/>
             <AppenderRef ref="RollingFile"/>

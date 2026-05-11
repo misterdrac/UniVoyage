@@ -5,6 +5,9 @@ This README helps you clone the repo, run frontend and backend locally, and cont
 - Product and feature overview: [`docs/project-overview.md`](docs/project-overview.md)
 - CI/CD workflows, Mermaid flow, and deployment secrets: [`docs/ci-cd-pipelines.md`](docs/ci-cd-pipelines.md)
 
+Docker stack logging (paths, rotation, env knobs):
+- `docs/logging-docker.md`
+
 ---
 
 ## Repository layout
