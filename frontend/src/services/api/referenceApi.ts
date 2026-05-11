@@ -44,8 +44,9 @@ export const referenceApi: {
   },
 
   async getReferenceLanguages(this: ApiClient) {
-    const response =
-      await this.request<ReferenceLanguage[]>("/reference/languages");
+    const response = await this.request<ReferenceLanguage[]>(
+      "/reference/languages",
+    );
     if (!response.success || !response.data) {
       throw new Error(response.error || "Failed to load languages");
     }
@@ -53,8 +54,9 @@ export const referenceApi: {
   },
 
   async getReferenceCountries(this: ApiClient) {
-    const response =
-      await this.request<ReferenceCountry[]>("/reference/countries");
+    const response = await this.request<ReferenceCountry[]>(
+      "/reference/countries",
+    );
     if (!response.success || !response.data) {
       throw new Error(response.error || "Failed to load countries");
     }

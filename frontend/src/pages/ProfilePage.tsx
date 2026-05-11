@@ -30,8 +30,7 @@ const ProfilePage = () => {
     useReferenceDictionaries();
 
   const countryOptions = useMemo(
-    () =>
-      reference?.countries ? countriesToOptions(reference.countries) : [],
+    () => (reference?.countries ? countriesToOptions(reference.countries) : []),
     [reference?.countries],
   );
   const hobbyPickerOptions = useMemo(
@@ -39,8 +38,7 @@ const ProfilePage = () => {
     [reference?.hobbies],
   );
   const languagePickerOptions = useMemo(
-    () =>
-      reference?.languages ? languagesToOptions(reference.languages) : [],
+    () => (reference?.languages ? languagesToOptions(reference.languages) : []),
     [reference?.languages],
   );
 

@@ -266,7 +266,7 @@ const AdminHobbiesPage: React.FC = () => {
                           <td className="px-4 py-3 text-sm text-muted-foreground text-center font-mono">
                             {row.hobbyName}
                           </td>
-                      </tr>
+                        </tr>
                       ))
                     )}
                   </tbody>
@@ -351,16 +351,16 @@ const AdminHobbiesPage: React.FC = () => {
             ) : (
               <div className="p-6 flex flex-col gap-4 flex-1 text-sm overflow-y-auto">
                 <h3 className="text-lg font-semibold text-foreground">
-                  {selected
-                    ? formatHobbyLabel(selected)
-                    : ""}
+                  {selected ? formatHobbyLabel(selected) : ""}
                 </h3>
                 <dl className="space-y-3 text-muted-foreground">
                   <div>
                     <dt className="text-xs uppercase tracking-wide text-muted-foreground/80">
                       Key
                     </dt>
-                    <dd className="font-mono text-sm mt-1">{selected?.hobbyName}</dd>
+                    <dd className="font-mono text-sm mt-1">
+                      {selected?.hobbyName}
+                    </dd>
                   </div>
                   <div>
                     <dt className="text-xs uppercase tracking-wide text-muted-foreground/80">

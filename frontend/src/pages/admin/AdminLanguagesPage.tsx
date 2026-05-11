@@ -151,9 +151,7 @@ const AdminLanguagesPage: React.FC = () => {
       await apiService.deleteAdminLanguage(selected.langCode);
       toast.success("Language deleted");
       invalidateReference();
-      setRows((prev) =>
-        prev.filter((r) => r.langCode !== selected.langCode),
-      );
+      setRows((prev) => prev.filter((r) => r.langCode !== selected.langCode));
       setSelected(null);
     } catch {
       toast.error("Delete failed");
@@ -277,9 +275,7 @@ const AdminLanguagesPage: React.FC = () => {
           >
             {!selected && !isCreating ? (
               <AdminEmptySelection
-                icon={
-                  <Languages className="w-8 h-8 text-muted-foreground" />
-                }
+                icon={<Languages className="w-8 h-8 text-muted-foreground" />}
                 message="Select a language from the table to delete, or create a new one"
                 action={
                   <Button onClick={startCreate} className="gap-2">
@@ -337,7 +333,9 @@ const AdminLanguagesPage: React.FC = () => {
                     <dt className="text-xs uppercase tracking-wide text-muted-foreground/80">
                       Code
                     </dt>
-                    <dd className="font-mono text-sm mt-1">{selected?.langCode}</dd>
+                    <dd className="font-mono text-sm mt-1">
+                      {selected?.langCode}
+                    </dd>
                   </div>
                 </dl>
                 <div className="mt-auto pt-4">

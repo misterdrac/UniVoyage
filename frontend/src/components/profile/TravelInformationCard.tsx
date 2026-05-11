@@ -39,10 +39,7 @@ interface TravelInformationCardProps {
 
 type SectionType = "languages" | "hobbies" | "countries";
 
-const STYLE_BASE: Record<
-  SectionType,
-  Omit<TravelSectionConfig, "getLabel">
-> = {
+const STYLE_BASE: Record<SectionType, Omit<TravelSectionConfig, "getLabel">> = {
   languages: {
     title: "Languages Spoken",
     icon: Languages,

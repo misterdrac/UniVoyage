@@ -5,11 +5,7 @@ import {
   ApiError,
 } from "@/config/apiConfig";
 import { API_CONSTANTS } from "@/lib/constants";
-import type {
-  User,
-  CountryDto,
-  VisitedCountryDto,
-} from "@/types/user";
+import type { User, CountryDto, VisitedCountryDto } from "@/types/user";
 import type { BackendUserDto } from "./types";
 
 /**
