@@ -46,8 +46,8 @@ public class AdminLanguageController {
   }
 
   @PatchMapping("/{langCode}")
-  public ResponseEntity<ApiResponse<AdminLanguageResponse>> patchUpdate(@PathVariable String langCode,
-      @RequestBody AdminPatchLanguageRequest req) {
+  public ResponseEntity<ApiResponse<AdminLanguageResponse>> patchUpdate(
+      @PathVariable String langCode, @RequestBody AdminPatchLanguageRequest req) {
     return ResponseEntity.ok(ApiResponse.ok(adminLanguageService.patchUpdate(langCode, req)));
   }
 

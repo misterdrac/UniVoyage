@@ -42,12 +42,13 @@ public class ReferenceDataService {
   }
 
   private static ReferenceHobbyResponse toHobby(Hobby h) {
-    return new ReferenceHobbyResponse(h.getId(), h.getHobbyName(), h.getDisplayLabel(), h.getEmoji(),
-        h.getSortOrder());
+    return new ReferenceHobbyResponse(h.getId(), h.getHobbyName(), h.getDisplayLabel(),
+        h.getEmoji(), h.getSortOrder());
   }
 
   private static ReferenceLanguageResponse toLanguage(Language l) {
-    return new ReferenceLanguageResponse(l.getLangCode(), l.getLangName(), l.getEmoji(), l.getSortOrder());
+    return new ReferenceLanguageResponse(l.getLangCode(), l.getLangName(), l.getEmoji(),
+        l.getSortOrder());
   }
 
   private static ReferenceCountryResponse toCountry(Country c) {

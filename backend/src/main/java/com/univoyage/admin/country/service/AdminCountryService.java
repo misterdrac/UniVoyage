@@ -21,9 +21,9 @@ public class AdminCountryService {
 
   @Transactional(readOnly = true)
   public AdminCountryPageResponse list(String search, Pageable pageable) {
-    Page<Country> page =
-        (search == null || search.isBlank()) ? countryRepository.findAll(pageable)
-            : countryRepository.search(search.trim(), pageable);
+    Page<Country> page = (search == null || search.isBlank())
+        ? countryRepository.findAll(pageable)
+        : countryRepository.search(search.trim(), pageable);
     return new AdminCountryPageResponse(page.getContent().stream().map(this::toDto).toList(),
         page.getTotalElements(), page.getTotalPages(), page.getSize(), page.getNumber());
   }
