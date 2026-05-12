@@ -1,29 +1,13 @@
 package com.univoyage.auth.controller;
 
-<<<<<<< HEAD
-=======
 import com.univoyage.user.model.Role;
 import com.univoyage.user.model.UserEntity;
 import com.univoyage.user.repository.UserRepository;
->>>>>>> origin/master
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-<<<<<<< HEAD
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
-
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-/**
- * Integration tests for issue #201.
- * Verifies that protected endpoints reject unauthenticated requests
- * with 401 Unauthorized or 403 Forbidden.
-=======
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
@@ -43,7 +27,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * Integration tests for issue #201: unauthenticated access to protected APIs
  * and forbidden access for authenticated users without required roles.
->>>>>>> origin/master
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -51,79 +34,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 class SecurityIntegrationTest {
 
-<<<<<<< HEAD
-    @Autowired
-    private MockMvc mockMvc;
-
-    // ── /api/auth/me ──────────────────────────────────────────────
-
-    @Test
-    @DisplayName("GET /api/auth/me returns 401 without token")
-    void authMe_unauthenticated() throws Exception {
-        mockMvc.perform(get("/api/auth/me"))
-                .andExpect(status().isUnauthorized());
-    }
-
-    // ── /api/admin/** ─────────────────────────────────────────────
-
-    @Test
-    @DisplayName("GET /api/admin/users returns 401 without token")
-    void adminUsers_unauthenticated() throws Exception {
-        mockMvc.perform(get("/api/admin/users"))
-                .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    @DisplayName("DELETE /api/admin/users/1 returns 401 without token")
-    void adminDeleteUser_unauthenticated() throws Exception {
-        mockMvc.perform(delete("/api/admin/users/1"))
-                .andExpect(status().isUnauthorized());
-    }
-
-    // ── /api/trips/** ─────────────────────────────────────────────
-
-    @Test
-    @DisplayName("GET /api/trips returns 401 without token")
-    void trips_unauthenticated() throws Exception {
-        mockMvc.perform(get("/api/trips"))
-                .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    @DisplayName("POST /api/trips returns 401 without token")
-    void createTrip_unauthenticated() throws Exception {
-        mockMvc.perform(post("/api/trips")
-                        .contentType("application/json")
-                        .content("{}"))
-                .andExpect(status().isUnauthorized());
-    }
-
-    // ── /api/user/** ──────────────────────────────────────────────
-
-    @Test
-    @DisplayName("GET /api/user/profile returns 401 without token")
-    void userProfile_unauthenticated() throws Exception {
-        mockMvc.perform(get("/api/user/profile"))
-                .andExpect(status().isUnauthorized());
-    }
-
-    // ── Public endpoints – must NOT return 401 ────────────────────
-
-    @Test
-    @DisplayName("GET /api/destinations is publicly accessible (not 401)")
-    void destinations_publiclyAccessible() throws Exception {
-        mockMvc.perform(get("/api/destinations"))
-                .andExpect(status().is2xxSuccessful());
-    }
-
-    @Test
-    @DisplayName("GET /api/quiz is publicly accessible (not 401)")
-    void quiz_publiclyAccessible() throws Exception {
-        mockMvc.perform(get("/api/quiz"))
-                .andExpect(status().is2xxSuccessful());
-    }
-}
-=======
   private static final String UNAUTHORIZED_MESSAGE = "Unauthorized. Please log in.";
   private static final String FORBIDDEN_MESSAGE = "Forbidden. You do not have permission to access this resource.";
 
@@ -313,4 +223,3 @@ class SecurityIntegrationTest {
     return securityContext(context);
   }
 }
->>>>>>> origin/master
