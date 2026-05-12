@@ -6,9 +6,6 @@ import { useDestinations } from "@/hooks/useDestinations";
 import { formatDateLong } from "@/lib/dateUtils";
 import { getDestinationImageById } from "@/lib/destinationUtils";
 import type { Trip } from "@/types/trip";
-<<<<<<< HEAD
-import { ArrowRight, CalendarDays, Globe, MapPinned, Plane } from "lucide-react";
-=======
 import {
   ArrowRight,
   CalendarDays,
@@ -16,7 +13,6 @@ import {
   MapPinned,
   Plane,
 } from "lucide-react";
->>>>>>> origin/master
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -87,12 +83,8 @@ export function PersonalizedHeroCard() {
       .filter((trip) => new Date(trip.departureDate) >= today)
       .sort(
         (a, b) =>
-<<<<<<< HEAD
-          new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime()
-=======
           new Date(a.departureDate).getTime() -
           new Date(b.departureDate).getTime(),
->>>>>>> origin/master
       );
 
     return upcomingTrips[0];
@@ -104,15 +96,6 @@ export function PersonalizedHeroCard() {
   }, [nextTrip, destinations]);
 
   const thisYearStats = useMemo(() => {
-<<<<<<< HEAD
-    const thisYearTrips = trips.filter((trip) => isTripInYear(trip, currentYear));
-    const finishedTripsThisYear = thisYearTrips.filter(
-      (trip) => new Date(trip.returnDate) <= now
-    );
-
-    const uniqueDestinations = new Set(
-      finishedTripsThisYear.map((trip) => trip.destinationName.trim().toLowerCase())
-=======
     const thisYearTrips = trips.filter((trip) =>
       isTripInYear(trip, currentYear),
     );
@@ -124,20 +107,14 @@ export function PersonalizedHeroCard() {
       finishedTripsThisYear.map((trip) =>
         trip.destinationName.trim().toLowerCase(),
       ),
->>>>>>> origin/master
     );
 
     const uniqueCountries = new Set(
       finishedTripsThisYear
-<<<<<<< HEAD
-        .map((trip) => getCountryFromLocation(trip.destinationLocation).toLowerCase())
-        .filter(Boolean)
-=======
         .map((trip) =>
           getCountryFromLocation(trip.destinationLocation).toLowerCase(),
         )
         .filter(Boolean),
->>>>>>> origin/master
     );
 
     return {
@@ -150,13 +127,9 @@ export function PersonalizedHeroCard() {
   return (
     <div className="mx-auto max-w-3xl rounded-2xl border border-border/60 bg-card/85 p-5 shadow-2xl backdrop-blur-md md:p-6">
       <div className="mb-4 text-center md:text-left">
-<<<<<<< HEAD
-        <p className="text-sm font-medium text-primary">{greeting}, {firstName}</p>
-=======
         <p className="text-sm font-medium text-primary">
           {greeting}, {firstName}
         </p>
->>>>>>> origin/master
         <h1 className="mt-1 text-3xl font-bold leading-tight text-foreground md:text-4xl">
           Ready for your next adventure?
         </h1>
@@ -174,38 +147,22 @@ export function PersonalizedHeroCard() {
                 Next trip
               </div>
 
-<<<<<<< HEAD
-              <h2 className="text-lg font-semibold text-foreground md:text-xl">{nextTrip.destinationName}</h2>
-              <p className="mt-0.5 text-sm text-muted-foreground">{nextTrip.destinationLocation}</p>
-=======
               <h2 className="text-lg font-semibold text-foreground md:text-xl">
                 {nextTrip.destinationName}
               </h2>
               <p className="mt-0.5 text-sm text-muted-foreground">
                 {nextTrip.destinationLocation}
               </p>
->>>>>>> origin/master
 
               <div className="mt-2 inline-flex items-center gap-2 rounded-md bg-primary/10 px-2.5 py-1 text-sm text-primary">
                 <CalendarDays className="h-4 w-4" />
                 <span>
-<<<<<<< HEAD
-                  {formatDateLong(nextTrip.departureDate)} - {formatDateLong(nextTrip.returnDate)}
-=======
                   {formatDateLong(nextTrip.departureDate)} -{" "}
                   {formatDateLong(nextTrip.returnDate)}
->>>>>>> origin/master
                 </span>
               </div>
 
               <div className="mt-3 flex flex-wrap gap-2">
-<<<<<<< HEAD
-                <Button size="sm" onClick={() => navigate(ROUTE_PATHS.TRIP_DETAIL(nextTrip.id))}>
-                  View trip details
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-                <Button size="sm" variant="outline" onClick={() => navigate(ROUTE_PATHS.MY_TRIPS)}>
-=======
                 <Button
                   size="sm"
                   onClick={() => navigate(ROUTE_PATHS.TRIP_DETAIL(nextTrip.id))}
@@ -218,7 +175,6 @@ export function PersonalizedHeroCard() {
                   variant="outline"
                   onClick={() => navigate(ROUTE_PATHS.MY_TRIPS)}
                 >
->>>>>>> origin/master
                   Open My Trips
                 </Button>
               </div>
@@ -248,14 +204,6 @@ export function PersonalizedHeroCard() {
             </div>
 
             <p className="text-sm text-muted-foreground md:text-base">
-<<<<<<< HEAD
-              Start planning your next adventure. Pick a destination and lock in your dates.
-            </p>
-
-            <div className="mt-4 flex flex-wrap gap-2">
-              <Button onClick={() => navigate(ROUTE_PATHS.DESTINATIONS)}>Plan a trip</Button>
-              <Button variant="outline" onClick={() => navigate(ROUTE_PATHS.DESTINATIONS)}>
-=======
               Start planning your next adventure. Pick a destination and lock in
               your dates.
             </p>
@@ -268,7 +216,6 @@ export function PersonalizedHeroCard() {
                 variant="outline"
                 onClick={() => navigate(ROUTE_PATHS.DESTINATIONS)}
               >
->>>>>>> origin/master
                 Browse destinations
               </Button>
             </div>
@@ -278,17 +225,12 @@ export function PersonalizedHeroCard() {
 
       <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
         <div className="rounded-lg border border-border/60 bg-background/80 p-3">
-<<<<<<< HEAD
-          <p className="text-xs uppercase tracking-wide text-muted-foreground">This year</p>
-          <p className="mt-1 text-xl font-semibold text-foreground">{thisYearStats.trips}</p>
-=======
           <p className="text-xs uppercase tracking-wide text-muted-foreground">
             This year
           </p>
           <p className="mt-1 text-xl font-semibold text-foreground">
             {thisYearStats.trips}
           </p>
->>>>>>> origin/master
           <p className="text-xs text-muted-foreground">Trips</p>
         </div>
 
@@ -297,13 +239,9 @@ export function PersonalizedHeroCard() {
             <MapPinned className="h-3.5 w-3.5" />
             Destinations
           </div>
-<<<<<<< HEAD
-          <p className="mt-1 text-xl font-semibold text-foreground">{thisYearStats.destinations}</p>
-=======
           <p className="mt-1 text-xl font-semibold text-foreground">
             {thisYearStats.destinations}
           </p>
->>>>>>> origin/master
           <p className="text-xs text-muted-foreground">Visited</p>
         </div>
 
@@ -312,20 +250,12 @@ export function PersonalizedHeroCard() {
             <Globe className="h-3.5 w-3.5" />
             Countries
           </div>
-<<<<<<< HEAD
-          <p className="mt-1 text-xl font-semibold text-foreground">{thisYearStats.countries}</p>
-=======
           <p className="mt-1 text-xl font-semibold text-foreground">
             {thisYearStats.countries}
           </p>
->>>>>>> origin/master
           <p className="text-xs text-muted-foreground">Visited</p>
         </div>
       </div>
     </div>
   );
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> origin/master
