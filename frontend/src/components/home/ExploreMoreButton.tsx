@@ -5,7 +5,7 @@ export function ExploreMoreButton() {
   const handleClick = useCallback(() => {
     window.scrollTo({
       top: window.innerHeight,
-      behavior: 'smooth'
+      behavior: "smooth",
     });
   }, []);
 

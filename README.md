@@ -1,196 +1,178 @@
-# 🌍 UniVoyage
+# UniVoyage — Developer guide
 
-**UniVoyage** is a modern, full-stack **travel planning and trip management application** designed to help users plan smarter, more personalized, and budget-aware trips using real-time data and AI assistance.
+This README helps you clone the repo, run frontend and backend locally, and contribute.
 
-The application brings together **trip creation**, **budget management**, **student-friendly travel data**, **maps**, **weather forecasts**, **AI-generated itineraries**, and a **CMS system** into one unified platform.
+- Product and feature overview: [`docs/project-overview.md`](docs/project-overview.md)
+- CI/CD workflows, Mermaid flow, and deployment secrets: [`docs/ci-cd-pipelines.md`](docs/ci-cd-pipelines.md)
 
----
-
-## 🎯 What is UniVoyage?
-
-UniVoyage is a **smart travel companion** that supports users from the moment they decide to travel until they have a fully structured daily itinerary, packing list, and budget overview.
-
-Instead of switching between multiple tools (maps, weather apps, booking platforms, notes, spreadsheets), UniVoyage centralizes everything and enhances it with **context-aware AI** and **live external APIs**.
+Docker stack logging (paths, rotation, env knobs):
+- `docs/logging-docker.md`
 
 ---
 
-## 👥 Who is UniVoyage for?
+## Repository layout
 
-- 🎓 **Students** and young travelers
-- ✈️ **Budget-conscious travelers**
-- 🧳 **Backpackers & digital nomads**
-- 🌍 Travelers who want **structured and intelligent planning**
-- 💼 Recruiters reviewing a real-world full-stack portfolio project
-
----
-
-## ⭐ Why people would use UniVoyage
-
-- One place for **entire trip planning**
-- **Budget control** at every stage
-- **Student-friendly hotel discovery**
-- **Weather-aware travel suggestions**
-- **AI-generated itineraries & packing lists**
-- Interactive **maps with points of interest**
-- Clean separation of user and admin (CMS) functionality
+- `frontend/` — React + TypeScript + Vite
+- `backend/` — Java 23 + Spring Boot
+- `.github/workflows/` — GitHub Actions
+- `docs/` — documentation
+- `.githooks/` — shared Git hooks
+- `scripts/` — local setup helpers
 
 ---
 
-## 🚀 Main Features
+## Prerequisites
 
-### 🧭 Trip Builder
-- Create trips with:
-    - destinations
-    - start & end dates
-    - total trip duration
-- Fully editable trips at any time
-- Dynamic structure supporting multi-day trips
-- Budget can be **updated at any point during the trip lifecycle**
-
----
-
-### 💰 Budget per Trip
-- Set or change total trip budget anytime
-- Expense tracking per category:
-    - accommodation
-    - transport
-    - food
-    - activities
-- Budget insights during planning
-- Budget context passed into AI recommendations
-
----
-
-### 🏨 Student-Friendly Hotels (Amadeus API)
-- Integration with **Amadeus API**
-- Displays a list of **student-friendly hotels** for selected destinations
-- Helps users choose affordable and suitable accommodation
-- Hotel data can influence:
-    - budget planning
-    - itinerary suggestions
-
----
-
-### 🌤️ Weather Forecast (OpenWeather API)
-- Shows **3–5 day weather forecast** for trip destinations
-- Weather data is dynamically loaded based on:
-    - destination
-    - travel dates
-- Weather context is used across:
-    - trip planning
-    - AI recommendations
-    - packing suggestions
-
----
-
-### 🗺️ Maps & Points of Interest (Geoapify + OpenStreetMap)
-- Interactive map view powered by **OpenStreetMap**
-- **Geoapify API** provides:
-    - geographic data
-    - nearby attractions
-    - points of interest (POI)
-- “Things to Visit” section lists POIs returned by Geoapify
-- All POIs are visualized directly on the map
-
----
-
-### 🤖 AI Travel Assistant (Google Gemini)
-
-The **Google Gemini API** is a core intelligence layer in UniVoyage.
-
-#### ✨ AI-Generated Daily Itineraries
-- Automatically generates **day-by-day itineraries**
-- Number of days is derived from trip duration
-- Takes into account:
-    - destination
-    - weather forecast
-    - points of interest
-    - budget
-    - user preferences
-- Produces realistic daily travel plans instead of generic suggestions
-
-#### 🎒 Smart Packing Suggestions
-- Generates **packing lists** based on:
-    - destination
-    - weather forecast
-    - trip duration
-- Includes:
-    - clothing suggestions
-    - weather-specific items
-    - travel documents
-    - essential accessories
-- Adapts packing advice dynamically if weather or dates change
-
-#### 💡 Context-Aware Recommendations
-- Suggests activities based on weather conditions
-- Provides budget-friendly alternatives
-- Uses real trip data instead of static prompts
-
----
-
-### 🛠️ CMS (Admin Panel)
-- Dedicated admin section
-- Full CRUD management for:
-    - users
-    - destinations
-    - countries (to be implemented)
-    - languages (to be implemented)
-    - hobbies (to be implemented)
-- Role-based access (HEAD_ADMIN, ADMIN , USER)
-- Centralized content control for the entire platform
-
----
-
-### 👤 User Profile Management
-- Edit personal details
-- Manage interests and preferences
-- Select country of origin and languages
-- Profile data is used to personalize:
-    - AI responses
-    - trip recommendations
-
----
-
-### 🔐 Authentication & Security
-- JWT authentication (stored in HttpOnly cookies)
-- Google OAuth2 login
-- Role-based authorization
-- Centralized exception handling
-
----
-
-## 🌐 External APIs Used
-
-- **OpenWeather** – 3–5 day weather forecasts
-- **Geoapify** – geolocation, POIs, places to visit
-- **Amadeus** – student-friendly hotel listings
-- **OpenStreetMap** – interactive maps
-- **Google Gemini** – AI itineraries, packing lists, recommendations
-
----
-
-## 🧱 Tech Stack
-
-### Backend
+- Node.js 22+ and npm
 - Java 23
-- Spring Boot
-- Spring Security (JWT + OAuth2)
-- Hibernate / JPA
-- Flyway (database migrations)
-- PostgreSQL
-- Maven
+- Docker Desktop (recommended for local PostgreSQL via Compose)
 
-### Frontend
-- React
-- Vite
-- JavaScript / TypeScript
-- Component-based architecture
-
-### AI & Integrations
-- Google Gemini API
-- OpenWeather API
-- Geoapify API
-- Amadeus API
-- OpenStreetMap
+Optional: Maven installed globally (not required if you use `./mvnw`).
 
 ---
+
+## 1) Clone
+
+```bash
+git clone https://github.com/misterdrac/UniVoyage
+cd UniVoyage
+```
+
+---
+
+## 2) Git hooks (recommended)
+
+Run once per clone:
+
+```bash
+./scripts/setup-git-hooks.sh
+```
+
+**Windows:** run that in **Git Bash** or **WSL**. If you only use PowerShell, point Git at the hooks directory:
+
+```powershell
+git config core.hooksPath .githooks
+```
+
+The pre-commit hook formats backend (Maven formatter) and frontend (Prettier) and re-stages changed files.
+
+---
+
+## 3) Frontend (run first)
+
+```bash
+cd frontend
+npm ci
+```
+
+Create `frontend/.env` (see `frontend/env.example`):
+
+```env
+VITE_API_URL=http://localhost:8080/api
+```
+
+Start dev server:
+
+```bash
+npm run dev
+```
+
+Default URL: `http://localhost:5173`
+
+---
+
+## 4) Backend (second terminal)
+
+```bash
+cd backend
+```
+
+Create `backend/.env` from the example:
+
+```bash
+cp env.example .env
+```
+
+PowerShell:
+
+```powershell
+Copy-Item env.example .env
+```
+
+Fill at least: `DB_PASSWORD`, `POSTGRES_PASSWORD`, `JWT_SECRET`, and any API keys you need (`OPENWEATHER_API_KEY`, `GEOAPIFY_API_KEY`, `GEMINI_API_KEY`, `AMADEUS_API_KEY`, `AMADEUS_API_SECRET`).
+
+### Recommended: Docker Compose
+
+From `backend/`:
+
+```bash
+docker compose up --build -d
+```
+
+If Windows blocks port `5432`, the mapped host port may be `5433` (see backend Compose/docs).
+
+Stop:
+
+```bash
+docker compose down
+```
+
+### Alternative: Maven only
+
+```bash
+./mvnw spring-boot:run
+```
+
+Backend: `http://localhost:8080`  
+Health: `http://localhost:8080/actuator/health`
+
+---
+
+## 5) How frontend talks to backend
+
+- API base path is configured under `/api` (see `frontend/src/config/apiConfig.ts`).
+- CORS is configured server-side (see `backend/src/main/java/com/univoyage/config/CorsFilterConfig.java`).
+- Local origins typically allowed include `http://localhost:5173` and `http://127.0.0.1:5173`.
+
+---
+
+## 6) Quick sanity check after startup
+
+- Frontend loads at `http://localhost:5173`.
+- Backend health is UP at `http://localhost:8080/actuator/health`.
+- Browser console shows no CORS errors when calling the API.
+
+If health fails: confirm Compose/Postgres is up, `backend/.env` exists, and DB credentials match the container.
+
+---
+
+## 7) Useful commands
+
+Frontend:
+
+```bash
+cd frontend
+npm run dev
+npm run build
+npm run lint
+```
+
+Backend:
+
+```bash
+cd backend
+./mvnw clean test
+./mvnw formatter:format
+./mvnw formatter:validate
+```
+
+---
+
+## 8) CI/CD (short)
+
+- Default branch: `master`
+- Push pipelines on feature branches give fast feedback
+- PR pipelines add stricter checks before merge
+- Full master workflow plus manual release/deploy: see [`docs/ci-cd-pipelines.md`](docs/ci-cd-pipelines.md)
+
+Deploy targets: backend **Railway**, frontend **Vercel**. Required GitHub secrets are listed in that doc.

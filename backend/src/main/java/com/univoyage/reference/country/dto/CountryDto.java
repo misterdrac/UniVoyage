@@ -13,14 +13,13 @@ import lombok.*;
 @Builder
 public class CountryDto {
 
-    private String isoCode;
-    private String countryName;
+  private String isoCode;
+  private String countryName;
 
-    public static CountryDto from(Country entity) {
-        if (entity == null) return null;
-        return CountryDto.builder()
-                .isoCode(entity.getIsoCode())
-                .countryName(entity.getCountryName())
-                .build();
-    }
+  public static CountryDto from(Country entity) {
+    if (entity == null)
+      return null;
+    return CountryDto.builder().isoCode(entity.getIsoCode()).countryName(entity.getCountryName())
+        .build();
+  }
 }

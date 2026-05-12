@@ -1,8 +1,8 @@
-import { Card, CardContent } from '@/components/ui/card'
-import { Sparkles } from 'lucide-react'
+import { Card, CardContent } from "@/components/ui/card";
+import { Sparkles } from "lucide-react";
 
 interface ItineraryLoaderProps {
-  message: string
+  message: string;
 }
 
 export function ItineraryLoader({ message }: ItineraryLoaderProps) {
@@ -17,12 +17,12 @@ export function ItineraryLoader({ message }: ItineraryLoaderProps) {
           </div>
         </div>
         <div>
-          <p className="text-base font-semibold text-foreground">Generating itinerary…</p>
+          <p className="text-base font-semibold text-foreground">
+            Generating itinerary…
+          </p>
           <p className="mt-2 text-sm text-muted-foreground">{message}</p>
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
-
-

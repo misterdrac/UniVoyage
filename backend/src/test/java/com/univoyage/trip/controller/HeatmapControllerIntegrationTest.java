@@ -26,7 +26,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Full-stack integration tests for {@link HeatmapController} (DB-backed aggregation, no external APIs).
+ * Full-stack integration tests for {@link HeatmapController} (DB-backed
+ * aggregation, no external APIs).
  */
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
@@ -34,90 +35,68 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 class HeatmapControllerIntegrationTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+  @Autowired
+  private MockMvc mockMvc;
 
-    @Autowired
-    private UserRepository userRepository;
+  @Autowired
+  private UserRepository userRepository;
 
-    @Autowired
-    private CountryRepository countryRepository;
+  @Autowired
+  private CountryRepository countryRepository;
 
-    @Autowired
-    private DestinationRepository destinationRepository;
+  @Autowired
+  private DestinationRepository destinationRepository;
 
-    @Autowired
-    private TripRepository tripRepository;
+  @Autowired
+  private TripRepository tripRepository;
 
-    @Test
-    @DisplayName("GET /api/heatmap returns points array (may be empty)")
-    void heatmapReturnsOk() throws Exception {
-        mockMvc.perform(get("/api/heatmap"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.points").isArray());
-    }
+  @Test
+  @DisplayName("GET /api/heatmap returns points array (may be empty)")
+  void heatmapReturnsOk() throws Exception {
+    mockMvc.perform(get("/api/heatmap")).andExpect(status().isOk())
+        .andExpect(jsonPath("$.success").value(true))
+        .andExpect(jsonPath("$.data.points").isArray());
+  }
 
-    @Test
-    @DisplayName("GET /api/heatmap aggregates trip counts per destination")
-    void heatmapAggregatesTripsPerDestination() throws Exception {
-        UserEntity user = saveUser("heatmap-user@example.com");
-        Country lu = country("LU");
-        Country mt = country("MT");
-        DestinationEntity d1 = saveDestination("HeatmapCityA", lu);
-        DestinationEntity d2 = saveDestination("HeatmapCityB", mt);
-        saveTrip(user.getId(), d1);
-        saveTrip(user.getId(), d1);
-        saveTrip(user.getId(), d2);
+  @Test
+  @DisplayName("GET /api/heatmap aggregates trip counts per destination")
+  void heatmapAggregatesTripsPerDestination() throws Exception {
+    UserEntity user = saveUser("heatmap-user@example.com");
+    Country lu = country("LU");
+    Country mt = country("MT");
+    DestinationEntity d1 = saveDestination("HeatmapCityA", lu);
+    DestinationEntity d2 = saveDestination("HeatmapCityB", mt);
+    saveTrip(user.getId(), d1);
+    saveTrip(user.getId(), d1);
+    saveTrip(user.getId(), d2);
 
-        mockMvc.perform(get("/api/heatmap"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.points[0].destinationName").value("HeatmapCityA"))
-                .andExpect(jsonPath("$.data.points[0].tripCount").value(2))
-                .andExpect(jsonPath("$.data.points[1].destinationName").value("HeatmapCityB"))
-                .andExpect(jsonPath("$.data.points[1].tripCount").value(1));
-    }
+    mockMvc.perform(get("/api/heatmap")).andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.points[0].destinationName").value("HeatmapCityA"))
+        .andExpect(jsonPath("$.data.points[0].tripCount").value(2))
+        .andExpect(jsonPath("$.data.points[1].destinationName").value("HeatmapCityB"))
+        .andExpect(jsonPath("$.data.points[1].tripCount").value(1));
+  }
 
-    private Country country(String isoCode) {
-        return countryRepository.findByIsoCode(isoCode)
-                .orElseThrow(() -> new IllegalStateException("Test DB missing seeded country: " + isoCode));
-    }
+  private Country country(String isoCode) {
+    return countryRepository.findByIsoCode(isoCode)
+        .orElseThrow(() -> new IllegalStateException("Test DB missing seeded country: " + isoCode));
+  }
 
-    private UserEntity saveUser(String email) {
-        return userRepository.save(UserEntity.builder()
-                .name("T")
-                .surname("U")
-                .email(email)
-                .passwordHash("{noop}unused")
-                .dateOfRegister(Instant.now())
-                .role(Role.USER)
-                .build());
-    }
+  private UserEntity saveUser(String email) {
+    return userRepository.save(UserEntity.builder().name("T").surname("U").email(email)
+        .passwordHash("{noop}unused").dateOfRegister(Instant.now()).role(Role.USER).build());
+  }
 
-    private DestinationEntity saveDestination(String name, Country c) {
-        return destinationRepository.save(DestinationEntity.builder()
-                .name(name)
-                .location(name)
-                .continent("Europe")
-                .country(c)
-                .imageUrl("https://example.com/x.jpg")
-                .imageAlt(name)
-                .overview("Overview")
-                .budgetPerDay(50)
-                .whyVisit("Why")
-                .createdAt(Instant.now())
-                .updatedAt(Instant.now())
-                .build());
-    }
+  private DestinationEntity saveDestination(String name, Country c) {
+    return destinationRepository.save(DestinationEntity.builder().name(name).location(name)
+        .continent("Europe").country(c).imageUrl("https://example.com/x.jpg").imageAlt(name)
+        .overview("Overview").budgetPerDay(50).whyVisit("Why").createdAt(Instant.now())
+        .updatedAt(Instant.now()).build());
+  }
 
-    private TripEntity saveTrip(Long userId, DestinationEntity destination) {
-        return tripRepository.save(TripEntity.builder()
-                .userId(userId)
-                .destination(destination)
-                .departureDate(LocalDate.now().plusDays(10))
-                .returnDate(LocalDate.now().plusDays(14))
-                .status("planned")
-                .createdAt(Instant.now())
-                .build());
-    }
+  private TripEntity saveTrip(Long userId, DestinationEntity destination) {
+    return tripRepository.save(TripEntity.builder().userId(userId).destination(destination)
+        .departureDate(LocalDate.now().plusDays(10)).returnDate(LocalDate.now().plusDays(14))
+        .status("planned").createdAt(Instant.now()).build());
+  }
 }

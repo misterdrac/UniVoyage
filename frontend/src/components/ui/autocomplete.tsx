@@ -1,14 +1,14 @@
 /**
  * AutoComplete Component
- * 
+ *
  * A flexible autocomplete component with support for:
  * - Basic filtering and search
  * - Popular options display (optional)
  * - Result limiting (optional)
  * - Dynamic height calculation (optional)
- * 
+ *
  * @see DestinationAutoComplete for a configured version with destination-specific defaults
- * 
+ *
  * Optional Future Optimizations (see inline comments):
  * - Consider useMemo for filtering if performance issues arise with large datasets (1000+ items)
  * - Consider useMemo for dynamic height calculation if virtual scrolling is added
@@ -18,31 +18,36 @@ import {
   CommandGroup,
   CommandItem,
   CommandList,
-} from "@/components/ui/command"
-import { Command as CommandPrimitive } from "cmdk"
-import React, { useState, useRef, useCallback, type KeyboardEvent } from "react"
+} from "@/components/ui/command";
+import { Command as CommandPrimitive } from "cmdk";
+import React, {
+  useState,
+  useRef,
+  useCallback,
+  type KeyboardEvent,
+} from "react";
 
-import { Skeleton } from "@/components/ui/skeleton"
-import { Input } from "@/components/ui/input"
-import { Search, Check } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import { Search, Check } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-export type Option = Record<"value" | "label", string> & Record<string, string>
+export type Option = Record<"value" | "label", string> & Record<string, string>;
 
 type AutoCompleteProps = {
-  options: Option[]
-  emptyMessage: string
-  value?: Option
-  onValueChange?: (value: Option) => void
-  onBlur?: () => void
-  isLoading?: boolean
-  disabled?: boolean
-  placeholder?: string
-  popularOptions?: Option[]
-  popularLabel?: string
-  maxResults?: number
-  dynamicHeight?: boolean
-}
+  options: Option[];
+  emptyMessage: string;
+  value?: Option;
+  onValueChange?: (value: Option) => void;
+  onBlur?: () => void;
+  isLoading?: boolean;
+  disabled?: boolean;
+  placeholder?: string;
+  popularOptions?: Option[];
+  popularLabel?: string;
+  maxResults?: number;
+  dynamicHeight?: boolean;
+};
 
 export const AutoComplete = ({
   options,
@@ -58,120 +63,128 @@ export const AutoComplete = ({
   maxResults,
   dynamicHeight = false,
 }: AutoCompleteProps) => {
-  const inputRef = useRef<HTMLInputElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const [isOpen, setOpen] = useState(false)
-  const [selected, setSelected] = useState<Option | undefined>(value)
-  const [inputValue, setInputValue] = useState<string>(value?.label || "")
+  const [isOpen, setOpen] = useState(false);
+  const [selected, setSelected] = useState<Option | undefined>(value);
+  const [inputValue, setInputValue] = useState<string>(value?.label || "");
 
   // Update when external value changes
   React.useEffect(() => {
     if (value !== selected) {
-      setSelected(value)
-      setInputValue(value?.label || "")
+      setSelected(value);
+      setInputValue(value?.label || "");
     }
-  }, [value, selected])
+  }, [value, selected]);
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLInputElement>) => {
       // Keep the options displayed when the user is typing
       if (!isOpen) {
-        setOpen(true)
+        setOpen(true);
       }
 
       // This is not a default behaviour of the <input /> field
       if (event.key === "Enter" && inputValue !== "") {
         const optionToSelect = options.find(
           (option) => option.label === inputValue,
-        )
+        );
         if (optionToSelect) {
-          setSelected(optionToSelect)
-          onValueChange?.(optionToSelect)
-          setInputValue(optionToSelect.label)
+          setSelected(optionToSelect);
+          onValueChange?.(optionToSelect);
+          setInputValue(optionToSelect.label);
         }
       }
 
       if (event.key === "Escape") {
-        inputRef.current?.blur()
+        inputRef.current?.blur();
       }
     },
     [isOpen, options, onValueChange, inputValue],
-  )
+  );
 
   const handleBlur = useCallback(() => {
-    setOpen(false)
+    setOpen(false);
     // Only reset to selected label if there's a selection, otherwise clear invalid input
     if (selected && selected.label) {
-      setInputValue(selected.label)
+      setInputValue(selected.label);
     } else {
       // Clear invalid input if no valid selection
-      setInputValue('')
-      setSelected(undefined)
+      setInputValue("");
+      setSelected(undefined);
     }
-    onBlur?.()
-  }, [selected, onBlur])
+    onBlur?.();
+  }, [selected, onBlur]);
 
   const handleSelectOption = useCallback(
     (selectedOption: Option) => {
-      setInputValue(selectedOption.label)
+      setInputValue(selectedOption.label);
 
-      setSelected(selectedOption)
-      onValueChange?.(selectedOption)
+      setSelected(selectedOption);
+      onValueChange?.(selectedOption);
 
-   
       setTimeout(() => {
-        inputRef?.current?.blur()
-      }, 0)
+        inputRef?.current?.blur();
+      }, 0);
     },
     [onValueChange],
-  )
+  );
 
+  const isEmpty = !inputValue || inputValue.trim() === "";
 
-  const isEmpty = !inputValue || inputValue.trim() === ''
-  
   // Filter options based on input value
   const filteredOptions = (() => {
     // If input is empty and popular options are provided, show popular options
     if (isEmpty && popularOptions && popularOptions.length > 0) {
-      const results = maxResults ? popularOptions.slice(0, maxResults) : popularOptions
-      return results
+      const results = maxResults
+        ? popularOptions.slice(0, maxResults)
+        : popularOptions;
+      return results;
     }
-    
+
     // Otherwise, filter based on input value
     const filtered = options
       .filter((option) =>
-        option.label.toLowerCase().includes(inputValue.toLowerCase())
+        option.label.toLowerCase().includes(inputValue.toLowerCase()),
       )
       .sort((a, b) => {
         // Prioritize exact matches, then starts with, then contains
-        const aLower = a.label.toLowerCase()
-        const bLower = b.label.toLowerCase()
-        const inputLower = inputValue.toLowerCase()
-        
-        if (aLower === inputLower && bLower !== inputLower) return -1
-        if (bLower === inputLower && aLower !== inputLower) return 1
-        if (aLower.startsWith(inputLower) && !bLower.startsWith(inputLower)) return -1
-        if (bLower.startsWith(inputLower) && !aLower.startsWith(inputLower)) return 1
-        return 0
-      })
-    
-    return maxResults ? filtered.slice(0, maxResults) : filtered
-  })()
-  
-  // Check if we're showing popular options
-  const isShowingPopular = isEmpty && popularOptions && popularOptions.length > 0
-  
+        const aLower = a.label.toLowerCase();
+        const bLower = b.label.toLowerCase();
+        const inputLower = inputValue.toLowerCase();
 
-  let listClassName = "rounded-lg max-h-[300px] overflow-y-auto overflow-x-hidden"
-  let calculatedHeight = 300
+        if (aLower === inputLower && bLower !== inputLower) return -1;
+        if (bLower === inputLower && aLower !== inputLower) return 1;
+        if (aLower.startsWith(inputLower) && !bLower.startsWith(inputLower))
+          return -1;
+        if (bLower.startsWith(inputLower) && !aLower.startsWith(inputLower))
+          return 1;
+        return 0;
+      });
+
+    return maxResults ? filtered.slice(0, maxResults) : filtered;
+  })();
+
+  // Check if we're showing popular options
+  const isShowingPopular =
+    isEmpty && popularOptions && popularOptions.length > 0;
+
+  let listClassName =
+    "rounded-lg max-h-[300px] overflow-y-auto overflow-x-hidden";
+  let calculatedHeight = 300;
   if (dynamicHeight) {
-    const hasMultiLineItems = filteredOptions.some(opt => opt.location && opt.location !== opt.label)
-    const itemHeight = hasMultiLineItems ? 56 : 36
-    const bannerHeight = isShowingPopular ? 40 : 0
-    const totalHeight = filteredOptions.length * itemHeight + bannerHeight
-    const maxHeightFor10Items = 10 * itemHeight + bannerHeight
-    calculatedHeight = Math.min(totalHeight, Math.min(maxHeightFor10Items, 500))
-    listClassName = `rounded-lg overflow-y-auto overflow-x-hidden`
+    const hasMultiLineItems = filteredOptions.some(
+      (opt) => opt.location && opt.location !== opt.label,
+    );
+    const itemHeight = hasMultiLineItems ? 56 : 36;
+    const bannerHeight = isShowingPopular ? 40 : 0;
+    const totalHeight = filteredOptions.length * itemHeight + bannerHeight;
+    const maxHeightFor10Items = 10 * itemHeight + bannerHeight;
+    calculatedHeight = Math.min(
+      totalHeight,
+      Math.min(maxHeightFor10Items, 500),
+    );
+    listClassName = `rounded-lg overflow-y-auto overflow-x-hidden`;
   }
 
   return (
@@ -182,8 +195,8 @@ export const AutoComplete = ({
           ref={inputRef}
           value={inputValue}
           onChange={(e) => {
-            setInputValue(isLoading ? inputValue : e.target.value)
-            setOpen(true)
+            setInputValue(isLoading ? inputValue : e.target.value);
+            setOpen(true);
           }}
           onKeyDown={handleKeyDown}
           onBlur={handleBlur}
@@ -200,7 +213,12 @@ export const AutoComplete = ({
             isOpen && filteredOptions.length > 0 ? "block" : "hidden",
           )}
         >
-          <CommandList className={listClassName} style={dynamicHeight ? { maxHeight: `${calculatedHeight}px` } : undefined}>
+          <CommandList
+            className={listClassName}
+            style={
+              dynamicHeight ? { maxHeight: `${calculatedHeight}px` } : undefined
+            }
+          >
             {isLoading ? (
               <CommandPrimitive.Loading>
                 <div className="p-1">
@@ -217,14 +235,14 @@ export const AutoComplete = ({
                 )}
                 <CommandGroup>
                   {filteredOptions.map((option) => {
-                    const isSelected = selected?.value === option.value
+                    const isSelected = selected?.value === option.value;
                     return (
                       <CommandItem
                         key={option.value}
                         value={option.label}
                         onMouseDown={(event) => {
-                          event.preventDefault()
-                          event.stopPropagation()
+                          event.preventDefault();
+                          event.stopPropagation();
                         }}
                         onSelect={() => handleSelectOption(option)}
                         className={cn(
@@ -235,12 +253,15 @@ export const AutoComplete = ({
                         {isSelected ? <Check className="w-4" /> : null}
                         <div className="flex flex-col">
                           <span className="font-medium">{option.label}</span>
-                          {option.location && option.location !== option.label && (
-                            <span className="text-xs text-muted-foreground">{option.location}</span>
-                          )}
+                          {option.location &&
+                            option.location !== option.label && (
+                              <span className="text-xs text-muted-foreground">
+                                {option.location}
+                              </span>
+                            )}
                         </div>
                       </CommandItem>
-                    )
+                    );
                   })}
                 </CommandGroup>
               </>
@@ -254,5 +275,5 @@ export const AutoComplete = ({
         </div>
       </div>
     </CommandPrimitive>
-  )
-}
+  );
+};

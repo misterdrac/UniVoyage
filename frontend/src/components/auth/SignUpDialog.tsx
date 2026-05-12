@@ -1,9 +1,21 @@
 import { useCallback } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { apiService } from "@/services/api";
 import { toast } from "sonner";
-import { SignUpBasicFields, SignUpInterestsFields, SignUpPasswordFields, SignUpFormActions, useSignUpForm } from "./signup";
+import {
+  SignUpBasicFields,
+  SignUpInterestsFields,
+  SignUpPasswordFields,
+  SignUpFormActions,
+  useSignUpForm,
+} from "./signup";
 
 interface SignUpDialogProps {
   open: boolean;
@@ -11,7 +23,11 @@ interface SignUpDialogProps {
   onLoginClick?: () => void;
 }
 
-export function SignUpDialog({ open, onOpenChange, onLoginClick }: SignUpDialogProps) {
+export function SignUpDialog({
+  open,
+  onOpenChange,
+  onLoginClick,
+}: SignUpDialogProps) {
   const { signup, loadUser } = useAuth();
 
   const handleSuccess = useCallback(() => {
@@ -53,32 +69,39 @@ export function SignUpDialog({ open, onOpenChange, onLoginClick }: SignUpDialogP
       toast.success("Account created with Google!");
       onOpenChange(false);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Google sign up failed";
+      const errorMessage =
+        error instanceof Error ? error.message : "Google sign up failed";
       toast.error(errorMessage);
     }
   }, [onOpenChange, loadUser]);
 
-  const handleOpenChange = useCallback((newOpen: boolean) => {
-    onOpenChange(newOpen);
-    if (!newOpen) {
-      resetForm();
-    }
-  }, [onOpenChange, resetForm]);
+  const handleOpenChange = useCallback(
+    (newOpen: boolean) => {
+      onOpenChange(newOpen);
+      if (!newOpen) {
+        resetForm();
+      }
+    },
+    [onOpenChange, resetForm],
+  );
 
   const handleLoginClick = useCallback(() => {
     onOpenChange(false);
     onLoginClick?.();
   }, [onOpenChange, onLoginClick]);
 
-  const handleFormSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!passwordsMatch) {
-      setShowPasswordError(true);
-      toast.error("Passwords do not match");
-      return;
-    }
-    await handleSubmit(e);
-  }, [handleSubmit, passwordsMatch, setShowPasswordError]);
+  const handleFormSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!passwordsMatch) {
+        setShowPasswordError(true);
+        toast.error("Passwords do not match");
+        return;
+      }
+      await handleSubmit(e);
+    },
+    [handleSubmit, passwordsMatch, setShowPasswordError],
+  );
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -88,10 +111,11 @@ export function SignUpDialog({ open, onOpenChange, onLoginClick }: SignUpDialogP
             Create Account
           </DialogTitle>
           <DialogDescription className="sr-only">
-            Create a new UniVoyage account to start planning your student travel adventures
+            Create a new UniVoyage account to start planning your student travel
+            adventures
           </DialogDescription>
         </DialogHeader>
-        
+
         <form onSubmit={handleFormSubmit} className="space-y-4">
           <SignUpBasicFields
             name={name}

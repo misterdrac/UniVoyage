@@ -14,7 +14,6 @@ export const SignUpInterestsFields = ({
   languages,
   setLanguages,
 }: SignUpInterestsFieldsProps) => {
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {/* Interests/Hobbies */}
@@ -32,9 +31,7 @@ export const SignUpInterestsFields = ({
 
       {/* Languages */}
       <div className="space-y-2">
-        <label className="text-sm font-medium text-foreground">
-          Languages
-        </label>
+        <label className="text-sm font-medium text-foreground">Languages</label>
         <ChipSelect
           options={LANGUAGES}
           value={languages}
@@ -45,4 +42,3 @@ export const SignUpInterestsFields = ({
     </div>
   );
 };
-

@@ -1,6 +1,6 @@
-import { useState, useCallback } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { toast } from 'sonner';
+import { useState, useCallback } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 import {
   ProfileHeaderCard,
   ProfileCompletionCard,
@@ -9,11 +9,11 @@ import {
   TravelInformationCard,
   AccountInformationCard,
   useProfileForm,
-} from '@/components/profile';
+} from "@/components/profile";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 const ProfilePage = () => {
-  useDocumentTitle('Profile');
+  useDocumentTitle("Profile");
   const { user, logout, updateProfile } = useAuth();
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isEditingInterests, setIsEditingInterests] = useState(false);
@@ -50,7 +50,6 @@ const ProfilePage = () => {
     toast.success("You've been logged out successfully");
   }, [logout]);
 
-
   const handleEditProfile = useCallback(() => {
     // If travel info is being edited, close it before entering profile edit
     setIsEditingInterests(false);
@@ -60,7 +59,7 @@ const ProfilePage = () => {
 
   const handleCancelProfile = useCallback(() => {
     resetProfileForm();
-    toast.info('Canceled changes to profile information');
+    toast.info("Canceled changes to profile information");
     setIsEditingProfile(false);
   }, [resetProfileForm]);
 
@@ -77,7 +76,12 @@ const ProfilePage = () => {
   }, [resetInterestsForm]);
 
   const handleSaveProfile = useCallback(
-    async (data: { name: string; surname?: string; countryCode?: string; profileImagePath?: string }) => {
+    async (data: {
+      name: string;
+      surname?: string;
+      countryCode?: string;
+      profileImagePath?: string;
+    }) => {
       setIsSavingProfile(true);
       try {
         const result = await updateProfile({
@@ -87,26 +91,30 @@ const ProfilePage = () => {
           profileImagePath: data.profileImagePath,
         });
         if (result.success) {
-          toast.success('Profile updated successfully!');
+          toast.success("Profile updated successfully!");
           setIsEditingProfile(false);
         } else {
-          toast.error(result.error || 'Failed to update profile');
+          toast.error(result.error || "Failed to update profile");
         }
       } catch (error) {
-        toast.error('An error occurred while updating your profile');
+        toast.error("An error occurred while updating your profile");
       } finally {
         setIsSavingProfile(false);
       }
     },
-    [updateProfile]
+    [updateProfile],
   );
 
   const handleSaveInterests = useCallback(
-    async (data: { hobbies: string[]; languages: string[]; visited: string[] }) => {
+    async (data: {
+      hobbies: string[];
+      languages: string[];
+      visited: string[];
+    }) => {
       setIsSavingInterests(true);
       try {
         const hobbyIds = data.hobbies
-          .map(h => Number(h))
+          .map((h) => Number(h))
           .filter((id): id is number => Number.isFinite(id));
         const result = await updateProfile({
           hobbyIds,
@@ -114,18 +122,18 @@ const ProfilePage = () => {
           visitedCountryCodes: data.visited,
         });
         if (result.success) {
-          toast.success('Travel information updated successfully!');
+          toast.success("Travel information updated successfully!");
           setIsEditingInterests(false);
         } else {
-          toast.error(result.error || 'Failed to update travel information');
+          toast.error(result.error || "Failed to update travel information");
         }
       } catch (error) {
-        toast.error('An error occurred while updating your travel information');
+        toast.error("An error occurred while updating your travel information");
       } finally {
         setIsSavingInterests(false);
       }
     },
-    [updateProfile]
+    [updateProfile],
   );
 
   // This should never happen due to ProtectedRoute, but TypeScript needs this

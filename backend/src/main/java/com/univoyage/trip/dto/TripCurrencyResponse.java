@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TripCurrencyResponse {
-    private String destinationCurrencyCode;
-    private String destinationCurrencyName;
-    private String baseCurrencyCode;
-    private Double exchangeRate;
+  private String destinationCurrencyCode;
+  private String destinationCurrencyName;
+  private String baseCurrencyCode;
+  private Double exchangeRate;
 }

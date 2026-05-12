@@ -1,26 +1,34 @@
-import { useCallback, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useTrips } from '@/contexts/TripContext';
-import { Loader2 } from 'lucide-react';
-import { EmptyTripsState } from '@/components/trips/my-trips/EmptyTripsState';
-import { DeleteTripDialog, TripFiltersBar, TripResultsSection } from '@/components/trips/my-trips';
-import type { Trip } from '@/types/trip';
+import { useCallback, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useTrips } from "@/contexts/TripContext";
+import { Loader2 } from "lucide-react";
+import { EmptyTripsState } from "@/components/trips/my-trips/EmptyTripsState";
+import {
+  DeleteTripDialog,
+  TripFiltersBar,
+  TripResultsSection,
+} from "@/components/trips/my-trips";
+import type { Trip } from "@/types/trip";
 import {
   DEFAULT_TRIP_FILTERS,
   filterTrips,
   hasActiveTripFilters,
   type TripFilters,
   type TripStatusFilter,
-} from '@/lib/tripFilters';
-import { sortTrips, type TripSortOption } from '@/lib/tripSorting';
-import { useDeleteTrip } from '@/hooks/useDeleteTrip';
+} from "@/lib/tripFilters";
+import { sortTrips, type TripSortOption } from "@/lib/tripSorting";
+import { useDeleteTrip } from "@/hooks/useDeleteTrip";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
+import { useRatedTripIds } from "@/hooks/useRatedTripIds";
 
 const MyTripsPage = () => {
-  useDocumentTitle('My Trips');
+  useDocumentTitle("My Trips");
   const { trips, isLoading, deleteTrip } = useTrips();
   const navigate = useNavigate();
-  const [filters, setFilters] = useState<TripFilters>({ ...DEFAULT_TRIP_FILTERS });
+  const [filters, setFilters] = useState<TripFilters>({
+    ...DEFAULT_TRIP_FILTERS,
+  });
+  const ratedTripIds = useRatedTripIds(trips);
 
   const {
     pendingDeleteTrip,
@@ -31,9 +39,12 @@ const MyTripsPage = () => {
     confirmDelete: handleConfirmDeleteTrip,
   } = useDeleteTrip();
 
-  const handleViewTrip = useCallback((trip: Trip) => {
-    navigate(`/trips/${trip.id}`);
-  }, [navigate]);
+  const handleViewTrip = useCallback(
+    (trip: Trip) => {
+      navigate(`/trips/${trip.id}`);
+    },
+    [navigate],
+  );
 
   const handleConfirmDelete = useCallback(async () => {
     await handleConfirmDeleteTrip(deleteTrip);
@@ -57,9 +68,18 @@ const MyTripsPage = () => {
     setFilters({ ...DEFAULT_TRIP_FILTERS });
   }, []);
 
-  const filteredTrips = useMemo(() => filterTrips(trips, filters), [trips, filters]);
-  const sortedTrips = useMemo(() => sortTrips(filteredTrips, filters.sort), [filteredTrips, filters.sort]);
-  const hasActiveFilters = useMemo(() => hasActiveTripFilters(filters), [filters]);
+  const filteredTrips = useMemo(
+    () => filterTrips(trips, filters),
+    [trips, filters],
+  );
+  const sortedTrips = useMemo(
+    () => sortTrips(filteredTrips, filters.sort),
+    [filteredTrips, filters.sort],
+  );
+  const hasActiveFilters = useMemo(
+    () => hasActiveTripFilters(filters),
+    [filters],
+  );
 
   if (isLoading) {
     return (
@@ -77,8 +97,12 @@ const MyTripsPage = () => {
     <div className="min-h-screen bg-background px-4 pt-24 pb-8 sm:px-6 lg:px-8">
       <div className="container mx-auto">
         <div className="mb-8">
-          <h1 className="mb-2 text-3xl font-bold text-foreground sm:text-4xl">My Trips</h1>
-          <p className="text-muted-foreground">Manage and view all your planned adventures</p>
+          <h1 className="mb-2 text-3xl font-bold text-foreground sm:text-4xl">
+            My Trips
+          </h1>
+          <p className="text-muted-foreground">
+            Manage and view all your planned adventures
+          </p>
         </div>
 
         {!trips.length ? (
@@ -98,6 +122,7 @@ const MyTripsPage = () => {
               trips={sortedTrips}
               deletingTripId={pendingDeleteTrip?.id ?? null}
               hasActiveFilters={hasActiveFilters}
+              ratedTripIds={ratedTripIds}
               onResetFilters={handleResetFilters}
               onDeleteTrip={handleRequestDeleteTrip}
               onViewTrip={handleViewTrip}

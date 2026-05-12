@@ -8,7 +8,6 @@ import lombok.Data;
  */
 @Data
 public class HotelSearchRequest {
-    @NotBlank
-    private String city;
+  @NotBlank
+  private String city;
 }
-

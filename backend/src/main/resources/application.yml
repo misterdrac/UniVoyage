@@ -21,6 +21,7 @@ spring:
       ddl-auto: validate
     # SQL is not echoed here; enable PostgreSQL log_statement (see docker-compose) for DB-side query logging.
     show-sql: false
+    open-in-view: false
 
 app:
   jwt:
@@ -44,6 +45,13 @@ app:
     # Override via env in production/docker (e.g. COOKIE_SECURE=true)
     secure: ${COOKIE_SECURE:false}
     same-site: ${COOKIE_SAMESITE:Lax}
+
+  trip:
+    rating:
+      ip-max-attempts: 40
+      ip-window: PT1M
+      user-max-attempts: 30
+      user-window: PT1M
 
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}

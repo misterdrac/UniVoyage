@@ -16,9 +16,9 @@ export function PopularDestinationsCarousel() {
   const navigate = useNavigate();
   const { destinations: apiDestinations } = useDestinations();
 
-  const popularDestinations = useMemo(() => 
-    getPopularDestinations(apiDestinations).slice(0, 12), 
-    [apiDestinations]
+  const popularDestinations = useMemo(
+    () => getPopularDestinations(apiDestinations).slice(0, 12),
+    [apiDestinations],
   );
 
   return (
@@ -57,6 +57,10 @@ export function PopularDestinationsCarousel() {
                   className="h-[350px] hover:-translate-y-2"
                   hideOverview={true}
                   buttonText="Explore Destinations"
+                  averageRating={
+                    destination.travellerRatingAverage ??
+                    destination.averageRating
+                  }
                 />
               </CarouselItem>
             ))}

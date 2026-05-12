@@ -1,21 +1,30 @@
 import { MapPin, Sparkles, LayoutDashboard } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 
 const features = [
   {
     icon: MapPin,
     title: "Curated Destinations",
-    description: "Handpicked locations perfect for student travelers on any budget",
+    description:
+      "Handpicked locations perfect for student travelers on any budget",
   },
   {
     icon: Sparkles,
     title: "AI-Powered Itineraries",
-    description: "Smart trip planning that considers your hobbies, interests, and weather conditions",
+    description:
+      "Smart trip planning that considers your hobbies, interests, and weather conditions",
   },
   {
     icon: LayoutDashboard,
     title: "All-in-One Trip Hub",
-    description: "Budget tracking, accommodation details, places to visit, and weather — everything in one place",
+    description:
+      "Budget tracking, accommodation details, places to visit, and weather — everything in one place",
   },
 ];
 
@@ -24,7 +33,9 @@ export function FeaturesSection() {
     <section className="py-16 bg-muted/30">
       <div className="container mx-auto px-6">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-foreground mb-4">Why Choose UniVoyage?</h2>
+          <h2 className="text-3xl font-bold text-foreground mb-4">
+            Why Choose UniVoyage?
+          </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
             We make student travel affordable, safe, and unforgettable
           </p>
@@ -34,8 +45,8 @@ export function FeaturesSection() {
           {features.map((feature) => {
             const Icon = feature.icon;
             return (
-              <Card 
-                key={feature.title} 
+              <Card
+                key={feature.title}
                 className="rounded-2xl hover:shadow-xl hover:scale-105 transition-all duration-300 group"
               >
                 <CardHeader>

@@ -13,5 +13,4 @@ export const WeatherSkeleton = () => (
       <div className="bg-secondary/30 h-3 w-32 rounded-sm"></div>
     </div>
   </div>
-)
-
+);

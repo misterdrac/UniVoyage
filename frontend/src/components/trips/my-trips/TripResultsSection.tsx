@@ -1,21 +1,23 @@
-import { Compass } from 'lucide-react'
-import { TripCard } from '@/components/trips/TripCard'
-import { Button } from '@/components/ui/button'
-import type { Trip } from '@/types/trip'
+import { Compass } from "lucide-react";
+import { TripCard } from "@/components/trips/TripCard";
+import { Button } from "@/components/ui/button";
+import type { Trip } from "@/types/trip";
 
 interface TripResultsSectionProps {
-  trips: Trip[]
-  deletingTripId: number | null
-  hasActiveFilters: boolean
-  onResetFilters: () => void
-  onDeleteTrip: (trip: Trip) => void
-  onViewTrip: (trip: Trip) => void
+  trips: Trip[];
+  deletingTripId: number | null;
+  hasActiveFilters: boolean;
+  ratedTripIds: Set<number>;
+  onResetFilters: () => void;
+  onDeleteTrip: (trip: Trip) => void;
+  onViewTrip: (trip: Trip) => void;
 }
 
 export function TripResultsSection({
   trips,
   deletingTripId,
   hasActiveFilters,
+  ratedTripIds,
   onResetFilters,
   onDeleteTrip,
   onViewTrip,
@@ -27,18 +29,26 @@ export function TripResultsSection({
           <Compass className="h-7 w-7 text-muted-foreground" />
         </div>
         <div className="space-y-2">
-          <h3 className="text-lg font-semibold text-foreground">No trips match these filters</h3>
+          <h3 className="text-lg font-semibold text-foreground">
+            No trips match these filters
+          </h3>
           <p className="max-w-md text-sm text-muted-foreground">
-            Try switching the status or sort order to bring back more adventures.
+            Try switching the status or sort order to bring back more
+            adventures.
           </p>
         </div>
         {hasActiveFilters && (
-          <Button type="button" variant="outline" onClick={onResetFilters} className="rounded-full">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onResetFilters}
+            className="rounded-full"
+          >
             Reset filters
           </Button>
         )}
       </div>
-    )
+    );
   }
 
   return (
@@ -48,11 +58,11 @@ export function TripResultsSection({
           key={trip.id}
           trip={trip}
           isDeleting={deletingTripId === trip.id}
+          isRated={ratedTripIds.has(trip.id)}
           onDelete={onDeleteTrip}
           onView={onViewTrip}
         />
       ))}
     </div>
-  )
+  );
 }
-

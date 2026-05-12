@@ -46,7 +46,6 @@ function PasswordStrength({ password, className }: PasswordStrengthProps) {
 
   return (
     <div className={`${className || ""}`}>
-
       <div
         className="mb-4 mt-3 h-1 w-full overflow-hidden rounded-full bg-border"
         role="progressbar"
@@ -61,7 +60,10 @@ function PasswordStrength({ password, className }: PasswordStrengthProps) {
         ></div>
       </div>
 
-      <p id={`${id}-description`} className="mb-2 text-sm font-medium text-foreground">
+      <p
+        id={`${id}-description`}
+        className="mb-2 text-sm font-medium text-foreground"
+      >
         {getStrengthText(strengthScore)}. Must contain:
       </p>
 
@@ -69,11 +71,21 @@ function PasswordStrength({ password, className }: PasswordStrengthProps) {
         {strength.map((req, index) => (
           <li key={index} className="flex items-center gap-2">
             {req.met ? (
-              <Check size={16} className="text-emerald-500" aria-hidden="true" />
+              <Check
+                size={16}
+                className="text-emerald-500"
+                aria-hidden="true"
+              />
             ) : (
-              <X size={16} className="text-muted-foreground/80" aria-hidden="true" />
+              <X
+                size={16}
+                className="text-muted-foreground/80"
+                aria-hidden="true"
+              />
             )}
-            <span className={`text-xs ${req.met ? "text-emerald-600" : "text-muted-foreground"}`}>
+            <span
+              className={`text-xs ${req.met ? "text-emerald-600" : "text-muted-foreground"}`}
+            >
               {req.text}
               <span className="sr-only">
                 {req.met ? " - Requirement met" : " - Requirement not met"}

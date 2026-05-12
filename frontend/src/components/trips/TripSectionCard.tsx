@@ -1,13 +1,17 @@
-import React from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface TripSectionCardProps {
-  icon: React.ComponentType<{ className?: string }>
-  title: string
-  children: React.ReactNode
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  children: React.ReactNode;
 }
 
-export function TripSectionCard({ icon: Icon, title, children }: TripSectionCardProps) {
+export function TripSectionCard({
+  icon: Icon,
+  title,
+  children,
+}: TripSectionCardProps) {
   return (
     <Card className="border-0 shadow-lg">
       <CardHeader className="pb-4">
@@ -20,7 +24,5 @@ export function TripSectionCard({ icon: Icon, title, children }: TripSectionCard
       </CardHeader>
       <CardContent className="pt-0">{children}</CardContent>
     </Card>
-  )
+  );
 }
-
-

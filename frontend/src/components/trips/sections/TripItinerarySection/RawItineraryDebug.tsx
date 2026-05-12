@@ -1,15 +1,15 @@
-import { Sparkles } from 'lucide-react'
+import { Sparkles } from "lucide-react";
 
 interface RawItineraryDebugProps {
-  raw: string
+  raw: string;
 }
 
 export function RawItineraryDebug({ raw }: RawItineraryDebugProps) {
-  let formatted = raw
+  let formatted = raw;
   try {
-    formatted = JSON.stringify(JSON.parse(raw), null, 2)
+    formatted = JSON.stringify(JSON.parse(raw), null, 2);
   } catch {
-    formatted = raw
+    formatted = raw;
   }
 
   return (
@@ -22,7 +22,5 @@ export function RawItineraryDebug({ raw }: RawItineraryDebugProps) {
         {formatted}
       </pre>
     </div>
-  )
+  );
 }
-
-

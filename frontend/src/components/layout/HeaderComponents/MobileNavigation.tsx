@@ -1,7 +1,17 @@
 import { useCallback, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Home, User as UserIcon, MapPin, Info, Mail, Shield, Globe, Star, Compass } from "lucide-react";
+import {
+  Home,
+  User as UserIcon,
+  MapPin,
+  Info,
+  Mail,
+  Shield,
+  Globe,
+  Star,
+  Compass,
+} from "lucide-react";
 import { DESTINATION_NAV_ITEMS } from "./constants";
 import type { User } from "@/types/user";
 import { ROUTE_PATHS } from "@/config/routes";
@@ -33,7 +43,9 @@ export const MobileNavigation = ({
       if (navRef.current && !navRef.current.contains(event.target as Node)) {
         // Check if click is not on the menu toggle button
         const target = event.target as HTMLElement;
-        const menuButton = target.closest('button[aria-label="Toggle mobile menu"]');
+        const menuButton = target.closest(
+          'button[aria-label="Toggle mobile menu"]',
+        );
         if (!menuButton) {
           onClose();
         }
@@ -42,19 +54,19 @@ export const MobileNavigation = ({
 
     // Add event listener with a small delay to avoid immediate closure
     const timeoutId = setTimeout(() => {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
     }, 100);
 
     return () => {
       clearTimeout(timeoutId);
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
   return (
-    <div 
+    <div
       ref={navRef}
       className="lg:hidden absolute top-full left-0 right-0 bg-background border-b border-border shadow-lg z-50 max-h-[80vh] overflow-y-auto"
     >
@@ -69,7 +81,7 @@ export const MobileNavigation = ({
             <Home className="w-4 h-4" />
             <span>Home</span>
           </Link>
-          
+
           {user ? (
             <Link
               to={ROUTE_PATHS.PROFILE}
@@ -80,8 +92,8 @@ export const MobileNavigation = ({
               <span>Profile</span>
             </Link>
           ) : (
-            <Button 
-              variant="secondary" 
+            <Button
+              variant="secondary"
               size="lg"
               onClick={() => {
                 onLoginClick();
@@ -132,7 +144,7 @@ export const MobileNavigation = ({
             <span>Contact</span>
           </Link>
 
-          {user && (user.role === 'ADMIN' || user.role === 'HEAD_ADMIN') && (
+          {user && (user.role === "ADMIN" || user.role === "HEAD_ADMIN") && (
             <Link
               to={ROUTE_PATHS.ADMIN_DASHBOARD}
               className="px-3 py-2 text-sm font-medium text-foreground hover:bg-accent rounded-md text-center flex flex-col items-center gap-1"
@@ -154,10 +166,11 @@ export const MobileNavigation = ({
             {DESTINATION_NAV_ITEMS.map((destination) => {
               // Use different icons for different destinations
               const getIcon = () => {
-                if (destination.title.includes("Popular")) return <Star className="w-3 h-3" />;
+                if (destination.title.includes("Popular"))
+                  return <Star className="w-3 h-3" />;
                 return <MapPin className="w-3 h-3" />;
               };
-              
+
               return (
                 <Link
                   key={destination.title}
@@ -176,4 +189,3 @@ export const MobileNavigation = ({
     </div>
   );
 };
-

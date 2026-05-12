@@ -9,12 +9,12 @@ import lombok.Data;
  */
 @Data
 public class CreateTripRequest {
-    @NotNull
-    private Long destinationId;
+  @NotNull
+  private Long destinationId;
 
-    @NotBlank
-    private String departureDate; // YYYY-MM-DD
+  @NotBlank
+  private String departureDate; // YYYY-MM-DD
 
-    @NotBlank
-    private String returnDate;    // YYYY-MM-DD
+  @NotBlank
+  private String returnDate; // YYYY-MM-DD
 }

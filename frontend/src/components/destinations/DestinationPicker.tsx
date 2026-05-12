@@ -1,14 +1,14 @@
-import { useMemo, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Plane, X } from 'lucide-react';
-import { type Option } from '@/components/ui/autocomplete';
-import { DestinationAutoComplete } from '@/components/ui/destination-autocomplete';
-import { Button } from '@/components/ui/button';
-import { getPopularDestinations } from '@/lib/destinationUtils';
-import { useDestinations } from '@/hooks/useDestinations';
-import { useDestination } from '@/contexts/DestinationContext';
-import { cn } from '@/lib/utils';
-import { ROUTE_PATHS } from '@/config/routes';
+import { useMemo, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import { Plane, X } from "lucide-react";
+import { type Option } from "@/components/ui/autocomplete";
+import { DestinationAutoComplete } from "@/components/ui/destination-autocomplete";
+import { Button } from "@/components/ui/button";
+import { getPopularDestinations } from "@/lib/destinationUtils";
+import { useDestinations } from "@/hooks/useDestinations";
+import { useDestination } from "@/contexts/DestinationContext";
+import { cn } from "@/lib/utils";
+import { ROUTE_PATHS } from "@/config/routes";
 
 interface DestinationPickerProps {
   continent?: string;
@@ -27,44 +27,46 @@ export const DestinationPicker = ({ continent }: DestinationPickerProps) => {
 
   // Get unique countries from destinations, filtered by continent if provided
   const countryOptions: Option[] = useMemo(() => {
-    const filteredDestinations = continent 
-      ? apiDestinations.filter(dest => dest.continent === continent)
+    const filteredDestinations = continent
+      ? apiDestinations.filter((dest) => dest.continent === continent)
       : apiDestinations;
-    
-    const uniqueCountries = Array.from(new Set(filteredDestinations.map(dest => dest.location)));
-    return uniqueCountries
-      .sort()
-      .map(location => ({
-        value: location,
-        label: location,
-        location: location
-      }));
+
+    const uniqueCountries = Array.from(
+      new Set(filteredDestinations.map((dest) => dest.location)),
+    );
+    return uniqueCountries.sort().map((location) => ({
+      value: location,
+      label: location,
+      location: location,
+    }));
   }, [apiDestinations, continent]);
 
   // Popular destinations - major destinations from all continents
   const popularDestinations: Option[] = useMemo(() => {
-    return getPopularDestinations(apiDestinations, continent).map(dest => ({
+    return getPopularDestinations(apiDestinations, continent).map((dest) => ({
       value: dest.id.toString(),
       label: dest.title,
-      location: dest.location
+      location: dest.location,
     }));
   }, [apiDestinations, continent]);
 
   // Convert destinations to options for autocomplete, filtered by continent and selected country
   const destinationOptions: Option[] = useMemo(() => {
-    let filtered = continent 
-      ? apiDestinations.filter(dest => dest.continent === continent)
+    let filtered = continent
+      ? apiDestinations.filter((dest) => dest.continent === continent)
       : apiDestinations;
-    
+
     if (selectedCountry) {
-      filtered = filtered.filter(dest => dest.location === selectedCountry.label);
+      filtered = filtered.filter(
+        (dest) => dest.location === selectedCountry.label,
+      );
     }
-    
-    return filtered.map(dest => ({
+
+    return filtered.map((dest) => ({
       value: dest.id.toString(),
       label: dest.title,
       location: dest.location,
-      imageUrl: dest.imageUrl || '',
+      imageUrl: dest.imageUrl || "",
     }));
   }, [apiDestinations, selectedCountry, continent]);
 
@@ -85,7 +87,9 @@ export const DestinationPicker = ({ continent }: DestinationPickerProps) => {
       <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
         {/* Country Selection */}
         <div className="relative md:col-span-3">
-          <label className="text-xs text-muted-foreground mb-1.5 block">Country</label>
+          <label className="text-xs text-muted-foreground mb-1.5 block">
+            Country
+          </label>
           <div className="relative">
             <DestinationAutoComplete
               options={countryOptions}
@@ -105,7 +109,7 @@ export const DestinationPicker = ({ continent }: DestinationPickerProps) => {
                 className={cn(
                   "cursor-pointer absolute right-3 top-1/2 -translate-y-1/2",
                   "h-4 w-4 rounded-full bg-muted hover:bg-muted-foreground/20",
-                  "flex items-center justify-center transition-colors"
+                  "flex items-center justify-center transition-colors",
                 )}
                 aria-label="Clear country selection"
               >
@@ -117,7 +121,9 @@ export const DestinationPicker = ({ continent }: DestinationPickerProps) => {
 
         {/* Destination Selection */}
         <div className="relative md:col-span-6">
-          <label className="text-xs text-muted-foreground mb-1.5 block">Destination</label>
+          <label className="text-xs text-muted-foreground mb-1.5 block">
+            Destination
+          </label>
           <div className="relative">
             <DestinationAutoComplete
               options={destinationOptions}
@@ -128,14 +134,16 @@ export const DestinationPicker = ({ continent }: DestinationPickerProps) => {
                 setDestination(option);
                 if (option && option.location) {
                   const countryOption = countryOptions.find(
-                    country => country.value === option.location
+                    (country) => country.value === option.location,
                   );
                   if (countryOption && !selectedCountry) {
                     setCountry(countryOption);
                   }
                 }
               }}
-              popularOptions={!selectedCountry ? popularDestinations : undefined}
+              popularOptions={
+                !selectedCountry ? popularDestinations : undefined
+              }
               popularLabel="You Might Like"
             />
             {selectedDestination && (
@@ -145,7 +153,7 @@ export const DestinationPicker = ({ continent }: DestinationPickerProps) => {
                 className={cn(
                   "cursor-pointer absolute right-3 top-1/2 -translate-y-1/2",
                   "h-4 w-4 rounded-full bg-muted hover:bg-muted-foreground/20",
-                  "flex items-center justify-center transition-colors"
+                  "flex items-center justify-center transition-colors",
                 )}
                 aria-label="Clear destination selection"
               >
@@ -157,8 +165,10 @@ export const DestinationPicker = ({ continent }: DestinationPickerProps) => {
 
         {/* Plan Trip Button */}
         <div className="md:col-span-3 flex flex-col">
-          <label className="text-xs text-muted-foreground mb-1.5 block">&nbsp;</label>
-          <Button 
+          <label className="text-xs text-muted-foreground mb-1.5 block">
+            &nbsp;
+          </label>
+          <Button
             onClick={handlePlanTrip}
             className="cursor-pointer w-full h-12 text-base"
             disabled={!selectedDestination}
@@ -171,4 +181,3 @@ export const DestinationPicker = ({ continent }: DestinationPickerProps) => {
     </div>
   );
 };
-

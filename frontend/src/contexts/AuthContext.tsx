@@ -1,11 +1,11 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import type { User } from '@/types/user';
-import { apiService } from '@/services/api';
-import { API_CONSTANTS } from '@/lib/constants';
-import { clearAllPlacesCache } from '@/lib/placesCache';
-import { clearAllWeatherCache } from '@/lib/weatherCache';
-import { clearAllTripData } from '@/lib/tripCacheUtils';
-import { clearAllHotelCache } from '@/lib/hotelsCache';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import type { User } from "@/types/user";
+import { apiService } from "@/services/api";
+import { API_CONSTANTS } from "@/lib/constants";
+import { clearAllPlacesCache } from "@/lib/placesCache";
+import { clearAllWeatherCache } from "@/lib/weatherCache";
+import { clearAllTripData } from "@/lib/tripCacheUtils";
+import { clearAllHotelCache } from "@/lib/hotelsCache";
 
 /**
  * Signup data structure for user registration
@@ -29,7 +29,10 @@ interface AuthContextType {
   /** Current authenticated user, or null if not logged in */
   user: User | null;
   /** Login with email and password */
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  login: (
+    email: string,
+    password: string,
+  ) => Promise<{ success: boolean; error?: string }>;
   /** Register a new user account */
   signup: (data: SignupData) => Promise<{ success: boolean; error?: string }>;
   /** Logout the current user */
@@ -60,7 +63,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
@@ -73,7 +76,7 @@ interface AuthProviderProps {
  * Context provider for user authentication state
  * Manages user session, login, logout, signup, and profile updates
  * Automatically initializes user session on mount by checking for existing authentication
- * 
+ *
  * @example
  * ```tsx
  * <AuthProvider>
@@ -96,7 +99,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           localStorage.setItem(API_CONSTANTS.USER_KEY, JSON.stringify(user));
         }
       } catch (error) {
-        console.error('Error initializing auth:', error);
+        console.error("Error initializing auth:", error);
         // Clear any invalid tokens
         localStorage.removeItem(API_CONSTANTS.USER_KEY);
         localStorage.removeItem(API_CONSTANTS.AUTH_TOKEN_KEY);
@@ -114,28 +117,37 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
    * @param password - User's password
    * @returns Promise resolving to success status and optional error message
    */
-  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+  const login = async (
+    email: string,
+    password: string,
+  ): Promise<{ success: boolean; error?: string }> => {
     try {
       setIsLoading(true);
-      
+
       if (!email || !password) {
-        return { success: false, error: 'Email and password are required' };
+        return { success: false, error: "Email and password are required" };
       }
 
       const result = await apiService.login(email, password);
-      
+
       if (result.success && result.user) {
         setUser(result.user);
-        localStorage.setItem(API_CONSTANTS.USER_KEY, JSON.stringify(result.user));
+        localStorage.setItem(
+          API_CONSTANTS.USER_KEY,
+          JSON.stringify(result.user),
+        );
         return { success: true };
       } else {
-        return { success: false, error: result.error || 'Login failed' };
+        return { success: false, error: result.error || "Login failed" };
       }
     } catch (error) {
-      console.error('Login error:', error);
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'An error occurred during login' 
+      console.error("Login error:", error);
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : "An error occurred during login",
       };
     } finally {
       setIsLoading(false);
@@ -147,28 +159,36 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
    * @param data - Signup data including email, password, and optional profile fields
    * @returns Promise resolving to success status and optional error message
    */
-  const signup = async (data: SignupData): Promise<{ success: boolean; error?: string }> => {
+  const signup = async (
+    data: SignupData,
+  ): Promise<{ success: boolean; error?: string }> => {
     try {
       setIsLoading(true);
-      
+
       if (!data.email || !data.password) {
-        return { success: false, error: 'Email and password are required' };
+        return { success: false, error: "Email and password are required" };
       }
 
       const result = await apiService.register(data);
-      
+
       if (result.success && result.user) {
         setUser(result.user);
-        localStorage.setItem(API_CONSTANTS.USER_KEY, JSON.stringify(result.user));
+        localStorage.setItem(
+          API_CONSTANTS.USER_KEY,
+          JSON.stringify(result.user),
+        );
         return { success: true };
       } else {
-        return { success: false, error: result.error || 'Signup failed' };
+        return { success: false, error: result.error || "Signup failed" };
       }
     } catch (error) {
-      console.error('Signup error:', error);
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'An error occurred during signup' 
+      console.error("Signup error:", error);
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : "An error occurred during signup",
       };
     } finally {
       setIsLoading(false);
@@ -181,20 +201,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
    * @returns Promise resolving to User object or null if not authenticated
    */
   const loadUser = async (): Promise<User | null> => {
-      try {
-        const me = await apiService.getCurrentUser()
-        if (me) {
-          setUser(me)
-          localStorage.setItem(API_CONSTANTS.USER_KEY, JSON.stringify(me))
-          return me
-        }
-        setUser(null)
-        return null
-      } catch (err) {
-        console.error("loadUser error:", err)
-        setUser(null)
-        return null
+    try {
+      const me = await apiService.getCurrentUser();
+      if (me) {
+        setUser(me);
+        localStorage.setItem(API_CONSTANTS.USER_KEY, JSON.stringify(me));
+        return me;
       }
+      setUser(null);
+      return null;
+    } catch (err) {
+      console.error("loadUser error:", err);
+      setUser(null);
+      return null;
+    }
   };
 
   /**
@@ -205,14 +225,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       await apiService.logout();
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
     } finally {
       setUser(null);
-      
+
       // Clear authentication data
       localStorage.removeItem(API_CONSTANTS.USER_KEY);
       localStorage.removeItem(API_CONSTANTS.AUTH_TOKEN_KEY);
-      
+
       // Clear all cached data using utility functions
       clearAllTripData();
       clearAllPlacesCache();
@@ -247,19 +267,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         visitedCountryCodes: data.visitedCountryCodes,
         profileImagePath: data.profileImagePath,
       });
-      
+
       if (result.success && result.user) {
         setUser(result.user);
-        localStorage.setItem(API_CONSTANTS.USER_KEY, JSON.stringify(result.user));
+        localStorage.setItem(
+          API_CONSTANTS.USER_KEY,
+          JSON.stringify(result.user),
+        );
         return { success: true };
       } else {
-        return { success: false, error: result.error || 'Update failed' };
+        return { success: false, error: result.error || "Update failed" };
       }
     } catch (error) {
-      console.error('Update profile error:', error);
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'An error occurred during update' 
+      console.error("Update profile error:", error);
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : "An error occurred during update",
       };
     } finally {
       setIsLoading(false);
@@ -273,12 +299,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     logout,
     updateProfile,
     loadUser,
-    isLoading
+    isLoading,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

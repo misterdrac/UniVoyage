@@ -66,7 +66,7 @@ Refresh token persistence:
 
 - Token value is random and returned only to client cookie.
 - Database stores only `token_hash` (SHA-256), `user_id`, `expires_at`, `created_at`.
-- Table: `refresh_tokens` (migration `V13__create_refresh_tokens.sql`).
+- Table: `refresh_tokens` (migration `V15__create_refresh_tokens.sql`).
 
 ## Security Properties
 

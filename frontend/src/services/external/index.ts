@@ -1,1 +1,1 @@
-export { searchNominatim, type NominatimGeocodeResult } from './nominatim'
+export { searchNominatim, type NominatimGeocodeResult } from "./nominatim";

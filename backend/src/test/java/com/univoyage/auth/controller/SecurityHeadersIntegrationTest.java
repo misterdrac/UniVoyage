@@ -18,6 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 class SecurityHeadersIntegrationTest {
 
+<<<<<<< HEAD
     @Autowired
     private MockMvc mockMvc;
 
@@ -35,3 +36,21 @@ class SecurityHeadersIntegrationTest {
                 .andExpect(header().string("X-Frame-Options", "DENY"));
     }
 }
+=======
+  @Autowired
+  private MockMvc mockMvc;
+
+  @Test
+  @DisplayName("Responses include X-Content-Type-Options: nosniff")
+  void contentTypeOptionsHeader() throws Exception {
+    mockMvc.perform(get("/api/auth/me"))
+        .andExpect(header().string("X-Content-Type-Options", "nosniff"));
+  }
+
+  @Test
+  @DisplayName("Responses include X-Frame-Options: DENY")
+  void frameOptionsHeader() throws Exception {
+    mockMvc.perform(get("/api/auth/me")).andExpect(header().string("X-Frame-Options", "DENY"));
+  }
+}
+>>>>>>> origin/master
