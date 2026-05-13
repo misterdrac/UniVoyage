@@ -1,17 +1,22 @@
 package com.univoyage.auth.controller;
 
 import com.univoyage.auth.dto.GoogleCallbackRequestDto;
+import com.univoyage.auth.oauth.OAuthSecurityProperties;
 import com.univoyage.auth.dto.AuthPayload;
 import com.univoyage.auth.security.AuthCookieWriter;
+import com.univoyage.auth.security.ClientIpResolver;
+import com.univoyage.auth.security.OAuthCallbackIpRateLimiter;
 import com.univoyage.auth.service.GoogleOAuthService;
 import com.univoyage.auth.service.RefreshTokenService;
 import com.univoyage.common.response.ApiResponse;
 import com.univoyage.user.repository.UserRepository;
 
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
@@ -34,6 +39,8 @@ public class GoogleOAuthController {
   private final RefreshTokenService refreshTokenService;
   private final AuthCookieWriter authCookieWriter;
   private final UserRepository userRepository;
+  private final OAuthCallbackIpRateLimiter oauthCallbackIpRateLimiter;
+  private final OAuthSecurityProperties oauthSecurityProperties;
 
   @GetMapping("/google")
   public void googleAuth(HttpServletResponse response) throws IOException {
@@ -42,19 +49,37 @@ public class GoogleOAuthController {
   }
 
   @PostMapping("/google/callback")
-  public ResponseEntity<ApiResponse<AuthPayload>> googleCallback(
+  public ResponseEntity<ApiResponse<AuthPayload>> googleCallback(HttpServletRequest httpRequest,
       @RequestBody GoogleCallbackRequestDto request, HttpServletResponse response) {
     log.debug("Google OAuth callback received");
+    long retryAfterSec = oauthCallbackIpRateLimiter
+        .tryConsumeOrRetryAfterSeconds(ClientIpResolver.resolve(httpRequest));
+    if (retryAfterSec >= 0) {
+      log.warn("Google OAuth callback rate limited");
+      return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+          .header(HttpHeaders.RETRY_AFTER, String.valueOf(retryAfterSec)).body(ApiResponse
+              .fail("Too many OAuth attempts from this network. Please try again later."));
+    }
+
     if (request.getCode() == null || request.getCode().isBlank()) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST)
           .body(ApiResponse.fail("Missing authorization code"));
     }
+    if (oauthSecurityProperties.isRequireSignedOAuthState()
+        && (request.getState() == null || request.getState().isBlank())) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body(ApiResponse.fail("Missing OAuth state"));
+    }
 
-    AuthPayload payload = googleOAuthService.handleCallback(request.getCode());
+    String stateParam = request.getState() != null ? request.getState() : "";
+    AuthPayload payload = googleOAuthService.handleCallback(request.getCode(), stateParam);
 
     if (!payload.isSuccess()) {
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse
-          .fail(payload.getError() != null ? payload.getError() : "Google login failed"));
+      String err = payload.getError() != null ? payload.getError() : "Google login failed";
+      if (GoogleOAuthService.ERROR_INVALID_STATE.equals(err)) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.fail(err));
+      }
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.fail(err));
     }
 
     var user = userRepository.findById(payload.getUser().getId())

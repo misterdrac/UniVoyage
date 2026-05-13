@@ -41,6 +41,19 @@ app:
       refresh-ip-max-attempts: 120
       refresh-ip-window: PT1M
 
+    oauth:
+      require-email-verified: ${OAUTH_REQUIRE_EMAIL_VERIFIED:true}
+      require-signed-oauth-state: ${OAUTH_REQUIRE_SIGNED_STATE:false}
+      state-ttl: PT15M
+      state-secret: ${OAUTH_STATE_SECRET:${JWT_SECRET}}
+      callback-ip-max-attempts: 60
+      callback-ip-window: PT1M
+
+    google:
+      client-id: ${GOOGLE_CLIENT_ID:}
+      client-secret: ${GOOGLE_CLIENT_SECRET:}
+      redirect-uris: ${GOOGLE_REDIRECT_URIS:${GOOGLE_REDIRECT_URI:}}
+
   cookies:
     # Override via env in production/docker (e.g. COOKIE_SECURE=true)
     secure: ${COOKIE_SECURE:false}
