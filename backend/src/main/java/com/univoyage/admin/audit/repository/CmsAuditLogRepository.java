@@ -5,4 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 public interface CmsAuditLogRepository
-    extends JpaRepository<CmsAuditLogEntity, Long>, JpaSpecificationExecutor<CmsAuditLogEntity> {}
+    extends
+      JpaRepository<CmsAuditLogEntity, Long>,
+      JpaSpecificationExecutor<CmsAuditLogEntity> {
+}

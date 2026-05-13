@@ -51,8 +51,8 @@ public class AdminUserController {
       HttpServletRequest httpRequest) {
     Long actingAdminId = actingAdminId(authentication);
 
-    return ResponseEntity.ok(ApiResponse.ok(
-        adminUserService.updateRole(id, req.role(), actingAdminId, ClientIpResolver.resolve(httpRequest))));
+    return ResponseEntity.ok(ApiResponse.ok(adminUserService.updateRole(id, req.role(),
+        actingAdminId, ClientIpResolver.resolve(httpRequest))));
   }
 
   private Long actingAdminId(Authentication authentication) {

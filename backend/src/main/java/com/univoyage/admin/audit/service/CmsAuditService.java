@@ -44,18 +44,11 @@ public class CmsAuditService {
       if (search != null && !search.isBlank()) {
         String pattern = "%" + search.toLowerCase().trim() + "%";
         List<Predicate> textOr = new ArrayList<>();
-        textOr.add(cb.like(
-            cb.lower(cb.coalesce(root.get("actorEmail"), cb.literal(""))),
-            pattern));
-        textOr.add(cb.like(
-            cb.lower(cb.coalesce(root.get("targetEmail"), cb.literal(""))),
-            pattern));
-        textOr.add(cb.like(
-            cb.lower(cb.coalesce(root.get("ipAddress"), cb.literal(""))),
-            pattern));
-        textOr.add(cb.like(
-            cb.lower(cb.coalesce(root.get("metadata"), cb.literal(""))),
-            pattern));
+        textOr.add(cb.like(cb.lower(cb.coalesce(root.get("actorEmail"), cb.literal(""))), pattern));
+        textOr
+            .add(cb.like(cb.lower(cb.coalesce(root.get("targetEmail"), cb.literal(""))), pattern));
+        textOr.add(cb.like(cb.lower(cb.coalesce(root.get("ipAddress"), cb.literal(""))), pattern));
+        textOr.add(cb.like(cb.lower(cb.coalesce(root.get("metadata"), cb.literal(""))), pattern));
         textOr.add(cb.like(cb.lower(root.get("eventType").as(String.class)), pattern));
         predicates.add(cb.or(textOr.toArray(Predicate[]::new)));
       }
@@ -87,8 +80,8 @@ public class CmsAuditService {
   @Transactional
   public void recordRoleChange(Long actorUserId, String actorEmail, Long targetUserId,
       String targetEmail, Role fromRole, Role toRole, String ip) {
-    Map<String, Object> meta =
-        new LinkedHashMap<>(Map.of("fromRole", fromRole.name(), "toRole", toRole.name()));
+    Map<String, Object> meta = new LinkedHashMap<>(
+        Map.of("fromRole", fromRole.name(), "toRole", toRole.name()));
     persist(CmsAuditEventType.USER_ROLE_CHANGED, actorUserId, actorEmail, targetUserId, targetEmail,
         ip, meta);
   }
@@ -96,9 +89,10 @@ public class CmsAuditService {
   private void persist(CmsAuditEventType eventType, Long actorUserId, String actorEmail,
       Long targetUserId, String targetEmail, String ip, Map<String, ?> metadataMap) {
     String metaJson = toJson(metadataMap);
-    CmsAuditLogEntity row = CmsAuditLogEntity.builder().createdAt(Instant.now()).eventType(eventType)
-        .actorUserId(actorUserId).actorEmail(actorEmail).targetUserId(targetUserId)
-        .targetEmail(targetEmail).ipAddress(ip).metadata(metaJson).build();
+    CmsAuditLogEntity row = CmsAuditLogEntity.builder().createdAt(Instant.now())
+        .eventType(eventType).actorUserId(actorUserId).actorEmail(actorEmail)
+        .targetUserId(targetUserId).targetEmail(targetEmail).ipAddress(ip).metadata(metaJson)
+        .build();
     repository.save(row);
   }
 
