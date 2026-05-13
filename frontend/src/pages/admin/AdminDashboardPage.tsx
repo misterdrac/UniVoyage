@@ -16,6 +16,7 @@ import {
   Sparkles,
   Languages,
   Globe2,
+  ScrollText,
 } from "lucide-react";
 import { ROUTE_PATHS } from "@/config/routes";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
@@ -264,6 +265,31 @@ const AdminDashboardPage: React.FC = () => {
             </h3>
             <p className="text-muted-foreground">
               Manage countries for profiles and destinations
+            </p>
+          </button>
+
+          <button
+            onClick={() => navigate(ROUTE_PATHS.ADMIN_AUDIT)}
+            className="group flex h-full flex-col bg-card hover:bg-card/80 rounded-2xl p-8 border shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 text-left sm:col-span-2 lg:col-span-3"
+          >
+            <div
+              className="w-16 h-16 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform"
+              style={{
+                background:
+                  "linear-gradient(to bottom right, #64748b, #334155)",
+                boxShadow: `0 10px 15px -3px rgba(51, 65, 85, 0.35)`,
+              }}
+            >
+              <ScrollText
+                className="w-8 h-8"
+                style={{ color: "var(--ds-contrast-fg)" }}
+              />
+            </div>
+            <h3 className="text-2xl font-bold text-foreground mb-2">
+              AUDIT LOG
+            </h3>
+            <p className="text-muted-foreground">
+              Admin sign-ins, sign-outs, and role changes
             </p>
           </button>
         </div>

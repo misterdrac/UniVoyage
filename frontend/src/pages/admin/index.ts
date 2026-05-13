@@ -6,3 +6,4 @@ export { default as AdminReviewsPage } from "./AdminReviewsPage";
 export { default as AdminHobbiesPage } from "./AdminHobbiesPage";
 export { default as AdminLanguagesPage } from "./AdminLanguagesPage";
 export { default as AdminCountriesPage } from "./AdminCountriesPage";
+export { default as AdminAuditPage } from "./AdminAuditPage";
