@@ -1,9 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { apiService } from "@/services/api";
-import type {
-  CmsAuditEventType,
-  CmsAuditLog,
-} from "@/services/api/adminApi";
+import type { CmsAuditEventType, CmsAuditLog } from "@/services/api/adminApi";
 import {
   AdminHeader,
   AdminSearchBar,
@@ -161,8 +158,7 @@ const AdminAuditPage: React.FC = () => {
           />
         }
         gradientStyle={{
-          background:
-            "linear-gradient(to bottom right, #64748b, #334155)",
+          background: "linear-gradient(to bottom right, #64748b, #334155)",
           boxShadow: "0 4px 6px -1px rgba(100, 116, 139, 0.25)",
         }}
       />
@@ -177,7 +173,10 @@ const AdminAuditPage: React.FC = () => {
 
           <div className="px-4 py-3 border-b bg-muted/20 flex flex-wrap items-end gap-4">
             <div className="flex flex-col gap-2 min-w-[220px] max-w-sm flex-1">
-              <Label htmlFor="audit-event-filter" className="text-xs font-medium text-muted-foreground">
+              <Label
+                htmlFor="audit-event-filter"
+                className="text-xs font-medium text-muted-foreground"
+              >
                 Event type
               </Label>
               <Select
