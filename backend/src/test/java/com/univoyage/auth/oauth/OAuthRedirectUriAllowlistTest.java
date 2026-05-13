@@ -20,7 +20,8 @@ class OAuthRedirectUriAllowlistTest {
   @Test
   @DisplayName("validate rejects blank URI")
   void rejectsBlank() {
-    assertThatThrownBy(() -> OAuthRedirectUriAllowlist.validate("  ", List.of("http://localhost/cb")))
+    assertThatThrownBy(
+        () -> OAuthRedirectUriAllowlist.validate("  ", List.of("http://localhost/cb")))
         .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("missing");
   }
 
@@ -29,7 +30,7 @@ class OAuthRedirectUriAllowlistTest {
   void rejectsUnknown() {
     assertThatThrownBy(
         () -> OAuthRedirectUriAllowlist.validate("http://evil/cb", List.of("http://localhost/cb")))
-            .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("not allowlisted");
+        .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("not allowlisted");
   }
 
   @Test

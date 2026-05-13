@@ -87,9 +87,8 @@ class OAuthCallbackRateLimitIntegrationTest {
     when(googleIdTokenVerifier.verify(eq("tok"), anyString())).thenAnswer(invocation -> {
       String nonce = invocation.getArgument(1);
       Instant now = Instant.now();
-      return new Jwt("tok", now, now.plusSeconds(360), Map.of("alg", "none"),
-          Map.of("sub", "rl-sub", "email", "oauth-rl@example.com", "email_verified", true, "nonce",
-              nonce));
+      return new Jwt("tok", now, now.plusSeconds(360), Map.of("alg", "none"), Map.of("sub",
+          "rl-sub", "email", "oauth-rl@example.com", "email_verified", true, "nonce", nonce));
     });
 
     String state1 = fetchState();
@@ -113,11 +112,11 @@ class OAuthCallbackRateLimitIntegrationTest {
   }
 
   private String fetchState() throws Exception {
-    MvcResult redirectResult =
-        mockMvc.perform(get("/api/auth/google")).andExpect(status().isFound()).andReturn();
+    MvcResult redirectResult = mockMvc.perform(get("/api/auth/google"))
+        .andExpect(status().isFound()).andReturn();
     String location = redirectResult.getResponse().getHeader("Location");
-    MultiValueMap<String, String> params =
-        UriComponentsBuilder.fromUriString(location).build().getQueryParams();
+    MultiValueMap<String, String> params = UriComponentsBuilder.fromUriString(location).build()
+        .getQueryParams();
     String state = params.getFirst("state");
     assertThat(state).isNotBlank();
     return state;

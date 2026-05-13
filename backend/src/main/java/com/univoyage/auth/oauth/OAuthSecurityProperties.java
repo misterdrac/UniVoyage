@@ -23,18 +23,22 @@ public class OAuthSecurityProperties {
   private Duration stateTtl = Duration.ofMinutes(15);
 
   /**
-   * Secret for HMAC signing OAuth state. Defaults to JWT secret when unset (see application.yml).
+   * Secret for HMAC signing OAuth state. Defaults to JWT secret when unset (see
+   * application.yml).
    */
   private String stateSecret;
 
-  /** Max {@code POST /api/auth/google/callback} calls per IP per {@link #callbackIpWindow}. */
+  /**
+   * Max {@code POST /api/auth/google/callback} calls per IP per
+   * {@link #callbackIpWindow}.
+   */
   private int callbackIpMaxAttempts = 60;
 
   /**
-   * When true, the SPA must POST signed {@code state} (and the authorize URL uses OIDC nonce).
-   * When false, matches legacy clients that only POST {@code code}; use redirect URI allowlist +
-   * ID token validation only (weaker CSRF binding). Prefer true in production once the web app is
-   * updated.
+   * When true, the SPA must POST signed {@code state} (and the authorize URL uses
+   * OIDC nonce). When false, matches legacy clients that only POST {@code code};
+   * use redirect URI allowlist + ID token validation only (weaker CSRF binding).
+   * Prefer true in production once the web app is updated.
    */
   private boolean requireSignedOAuthState = false;
 

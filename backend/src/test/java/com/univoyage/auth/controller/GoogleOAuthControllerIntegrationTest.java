@@ -155,9 +155,8 @@ class GoogleOAuthControllerIntegrationTest {
         .thenReturn(AuthPayload.ok(user, "test-jwt", "test-csrf"));
 
     MvcResult result = mockMvc
-        .perform(post("/api/auth/google/callback").contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(
-                Map.of("code", "valid-code", "state", "signed-state"))))
+        .perform(post("/api/auth/google/callback").contentType(MediaType.APPLICATION_JSON).content(
+            objectMapper.writeValueAsString(Map.of("code", "valid-code", "state", "signed-state"))))
         .andExpect(status().isOk()).andExpect(jsonPath("$.success").value(true))
         .andExpect(jsonPath("$.data.success").value(true))
         .andExpect(jsonPath("$.data.user.email").value("google-user@example.com"))

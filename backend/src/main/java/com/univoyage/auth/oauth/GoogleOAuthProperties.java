@@ -20,7 +20,8 @@ public class GoogleOAuthProperties {
   private String clientSecret = "";
 
   /**
-   * Comma-separated redirect URIs allowlisted for this client (must match Google Cloud console).
+   * Comma-separated redirect URIs allowlisted for this client (must match Google
+   * Cloud console).
    */
   private String redirectUris = "";
 

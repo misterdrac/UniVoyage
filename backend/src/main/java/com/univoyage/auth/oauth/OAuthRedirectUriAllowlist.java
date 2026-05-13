@@ -3,7 +3,8 @@ package com.univoyage.auth.oauth;
 import java.util.List;
 
 /**
- * Validates redirect URIs used in OAuth token exchange against configured allowlist.
+ * Validates redirect URIs used in OAuth token exchange against configured
+ * allowlist.
  */
 public final class OAuthRedirectUriAllowlist {
 

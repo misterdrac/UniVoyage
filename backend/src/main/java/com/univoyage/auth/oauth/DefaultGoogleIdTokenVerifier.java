@@ -58,9 +58,8 @@ public class DefaultGoogleIdTokenVerifier implements GoogleIdTokenVerifier {
         String audience = googleOAuthProperties.getClientId();
         NimbusJwtDecoder d = NimbusJwtDecoder.withJwkSetUri(JWKS_URI).build();
         OAuth2TokenValidator<Jwt> iss = JwtValidators.createDefaultWithIssuer(ISSUER);
-        OAuth2TokenValidator<Jwt> aud =
-            new JwtClaimValidator<List<String>>(JwtClaimNames.AUD,
-                audClaim -> audClaim != null && audClaim.contains(audience));
+        OAuth2TokenValidator<Jwt> aud = new JwtClaimValidator<List<String>>(JwtClaimNames.AUD,
+            audClaim -> audClaim != null && audClaim.contains(audience));
         d.setJwtValidator(new DelegatingOAuth2TokenValidator<>(iss, aud));
         decoder = d;
       }

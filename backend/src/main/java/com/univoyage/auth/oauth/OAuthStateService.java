@@ -20,7 +20,8 @@ import java.util.HexFormat;
 import java.util.Optional;
 
 /**
- * Signs and verifies OAuth 2.0 {@code state} for CSRF protection on the authorization redirect.
+ * Signs and verifies OAuth 2.0 {@code state} for CSRF protection on the
+ * authorization redirect.
  */
 @Service
 @RequiredArgsConstructor
@@ -33,20 +34,22 @@ public class OAuthStateService {
   private final Clock clock;
 
   /**
-   * Creates signed {@code state} and returns the nonce that must be passed separately as the OIDC
-   * {@code nonce} query parameter (and validated against the ID token).
+   * Creates signed {@code state} and returns the nonce that must be passed
+   * separately as the OIDC {@code nonce} query parameter (and validated against
+   * the ID token).
    */
   public IssuedOAuthState issueState(String redirectUri) {
     try {
-      long expEpoch = Instant.now(clock).plus(oauthSecurityProperties.getStateTtl()).getEpochSecond();
+      long expEpoch = Instant.now(clock).plus(oauthSecurityProperties.getStateTtl())
+          .getEpochSecond();
       byte[] nonceBytes = new byte[16];
       new SecureRandom().nextBytes(nonceBytes);
       String nonce = HexFormat.of().formatHex(nonceBytes);
 
       StatePayload payload = new StatePayload(expEpoch, nonce, redirectUri);
       String json = MAPPER.writeValueAsString(payload);
-      String payloadB64 =
-          Base64.getUrlEncoder().withoutPadding().encodeToString(json.getBytes(StandardCharsets.UTF_8));
+      String payloadB64 = Base64.getUrlEncoder().withoutPadding()
+          .encodeToString(json.getBytes(StandardCharsets.UTF_8));
       byte[] sig = sign(payloadB64.getBytes(StandardCharsets.UTF_8));
       String sigB64 = Base64.getUrlEncoder().withoutPadding().encodeToString(sig);
       return new IssuedOAuthState(payloadB64 + "." + sigB64, nonce);

@@ -34,9 +34,8 @@ class GoogleOAuthProfileMapperTest {
   @DisplayName("treats absent email_verified as false")
   void missingVerifiedClaim() {
     Instant now = Instant.now();
-    Jwt jwt =
-        Jwt.withTokenValue("t").headers(h -> h.put("alg", "none")).issuedAt(now).expiresAt(now.plusSeconds(60))
-            .subject("s").claim("email", "x@y.com").build();
+    Jwt jwt = Jwt.withTokenValue("t").headers(h -> h.put("alg", "none")).issuedAt(now)
+        .expiresAt(now.plusSeconds(60)).subject("s").claim("email", "x@y.com").build();
 
     NormalizedOAuthProfile p = GoogleOAuthProfileMapper.fromGoogleIdToken(jwt);
     assertThat(p.emailVerified()).isFalse();

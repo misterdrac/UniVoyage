@@ -84,8 +84,8 @@ class GoogleOAuthLegacyCallbackIntegrationTest {
     mockMvc.perform(get("/api/auth/google")).andExpect(status().isFound()).andExpect(
         header().string(HttpHeaders.LOCATION, Matchers.not(Matchers.containsString("nonce="))));
 
-    mockGoogle.expect(MockRestRequestMatchers.requestTo(TOKEN_ENDPOINT)).andRespond(
-        MockRestResponseCreators.withSuccess(
+    mockGoogle.expect(MockRestRequestMatchers.requestTo(TOKEN_ENDPOINT))
+        .andRespond(MockRestResponseCreators.withSuccess(
             "{\"access_token\":\"at\",\"id_token\":\"dummy-id-token\",\"expires_in\":3600}",
             MediaType.APPLICATION_JSON));
 
@@ -105,15 +105,15 @@ class GoogleOAuthLegacyCallbackIntegrationTest {
   @Test
   @DisplayName("Legacy mode: POST without state field succeeds")
   void legacyFlow_jsonWithoutStateField() throws Exception {
-    mockGoogle.expect(MockRestRequestMatchers.requestTo(TOKEN_ENDPOINT)).andRespond(
-        MockRestResponseCreators.withSuccess(
+    mockGoogle.expect(MockRestRequestMatchers.requestTo(TOKEN_ENDPOINT))
+        .andRespond(MockRestResponseCreators.withSuccess(
             "{\"access_token\":\"at\",\"id_token\":\"dummy-id-token\",\"expires_in\":3600}",
             MediaType.APPLICATION_JSON));
 
     when(googleIdTokenVerifier.verify(eq("dummy-id-token"), isNull())).thenAnswer(invocation -> {
       Instant now = Instant.now();
-      return new Jwt("dummy-id-token", now, now.plusSeconds(360), Map.of("alg", "none"),
-          Map.of("sub", "legacy-sub2", "email", "legacy-oauth2@example.com", "email_verified", true));
+      return new Jwt("dummy-id-token", now, now.plusSeconds(360), Map.of("alg", "none"), Map
+          .of("sub", "legacy-sub2", "email", "legacy-oauth2@example.com", "email_verified", true));
     });
 
     mockMvc

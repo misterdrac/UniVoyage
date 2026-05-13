@@ -40,8 +40,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * End-to-end callback tests with mocked Google HTTP and mocked ID token verifier (no outbound
- * calls to Google JWKS).
+ * End-to-end callback tests with mocked Google HTTP and mocked ID token
+ * verifier (no outbound calls to Google JWKS).
  */
 @SpringBootTest(properties = {"app.auth.google.client-id=test-google-client-id",
     "app.auth.google.client-secret=test-google-secret",
@@ -96,9 +96,8 @@ class GoogleOAuthCallbackFlowIntegrationTest {
     String state = fetchStateFromAuthorizeRedirect();
 
     mockMvc
-        .perform(post("/api/auth/google/callback").contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(
-                Map.of("code", "google-auth-code", "state", state))))
+        .perform(post("/api/auth/google/callback").contentType(MediaType.APPLICATION_JSON).content(
+            objectMapper.writeValueAsString(Map.of("code", "google-auth-code", "state", state))))
         .andExpect(status().isOk()).andExpect(jsonPath("$.success").value(true))
         .andExpect(jsonPath("$.data.success").value(true))
         .andExpect(jsonPath("$.data.user.email").value("oauth-flow-user@example.com"));
@@ -108,7 +107,8 @@ class GoogleOAuthCallbackFlowIntegrationTest {
   @DisplayName("POST /api/auth/google/callback returns 400 when OAuth state is tampered")
   void callback_tamperedState_returns400() throws Exception {
     String state = fetchStateFromAuthorizeRedirect();
-    String badState = state.endsWith("z") ? state.substring(0, state.length() - 1) + "0"
+    String badState = state.endsWith("z")
+        ? state.substring(0, state.length() - 1) + "0"
         : state + "x";
 
     mockMvc
@@ -158,8 +158,7 @@ class GoogleOAuthCallbackFlowIntegrationTest {
   @Test
   @DisplayName("POST /api/auth/google/callback returns 401 when ID token verification fails")
   void callback_idTokenVerifierThrows_returns401() throws Exception {
-    expectTokenJson(
-        "{\"access_token\":\"at\",\"id_token\":\"bad-token\",\"expires_in\":3600}");
+    expectTokenJson("{\"access_token\":\"at\",\"id_token\":\"bad-token\",\"expires_in\":3600}");
 
     when(googleIdTokenVerifier.verify(eq("bad-token"), anyString()))
         .thenThrow(new IllegalArgumentException("wrong audience"));
@@ -174,17 +173,17 @@ class GoogleOAuthCallbackFlowIntegrationTest {
   }
 
   private void expectTokenJson(String json) {
-    mockGoogle.expect(MockRestRequestMatchers.requestTo(TOKEN_ENDPOINT)).andRespond(
-        MockRestResponseCreators.withSuccess(json, MediaType.APPLICATION_JSON));
+    mockGoogle.expect(MockRestRequestMatchers.requestTo(TOKEN_ENDPOINT))
+        .andRespond(MockRestResponseCreators.withSuccess(json, MediaType.APPLICATION_JSON));
   }
 
   private String fetchStateFromAuthorizeRedirect() throws Exception {
-    MvcResult redirectResult =
-        mockMvc.perform(get("/api/auth/google")).andExpect(status().isFound()).andReturn();
+    MvcResult redirectResult = mockMvc.perform(get("/api/auth/google"))
+        .andExpect(status().isFound()).andReturn();
     String location = redirectResult.getResponse().getHeader("Location");
     assertThat(location).isNotBlank();
-    MultiValueMap<String, String> params =
-        UriComponentsBuilder.fromUriString(location).build().getQueryParams();
+    MultiValueMap<String, String> params = UriComponentsBuilder.fromUriString(location).build()
+        .getQueryParams();
     String state = params.getFirst("state");
     assertThat(state).isNotBlank();
     return state;

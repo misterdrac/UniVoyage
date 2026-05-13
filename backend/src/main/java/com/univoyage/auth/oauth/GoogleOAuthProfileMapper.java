@@ -20,7 +20,6 @@ public final class GoogleOAuthProfileMapper {
     String family = jwt.getClaimAsString("family_name");
     String picture = jwt.getClaimAsString("picture");
     return new NormalizedOAuthProfile(IdentityProvider.GOOGLE, sub, email, emailVerified,
-        given != null ? given : "", family != null ? family : "",
-        picture != null ? picture : "");
+        given != null ? given : "", family != null ? family : "", picture != null ? picture : "");
   }
 }

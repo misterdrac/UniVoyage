@@ -116,9 +116,8 @@ class AuthCookieContractIntegrationTest {
         .thenReturn(AuthPayload.ok(user, "test-jwt", "test-csrf"));
 
     MvcResult result = mockMvc
-        .perform(post("/api/auth/google/callback").contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(
-                Map.of("code", "valid-code", "state", "signed-state"))))
+        .perform(post("/api/auth/google/callback").contentType(MediaType.APPLICATION_JSON).content(
+            objectMapper.writeValueAsString(Map.of("code", "valid-code", "state", "signed-state"))))
         .andExpect(status().isOk()).andReturn();
 
     List<String> setCookies = result.getResponse().getHeaders(HttpHeaders.SET_COOKIE);

@@ -34,8 +34,9 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Google OAuth 2.0 / OIDC: authorization URL, callback handling with signed state, token exchange,
- * ID token validation, and delegated user/session completion.
+ * Google OAuth 2.0 / OIDC: authorization URL, callback handling with signed
+ * state, token exchange, ID token validation, and delegated user/session
+ * completion.
  */
 @Service
 @Slf4j
@@ -71,7 +72,8 @@ public class GoogleOAuthService {
   }
 
   /**
-   * Build the Google OAuth 2.0 authorization URL with signed {@code state} and OIDC {@code nonce}.
+   * Build the Google OAuth 2.0 authorization URL with signed {@code state} and
+   * OIDC {@code nonce}.
    */
   public String buildAuthorizationUrl() {
     String clientId = googleOAuthProperties.getClientId();
@@ -87,9 +89,10 @@ public class GoogleOAuthService {
 
     if (oauthSecurityProperties.isRequireSignedOAuthState()) {
       IssuedOAuthState issued = oauthStateService.issueState(redirectUri);
-      return AUTH_ENDPOINT + "?response_type=code" + "&client_id=" + enc(clientId) + "&redirect_uri="
-          + enc(redirectUri) + "&scope=" + enc(SCOPES) + "&state=" + enc(issued.stateQueryParam())
-          + "&nonce=" + enc(issued.nonceForAuthorizeUrl()) + "&access_type=offline" + "&prompt=consent";
+      return AUTH_ENDPOINT + "?response_type=code" + "&client_id=" + enc(clientId)
+          + "&redirect_uri=" + enc(redirectUri) + "&scope=" + enc(SCOPES) + "&state="
+          + enc(issued.stateQueryParam()) + "&nonce=" + enc(issued.nonceForAuthorizeUrl())
+          + "&access_type=offline" + "&prompt=consent";
     }
 
     return AUTH_ENDPOINT + "?response_type=code" + "&client_id=" + enc(clientId) + "&redirect_uri="
@@ -100,8 +103,9 @@ public class GoogleOAuthService {
    * Completes login after Google redirects back with an authorization code.
    *
    * @param state
-   *          signed state echoed by Google when {@link OAuthSecurityProperties#requireSignedOAuthState}
-   *          is true; ignored in legacy mode
+   *          signed state echoed by Google when
+   *          {@link OAuthSecurityProperties#requireSignedOAuthState} is true;
+   *          ignored in legacy mode
    */
   @Transactional
   public AuthPayload handleCallback(String code, String state) {

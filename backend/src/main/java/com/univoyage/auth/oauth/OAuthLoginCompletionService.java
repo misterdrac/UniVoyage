@@ -18,8 +18,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Shared pipeline: persist / update local user from normalized OAuth claims and issue app JWT +
- * CSRF secret.
+ * Shared pipeline: persist / update local user from normalized OAuth claims and
+ * issue app JWT + CSRF secret.
  */
 @Service
 @RequiredArgsConstructor

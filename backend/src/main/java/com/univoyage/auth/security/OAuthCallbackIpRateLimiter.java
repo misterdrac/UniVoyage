@@ -8,7 +8,8 @@ import java.time.Clock;
 import java.time.Duration;
 
 /**
- * Per-IP rate limit for OAuth provider callbacks (token exchange abuse protection).
+ * Per-IP rate limit for OAuth provider callbacks (token exchange abuse
+ * protection).
  */
 @Component
 public class OAuthCallbackIpRateLimiter {
