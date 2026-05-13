@@ -1,8 +1,10 @@
 package com.univoyage.auth.controller;
 
-import com.univoyage.auth.dto.GoogleCallbackRequestDto;
+import com.univoyage.admin.audit.service.CmsAuditService;
 import com.univoyage.auth.dto.AuthPayload;
+import com.univoyage.auth.dto.GoogleCallbackRequestDto;
 import com.univoyage.auth.security.AuthCookieWriter;
+import com.univoyage.auth.security.ClientIpResolver;
 import com.univoyage.auth.service.GoogleOAuthService;
 import com.univoyage.auth.service.RefreshTokenService;
 import com.univoyage.common.response.ApiResponse;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
@@ -34,6 +37,7 @@ public class GoogleOAuthController {
   private final RefreshTokenService refreshTokenService;
   private final AuthCookieWriter authCookieWriter;
   private final UserRepository userRepository;
+  private final CmsAuditService cmsAuditService;
 
   @GetMapping("/google")
   public void googleAuth(HttpServletResponse response) throws IOException {
@@ -43,7 +47,8 @@ public class GoogleOAuthController {
 
   @PostMapping("/google/callback")
   public ResponseEntity<ApiResponse<AuthPayload>> googleCallback(
-      @RequestBody GoogleCallbackRequestDto request, HttpServletResponse response) {
+      @RequestBody GoogleCallbackRequestDto request, HttpServletResponse response,
+      HttpServletRequest httpRequest) {
     log.debug("Google OAuth callback received");
     if (request.getCode() == null || request.getCode().isBlank()) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -62,6 +67,12 @@ public class GoogleOAuthController {
     String refreshRaw = refreshTokenService.issueRefreshToken(user);
     authCookieWriter.writeAuthCookies(response, payload.getToken(), payload.getCsrfToken(),
         refreshRaw);
+
+    String role = payload.getUser().getRole();
+    if ("ADMIN".equals(role) || "HEAD_ADMIN".equals(role)) {
+      cmsAuditService.recordAdminLoginSuccess(payload.getUser().getId(), payload.getUser().getEmail(),
+          ClientIpResolver.resolve(httpRequest), "google");
+    }
 
     return ResponseEntity.ok(ApiResponse.ok(payload));
   }
