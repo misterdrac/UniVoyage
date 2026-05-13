@@ -70,8 +70,8 @@ public class GoogleOAuthController {
 
     String role = payload.getUser().getRole();
     if ("ADMIN".equals(role) || "HEAD_ADMIN".equals(role)) {
-      cmsAuditService.recordAdminLoginSuccess(payload.getUser().getId(), payload.getUser().getEmail(),
-          ClientIpResolver.resolve(httpRequest), "google");
+      cmsAuditService.recordAdminLoginSuccess(payload.getUser().getId(),
+          payload.getUser().getEmail(), ClientIpResolver.resolve(httpRequest), "google");
     }
 
     return ResponseEntity.ok(ApiResponse.ok(payload));
