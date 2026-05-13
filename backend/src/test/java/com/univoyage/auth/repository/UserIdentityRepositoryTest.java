@@ -25,120 +25,102 @@ import static org.assertj.core.api.Assertions.*;
 @Transactional
 class UserIdentityRepositoryTest {
 
-    @Autowired
-    private UserIdentityRepository userIdentityRepository;
+  @Autowired
+  private UserIdentityRepository userIdentityRepository;
 
-    @Autowired
-    private UserRepository userRepository;
+  @Autowired
+  private UserRepository userRepository;
 
-    private UserEntity savedUser;
+  private UserEntity savedUser;
 
-    @BeforeEach
-    void setUp() {
-        savedUser = userRepository.save(UserEntity.builder()
-                .name("Test")
-                .surname("User")
-                .email("test_identity_" + System.currentTimeMillis() + "@example.com")
-                .passwordHash("$2a$10$hashedpassword")
-                .role(Role.USER)
-                .dateOfRegister(Instant.now())
-                .build());
-    }
+  @BeforeEach
+  void setUp() {
+    savedUser = userRepository.save(UserEntity.builder().name("Test").surname("User")
+        .email("test_identity_" + System.currentTimeMillis() + "@example.com")
+        .passwordHash("$2a$10$hashedpassword").role(Role.USER).dateOfRegister(Instant.now())
+        .build());
+  }
 
-    // ------------------------------------------------------------------ insert
+  // ------------------------------------------------------------------ insert
 
-    @Test
-    void insert_persistsIdentityWithAllFields() {
-        UserIdentity identity = userIdentityRepository.save(UserIdentity.builder()
-                .user(savedUser)
-                .provider("google")
-                .providerSubject("google-subject-001")
-                .providerEmail("test@gmail.com")
-                .emailVerified(true)
-                .build());
+  @Test
+  void insert_persistsIdentityWithAllFields() {
+    UserIdentity identity = userIdentityRepository.save(UserIdentity.builder().user(savedUser)
+        .provider("google").providerSubject("google-subject-001").providerEmail("test@gmail.com")
+        .emailVerified(true).build());
 
-        assertThat(identity.getId()).isNotNull();
-        assertThat(identity.getProvider()).isEqualTo("google");
-        assertThat(identity.getProviderSubject()).isEqualTo("google-subject-001");
-        assertThat(identity.isEmailVerified()).isTrue();
-        assertThat(identity.getCreatedAt()).isNotNull();
-    }
+    assertThat(identity.getId()).isNotNull();
+    assertThat(identity.getProvider()).isEqualTo("google");
+    assertThat(identity.getProviderSubject()).isEqualTo("google-subject-001");
+    assertThat(identity.isEmailVerified()).isTrue();
+    assertThat(identity.getCreatedAt()).isNotNull();
+  }
 
-    // ------------------------------------------------ findByProviderAndSubject
+  // ------------------------------------------------ findByProviderAndSubject
 
-    @Test
-    void findByProviderAndProviderSubject_returnsIdentityWhenExists() {
-        userIdentityRepository.save(UserIdentity.builder()
-                .user(savedUser)
-                .provider("github")
-                .providerSubject("gh-subject-42")
-                .build());
+  @Test
+  void findByProviderAndProviderSubject_returnsIdentityWhenExists() {
+    userIdentityRepository.save(UserIdentity.builder().user(savedUser).provider("github")
+        .providerSubject("gh-subject-42").build());
 
-        Optional<UserIdentity> found =
-                userIdentityRepository.findByProviderAndProviderSubject("github", "gh-subject-42");
+    Optional<UserIdentity> found = userIdentityRepository.findByProviderAndProviderSubject("github",
+        "gh-subject-42");
 
-        assertThat(found).isPresent();
-        assertThat(found.get().getUser().getId()).isEqualTo(savedUser.getId());
-    }
+    assertThat(found).isPresent();
+    assertThat(found.get().getUser().getId()).isEqualTo(savedUser.getId());
+  }
 
-    @Test
-    void findByProviderAndProviderSubject_returnsEmptyWhenNotExists() {
-        Optional<UserIdentity> found =
-                userIdentityRepository.findByProviderAndProviderSubject("github", "nonexistent");
+  @Test
+  void findByProviderAndProviderSubject_returnsEmptyWhenNotExists() {
+    Optional<UserIdentity> found = userIdentityRepository.findByProviderAndProviderSubject("github",
+        "nonexistent");
 
-        assertThat(found).isEmpty();
-    }
+    assertThat(found).isEmpty();
+  }
 
-    // ------------------------------------------------------- listByUserId
+  // ------------------------------------------------------- listByUserId
 
-    @Test
-    void findAllByUserId_returnsAllIdentitiesForUser() {
-        userIdentityRepository.save(UserIdentity.builder()
-                .user(savedUser).provider("google").providerSubject("g-001").build());
-        userIdentityRepository.save(UserIdentity.builder()
-                .user(savedUser).provider("github").providerSubject("gh-001").build());
+  @Test
+  void findAllByUserId_returnsAllIdentitiesForUser() {
+    userIdentityRepository.save(
+        UserIdentity.builder().user(savedUser).provider("google").providerSubject("g-001").build());
+    userIdentityRepository.save(UserIdentity.builder().user(savedUser).provider("github")
+        .providerSubject("gh-001").build());
 
-        List<UserIdentity> identities = userIdentityRepository.findAllByUserId(savedUser.getId());
+    List<UserIdentity> identities = userIdentityRepository.findAllByUserId(savedUser.getId());
 
-        assertThat(identities).hasSize(2);
-        assertThat(identities).extracting(UserIdentity::getProvider)
-                .containsExactlyInAnyOrder("google", "github");
-    }
+    assertThat(identities).hasSize(2);
+    assertThat(identities).extracting(UserIdentity::getProvider).containsExactlyInAnyOrder("google",
+        "github");
+  }
 
-    @Test
-    void findAllByUserId_returnsEmptyListWhenNoIdentities() {
-        List<UserIdentity> identities = userIdentityRepository.findAllByUserId(savedUser.getId());
-        assertThat(identities).isEmpty();
-    }
+  @Test
+  void findAllByUserId_returnsEmptyListWhenNoIdentities() {
+    List<UserIdentity> identities = userIdentityRepository.findAllByUserId(savedUser.getId());
+    assertThat(identities).isEmpty();
+  }
 
-    // ------------------------------------------------- unique constraint
+  // ------------------------------------------------- unique constraint
 
-    @Test
-    void insert_throwsOnDuplicateProviderSubject() {
-        userIdentityRepository.saveAndFlush(UserIdentity.builder()
-                .user(savedUser)
-                .provider("google")
-                .providerSubject("duplicate-subject")
-                .build());
+  @Test
+  void insert_throwsOnDuplicateProviderSubject() {
+    userIdentityRepository.saveAndFlush(UserIdentity.builder().user(savedUser).provider("google")
+        .providerSubject("duplicate-subject").build());
 
-        UserIdentity duplicate = UserIdentity.builder()
-                .user(savedUser)
-                .provider("google")
-                .providerSubject("duplicate-subject")
-                .build();
+    UserIdentity duplicate = UserIdentity.builder().user(savedUser).provider("google")
+        .providerSubject("duplicate-subject").build();
 
-        assertThatThrownBy(() -> {
-            userIdentityRepository.saveAndFlush(duplicate);
-        }).isInstanceOf(DataIntegrityViolationException.class);
-    }
+    assertThatThrownBy(() -> {
+      userIdentityRepository.saveAndFlush(duplicate);
+    }).isInstanceOf(DataIntegrityViolationException.class);
+  }
 
-    @Test
-    void insert_allowsSameSubjectForDifferentProviders() {
-        userIdentityRepository.saveAndFlush(UserIdentity.builder()
-                .user(savedUser).provider("google").providerSubject("same-subject").build());
+  @Test
+  void insert_allowsSameSubjectForDifferentProviders() {
+    userIdentityRepository.saveAndFlush(UserIdentity.builder().user(savedUser).provider("google")
+        .providerSubject("same-subject").build());
 
-        assertThatNoException().isThrownBy(() ->
-                userIdentityRepository.saveAndFlush(UserIdentity.builder()
-                        .user(savedUser).provider("github").providerSubject("same-subject").build()));
-    }
+    assertThatNoException().isThrownBy(() -> userIdentityRepository.saveAndFlush(UserIdentity
+        .builder().user(savedUser).provider("github").providerSubject("same-subject").build()));
+  }
 }

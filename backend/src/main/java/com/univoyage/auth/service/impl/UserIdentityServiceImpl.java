@@ -21,57 +21,50 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserIdentityServiceImpl implements UserIdentityService {
 
-    private final UserIdentityRepository userIdentityRepository;
+  private final UserIdentityRepository userIdentityRepository;
 
-    /**
-     * {@inheritDoc}
-     *
-     * Guards against duplicate (provider, providerSubject) before persisting.
-     * The DB unique constraint is the authoritative guard; this check avoids
-     * a round-trip exception for the happy path.
-     */
-    @Override
-    @Transactional
-    public UserIdentity createIdentity(UserEntity user,
-                                       String provider,
-                                       String providerSubject,
-                                       String providerEmail,
-                                       boolean emailVerified) {
+  /**
+   * {@inheritDoc}
+   *
+   * Guards against duplicate (provider, providerSubject) before persisting. The
+   * DB unique constraint is the authoritative guard; this check avoids a
+   * round-trip exception for the happy path.
+   */
+  @Override
+  @Transactional
+  public UserIdentity createIdentity(UserEntity user, String provider, String providerSubject,
+      String providerEmail, boolean emailVerified) {
 
-        if (userIdentityRepository.existsByProviderAndProviderSubject(provider, providerSubject)) {
-            log.warn("Attempted to create duplicate identity for provider={} subject={}",
-                    provider, providerSubject);
-            throw new IdentityAlreadyLinkedException(provider, providerSubject);
-        }
-
-        UserIdentity identity = UserIdentity.builder()
-                .user(user)
-                .provider(provider)
-                .providerSubject(providerSubject)
-                .providerEmail(providerEmail)
-                .emailVerified(emailVerified)
-                .build();
-
-        UserIdentity saved = userIdentityRepository.save(identity);
-        log.info("Created identity id={} provider={} userId={}", saved.getId(), provider, user.getId());
-        return saved;
+    if (userIdentityRepository.existsByProviderAndProviderSubject(provider, providerSubject)) {
+      log.warn("Attempted to create duplicate identity for provider={} subject={}", provider,
+          providerSubject);
+      throw new IdentityAlreadyLinkedException(provider, providerSubject);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @Transactional(readOnly = true)
-    public Optional<UserIdentity> findByProviderAndSubject(String provider, String providerSubject) {
-        return userIdentityRepository.findByProviderAndProviderSubject(provider, providerSubject);
-    }
+    UserIdentity identity = UserIdentity.builder().user(user).provider(provider)
+        .providerSubject(providerSubject).providerEmail(providerEmail).emailVerified(emailVerified)
+        .build();
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @Transactional(readOnly = true)
-    public List<UserIdentity> listIdentitiesForUser(Long userId) {
-        return userIdentityRepository.findAllByUserId(userId);
-    }
+    UserIdentity saved = userIdentityRepository.save(identity);
+    log.info("Created identity id={} provider={} userId={}", saved.getId(), provider, user.getId());
+    return saved;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  @Transactional(readOnly = true)
+  public Optional<UserIdentity> findByProviderAndSubject(String provider, String providerSubject) {
+    return userIdentityRepository.findByProviderAndProviderSubject(provider, providerSubject);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  @Transactional(readOnly = true)
+  public List<UserIdentity> listIdentitiesForUser(Long userId) {
+    return userIdentityRepository.findAllByUserId(userId);
+  }
 }

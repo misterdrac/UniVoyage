@@ -12,20 +12,17 @@ import java.util.List;
 @RequiredArgsConstructor
 public class LanguageService {
 
-    private final LanguageRepository languageRepository;
+  private final LanguageRepository languageRepository;
 
-    public List<LanguageDto> getAll() {
-        return languageRepository.findAll()
-                .stream()
-                .map(LanguageDto::from)
-                .toList();
-    }
+  public List<LanguageDto> getAll() {
+    return languageRepository.findAll().stream().map(LanguageDto::from).toList();
+  }
 
-    public LanguageDto create(Language language) {
-        return LanguageDto.from(languageRepository.save(language));
-    }
+  public LanguageDto create(Language language) {
+    return LanguageDto.from(languageRepository.save(language));
+  }
 
-    public void delete(String code) {
+  public void delete(String code) {
     languageRepository.deleteById(code);
-}
+  }
 }

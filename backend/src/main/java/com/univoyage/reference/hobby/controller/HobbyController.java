@@ -15,21 +15,21 @@ import java.util.List;
 @RequiredArgsConstructor
 public class HobbyController {
 
-    private final HobbyService hobbyService;
+  private final HobbyService hobbyService;
 
-    @GetMapping
-    public ResponseEntity<ApiResponse<List<HobbyDto>>> getAll() {
-        return ResponseEntity.ok(ApiResponse.ok(hobbyService.getAll()));
-    }
+  @GetMapping
+  public ResponseEntity<ApiResponse<List<HobbyDto>>> getAll() {
+    return ResponseEntity.ok(ApiResponse.ok(hobbyService.getAll()));
+  }
 
-    @PostMapping
-    public ResponseEntity<ApiResponse<HobbyDto>> create(@RequestBody Hobby hobby) {
-        return ResponseEntity.ok(ApiResponse.ok(hobbyService.create(hobby)));
-    }
+  @PostMapping
+  public ResponseEntity<ApiResponse<HobbyDto>> create(@RequestBody Hobby hobby) {
+    return ResponseEntity.ok(ApiResponse.ok(hobbyService.create(hobby)));
+  }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
-        hobbyService.delete(id);
-        return ResponseEntity.ok(ApiResponse.ok(null));
-    }
+  @DeleteMapping("/{id}")
+  public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
+    hobbyService.delete(id);
+    return ResponseEntity.ok(ApiResponse.ok(null));
+  }
 }

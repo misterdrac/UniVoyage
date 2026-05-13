@@ -12,20 +12,17 @@ import java.util.List;
 @RequiredArgsConstructor
 public class HobbyService {
 
-    private final HobbyRepository hobbyRepository;
+  private final HobbyRepository hobbyRepository;
 
-    public List<HobbyDto> getAll() {
-        return hobbyRepository.findAll()
-                .stream()
-                .map(HobbyDto::from)
-                .toList();
-    }
+  public List<HobbyDto> getAll() {
+    return hobbyRepository.findAll().stream().map(HobbyDto::from).toList();
+  }
 
-    public HobbyDto create(Hobby hobby) {
-        return HobbyDto.from(hobbyRepository.save(hobby));
-    }
+  public HobbyDto create(Hobby hobby) {
+    return HobbyDto.from(hobbyRepository.save(hobby));
+  }
 
-    public void delete(Long id) {
-        hobbyRepository.deleteById(id);
-    }
+  public void delete(Long id) {
+    hobbyRepository.deleteById(id);
+  }
 }

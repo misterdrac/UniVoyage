@@ -12,21 +12,18 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CountryService {
 
-    private final CountryRepository countryRepository;
+  private final CountryRepository countryRepository;
 
-    public List<CountryDto> getAll() {
-        return countryRepository.findAll()
-                .stream()
-                .map(CountryDto::from)
-                .toList();
-    }
+  public List<CountryDto> getAll() {
+    return countryRepository.findAll().stream().map(CountryDto::from).toList();
+  }
 
-    public CountryDto create(Country country) {
-        Country saved = countryRepository.save(country);
-        return CountryDto.from(saved);
-    }
+  public CountryDto create(Country country) {
+    Country saved = countryRepository.save(country);
+    return CountryDto.from(saved);
+  }
 
-    public void delete(String isoCode) {
-        countryRepository.deleteById(isoCode);
-    }
+  public void delete(String isoCode) {
+    countryRepository.deleteById(isoCode);
+  }
 }

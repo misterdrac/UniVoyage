@@ -15,21 +15,21 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CountryController {
 
-    private final CountryService countryService;
+  private final CountryService countryService;
 
-    @GetMapping
-    public ResponseEntity<ApiResponse<List<CountryDto>>> getAll() {
-        return ResponseEntity.ok(ApiResponse.ok(countryService.getAll()));
-    }
+  @GetMapping
+  public ResponseEntity<ApiResponse<List<CountryDto>>> getAll() {
+    return ResponseEntity.ok(ApiResponse.ok(countryService.getAll()));
+  }
 
-    @PostMapping
-    public ResponseEntity<ApiResponse<CountryDto>> create(@RequestBody Country country) {
-        return ResponseEntity.ok(ApiResponse.ok(countryService.create(country)));
-    }
+  @PostMapping
+  public ResponseEntity<ApiResponse<CountryDto>> create(@RequestBody Country country) {
+    return ResponseEntity.ok(ApiResponse.ok(countryService.create(country)));
+  }
 
-    @DeleteMapping("/{isoCode}")
-    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable String isoCode) {
-        countryService.delete(isoCode);
-        return ResponseEntity.ok(ApiResponse.ok(null));
-    }
+  @DeleteMapping("/{isoCode}")
+  public ResponseEntity<ApiResponse<Void>> delete(@PathVariable String isoCode) {
+    countryService.delete(isoCode);
+    return ResponseEntity.ok(ApiResponse.ok(null));
+  }
 }

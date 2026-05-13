@@ -15,21 +15,21 @@ import java.util.List;
 @RequiredArgsConstructor
 public class LanguageController {
 
-    private final LanguageService languageService;
+  private final LanguageService languageService;
 
-    @GetMapping
-    public ResponseEntity<ApiResponse<List<LanguageDto>>> getAll() {
-        return ResponseEntity.ok(ApiResponse.ok(languageService.getAll()));
-    }
+  @GetMapping
+  public ResponseEntity<ApiResponse<List<LanguageDto>>> getAll() {
+    return ResponseEntity.ok(ApiResponse.ok(languageService.getAll()));
+  }
 
-    @PostMapping
-    public ResponseEntity<ApiResponse<LanguageDto>> create(@RequestBody Language language) {
-        return ResponseEntity.ok(ApiResponse.ok(languageService.create(language)));
-    }
+  @PostMapping
+  public ResponseEntity<ApiResponse<LanguageDto>> create(@RequestBody Language language) {
+    return ResponseEntity.ok(ApiResponse.ok(languageService.create(language)));
+  }
 
-    @DeleteMapping("/{code}")
-    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable String code) {
-        languageService.delete(code);
-        return ResponseEntity.ok(ApiResponse.ok(null));
-}
+  @DeleteMapping("/{code}")
+  public ResponseEntity<ApiResponse<Void>> delete(@PathVariable String code) {
+    languageService.delete(code);
+    return ResponseEntity.ok(ApiResponse.ok(null));
+  }
 }
