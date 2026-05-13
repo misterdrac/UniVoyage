@@ -11,7 +11,9 @@ import com.univoyage.auth.security.CookieUtils;
 import com.univoyage.auth.security.LoginIpRateLimiter;
 import com.univoyage.auth.security.RefreshIpRateLimiter;
 import com.univoyage.common.response.ApiResponse;
+import com.univoyage.admin.audit.service.CmsAuditService;
 import com.univoyage.user.dto.UserDto;
+import com.univoyage.user.model.Role;
 import com.univoyage.user.model.UserEntity;
 import com.univoyage.user.repository.UserRepository;
 import jakarta.servlet.http.Cookie;
@@ -43,6 +45,7 @@ public class AuthController {
   private final RefreshIpRateLimiter refreshIpRateLimiter;
   private final RefreshTokenService refreshTokenService;
   private final AuthCookieWriter authCookieWriter;
+  private final CmsAuditService cmsAuditService;
 
   @PostMapping("/register")
   public ResponseEntity<ApiResponse<AuthPayload>> register(
@@ -76,6 +79,7 @@ public class AuthController {
 
       if (!payload.isSuccess()) {
         log.info("Login failed: invalid credentials");
+        recordAdminLoginFailureIfApplicable(request.getEmail(), httpRequest);
         String msg = (payload.getError() != null && !payload.getError().isBlank())
             ? payload.getError()
             : "Invalid email or password";
@@ -84,10 +88,12 @@ public class AuthController {
 
       issueRefreshAndWriteCookies(response, payload);
       log.debug("Login succeeded userId={}", payload.getUser().getId());
+      maybeRecordAdminPasswordLogin(payload, httpRequest);
       return ResponseEntity.ok(ApiResponse.ok(payload));
 
     } catch (IllegalArgumentException e) {
       log.info("Login failed: invalid credentials");
+      recordAdminLoginFailureIfApplicable(request.getEmail(), httpRequest);
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
           .body(ApiResponse.fail("Invalid email or password"));
     }
@@ -159,6 +165,10 @@ public class AuthController {
       HttpServletResponse response) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     if (authentication != null && authentication.getPrincipal() instanceof UserEntity u) {
+      if (u.getRole() == Role.ADMIN || u.getRole() == Role.HEAD_ADMIN) {
+        cmsAuditService.recordAdminLogout(u.getId(), u.getEmail(),
+            ClientIpResolver.resolve(request));
+      }
       refreshTokenService.revokeAllForUser(u.getId());
     }
     Cookie refreshCookie = WebUtils.getCookie(request, CookieUtils.REFRESH_TOKEN_COOKIE_NAME);
@@ -167,6 +177,30 @@ public class AuthController {
     }
     authCookieWriter.clearAuthCookies(response);
     return ResponseEntity.ok(ApiResponse.ok(null));
+  }
+
+  private void maybeRecordAdminPasswordLogin(AuthPayload payload, HttpServletRequest httpRequest) {
+    UserDto u = payload.getUser();
+    if (u == null || u.getRole() == null) {
+      return;
+    }
+    if (!"ADMIN".equals(u.getRole()) && !"HEAD_ADMIN".equals(u.getRole())) {
+      return;
+    }
+    cmsAuditService.recordAdminLoginSuccess(u.getId(), u.getEmail(),
+        ClientIpResolver.resolve(httpRequest), "password");
+  }
+
+  private void recordAdminLoginFailureIfApplicable(String email, HttpServletRequest httpRequest) {
+    if (email == null || email.isBlank()) {
+      return;
+    }
+    userRepository.findByEmail(email).ifPresent(user -> {
+      if (user.getRole() == Role.ADMIN || user.getRole() == Role.HEAD_ADMIN) {
+        cmsAuditService.recordAdminLoginFailed(user.getEmail(),
+            ClientIpResolver.resolve(httpRequest));
+      }
+    });
   }
 
   private void issueRefreshAndWriteCookies(HttpServletResponse response, AuthPayload payload) {
