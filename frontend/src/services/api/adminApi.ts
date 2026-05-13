@@ -194,6 +194,32 @@ export interface PatchAdminCountryRequest {
   active?: boolean;
 }
 
+export type CmsAuditEventType =
+  | "ADMIN_LOGIN_SUCCESS"
+  | "ADMIN_LOGIN_FAILED"
+  | "ADMIN_LOGOUT"
+  | "USER_ROLE_CHANGED";
+
+export interface CmsAuditLog {
+  id: number;
+  createdAt: string;
+  eventType: CmsAuditEventType;
+  actorUserId: number | null;
+  actorEmail: string | null;
+  targetUserId: number | null;
+  targetEmail: string | null;
+  ipAddress: string | null;
+  metadata: string | null;
+}
+
+export interface CmsAuditLogPage {
+  content: CmsAuditLog[];
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
+}
+
 /**
  * Admin API interface
  * Handles administrative operations for users and destinations
@@ -334,6 +360,14 @@ export interface AdminApi {
     data: PatchAdminCountryRequest,
   ): Promise<AdminCountry>;
   deleteAdminCountry(isoCode: string): Promise<void>;
+
+  getAuditLogs(params?: {
+    page?: number;
+    size?: number;
+    sort?: string;
+    search?: string;
+    eventType?: CmsAuditEventType;
+  }): Promise<CmsAuditLogPage>;
 }
 
 export const adminApi: {
@@ -686,5 +720,23 @@ export const adminApi: {
         method: "DELETE",
       },
     );
+  },
+
+  async getAuditLogs(this: ApiClient, params = {}) {
+    const searchParams = new URLSearchParams();
+    if (params.page !== undefined)
+      searchParams.append("page", params.page.toString());
+    if (params.size !== undefined)
+      searchParams.append("size", params.size.toString());
+    if (params.sort) searchParams.append("sort", params.sort);
+    if (params.search) searchParams.append("search", params.search);
+    if (params.eventType) searchParams.append("eventType", params.eventType);
+    const q = searchParams.toString();
+    const res = await this.request<CmsAuditLogPage>(
+      `/admin/audit-logs${q ? `?${q}` : ""}`,
+    );
+    if (!res.success || !res.data)
+      throw new Error(res.error || "Failed to fetch audit logs");
+    return res.data;
   },
 };
