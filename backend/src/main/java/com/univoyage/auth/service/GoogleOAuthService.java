@@ -123,6 +123,9 @@ public class GoogleOAuthService {
       }
 
       List<String> redirectUris = googleOAuthProperties.redirectUriList();
+      if (redirectUris.isEmpty()) {
+        throw new IllegalStateException("Google OAuth redirect URI allowlist is empty");
+      }
       String redirectUri = redirectUris.getFirst();
       OAuthRedirectUriAllowlist.validate(redirectUri, redirectUris);
       return finishLogin(code, redirectUri, null);
