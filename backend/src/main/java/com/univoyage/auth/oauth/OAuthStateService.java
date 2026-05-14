@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.stereotype.Service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.crypto.Mac;
@@ -24,14 +23,21 @@ import java.util.Optional;
  * authorization redirect.
  */
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class OAuthStateService {
 
   private static final ObjectMapper MAPPER = new ObjectMapper();
+  private static final int MIN_SECRET_LENGTH_BYTES = 32;
 
   private final OAuthSecurityProperties oauthSecurityProperties;
   private final Clock clock;
+  private final byte[] cachedSecretBytes;
+
+  public OAuthStateService(OAuthSecurityProperties oauthSecurityProperties, Clock clock) {
+    this.oauthSecurityProperties = oauthSecurityProperties;
+    this.clock = clock;
+    this.cachedSecretBytes = validateAndCacheSecret();
+  }
 
   /**
    * Creates signed {@code state} and returns the nonce that must be passed
@@ -99,16 +105,22 @@ public class OAuthStateService {
 
   private byte[] sign(byte[] data) throws Exception {
     Mac mac = Mac.getInstance("HmacSHA256");
-    mac.init(new SecretKeySpec(stateSecretBytes(), "HmacSHA256"));
+    mac.init(new SecretKeySpec(cachedSecretBytes, "HmacSHA256"));
     return mac.doFinal(data);
   }
 
-  private byte[] stateSecretBytes() {
+  private byte[] validateAndCacheSecret() {
     String secret = oauthSecurityProperties.getStateSecret();
     if (secret == null || secret.isBlank()) {
       throw new IllegalStateException("OAuth state secret is not configured");
     }
-    return secret.getBytes(StandardCharsets.UTF_8);
+    byte[] secretBytes = secret.getBytes(StandardCharsets.UTF_8);
+    if (secretBytes.length < MIN_SECRET_LENGTH_BYTES) {
+      throw new IllegalStateException(
+          "OAuth state secret must be at least " + MIN_SECRET_LENGTH_BYTES + " bytes (got "
+              + secretBytes.length + " bytes). Use a stronger secret.");
+    }
+    return secretBytes;
   }
 
   private static boolean constantTimeEquals(byte[] a, byte[] b) {
