@@ -30,7 +30,8 @@ echo "[pre-commit] Running frontend formatter..."
 )
 
 echo "[pre-commit] Re-staging formatted files..."
-git add backend
-git add frontend
+while IFS= read -r path; do
+  [[ -n "${path}" ]] && git add "${path}"
+done < <(git diff --cached --name-only || true)
 
 echo "[pre-commit] Done."
