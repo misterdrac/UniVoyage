@@ -54,6 +54,16 @@ app:
       client-secret: ${GOOGLE_CLIENT_SECRET:}
       redirect-uris: ${GOOGLE_REDIRECT_URIS:${GOOGLE_REDIRECT_URI:}}
 
+    github:
+      client-id: ${GITHUB_CLIENT_ID:}
+      client-secret: ${GITHUB_CLIENT_SECRET:}
+      redirect-uris: ${GITHUB_REDIRECT_URIS:${GITHUB_REDIRECT_URI:}}
+
+    linkedin:
+      client-id: ${LINKEDIN_CLIENT_ID:}
+      client-secret: ${LINKEDIN_CLIENT_SECRET:}
+      redirect-uris: ${LINKEDIN_REDIRECT_URIS:${LINKEDIN_REDIRECT_URI:}}
+
   cookies:
     # Override via env in production/docker (e.g. COOKIE_SECURE=true)
     secure: ${COOKIE_SECURE:false}

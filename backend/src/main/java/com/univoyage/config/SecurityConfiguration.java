@@ -47,6 +47,8 @@ public class SecurityConfiguration {
             .requestMatchers("/api/auth/login/**", "/api/auth/register/**").permitAll()
             .requestMatchers(HttpMethod.POST, "/api/auth/refresh", "/api/auth/refresh/").permitAll()
             .requestMatchers("/api/auth/google/**").permitAll()
+            .requestMatchers("/api/auth/github/**").permitAll()
+            .requestMatchers("/api/auth/linkedin/**").permitAll()
             // Public routes for destinations
             .requestMatchers(HttpMethod.GET, "/api/destinations/**").permitAll()
             // Public quiz endpoint
