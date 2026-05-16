@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useMemo,
+} from "react";
 import { apiService } from "@/services/api";
 import type {
   AdminDestination,
@@ -9,7 +15,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { AutoComplete, type Option } from "@/components/ui/autocomplete";
-import { COUNTRIES } from "@/lib/constants";
+import { useReferenceDictionaries } from "@/hooks/useReferenceDictionaries";
+import { countriesToOptions } from "@/lib/referenceOptions";
 import {
   AdminHeader,
   AdminSearchBar,
@@ -85,6 +92,13 @@ const EMPTY_FORM: CreateDestinationRequest = {
 
 const AdminDestinationsPage: React.FC = () => {
   useDocumentTitle("Admin - Destinations");
+
+  const { data: reference } = useReferenceDictionaries();
+  const countryOptions = useMemo(
+    () => (reference?.countries ? countriesToOptions(reference.countries) : []),
+    [reference?.countries],
+  );
+
   // Data state
   const [destinations, setDestinations] = useState<AdminDestination[]>([]);
   const [totalPages, setTotalPages] = useState(0);
@@ -505,20 +519,17 @@ const AdminDestinationsPage: React.FC = () => {
                       Country *
                     </Label>
                     <AutoComplete
-                      options={COUNTRIES.map((country) => ({
-                        value: country.value,
-                        label: country.label,
-                      }))}
+                      options={countryOptions}
                       value={(() => {
                         if (formData.countryCode) {
-                          const byCode = COUNTRIES.find(
+                          const byCode = countryOptions.find(
                             (c) => c.value === formData.countryCode,
                           );
                           if (byCode)
                             return { value: byCode.value, label: byCode.label };
                         }
                         if (formData.location) {
-                          const byLabel = COUNTRIES.find(
+                          const byLabel = countryOptions.find(
                             (c) => c.label === formData.location,
                           );
                           if (byLabel)
@@ -532,7 +543,7 @@ const AdminDestinationsPage: React.FC = () => {
                       onValueChange={(option: Option) => {
                         if (
                           option &&
-                          COUNTRIES.some((c) => c.value === option.value)
+                          countryOptions.some((c) => c.value === option.value)
                         ) {
                           updateField("location", option.label);
                           updateField("countryCode", option.value);
@@ -541,7 +552,9 @@ const AdminDestinationsPage: React.FC = () => {
                       onBlur={() => {
                         if (
                           formData.location &&
-                          !COUNTRIES.some((c) => c.label === formData.location)
+                          !countryOptions.some(
+                            (c) => c.label === formData.location,
+                          )
                         ) {
                           updateField("location", "");
                           updateField("countryCode", "");

@@ -662,6 +662,13 @@ summary,
 }
 
 @layer utilities {
+  /* Force colorful emoji presentation (works with Inter + system fallbacks; matches profile pickers). */
+  .admin-cms-emoji {
+    font-variant-emoji: emoji;
+    -webkit-font-feature-settings: "liga" off;
+    font-feature-settings: "liga" off;
+  }
+
   @keyframes bounce-once {
     0%,
     100% {

@@ -22,4 +22,15 @@ public class Language {
   @Column(name = "lang_name", unique = true, nullable = false, length = 50)
   private String langName;
 
+  @Column(name = "emoji", length = 32)
+  private String emoji;
+
+  @Column(name = "sort_order", nullable = false)
+  @Builder.Default
+  private Integer sortOrder = 0;
+
+  @Column(name = "active", nullable = false)
+  @Builder.Default
+  private boolean active = true;
+
 }

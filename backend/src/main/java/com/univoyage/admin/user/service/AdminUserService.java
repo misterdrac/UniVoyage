@@ -1,5 +1,6 @@
 package com.univoyage.admin.user.service;
 
+import com.univoyage.admin.audit.service.CmsAuditService;
 import com.univoyage.admin.user.dto.AdminUserResponse;
 import com.univoyage.exception.ResourceNotFoundException;
 import com.univoyage.user.model.Role;
@@ -25,6 +26,7 @@ import org.springframework.data.domain.Pageable;
 public class AdminUserService {
 
   private final UserRepository userRepository;
+  private final CmsAuditService cmsAuditService;
 
   public Page<AdminUserResponse> listUsers(String search, Pageable pageable) {
 
@@ -44,7 +46,8 @@ public class AdminUserService {
   }
 
   @Transactional
-  public AdminUserResponse updateRole(long targetUserId, Role newRole, Long actingUserId) {
+  public AdminUserResponse updateRole(long targetUserId, Role newRole, Long actingUserId,
+      String clientIp) {
     if (actingUserId == null) {
       throw new IllegalArgumentException("Missing acting user id.");
     }
@@ -54,6 +57,8 @@ public class AdminUserService {
 
     UserEntity target = userRepository.findById(targetUserId)
         .orElseThrow(() -> new ResourceNotFoundException("User not found: " + targetUserId));
+
+    Role roleBefore = target.getRole();
 
     // Nobody can change their own role
     if (actingUserId.equals(targetUserId)) {
@@ -69,6 +74,8 @@ public class AdminUserService {
         return toDto(target);
       target.setRole(newRole);
       userRepository.save(target);
+      cmsAuditService.recordRoleChange(actor.getId(), actor.getEmail(), target.getId(),
+          target.getEmail(), roleBefore, target.getRole(), clientIp);
       return toDto(target);
     }
 
@@ -83,6 +90,8 @@ public class AdminUserService {
 
       target.setRole(Role.ADMIN);
       userRepository.save(target);
+      cmsAuditService.recordRoleChange(actor.getId(), actor.getEmail(), target.getId(),
+          target.getEmail(), roleBefore, target.getRole(), clientIp);
       return toDto(target);
     }
 

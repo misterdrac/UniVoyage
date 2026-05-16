@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import {
@@ -11,6 +11,12 @@ import {
   useProfileForm,
 } from "@/components/profile";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
+import { useReferenceDictionaries } from "@/hooks/useReferenceDictionaries";
+import {
+  countriesToOptions,
+  hobbiesToOptions,
+  languagesToOptions,
+} from "@/lib/referenceOptions";
 
 const ProfilePage = () => {
   useDocumentTitle("Profile");
@@ -19,6 +25,22 @@ const ProfilePage = () => {
   const [isEditingInterests, setIsEditingInterests] = useState(false);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [isSavingInterests, setIsSavingInterests] = useState(false);
+
+  const { data: reference, isLoading: referenceLoading } =
+    useReferenceDictionaries();
+
+  const countryOptions = useMemo(
+    () => (reference?.countries ? countriesToOptions(reference.countries) : []),
+    [reference?.countries],
+  );
+  const hobbyPickerOptions = useMemo(
+    () => (reference?.hobbies ? hobbiesToOptions(reference.hobbies) : []),
+    [reference?.hobbies],
+  );
+  const languagePickerOptions = useMemo(
+    () => (reference?.languages ? languagesToOptions(reference.languages) : []),
+    [reference?.languages],
+  );
 
   // Custom hooks for form and image management
   const {
@@ -42,6 +64,7 @@ const ProfilePage = () => {
     user,
     isEditingProfile,
     isEditingInterests,
+    countryOptions,
   });
 
   // Handlers
@@ -156,6 +179,8 @@ const ProfilePage = () => {
           surname={surname}
           country={country}
           profileImagePath={profileImagePath}
+          countryOptions={countryOptions}
+          referenceLoading={referenceLoading}
           onEdit={handleEditProfile}
           onCancel={handleCancelProfile}
           onSave={handleSaveProfile}
@@ -178,6 +203,10 @@ const ProfilePage = () => {
           hobbies={hobbies}
           languages={languages}
           visited={visited}
+          hobbyOptions={hobbyPickerOptions}
+          languageOptions={languagePickerOptions}
+          countryOptions={countryOptions}
+          referenceLoading={referenceLoading}
           onEdit={handleEditInterests}
           onCancel={handleCancelInterests}
           onSave={handleSaveInterests}

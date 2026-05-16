@@ -44,7 +44,7 @@ class GlobalExceptionHandlerIllegalArgumentWebMvcTest {
   @Test
   @DisplayName("IllegalArgumentException maps to 400 with ApiResponse error message")
   void illegalArgument_mapsTo400Json() throws Exception {
-    when(adminUserService.updateRole(anyLong(), any(Role.class), any()))
+    when(adminUserService.updateRole(anyLong(), any(Role.class), any(), any()))
         .thenThrow(new IllegalArgumentException("Business rule violated for test."));
 
     mockMvc

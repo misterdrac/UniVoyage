@@ -5,7 +5,9 @@ CREATE TABLE countries (
     iso_code VARCHAR(2) PRIMARY KEY,
     country_name VARCHAR(100) UNIQUE NOT NULL,
     currency_code VARCHAR(3),
-    currency_name VARCHAR(100)
+    currency_name VARCHAR(100),
+    sort_order INTEGER NOT NULL DEFAULT 0,
+    active BOOLEAN NOT NULL DEFAULT TRUE
 );
 
 CREATE TABLE users (

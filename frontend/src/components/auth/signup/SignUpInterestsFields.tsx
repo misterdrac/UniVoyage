@@ -1,11 +1,14 @@
 import { ChipSelect } from "@/components/ui/chip-select";
-import { TRAVEL_INTERESTS, LANGUAGES } from "@/lib/constants";
+import type { Option } from "@/components/ui/autocomplete";
 
 interface SignUpInterestsFieldsProps {
   hobbies: string[];
   setHobbies: (value: string[]) => void;
   languages: string[];
   setLanguages: (value: string[]) => void;
+  hobbyOptions: Option[];
+  languageOptions: Option[];
+  referenceLoading?: boolean;
 }
 
 export const SignUpInterestsFields = ({
@@ -13,6 +16,9 @@ export const SignUpInterestsFields = ({
   setHobbies,
   languages,
   setLanguages,
+  hobbyOptions,
+  languageOptions,
+  referenceLoading = false,
 }: SignUpInterestsFieldsProps) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -22,10 +28,11 @@ export const SignUpInterestsFields = ({
           Interests (e.g., history, hiking)
         </label>
         <ChipSelect
-          options={TRAVEL_INTERESTS}
+          options={hobbyOptions}
           value={hobbies}
           onChange={setHobbies}
           placeholder="Add things you like"
+          disabled={referenceLoading}
         />
       </div>
 
@@ -33,10 +40,11 @@ export const SignUpInterestsFields = ({
       <div className="space-y-2">
         <label className="text-sm font-medium text-foreground">Languages</label>
         <ChipSelect
-          options={LANGUAGES}
+          options={languageOptions}
           value={languages}
           onChange={setLanguages}
           placeholder="Add languages you know"
+          disabled={referenceLoading}
         />
       </div>
     </div>

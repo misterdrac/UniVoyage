@@ -10,7 +10,6 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { AutoComplete, type Option } from "@/components/ui/autocomplete";
-import { COUNTRIES } from "@/lib/constants";
 import type { User as UserType } from "@/types/user";
 import { toast } from "sonner";
 import { AvatarPicker } from "./AvatarPicker";
@@ -24,6 +23,8 @@ interface ProfileHeaderCardProps {
   surname: string;
   country: Option | undefined;
   profileImagePath?: string;
+  countryOptions: Option[];
+  referenceLoading?: boolean;
   onEdit: () => void;
   onCancel: () => void;
   onSave: (data: {
@@ -46,6 +47,8 @@ export const ProfileHeaderCard = ({
   surname,
   country,
   profileImagePath,
+  countryOptions,
+  referenceLoading = false,
   onEdit,
   onCancel,
   onSave,
@@ -162,12 +165,12 @@ export const ProfileHeaderCard = ({
                   Country of Origin
                 </label>
                 <AutoComplete
-                  options={COUNTRIES}
+                  options={countryOptions}
                   value={country}
                   onValueChange={onCountryChange}
                   placeholder="Select your country..."
                   emptyMessage="No countries found"
-                  disabled={isSaving}
+                  disabled={isSaving || referenceLoading}
                 />
               </div>
             </div>
