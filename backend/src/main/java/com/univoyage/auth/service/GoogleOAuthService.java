@@ -1,166 +1,168 @@
 package com.univoyage.auth.service;
 
+import com.univoyage.auth.config.GoogleOAuthHttpConfiguration;
 import com.univoyage.auth.dto.AuthPayload;
-import com.univoyage.auth.security.JwtService;
-import com.univoyage.user.dto.UserDto;
-import com.univoyage.user.model.Role;
-import com.univoyage.user.model.UserEntity;
-import com.univoyage.user.repository.UserRepository;
+import com.univoyage.auth.oauth.GoogleOAuthProfileMapper;
+import com.univoyage.auth.oauth.GoogleOAuthProperties;
+import com.univoyage.auth.oauth.GoogleIdTokenVerifier;
+import com.univoyage.auth.oauth.IssuedOAuthState;
+import com.univoyage.auth.oauth.NormalizedOAuthProfile;
+import com.univoyage.auth.oauth.OAuthLoginCompletionService;
+import com.univoyage.auth.oauth.OAuthRedirectUriAllowlist;
+import com.univoyage.auth.oauth.OAuthSecurityProperties;
+import com.univoyage.auth.oauth.OAuthStatePayload;
+import com.univoyage.auth.oauth.OAuthStateService;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
- * Service for handling Google OAuth 2.0 authentication. This service builds the
- * authorization URL, handles the callback, exchanges authorization codes for
- * access tokens, fetches user info, and creates or updates user records in the
- * database.
+ * Google OAuth 2.0 / OIDC: authorization URL, callback handling with signed
+ * state, token exchange, ID token validation, and delegated user/session
+ * completion.
  */
-
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class GoogleOAuthService {
 
-  // Optional in test environments. If not configured, the app should still start
-  // (integration tests rely on Spring context loading).
-  @Value("${GOOGLE_CLIENT_ID:}")
-  private String clientId;
+  public static final String ERROR_INVALID_STATE = "Invalid or expired OAuth state";
+  public static final String ERROR_EMAIL_UNVERIFIED = "Google email is not verified";
+  public static final String ERROR_NO_EMAIL = "Google account has no email";
 
-  @Value("${GOOGLE_CLIENT_SECRET:}")
-  private String clientSecret;
+  private static final String AUTH_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth";
+  private static final String TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
+  /** Minimal scopes: OIDC + email (no profile scope). */
+  private static final String SCOPES = "openid email";
 
-  @Value("${GOOGLE_REDIRECT_URI:}")
-  private String redirectUri;
+  private final GoogleOAuthProperties googleOAuthProperties;
+  private final OAuthSecurityProperties oauthSecurityProperties;
+  private final OAuthStateService oauthStateService;
+  private final OAuthLoginCompletionService oauthLoginCompletionService;
+  private final GoogleIdTokenVerifier googleIdTokenVerifier;
+  private final RestTemplate googleOAuthRestTemplate;
 
-  private final JwtService jwtService;
-  private final UserRepository userRepository;
-  private final RestTemplate restTemplate = new RestTemplate();
-  private final PasswordEncoder passwordEncoder;
-
-  /**
-   * Build the Google OAuth 2.0 authorization URL.
-   *
-   * @return The authorization URL to redirect users for Google OAuth 2.0
-   *         authentication.
-   */
-  public String buildAuthorizationUrl() {
-    if (clientId.isBlank() || redirectUri.isBlank()) {
-      // Configuration missing; caller can decide how to handle this case.
-      throw new IllegalStateException("Google OAuth is not configured");
-    }
-    return "https://accounts.google.com/o/oauth2/v2/auth" + "?response_type=code" + "&client_id="
-        + URLEncoder.encode(clientId, StandardCharsets.UTF_8) + "&redirect_uri="
-        + URLEncoder.encode(redirectUri, StandardCharsets.UTF_8) + "&scope="
-        + URLEncoder.encode("openid email profile", StandardCharsets.UTF_8) + "&access_type=offline"
-        + "&prompt=consent";
+  public GoogleOAuthService(GoogleOAuthProperties googleOAuthProperties,
+      OAuthSecurityProperties oauthSecurityProperties, OAuthStateService oauthStateService,
+      OAuthLoginCompletionService oauthLoginCompletionService,
+      GoogleIdTokenVerifier googleIdTokenVerifier,
+      @Qualifier(GoogleOAuthHttpConfiguration.GOOGLE_OAUTH_REST_TEMPLATE) RestTemplate googleOAuthRestTemplate) {
+    this.googleOAuthProperties = googleOAuthProperties;
+    this.oauthSecurityProperties = oauthSecurityProperties;
+    this.oauthStateService = oauthStateService;
+    this.oauthLoginCompletionService = oauthLoginCompletionService;
+    this.googleIdTokenVerifier = googleIdTokenVerifier;
+    this.googleOAuthRestTemplate = googleOAuthRestTemplate;
   }
 
   /**
-   * Handle the OAuth 2.0 callback from Google.
+   * Build the Google OAuth 2.0 authorization URL with signed {@code state} and
+   * OIDC {@code nonce}.
+   */
+  public String buildAuthorizationUrl() {
+    String clientId = googleOAuthProperties.getClientId();
+    List<String> redirectUris = googleOAuthProperties.redirectUriList();
+    if (clientId == null || clientId.isBlank()) {
+      throw new IllegalStateException("Google OAuth is not configured");
+    }
+    if (redirectUris.isEmpty()) {
+      throw new IllegalStateException("Google OAuth redirect URI allowlist is empty");
+    }
+    String redirectUri = redirectUris.getFirst();
+    OAuthRedirectUriAllowlist.validate(redirectUri, redirectUris);
+
+    if (oauthSecurityProperties.isRequireSignedOAuthState()) {
+      IssuedOAuthState issued = oauthStateService.issueState(redirectUri);
+      return AUTH_ENDPOINT + "?response_type=code" + "&client_id=" + enc(clientId)
+          + "&redirect_uri=" + enc(redirectUri) + "&scope=" + enc(SCOPES) + "&state="
+          + enc(issued.stateQueryParam()) + "&nonce=" + enc(issued.nonceForAuthorizeUrl())
+          + "&access_type=offline" + "&prompt=consent";
+    }
+
+    return AUTH_ENDPOINT + "?response_type=code" + "&client_id=" + enc(clientId) + "&redirect_uri="
+        + enc(redirectUri) + "&scope=" + enc(SCOPES) + "&access_type=offline" + "&prompt=consent";
+  }
+
+  /**
+   * Completes login after Google redirects back with an authorization code.
    *
-   * @param code
-   *          The authorization code received from Google.
-   * @return An AuthPayload containing user info and tokens, or an error message.
+   * @param state
+   *          signed state echoed by Google when
+   *          {@link OAuthSecurityProperties#requireSignedOAuthState} is true;
+   *          ignored in legacy mode
    */
   @Transactional
-  public AuthPayload handleCallback(String code) {
+  public AuthPayload handleCallback(String code, String state) {
     log.debug("Google OAuth token exchange starting");
     try {
-      String accessToken = exchangeCodeForAccessToken(code);
-      Map<String, Object> userInfo = fetchUserInfo(accessToken);
-
-      String email = (String) userInfo.get("email");
-      String givenName = (String) userInfo.getOrDefault("given_name", "");
-      String familyName = (String) userInfo.getOrDefault("family_name", "");
-
-      if (email == null || email.isBlank()) {
-        return AuthPayload.fail("Google account has no email");
+      if (oauthSecurityProperties.isRequireSignedOAuthState()) {
+        Optional<OAuthStatePayload> parsedState = oauthStateService.verifyAndParse(state);
+        if (parsedState.isEmpty()) {
+          return AuthPayload.fail(ERROR_INVALID_STATE);
+        }
+        OAuthStatePayload oauthState = parsedState.get();
+        List<String> allowlist = googleOAuthProperties.redirectUriList();
+        OAuthRedirectUriAllowlist.validate(oauthState.redirectUri(), allowlist);
+        return finishLogin(code, oauthState.redirectUri(), oauthState.nonce());
       }
 
-      UserEntity user = createGoogleUser(email, givenName, familyName);
-
-      // Generate JWT + CSRF the same way as login/register
-      JwtService.TokenPair pair = jwtService.generateForUser(user);
-
-      return AuthPayload.ok(UserDto.from(user), pair.jwt(), pair.csrfSecret());
+      List<String> redirectUris = googleOAuthProperties.redirectUriList();
+      if (redirectUris.isEmpty()) {
+        throw new IllegalStateException("Google OAuth redirect URI allowlist is empty");
+      }
+      String redirectUri = redirectUris.getFirst();
+      OAuthRedirectUriAllowlist.validate(redirectUri, redirectUris);
+      return finishLogin(code, redirectUri, null);
+    } catch (IllegalArgumentException e) {
+      log.debug("Google OAuth rejected: {}", e.getMessage());
+      return AuthPayload.fail(e.getMessage());
+    } catch (RestClientException e) {
+      log.debug("Google OAuth HTTP error: {}", e.getMessage());
+      return AuthPayload.fail("Google login failed: token exchange error");
     } catch (Exception e) {
+      log.warn("Google OAuth failure", e);
       return AuthPayload.fail("Google login failed: " + e.getMessage());
     }
   }
 
-  private static String safeNonNullTrim(String s) {
-    return s == null ? "" : s.trim();
-  }
-
-  /**
-   * Insert or update a user based on Google account info.
-   *
-   * @param email
-   *          The user's email address.
-   * @param givenName
-   *          The user's given name.
-   * @param familyName
-   *          The user's family name.
-   * @return The upserted UserEntity.
-   */
-  private UserEntity createGoogleUser(String email, String givenName, String familyName) {
-    Optional<UserEntity> existing = userRepository.findByEmail(email);
-
-    if (existing.isPresent()) {
-      UserEntity u = existing.get();
-      u.setDateOfLastSignin(Instant.now());
-
-      if (u.getName() == null || u.getName().isBlank()) {
-        u.setName(safeNonNullTrim(givenName));
-      }
-      if (u.getSurname() == null || u.getSurname().isBlank()) {
-        u.setSurname(safeNonNullTrim(familyName));
-      }
-
-      return userRepository.save(u);
+  private AuthPayload finishLogin(String code, String redirectUri, String idTokenNonce) {
+    TokenResponse tokens = exchangeCodeForTokens(code, redirectUri);
+    if (tokens.idToken() == null || tokens.idToken().isBlank()) {
+      return AuthPayload.fail("Google token response missing id_token");
     }
 
-    String name = safeNonNullTrim(givenName);
-    String surname = safeNonNullTrim(familyName);
-    String randomPassword = UUID.randomUUID().toString(); // we need to ensure password is set, even
-                                                          // if not used
-    String passwordHash = passwordEncoder.encode(randomPassword);
+    Jwt jwt = googleIdTokenVerifier.verify(tokens.idToken(), idTokenNonce);
+    NormalizedOAuthProfile profile = GoogleOAuthProfileMapper.fromGoogleIdToken(jwt);
 
-    UserEntity u = UserEntity.builder().email(email).name(name).surname(surname)
-        .passwordHash(passwordHash).dateOfRegister(Instant.now()).dateOfLastSignin(Instant.now())
-        .role(Role.USER).build();
+    if (profile.email() == null || profile.email().isBlank()) {
+      return AuthPayload.fail(ERROR_NO_EMAIL);
+    }
+    if (oauthSecurityProperties.isRequireEmailVerified() && !profile.emailVerified()) {
+      return AuthPayload.fail(ERROR_EMAIL_UNVERIFIED);
+    }
 
-    return userRepository.save(u);
+    return oauthLoginCompletionService.completeLogin(profile);
   }
 
-  /**
-   * Exchange the authorization code for an access token.
-   *
-   * @param code
-   *          The authorization code received from Google.
-   * @return The access token.
-   */
-  private String exchangeCodeForAccessToken(String code) {
-    String tokenEndpoint = "https://oauth2.googleapis.com/token";
+  private TokenResponse exchangeCodeForTokens(String code, String redirectUri) {
+    String clientId = googleOAuthProperties.getClientId();
+    String clientSecret = googleOAuthProperties.getClientSecret();
 
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -169,45 +171,31 @@ public class GoogleOAuthService {
         + enc(clientSecret) + "&redirect_uri=" + enc(redirectUri)
         + "&grant_type=authorization_code";
 
-    ResponseEntity<Map> res = restTemplate.exchange(tokenEndpoint, HttpMethod.POST,
+    ResponseEntity<Map> res = googleOAuthRestTemplate.exchange(TOKEN_ENDPOINT, HttpMethod.POST,
         new HttpEntity<>(body, headers), Map.class);
 
     if (!res.getStatusCode().is2xxSuccessful() || res.getBody() == null) {
       throw new IllegalStateException("Token exchange failed");
     }
 
-    String accessToken = (String) res.getBody().get("access_token");
+    Map<?, ?> bodyMap = res.getBody();
+    String accessToken = stringClaim(bodyMap, "access_token");
+    String idToken = stringClaim(bodyMap, "id_token");
     if (accessToken == null || accessToken.isBlank()) {
       throw new IllegalStateException("No access_token returned by Google");
     }
-
-    return accessToken;
+    return new TokenResponse(accessToken, idToken);
   }
 
-  /**
-   * Fetch user info from Google using the access token.
-   *
-   * @param accessToken
-   *          The access token.
-   * @return A map containing user info.
-   */
-  private Map<String, Object> fetchUserInfo(String accessToken) {
-    String userInfoEndpoint = "https://www.googleapis.com/oauth2/v3/userinfo";
-
-    HttpHeaders headers = new HttpHeaders();
-    headers.setBearerAuth(accessToken);
-
-    ResponseEntity<Map> res = restTemplate.exchange(userInfoEndpoint, HttpMethod.GET,
-        new HttpEntity<>(headers), Map.class);
-
-    if (!res.getStatusCode().is2xxSuccessful() || res.getBody() == null) {
-      throw new IllegalStateException("Failed to fetch Google user info");
-    }
-
-    return res.getBody();
+  private static String stringClaim(Map<?, ?> map, String key) {
+    Object v = map.get(key);
+    return v != null ? v.toString() : null;
   }
 
   private String enc(String s) {
     return URLEncoder.encode(s, StandardCharsets.UTF_8);
+  }
+
+  private record TokenResponse(String accessToken, String idToken) {
   }
 }

@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -97,15 +99,49 @@ class GoogleOAuthControllerIntegrationTest {
   }
 
   @Test
+  @DisplayName("POST /api/auth/google/callback returns 400 when OAuth state is missing")
+  void callback_missingState_returns400() throws Exception {
+    mockMvc
+        .perform(post("/api/auth/google/callback").contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(Map.of("code", "some-code"))))
+        .andExpect(status().isBadRequest()).andExpect(jsonPath("$.success").value(false))
+        .andExpect(jsonPath("$.error").value("Missing OAuth state"));
+  }
+
+  @Test
+  @DisplayName("POST /api/auth/google/callback returns 400 when OAuth state is blank")
+  void callback_blankState_returns400() throws Exception {
+    mockMvc
+        .perform(post("/api/auth/google/callback").contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(Map.of("code", "some-code", "state", "   "))))
+        .andExpect(status().isBadRequest()).andExpect(jsonPath("$.success").value(false))
+        .andExpect(jsonPath("$.error").value("Missing OAuth state"));
+  }
+
+  @Test
   @DisplayName("POST /api/auth/google/callback returns 401 when service reports failure")
   void callback_serviceFailure_returns401() throws Exception {
-    when(googleOAuthService.handleCallback("bad")).thenReturn(AuthPayload.fail("invalid_grant"));
+    when(googleOAuthService.handleCallback(eq("bad"), anyString()))
+        .thenReturn(AuthPayload.fail("invalid_grant"));
 
     mockMvc
         .perform(post("/api/auth/google/callback").contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(Map.of("code", "bad"))))
+            .content(objectMapper.writeValueAsString(Map.of("code", "bad", "state", "st"))))
         .andExpect(status().isUnauthorized()).andExpect(jsonPath("$.success").value(false))
         .andExpect(jsonPath("$.error").value("invalid_grant"));
+  }
+
+  @Test
+  @DisplayName("POST /api/auth/google/callback returns 400 when service reports invalid OAuth state")
+  void callback_invalidOAuthState_returns400() throws Exception {
+    when(googleOAuthService.handleCallback(eq("c"), anyString()))
+        .thenReturn(AuthPayload.fail(GoogleOAuthService.ERROR_INVALID_STATE));
+
+    mockMvc
+        .perform(post("/api/auth/google/callback").contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(Map.of("code", "c", "state", "bad"))))
+        .andExpect(status().isBadRequest()).andExpect(jsonPath("$.success").value(false))
+        .andExpect(jsonPath("$.error").value(GoogleOAuthService.ERROR_INVALID_STATE));
   }
 
   @Test
@@ -115,12 +151,12 @@ class GoogleOAuthControllerIntegrationTest {
         .save(UserEntity.builder().name("G").surname("User").email("google-user@example.com")
             .passwordHash("{noop}unused").dateOfRegister(Instant.now()).role(Role.USER).build());
     UserDto user = UserDto.from(persisted);
-    when(googleOAuthService.handleCallback("valid-code"))
+    when(googleOAuthService.handleCallback(eq("valid-code"), eq("signed-state")))
         .thenReturn(AuthPayload.ok(user, "test-jwt", "test-csrf"));
 
     MvcResult result = mockMvc
-        .perform(post("/api/auth/google/callback").contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(Map.of("code", "valid-code"))))
+        .perform(post("/api/auth/google/callback").contentType(MediaType.APPLICATION_JSON).content(
+            objectMapper.writeValueAsString(Map.of("code", "valid-code", "state", "signed-state"))))
         .andExpect(status().isOk()).andExpect(jsonPath("$.success").value(true))
         .andExpect(jsonPath("$.data.success").value(true))
         .andExpect(jsonPath("$.data.user.email").value("google-user@example.com"))

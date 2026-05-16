@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -111,12 +112,12 @@ class AuthCookieContractIntegrationTest {
         .save(UserEntity.builder().name("G").surname("User").email("cookie-google@example.com")
             .passwordHash("{noop}unused").dateOfRegister(Instant.now()).role(Role.USER).build());
     UserDto user = UserDto.from(persisted);
-    when(googleOAuthService.handleCallback("valid-code"))
+    when(googleOAuthService.handleCallback(eq("valid-code"), eq("signed-state")))
         .thenReturn(AuthPayload.ok(user, "test-jwt", "test-csrf"));
 
     MvcResult result = mockMvc
-        .perform(post("/api/auth/google/callback").contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(Map.of("code", "valid-code"))))
+        .perform(post("/api/auth/google/callback").contentType(MediaType.APPLICATION_JSON).content(
+            objectMapper.writeValueAsString(Map.of("code", "valid-code", "state", "signed-state"))))
         .andExpect(status().isOk()).andReturn();
 
     List<String> setCookies = result.getResponse().getHeaders(HttpHeaders.SET_COOKIE);

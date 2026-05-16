@@ -34,3 +34,11 @@ app:
     refresh-ttl-seconds: 604800
     issuer: "univoyage"
     audience: "web"
+
+  auth:
+    oauth:
+      state-secret: ${app.jwt.secret}
+      require-email-verified: true
+      require-signed-oauth-state: true
+      callback-ip-max-attempts: 60
+      callback-ip-window: PT1M
