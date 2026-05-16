@@ -16,6 +16,25 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
 
+  mail:
+    host: ${SPRING_MAIL_HOST:}
+    port: ${SPRING_MAIL_PORT:587}
+    username: ${SPRING_MAIL_USERNAME:}
+    password: ${SPRING_MAIL_PASSWORD:}
+    default-encoding: UTF-8
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          ssl:
+            trust: ${SPRING_MAIL_SSL_TRUST:}
+          connectiontimeout: 10000
+          timeout: 10000
+          writetimeout: 10000
+
   jpa:
     hibernate:
       ddl-auto: validate
@@ -63,6 +82,42 @@ app:
       client-id: ${LINKEDIN_CLIENT_ID:}
       client-secret: ${LINKEDIN_CLIENT_SECRET:}
       redirect-uris: ${LINKEDIN_REDIRECT_URIS:${LINKEDIN_REDIRECT_URI:}}
+
+    otp:
+      ttl: PT10M
+      resend-cooldown: PT60S
+      max-resends-per-challenge: 3
+      max-verify-attempts-per-challenge: 5
+      verify-lock-duration: PT15M
+      request-email-max-attempts: 5
+      request-email-window: PT15M
+      request-ip-max-attempts: 20
+      request-ip-window: PT15M
+      verify-email-max-attempts: 10
+      verify-email-window: PT15M
+      verify-ip-max-attempts: 30
+      verify-ip-window: PT15M
+      auto-register-on-verify: false
+      auto-register-country-code: MT
+
+  email:
+    # logging | smtp | sendgrid | resend | postmark
+    provider: ${EMAIL_PROVIDER:logging}
+    from: ${EMAIL_FROM:${OTP_MAIL_FROM:}}
+    from-name: ${EMAIL_FROM_NAME:${OTP_MAIL_FROM_NAME:UniVoyage}}
+    reply-to: ${EMAIL_REPLY_TO:${OTP_MAIL_REPLY_TO:}}
+    product-name: ${EMAIL_PRODUCT_NAME:UniVoyage}
+    test-connection-on-startup: ${EMAIL_TEST_CONNECTION:${OTP_MAIL_TEST_CONNECTION:false}}
+    retry:
+      max-attempts: ${EMAIL_RETRY_MAX_ATTEMPTS:3}
+      initial-backoff: ${EMAIL_RETRY_INITIAL_BACKOFF:PT1S}
+      max-backoff: ${EMAIL_RETRY_MAX_BACKOFF:PT10S}
+    sendgrid:
+      api-key: ${SENDGRID_API_KEY:}
+    resend:
+      api-key: ${RESEND_API_KEY:}
+    postmark:
+      server-token: ${POSTMARK_SERVER_TOKEN:}
 
   cookies:
     # Override via env in production/docker (e.g. COOKIE_SECURE=true)
