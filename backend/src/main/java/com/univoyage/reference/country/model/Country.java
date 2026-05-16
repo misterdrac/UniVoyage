@@ -27,4 +27,12 @@ public class Country {
 
   @Column(name = "currency_name", length = 100)
   private String currencyName;
+
+  @Column(name = "sort_order", nullable = false)
+  @Builder.Default
+  private Integer sortOrder = 0;
+
+  @Column(name = "active", nullable = false)
+  @Builder.Default
+  private boolean active = true;
 }

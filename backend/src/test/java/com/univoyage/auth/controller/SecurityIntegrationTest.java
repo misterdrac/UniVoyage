@@ -87,6 +87,14 @@ class SecurityIntegrationTest {
   }
 
   @Test
+  @DisplayName("GET /api/admin/audit-logs returns 401 without authentication")
+  void adminAuditLogs_unauthenticated() throws Exception {
+    mockMvc.perform(get("/api/admin/audit-logs")).andExpect(status().isUnauthorized())
+        .andExpect(jsonPath("$.success").value(false))
+        .andExpect(jsonPath("$.error").value(UNAUTHORIZED_MESSAGE));
+  }
+
+  @Test
   @DisplayName("GET /api/trips returns 401 without authentication")
   void trips_unauthenticated() throws Exception {
     mockMvc.perform(get("/api/trips")).andExpect(status().isUnauthorized())

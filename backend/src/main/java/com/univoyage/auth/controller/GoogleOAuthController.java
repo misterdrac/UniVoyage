@@ -1,8 +1,9 @@
 package com.univoyage.auth.controller;
 
+import com.univoyage.admin.audit.service.CmsAuditService;
+import com.univoyage.auth.dto.AuthPayload;
 import com.univoyage.auth.dto.GoogleCallbackRequestDto;
 import com.univoyage.auth.oauth.OAuthSecurityProperties;
-import com.univoyage.auth.dto.AuthPayload;
 import com.univoyage.auth.security.AuthCookieWriter;
 import com.univoyage.auth.security.ClientIpResolver;
 import com.univoyage.auth.security.OAuthCallbackIpRateLimiter;
@@ -41,6 +42,7 @@ public class GoogleOAuthController {
   private final UserRepository userRepository;
   private final OAuthCallbackIpRateLimiter oauthCallbackIpRateLimiter;
   private final OAuthSecurityProperties oauthSecurityProperties;
+  private final CmsAuditService cmsAuditService;
 
   @GetMapping("/google")
   public void googleAuth(HttpServletResponse response) throws IOException {
@@ -87,6 +89,12 @@ public class GoogleOAuthController {
     String refreshRaw = refreshTokenService.issueRefreshToken(user);
     authCookieWriter.writeAuthCookies(response, payload.getToken(), payload.getCsrfToken(),
         refreshRaw);
+
+    String role = payload.getUser().getRole();
+    if ("ADMIN".equals(role) || "HEAD_ADMIN".equals(role)) {
+      cmsAuditService.recordAdminLoginSuccess(payload.getUser().getId(),
+          payload.getUser().getEmail(), ClientIpResolver.resolve(httpRequest), "google");
+    }
 
     return ResponseEntity.ok(ApiResponse.ok(payload));
   }

@@ -4,19 +4,8 @@ import {
   type AuthResponse,
   ApiError,
 } from "@/config/apiConfig";
-import {
-  API_CONSTANTS,
-  COUNTRIES,
-  LANGUAGES,
-  TRAVEL_INTERESTS,
-} from "@/lib/constants";
-import type {
-  User,
-  CountryDto,
-  HobbyDto,
-  LanguageDto,
-  VisitedCountryDto,
-} from "@/types/user";
+import { API_CONSTANTS } from "@/lib/constants";
+import type { User, CountryDto, VisitedCountryDto } from "@/types/user";
 import type { BackendUserDto } from "./types";
 
 /**
@@ -76,8 +65,7 @@ export class ApiClient {
 
   public resolveCountry(code?: string): CountryDto | undefined {
     if (!code) return undefined;
-    const match = COUNTRIES.find((c) => c.value === code);
-    return { isoCode: code, countryName: match?.label || code };
+    return { isoCode: code, countryName: code };
   }
 
   public mapVisitedCountryCodes(codes?: string[]): VisitedCountryDto[] {
@@ -91,20 +79,6 @@ export class ApiClient {
         countryName: country.countryName,
         dateOfVisit: new Date().toISOString(),
       };
-    });
-  }
-
-  public mapHobbyIds(ids?: number[]): HobbyDto[] {
-    return (ids ?? []).map((id) => {
-      const match = TRAVEL_INTERESTS.find((h) => Number(h.value) === id);
-      return { id, hobbyName: match?.label ?? `Interest ${id}` };
-    });
-  }
-
-  public mapLanguageCodes(codes?: string[]): LanguageDto[] {
-    return (codes ?? []).map((code) => {
-      const match = LANGUAGES.find((lang) => lang.value === code);
-      return { langCode: code, langName: match?.label ?? code };
     });
   }
 

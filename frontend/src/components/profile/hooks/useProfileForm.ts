@@ -1,18 +1,28 @@
 import { useState, useEffect, useCallback } from "react";
-import { COUNTRIES } from "@/lib/constants";
 import type { Option } from "@/components/ui/autocomplete";
 import type { User } from "@/types/user";
+
+function findCountryOption(
+  iso: string | undefined,
+  countryOptions: Option[],
+): Option | undefined {
+  if (!iso) return undefined;
+  return countryOptions.find((c) => c.value === iso);
+}
 
 interface UseProfileFormProps {
   user: User | null;
   isEditingProfile: boolean;
   isEditingInterests: boolean;
+  /** Country picker options from reference API */
+  countryOptions: Option[];
 }
 
 export const useProfileForm = ({
   user,
   isEditingProfile,
   isEditingInterests,
+  countryOptions,
 }: UseProfileFormProps) => {
   // Form state for profile
   const [name, setName] = useState("");
@@ -33,9 +43,7 @@ export const useProfileForm = ({
       setName(user.name || "");
       setSurname(user.surname || "");
       setCountry(
-        user.countryOfOrigin
-          ? COUNTRIES.find((c) => c.value === user.countryOfOrigin?.isoCode)
-          : undefined,
+        findCountryOption(user.countryOfOrigin?.isoCode, countryOptions),
       );
       setProfileImagePath(user.profileImagePath);
       setHobbies(user.hobbies?.map((h) => h.id.toString()) || []);
@@ -46,7 +54,7 @@ export const useProfileForm = ({
           .filter((code): code is string => Boolean(code)) || [],
       );
     }
-  }, [user]);
+  }, [user, countryOptions]);
 
   // Reset profile form when editing starts
   useEffect(() => {
@@ -54,13 +62,11 @@ export const useProfileForm = ({
       setName(user.name || "");
       setSurname(user.surname || "");
       setCountry(
-        user.countryOfOrigin
-          ? COUNTRIES.find((c) => c.value === user.countryOfOrigin?.isoCode)
-          : undefined,
+        findCountryOption(user.countryOfOrigin?.isoCode, countryOptions),
       );
       setProfileImagePath(user.profileImagePath);
     }
-  }, [user, isEditingProfile]);
+  }, [user, isEditingProfile, countryOptions]);
 
   // Reset interests form when editing starts
   useEffect(() => {
@@ -80,13 +86,11 @@ export const useProfileForm = ({
       setName(user.name || "");
       setSurname(user.surname || "");
       setCountry(
-        user.countryOfOrigin
-          ? COUNTRIES.find((c) => c.value === user.countryOfOrigin?.isoCode)
-          : undefined,
+        findCountryOption(user.countryOfOrigin?.isoCode, countryOptions),
       );
       setProfileImagePath(user.profileImagePath);
     }
-  }, [user]);
+  }, [user, countryOptions]);
 
   const resetInterestsForm = useCallback(() => {
     if (user) {

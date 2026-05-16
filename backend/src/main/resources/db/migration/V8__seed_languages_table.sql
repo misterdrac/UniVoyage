@@ -1,3 +1,4 @@
+-- emoji, sort_order, active use column defaults from V2 (0, true); manage via CMS / API as needed.
 INSERT INTO languages(lang_code, lang_name) VALUES
     ('en', 'English'),
     ('es', 'Spanish (Español)'),

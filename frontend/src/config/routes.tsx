@@ -22,6 +22,10 @@ import {
   AdminUsersPage,
   AdminDestinationsPage,
   AdminReviewsPage,
+  AdminHobbiesPage,
+  AdminLanguagesPage,
+  AdminCountriesPage,
+  AdminAuditPage,
 } from "@/pages/admin";
 import GoogleCallbackPage from "@/pages/GoogleCallbackPage";
 import { MainLayout } from "@/components/layout";
@@ -86,6 +90,30 @@ export const routes: RouteConfig[] = [
   {
     path: "/admin/reviews",
     element: <AdminReviewsPage />,
+    layout: false,
+    protected: "admin",
+  },
+  {
+    path: "/admin/hobbies",
+    element: <AdminHobbiesPage />,
+    layout: false,
+    protected: "admin",
+  },
+  {
+    path: "/admin/languages",
+    element: <AdminLanguagesPage />,
+    layout: false,
+    protected: "admin",
+  },
+  {
+    path: "/admin/countries",
+    element: <AdminCountriesPage />,
+    layout: false,
+    protected: "admin",
+  },
+  {
+    path: "/admin/audit",
+    element: <AdminAuditPage />,
     layout: false,
     protected: "admin",
   },
@@ -201,5 +229,9 @@ export const ROUTE_PATHS = {
   ADMIN_USERS: getRoutePath("/admin/users"),
   ADMIN_DESTINATIONS: getRoutePath("/admin/destinations"),
   ADMIN_REVIEWS: getRoutePath("/admin/reviews"),
+  ADMIN_HOBBIES: getRoutePath("/admin/hobbies"),
+  ADMIN_LANGUAGES: getRoutePath("/admin/languages"),
+  ADMIN_COUNTRIES: getRoutePath("/admin/countries"),
+  ADMIN_AUDIT: getRoutePath("/admin/audit"),
   GOOGLE_CALLBACK: getRoutePath("/auth/google/callback"),
 } as const;

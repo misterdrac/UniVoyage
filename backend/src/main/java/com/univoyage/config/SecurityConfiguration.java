@@ -32,7 +32,6 @@ public class SecurityConfiguration {
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-
     http.cors(Customizer.withDefaults()).csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"))
         .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .headers(headers -> headers
@@ -40,39 +39,31 @@ public class SecurityConfiguration {
         .authorizeHttpRequests(auth -> auth
             // Allow preflight CORS requests
             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
             // Public routes for error handling; actuator only health (defense in depth)
             .requestMatchers("/error").permitAll()
             .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
             .requestMatchers("/actuator/**").denyAll()
-
             // Specific public routes for authentication
             .requestMatchers("/api/auth/login/**", "/api/auth/register/**").permitAll()
             .requestMatchers(HttpMethod.POST, "/api/auth/refresh", "/api/auth/refresh/").permitAll()
             .requestMatchers("/api/auth/google/**").permitAll()
-
             // Public routes for destinations
             .requestMatchers(HttpMethod.GET, "/api/destinations/**").permitAll()
-
             // Public quiz endpoint
             .requestMatchers("/api/quiz/**").permitAll()
-
+            // Public reference data for forms (hobbies, languages, countries)
+            .requestMatchers(HttpMethod.GET, "/api/reference/**").permitAll()
             // Public heatmap endpoint (landing page)
             .requestMatchers(HttpMethod.GET, "/api/heatmap/**").permitAll()
-
             // Admin routes
             .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "HEAD_ADMIN")
-
             // Everything under /api/auth/me requires authentication
             .requestMatchers("/api/auth/me").authenticated().requestMatchers("/api/auth/**")
             .authenticated()
-
             // Secure catch-all
             .anyRequest().authenticated())
         .exceptionHandling(eh -> eh.authenticationEntryPoint(restAuthenticationEntryPoint)
             .accessDeniedHandler(restAccessDeniedHandler))
-        // We add our custom JWT security filter before the default
-        // UsernamePasswordAuthenticationFilter
         .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
     return http.build();

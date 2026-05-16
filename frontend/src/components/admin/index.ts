@@ -7,3 +7,4 @@ export {
   AdminEmptySelection,
 } from "./AdminTableStates";
 export { SortableTableHeader } from "./SortableTableHeader";
+export { AdminEmojiCell } from "./AdminEmojiCell";

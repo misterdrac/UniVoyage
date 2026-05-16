@@ -3,8 +3,10 @@ package com.univoyage.admin.user.controller;
 import com.univoyage.admin.user.dto.AdminUserResponse;
 import com.univoyage.admin.user.dto.UpdateUserRoleRequest;
 import com.univoyage.admin.user.service.AdminUserService;
+import com.univoyage.auth.security.ClientIpResolver;
 import com.univoyage.common.response.ApiResponse;
 import com.univoyage.user.model.UserEntity;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -45,11 +47,12 @@ public class AdminUserController {
 
   @PatchMapping("/{id}/role")
   public ResponseEntity<ApiResponse<AdminUserResponse>> updateRole(@PathVariable long id,
-      @Valid @RequestBody UpdateUserRoleRequest req, Authentication authentication) {
+      @Valid @RequestBody UpdateUserRoleRequest req, Authentication authentication,
+      HttpServletRequest httpRequest) {
     Long actingAdminId = actingAdminId(authentication);
 
-    return ResponseEntity
-        .ok(ApiResponse.ok(adminUserService.updateRole(id, req.role(), actingAdminId)));
+    return ResponseEntity.ok(ApiResponse.ok(adminUserService.updateRole(id, req.role(),
+        actingAdminId, ClientIpResolver.resolve(httpRequest))));
   }
 
   private Long actingAdminId(Authentication authentication) {

@@ -2,7 +2,7 @@ import { Edit2, Check, Trash2, X, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AutoComplete, type Option } from "@/components/ui/autocomplete";
 
-interface TravelSectionConfig {
+export interface TravelSectionConfig {
   title: string;
   icon: LucideIcon;
   iconColorVar: string;

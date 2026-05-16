@@ -3,6 +3,7 @@ package com.univoyage.auth.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.univoyage.auth.config.GoogleOAuthHttpConfiguration;
 import com.univoyage.auth.oauth.GoogleIdTokenVerifier;
+import com.univoyage.auth.repository.UserIdentityRepository;
 import com.univoyage.auth.service.GoogleOAuthService;
 
 import org.junit.jupiter.api.AfterEach;
@@ -61,6 +62,9 @@ class GoogleOAuthCallbackFlowIntegrationTest {
   private ObjectMapper objectMapper;
 
   @Autowired
+  private UserIdentityRepository userIdentityRepository;
+
+  @Autowired
   @Qualifier(GoogleOAuthHttpConfiguration.GOOGLE_OAUTH_REST_TEMPLATE)
   private RestTemplate googleOAuthRestTemplate;
 
@@ -101,6 +105,10 @@ class GoogleOAuthCallbackFlowIntegrationTest {
         .andExpect(status().isOk()).andExpect(jsonPath("$.success").value(true))
         .andExpect(jsonPath("$.data.success").value(true))
         .andExpect(jsonPath("$.data.user.email").value("oauth-flow-user@example.com"));
+
+    assertThat(
+        userIdentityRepository.findByProviderAndProviderSubject("google", "google-sub-oauth-flow"))
+        .isPresent();
   }
 
   @Test
