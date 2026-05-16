@@ -1,5 +1,6 @@
 package com.univoyage.exception;
 
+import com.univoyage.auth.exception.IdentityAlreadyLinkedException;
 import com.univoyage.common.response.ApiResponse;
 
 import lombok.extern.log4j.Log4j2;
@@ -91,6 +92,16 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ApiResponse<Object>> handleIllegalArgumentException(
       IllegalArgumentException ex, WebRequest request) {
     return new ResponseEntity<>(ApiResponse.fail(ex.getMessage()), HttpStatus.BAD_REQUEST);
+  }
+
+  /**
+   * Handles duplicate OAuth identity links ({@code provider} +
+   * {@code providerSubject} already exists).
+   */
+  @ExceptionHandler(IdentityAlreadyLinkedException.class)
+  public ResponseEntity<ApiResponse<Object>> handleIdentityAlreadyLinkedException(
+      IdentityAlreadyLinkedException ex, WebRequest request) {
+    return new ResponseEntity<>(ApiResponse.fail(ex.getMessage()), HttpStatus.CONFLICT);
   }
 
   /**
