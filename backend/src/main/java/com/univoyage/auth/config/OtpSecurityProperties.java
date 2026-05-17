@@ -12,25 +12,25 @@ import java.time.Duration;
 public class OtpSecurityProperties {
 
   private Duration ttl = Duration.ofMinutes(10);
-  private Duration resendCooldown = Duration.ofSeconds(60);
-  private int maxResendsPerChallenge = 3;
+  private Duration resendCooldown = Duration.ofSeconds(90);
+  private int maxResendsPerChallenge = 2;
   private int maxVerifyAttemptsPerChallenge = 5;
-  private Duration verifyLockDuration = Duration.ofMinutes(15);
+  private Duration verifyLockDuration = Duration.ofMinutes(30);
 
   /** POST /api/auth/otp/request per email per window. */
-  private int requestEmailMaxAttempts = 5;
+  private int requestEmailMaxAttempts = 3;
   private Duration requestEmailWindow = Duration.ofMinutes(15);
 
   /** POST /api/auth/otp/request per IP per window. */
-  private int requestIpMaxAttempts = 20;
+  private int requestIpMaxAttempts = 15;
   private Duration requestIpWindow = Duration.ofMinutes(15);
 
   /** POST /api/auth/otp/verify per email per window. */
-  private int verifyEmailMaxAttempts = 10;
+  private int verifyEmailMaxAttempts = 5;
   private Duration verifyEmailWindow = Duration.ofMinutes(15);
 
   /** POST /api/auth/otp/verify per IP per window. */
-  private int verifyIpMaxAttempts = 30;
+  private int verifyIpMaxAttempts = 20;
   private Duration verifyIpWindow = Duration.ofMinutes(15);
 
   /**
