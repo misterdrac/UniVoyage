@@ -63,6 +63,9 @@ public class UserEntity implements UserDetails {
   @Column(name = "locked_until")
   private Instant lockedUntil;
 
+  @Column(name = "email_verified_at")
+  private Instant emailVerifiedAt;
+
   @Builder.Default
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
@@ -111,5 +114,9 @@ public class UserEntity implements UserDetails {
   @Override
   public boolean isEnabled() {
     return true;
+  }
+
+  public boolean isEmailVerified() {
+    return emailVerifiedAt != null;
   }
 }

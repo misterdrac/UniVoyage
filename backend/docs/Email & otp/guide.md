@@ -6,7 +6,110 @@ Session after successful OTP verify matches password login — see [auth-session
 
 ---
 
+## Production setup (Railway)
+
+Use this checklist when deploying the backend with `SPRING_PROFILES_ACTIVE=prod` (Railway, staging, or any HTTPS host).  
+`application-prod.yml` sets **secure cookies** and expects a **real email provider** — not `logging`.
+
+### 1. Railway variables (copy-paste template)
+
+Set these in **Railway → your backend service → Variables**. Replace placeholders; never commit secrets to git.
+
+```env
+SPRING_PROFILES_ACTIVE=prod
+
+# Frontend (Vercel) — comma-separated HTTPS origins
+CORS_ALLOWED_ORIGINS=https://your-app.vercel.app,https://www.your-domain.com
+
+# Cookies (cross-site SPA + API on different hosts)
+COOKIE_SECURE=true
+COOKIE_SAMESITE=None
+COOKIE_DOMAIN=.your-domain.com
+
+# Transactional email (recommended: Resend HTTP API — see resend-postmark-setup.md)
+EMAIL_PROVIDER=resend
+EMAIL_FROM=noreply@mail.your-domain.com
+EMAIL_FROM_NAME=UniVoyage
+EMAIL_PRODUCT_NAME=UniVoyage
+EMAIL_REPLY_TO=support@your-domain.com
+RESEND_API_KEY=re_xxxxxxxxxxxxxxxx
+
+# EMAIL_TEST_CONNECTION=false
+
+# OTP — strong policy is ON by default with profile=prod (see otp-prod-policy.md)
+# OTP_AUTO_REGISTER_ON_VERIFY=false
+# OTP_REQUEST_EMAIL_MAX=3
+# OTP_RESEND_COOLDOWN=PT90S
+```
+
+**Auth email:** dev i prod koriste **iste** defaulte (`application.yml`). Razlikuju se samo env vrijednosti (ključ, `EMAIL_FROM`, frontend URL).
+
+- **[email-prod-policy.md](email-prod-policy.md)** — outbound + reset + verify  
+- **[otp-prod-policy.md](otp-prod-policy.md)** — OTP  
+- **[resend-postmark-setup.md](resend-postmark-setup.md)** — provider & DNS  
+- **Tiket:** `TICKET-email-setup.md` (repo root)
+
+**Alternative providers** — change `EMAIL_PROVIDER` and set exactly one secret:
+
+| Provider | `EMAIL_PROVIDER` | Secret variable |
+|----------|------------------|-----------------|
+| **Resend** (default) | `resend` | `RESEND_API_KEY` |
+| Postmark | `postmark` | `POSTMARK_SERVER_TOKEN` |
+| SendGrid | `sendgrid` | `SENDGRID_API_KEY` |
+| SMTP relay | `smtp` | `SPRING_MAIL_HOST`, `SPRING_MAIL_USERNAME`, `SPRING_MAIL_PASSWORD` |
+
+Detailed setup (DNS, Railway, smoke test): **[resend-postmark-setup.md](resend-postmark-setup.md)**.
+
+### 2. DNS (before go-live)
+
+On subdomain **`mail.your-domain.com`** (or your chosen sending domain):
+
+1. **Resend or Postmark** dashboard → add domain → copy CNAME/TXT (DKIM + SPF).
+2. **DMARC** (start monitoring): `v=DMARC1; p=none; rua=mailto:dmarc@your-domain.com`
+3. `EMAIL_FROM` must use that verified domain (e.g. `noreply@mail.your-domain.com`).
+
+### 3. Database
+
+Ensure migration **`V20__create_email_otp_challenges.sql`** ran (Flyway on deploy). No manual DDL.
+
+### 4. Smoke test after deploy
+
+1. `POST /api/auth/otp/request` with `{ "email": "you@example.com", "purpose": "LOGIN" }` → **200** (uniform message).
+2. Inbox receives mail; subject like `Your UniVoyage Sign in code`.
+3. `POST /api/auth/otp/verify` with the 6-digit code → **200** + auth cookies.
+4. Logs: **no** plaintext OTP; on failure search `OTP delivery failed errorId=`.
+
+### 5. Production do / don't
+
+| Do | Don't |
+|----|--------|
+| Use Resend / Postmark / SendGrid / transactional SMTP | Use `EMAIL_PROVIDER=logging` (samo `test` profil) |
+| Store API keys in Railway secrets only | Commit `RESEND_API_KEY` / tokens to git |
+| Keep `OTP_AUTO_REGISTER_ON_VERIFY=false` unless product requires it | Use personal Gmail for OTP volume |
+| Monitor `OTP delivery failed` in logs | Log or print the 6-digit code |
+
+### 6. Local vs production
+
+| | Local dev | Production |
+|---|-----------|------------|
+| Profile | default or `docker` | `prod` (cookies, CORS) |
+| Email provider | `resend` + `RESEND_API_KEY` + `EMAIL_FROM` | **isto** (+ verified domena) |
+| OTP / reset / verify limits | `application.yml` | **isto** |
+| Cookies | `COOKIE_SECURE=false` | `true` (in `application-prod.yml`) |
+| Unit/integration tests | `test` profile → `logging` provider | — |
+
+Full reference for API, security, SMTP, and templates: sections below.
+
+---
+
 ## Table of contents
+
+### Production
+- [Production setup (Railway)](#production-setup-railway)
+- [Email prod policy (outbound + reset + verify)](email-prod-policy.md)
+- [OTP prod policy](otp-prod-policy.md)
+- [Resend / Postmark setup](resend-postmark-setup.md)
+
 
 ### Overview
 - [Architecture](#architecture)
@@ -78,7 +181,7 @@ EmailOtpController
 | OTP policy | `app.auth.otp.*` |
 | Email provider | `EMAIL_PROVIDER`, `EMAIL_FROM`, API keys |
 | Production cookies | `COOKIE_SECURE=true` |
-| Dev (no mail) | `EMAIL_PROVIDER=logging` |
+| JUnit (`test` profil) | `EMAIL_PROVIDER=logging` |
 | Tests | `@ActiveProfiles("test")` → `TestOtpNotificationPort` |
 
 Legacy `OTP_MAIL_*` env vars map to `EMAIL_*` via `application.yml`.
@@ -328,16 +431,16 @@ Apply the same production cookie settings: `COOKIE_SECURE=true`, appropriate `Sa
 
 Two layers: **HTTP rate limiters** (in-memory per deployment) and **per-challenge** counters (in DB).
 
-### HTTP limiters (defaults)
+### HTTP limiters
 
-Configured under `app.auth.otp` in `application.yml`.
+Configured under `app.auth.otp` — **isti defaulti** u dev i prod ([otp-prod-policy.md](otp-prod-policy.md)).
 
 | Limiter | Scope | Default cap | Window |
 |---------|-------|-------------|--------|
-| Request | Client IP | 20 | 15 min |
-| Request | Email | 5 | 15 min |
-| Verify | Client IP | 30 | 15 min |
-| Verify | Email | 10 | 15 min |
+| Request | Client IP | 15 | 15 min |
+| Request | Email | 3 | 15 min |
+| Verify | Client IP | 20 | 15 min |
+| Verify | Email | 5 | 15 min |
 
 On exceed → **429** + `Retry-After`.
 
@@ -345,13 +448,13 @@ On exceed → **429** + `Retry-After`.
 
 ### Per-challenge lockout
 
-| Setting | Default |
-|---------|---------|
+| Setting | Default (dev = prod) |
+|---------|----------------------|
 | Max wrong verify attempts | 5 |
-| Lock duration | 15 min |
+| Lock duration | 30 min |
 | Challenge TTL | 10 min |
-| Resend cooldown | 60 s |
-| Max resends per challenge | 3 |
+| Resend cooldown | 90 s |
+| Max resends per challenge | 2 |
 
 When locked, verify returns `429` until `locked_until` passes.
 
@@ -361,25 +464,25 @@ When locked, verify returns `429` until `locked_until` passes.
 
 ### OTP policy (`app.auth.otp`)
 
-| Property | Env override pattern | Default | Description |
-|----------|----------------------|---------|-------------|
-| `ttl` | — | `PT10M` | Code validity after each send |
-| `resend-cooldown` | — | `PT60S` | Minimum gap between resends |
-| `max-resends-per-challenge` | — | `3` | Resends per challenge row |
-| `max-verify-attempts-per-challenge` | — | `5` | Wrong codes before lock |
-| `verify-lock-duration` | — | `PT15M` | Lock duration |
-| `request-email-max-attempts` | — | `5` | Per-email request cap |
-| `request-email-window` | — | `PT15M` | Request window |
-| `request-ip-max-attempts` | — | `20` | Per-IP request cap |
-| `request-ip-window` | — | `PT15M` | Request window |
-| `verify-email-max-attempts` | — | `10` | Per-email verify cap |
-| `verify-email-window` | — | `PT15M` | Verify window |
-| `verify-ip-max-attempts` | — | `30` | Per-IP verify cap |
-| `verify-ip-window` | — | `PT15M` | Verify window |
-| `auto-register-on-verify` | — | `false` | Create user on REGISTER verify |
-| `auto-register-country-code` | — | `MT` | ISO country for auto-register |
+All properties accept **`OTP_*` env vars** (ISO-8601 durations). Defaults in `application.yml` (dev = prod): **[otp-prod-policy.md](otp-prod-policy.md)**.
 
-Override in `application-prod.yml` or environment-specific config — do not relax limits in production without review.
+| Property | Env variable | Default |
+|----------|--------------|---------|
+| `ttl` | `OTP_TTL` | `PT10M` |
+| `resend-cooldown` | `OTP_RESEND_COOLDOWN` | `PT90S` |
+| `max-resends-per-challenge` | `OTP_MAX_RESENDS` | `2` |
+| `max-verify-attempts-per-challenge` | `OTP_MAX_VERIFY_ATTEMPTS` | `5` |
+| `verify-lock-duration` | `OTP_VERIFY_LOCK_DURATION` | `PT30M` |
+| `request-email-max-attempts` | `OTP_REQUEST_EMAIL_MAX` | `3` |
+| `request-email-window` | `OTP_REQUEST_EMAIL_WINDOW` | `PT15M` |
+| `request-ip-max-attempts` | `OTP_REQUEST_IP_MAX` | `15` |
+| `request-ip-window` | `OTP_REQUEST_IP_WINDOW` | `PT15M` |
+| `verify-email-max-attempts` | `OTP_VERIFY_EMAIL_MAX` | `5` |
+| `verify-email-window` | `OTP_VERIFY_EMAIL_WINDOW` | `PT15M` |
+| `verify-ip-max-attempts` | `OTP_VERIFY_IP_MAX` | `20` |
+| `verify-ip-window` | `OTP_VERIFY_IP_WINDOW` | `PT15M` |
+| `auto-register-on-verify` | `OTP_AUTO_REGISTER_ON_VERIFY` | `false` |
+| `auto-register-country-code` | `OTP_AUTO_REGISTER_COUNTRY_CODE` | `MT` |
 
 ### Email (delivery)
 
@@ -406,27 +509,21 @@ OTP does not configure SMTP directly. See [email-production-guide.md](email-prod
 ### Recommended production `.env` fragment
 
 ```env
-# Email (pick one provider — see email-production-guide.md)
-EMAIL_PROVIDER=sendgrid
+SPRING_PROFILES_ACTIVE=prod
+
+# Email — resend-postmark-setup.md
+EMAIL_PROVIDER=resend
 EMAIL_FROM=noreply@mail.univoyage.com
-EMAIL_FROM_NAME=UniVoyage
-EMAIL_PRODUCT_NAME=UniVoyage
-EMAIL_REPLY_TO=support@univoyage.com
-SENDGRID_API_KEY=<from-secrets-manager>
+RESEND_API_KEY=<from-secrets-manager>
 
-EMAIL_RETRY_MAX_ATTEMPTS=3
-EMAIL_RETRY_INITIAL_BACKOFF=PT1S
-EMAIL_RETRY_MAX_BACKOFF=PT10S
-
-# Auth cookies
 COOKIE_SECURE=true
-COOKIE_SAMESITE=Lax
+COOKIE_SAMESITE=None
 
-# OTP — tighten if under abuse (example)
-# OTP_REQUEST_EMAIL_MAX_ATTEMPTS=3
+# OTP — strong policy ON by default; override only if needed (otp-prod-policy.md)
+OTP_AUTO_REGISTER_ON_VERIFY=false
 ```
 
-Map env names to Spring properties via your deployment tool or `application-prod.yml`.
+No extra OTP vars required for go-live — `application-prod.yml` applies strict defaults when `prod` is active.
 
 ### Staging
 
