@@ -57,6 +57,9 @@ public class OAuthLoginCompletionService {
 
   private UserEntity touchExistingUser(UserEntity user, NormalizedOAuthProfile profile) {
     user.setDateOfLastSignin(Instant.now());
+    if (profile.emailVerified() && user.getEmailVerifiedAt() == null) {
+      user.setEmailVerifiedAt(Instant.now());
+    }
 
     if (user.getName() == null || user.getName().isBlank()) {
       user.setName(profile.givenName());
@@ -78,9 +81,11 @@ public class OAuthLoginCompletionService {
     String randomPassword = UUID.randomUUID().toString();
     String passwordHash = passwordEncoder.encode(randomPassword);
 
+    Instant now = Instant.now();
     UserEntity u = UserEntity.builder().email(profile.email()).name(profile.givenName())
-        .surname(profile.familyName()).passwordHash(passwordHash).dateOfRegister(Instant.now())
-        .dateOfLastSignin(Instant.now()).role(Role.USER).build();
+        .surname(profile.familyName()).passwordHash(passwordHash).dateOfRegister(now)
+        .dateOfLastSignin(now).emailVerifiedAt(profile.emailVerified() ? now : null).role(Role.USER)
+        .build();
 
     return userRepository.save(u);
   }
