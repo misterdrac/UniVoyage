@@ -52,6 +52,9 @@ public class EmailOtpChallengeService {
 
   @Transactional
   public OtpRequestOutcome requestOrResend(String rawEmail, EmailOtpPurpose purpose) {
+    if (purpose == EmailOtpPurpose.PASSWORD_RESET) {
+      return new OtpRequestOutcome.Accepted();
+    }
     String email = normalizeEmail(rawEmail);
     Instant now = clock.instant();
 
@@ -83,6 +86,9 @@ public class EmailOtpChallengeService {
 
   @Transactional
   public OtpVerifyOutcome verify(String rawEmail, EmailOtpPurpose purpose, String rawCode) {
+    if (purpose == EmailOtpPurpose.PASSWORD_RESET) {
+      return new OtpVerifyOutcome.NoActiveChallenge();
+    }
     String email = normalizeEmail(rawEmail);
     String code = normalizeCode(rawCode);
     Instant now = clock.instant();
