@@ -4,8 +4,7 @@ import com.univoyage.email.EmailProviderType;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Profile;
+import org.springframework.core.env.Environment;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Component;
@@ -15,12 +14,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 @Component
-@Profile("!test")
+@org.springframework.context.annotation.Profile("!test")
 @RequiredArgsConstructor
 @Log4j2
 public class EmailStartupValidator {
 
   private final EmailProperties emailProperties;
+  private final Environment environment;
 
   @Value("${spring.mail.host:}")
   private String mailHost;
@@ -30,6 +30,12 @@ public class EmailStartupValidator {
 
   @PostConstruct
   void validate() {
+    if (!isTestProfile() && emailProperties.getProvider() == EmailProviderType.LOGGING) {
+      throw new IllegalStateException(
+          "EMAIL_PROVIDER=logging is only allowed with the test profile. "
+              + "Use resend, postmark, sendgrid, or smtp (set RESEND_API_KEY and EMAIL_FROM).");
+    }
+
     if (emailProperties.getFrom() == null || emailProperties.getFrom().isBlank()) {
       if (emailProperties.getProvider() != EmailProviderType.LOGGING) {
         throw new IllegalStateException(
@@ -69,5 +75,14 @@ public class EmailStartupValidator {
     if (value == null || value.isBlank()) {
       throw new IllegalStateException("app.email.provider requires " + envName);
     }
+  }
+
+  private boolean isTestProfile() {
+    for (String profile : environment.getActiveProfiles()) {
+      if ("test".equalsIgnoreCase(profile)) {
+        return true;
+      }
+    }
+    return false;
   }
 }

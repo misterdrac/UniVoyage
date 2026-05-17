@@ -13,7 +13,7 @@ import lombok.extern.log4j.Log4j2;
  * recipient beyond mask.
  */
 @Component
-@ConditionalOnProperty(prefix = "app.email", name = "provider", havingValue = "logging", matchIfMissing = true)
+@ConditionalOnProperty(prefix = "app.email", name = "provider", havingValue = "logging")
 @Log4j2
 public class LoggingEmailProvider implements EmailProvider {
 

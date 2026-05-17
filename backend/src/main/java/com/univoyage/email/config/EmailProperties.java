@@ -14,7 +14,7 @@ import java.time.Duration;
 @Setter
 public class EmailProperties {
 
-  private EmailProviderType provider = EmailProviderType.LOGGING;
+  private EmailProviderType provider = EmailProviderType.RESEND;
 
   private String from = "";
   private String fromName = "UniVoyage";
