@@ -50,6 +50,8 @@ public class SecurityConfiguration {
             .requestMatchers("/api/auth/github/**").permitAll()
             .requestMatchers("/api/auth/linkedin/**").permitAll()
             .requestMatchers("/api/auth/otp/**").permitAll()
+            .requestMatchers("/api/auth/password/**").permitAll()
+            .requestMatchers("/api/auth/email/verification/**").permitAll()
             // Public routes for destinations
             .requestMatchers(HttpMethod.GET, "/api/destinations/**").permitAll()
             // Public quiz endpoint
