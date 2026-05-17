@@ -87,7 +87,7 @@ class AuthLoginLockoutIntegrationTest {
     mockMvc
         .perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(Map.of("email", "reset@example.com",
-                "password", "Valid-1", "name", "R", "surname", "S", "countryCode", "CY"))))
+                "password", "ValidPass1", "name", "R", "surname", "S", "countryCode", "CY"))))
         .andExpect(status().isCreated());
 
     String wrong = objectMapper
@@ -101,8 +101,8 @@ class AuthLoginLockoutIntegrationTest {
 
     mockMvc
         .perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper
-                .writeValueAsString(Map.of("email", "reset@example.com", "password", "Valid-1"))))
+            .content(objectMapper.writeValueAsString(
+                Map.of("email", "reset@example.com", "password", "ValidPass1"))))
         .andExpect(status().isOk());
 
     UserEntity afterOk = userRepository.findByEmail("reset@example.com").orElseThrow();
