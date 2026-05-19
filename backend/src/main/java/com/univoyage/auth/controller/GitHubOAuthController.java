@@ -7,6 +7,9 @@ import com.univoyage.auth.oauth.OAuthSecurityProperties;
 import com.univoyage.auth.security.AuthCookieWriter;
 import com.univoyage.auth.security.ClientIpResolver;
 import com.univoyage.auth.security.OAuthCallbackIpRateLimiter;
+import com.univoyage.auth.service.AuthSecurityEventLogger;
+import com.univoyage.auth.service.AuthSecurityEventLogger.EventType;
+import com.univoyage.auth.service.AuthSecurityEventLogger.Result;
 import com.univoyage.auth.service.GitHubOAuthService;
 import com.univoyage.auth.service.RefreshTokenService;
 import com.univoyage.common.response.ApiResponse;
@@ -44,6 +47,7 @@ public class GitHubOAuthController {
   private final OAuthCallbackIpRateLimiter oauthCallbackIpRateLimiter;
   private final OAuthSecurityProperties oauthSecurityProperties;
   private final CmsAuditService cmsAuditService;
+  private final AuthSecurityEventLogger securityEventLogger;
 
   @GetMapping("/github")
   public void githubAuth(HttpServletResponse response) throws IOException {
@@ -58,9 +62,11 @@ public class GitHubOAuthController {
 
   private ResponseEntity<ApiResponse<AuthPayload>> handleCallback(HttpServletRequest httpRequest,
       OAuthCallbackRequestDto request, HttpServletResponse response, String auditProvider) {
-    long retryAfterSec = oauthCallbackIpRateLimiter
-        .tryConsumeOrRetryAfterSeconds(ClientIpResolver.resolve(httpRequest));
+    String ip = ClientIpResolver.resolve(httpRequest);
+    long retryAfterSec = oauthCallbackIpRateLimiter.tryConsumeOrRetryAfterSeconds(ip);
     if (retryAfterSec >= 0) {
+      securityEventLogger.log(EventType.AUTH_RATE_LIMITED, Result.FAILURE, null,
+          null, ip, auditProvider, "oauth-callback");
       return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
           .header(HttpHeaders.RETRY_AFTER, String.valueOf(retryAfterSec)).body(ApiResponse
               .fail("Too many OAuth attempts from this network. Please try again later."));
@@ -81,6 +87,8 @@ public class GitHubOAuthController {
 
     if (!payload.isSuccess()) {
       String err = payload.getError() != null ? payload.getError() : "GitHub login failed";
+      securityEventLogger.log(EventType.AUTH_OAUTH_FAILED, Result.FAILURE, null,
+          null, ip, auditProvider, err);
       if (GitHubOAuthService.ERROR_INVALID_STATE.equals(err)) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.fail(err));
       }
@@ -93,10 +101,13 @@ public class GitHubOAuthController {
     authCookieWriter.writeAuthCookies(response, payload.getToken(), payload.getCsrfToken(),
         refreshRaw);
 
+    securityEventLogger.log(EventType.AUTH_OAUTH_SUCCESS, Result.SUCCESS,
+        payload.getUser().getId(), payload.getUser().getEmail(), ip, auditProvider);
+
     String role = payload.getUser().getRole();
     if ("ADMIN".equals(role) || "HEAD_ADMIN".equals(role)) {
       cmsAuditService.recordAdminLoginSuccess(payload.getUser().getId(),
-          payload.getUser().getEmail(), ClientIpResolver.resolve(httpRequest), auditProvider);
+          payload.getUser().getEmail(), ip, auditProvider);
     }
 
     return ResponseEntity.ok(ApiResponse.ok(payload));

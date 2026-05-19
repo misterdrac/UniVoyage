@@ -7,6 +7,9 @@ import com.univoyage.auth.security.ClientIpResolver;
 import com.univoyage.auth.security.PasswordResetForgotEmailRateLimiter;
 import com.univoyage.auth.security.PasswordResetForgotIpRateLimiter;
 import com.univoyage.auth.security.PasswordResetSubmitIpRateLimiter;
+import com.univoyage.auth.service.AuthSecurityEventLogger;
+import com.univoyage.auth.service.AuthSecurityEventLogger.EventType;
+import com.univoyage.auth.service.AuthSecurityEventLogger.Result;
 import com.univoyage.auth.service.PasswordResetService;
 import com.univoyage.auth.service.PasswordResetService.ResetOutcome;
 import com.univoyage.common.response.ApiResponse;
@@ -35,6 +38,7 @@ public class PasswordResetController {
   private final PasswordResetForgotIpRateLimiter forgotIpRateLimiter;
   private final PasswordResetForgotEmailRateLimiter forgotEmailRateLimiter;
   private final PasswordResetSubmitIpRateLimiter resetIpRateLimiter;
+  private final AuthSecurityEventLogger securityEventLogger;
 
   @PostMapping("/forgot")
   public ResponseEntity<ApiResponse<PasswordForgotAcceptedResponseDto>> forgot(
@@ -42,16 +46,22 @@ public class PasswordResetController {
     String ip = ClientIpResolver.resolve(httpRequest);
     long ipRetry = forgotIpRateLimiter.tryConsumeOrRetryAfterSeconds(ip);
     if (ipRetry >= 0) {
+      securityEventLogger.log(EventType.AUTH_RATE_LIMITED, Result.FAILURE, null,
+          body.getEmail(), ip, "password-reset", "forgot");
       return rateLimited(ipRetry);
     }
 
     String email = PasswordResetService.normalizeEmail(body.getEmail());
     long emailRetry = forgotEmailRateLimiter.tryConsumeOrRetryAfterSeconds(email);
     if (emailRetry >= 0) {
+      securityEventLogger.log(EventType.AUTH_RATE_LIMITED, Result.FAILURE, null,
+          email, ip, "password-reset", "forgot");
       return rateLimited(emailRetry);
     }
 
     passwordResetService.requestForgot(email);
+    securityEventLogger.log(EventType.AUTH_PASSWORD_RESET_REQUESTED, Result.SUCCESS, null,
+        email, ip, "password-reset");
     return ResponseEntity.ok(ApiResponse.ok(PasswordForgotAcceptedResponseDto.standard()));
   }
 
@@ -61,14 +71,20 @@ public class PasswordResetController {
     String ip = ClientIpResolver.resolve(httpRequest);
     long ipRetry = resetIpRateLimiter.tryConsumeOrRetryAfterSeconds(ip);
     if (ipRetry >= 0) {
+      securityEventLogger.log(EventType.AUTH_RATE_LIMITED, Result.FAILURE, null,
+          null, ip, "password-reset", "reset-submit");
       return resetRateLimited(ipRetry);
     }
 
     ResetOutcome outcome = passwordResetService.resetPassword(body.getToken(),
         body.getNewPassword());
     if (outcome == ResetOutcome.SUCCESS) {
+      securityEventLogger.log(EventType.AUTH_PASSWORD_RESET_COMPLETED, Result.SUCCESS, null,
+          null, ip, "password-reset");
       return ResponseEntity.ok(ApiResponse.ok(null));
     }
+    securityEventLogger.log(EventType.AUTH_PASSWORD_RESET_COMPLETED, Result.FAILURE, null,
+        null, ip, "password-reset", "invalid-token");
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.fail(RESET_FAIL_MSG));
   }
 

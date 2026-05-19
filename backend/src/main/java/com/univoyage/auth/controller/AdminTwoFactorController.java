@@ -8,6 +8,9 @@ import com.univoyage.auth.security.AuthCookieWriter;
 import com.univoyage.auth.security.ClientIpResolver;
 import com.univoyage.auth.service.AdminTwoFactorService;
 import com.univoyage.auth.service.AdminTwoFactorService.Admin2faVerifyResult;
+import com.univoyage.auth.service.AuthSecurityEventLogger;
+import com.univoyage.auth.service.AuthSecurityEventLogger.EventType;
+import com.univoyage.auth.service.AuthSecurityEventLogger.Result;
 import com.univoyage.common.response.ApiResponse;
 import com.univoyage.user.model.UserEntity;
 import jakarta.servlet.http.HttpServletRequest;
@@ -39,6 +42,7 @@ public class AdminTwoFactorController {
   private final Admin2faVerifyIpRateLimiter verifyIpLimiter;
   private final Admin2faVerifyEmailRateLimiter verifyEmailLimiter;
   private final AuthCookieWriter authCookieWriter;
+  private final AuthSecurityEventLogger securityEventLogger;
 
   @PostMapping("/challenge")
   public ResponseEntity<ApiResponse<Map<String, String>>> challenge(
@@ -52,16 +56,22 @@ public class AdminTwoFactorController {
     String ip = ClientIpResolver.resolve(httpRequest);
     long ipRetry = challengeIpLimiter.tryConsumeOrRetryAfterSeconds(ip);
     if (ipRetry >= 0) {
+      securityEventLogger.log(EventType.AUTH_RATE_LIMITED, Result.FAILURE, user.getId(),
+          user.getEmail(), ip, "admin-2fa", "challenge");
       return challengeRateLimited(ipRetry);
     }
 
     String email = user.getEmail().toLowerCase();
     long emailRetry = challengeEmailLimiter.tryConsumeOrRetryAfterSeconds(email);
     if (emailRetry >= 0) {
+      securityEventLogger.log(EventType.AUTH_RATE_LIMITED, Result.FAILURE, user.getId(),
+          email, ip, "admin-2fa", "challenge");
       return challengeRateLimited(emailRetry);
     }
 
     adminTwoFactorService.challenge(user);
+    securityEventLogger.log(EventType.AUTH_2FA_CHALLENGED, Result.SUCCESS, user.getId(),
+        email, ip, "admin-2fa");
 
     return ResponseEntity.ok(ApiResponse.ok(
         Map.of("message", "Verification code sent to your email.")));
@@ -98,11 +108,16 @@ public class AdminTwoFactorController {
     Admin2faVerifyResult result = adminTwoFactorService.verify(user, code, ip);
 
     if (result.success()) {
+      securityEventLogger.log(EventType.AUTH_2FA_VERIFIED, Result.SUCCESS, user.getId(),
+          user.getEmail(), ip, "admin-2fa");
       authCookieWriter.writeAuthCookies(httpResponse, result.tokenPair().jwt(),
           result.tokenPair().csrfSecret(), null);
       return ResponseEntity.ok(ApiResponse.ok(
           Map.of("message", "Two-factor authentication verified.")));
     }
+
+    securityEventLogger.log(EventType.AUTH_2FA_FAILED, Result.FAILURE, user.getId(),
+        user.getEmail(), ip, "admin-2fa", result.errorMessage());
 
     if (result.retryAfterSeconds() > 0) {
       return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
