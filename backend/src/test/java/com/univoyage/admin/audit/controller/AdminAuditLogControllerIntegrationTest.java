@@ -31,8 +31,7 @@ class AdminAuditLogControllerIntegrationTest {
     mockMvc.perform(get("/api/admin/audit-logs").with(request -> {
       request.setAttribute(JwtAuthenticationFilter.TFA_REQUEST_ATTRIBUTE, Boolean.TRUE);
       return request;
-    })).andExpect(status().isOk())
-        .andExpect(jsonPath("$.success").value(true))
+    })).andExpect(status().isOk()).andExpect(jsonPath("$.success").value(true))
         .andExpect(jsonPath("$.data.content").isArray());
   }
 }

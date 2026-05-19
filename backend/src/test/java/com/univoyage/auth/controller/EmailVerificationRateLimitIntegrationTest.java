@@ -27,14 +27,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(properties = {
-    "app.auth.email-verification.request-ip-max-attempts=3",
+@SpringBootTest(properties = {"app.auth.email-verification.request-ip-max-attempts=3",
     "app.auth.email-verification.request-ip-window=PT1H",
     "app.auth.email-verification.request-email-max-attempts=2",
     "app.auth.email-verification.request-email-window=PT1H",
     "app.auth.email-verification.confirm-ip-max-attempts=3",
-    "app.auth.email-verification.confirm-ip-window=PT1H"
-})
+    "app.auth.email-verification.confirm-ip-window=PT1H"})
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
@@ -58,36 +56,32 @@ class EmailVerificationRateLimitIntegrationTest {
   @BeforeEach
   void setup() {
     Country country = countryRepository.findByIsoCode("BA")
-        .orElseGet(() -> countryRepository.save(
-            Country.builder().isoCode("BA").countryName("Bosnia and Herzegovina")
+        .orElseGet(() -> countryRepository
+            .save(Country.builder().isoCode("BA").countryName("Bosnia and Herzegovina")
                 .currencyCode("BAM").currencyName("Convertible Mark").build()));
 
-    userRepository.save(UserEntity.builder()
-        .email("verifyrl@test.com").name("Verify").surname("RL")
-        .passwordHash(passwordEncoder.encode("Pass123!"))
-        .country(country).dateOfRegister(Instant.now())
-        .role(Role.USER).build());
+    userRepository.save(UserEntity.builder().email("verifyrl@test.com").name("Verify").surname("RL")
+        .passwordHash(passwordEncoder.encode("Pass123!")).country(country)
+        .dateOfRegister(Instant.now()).role(Role.USER).build());
   }
 
   @Test
   @DisplayName("Email verification request rate limits by IP")
   void requestRateLimitedByIp() throws Exception {
     for (int i = 0; i < 3; i++) {
-      mockMvc.perform(post("/api/auth/email/verification/request")
-              .header("X-Forwarded-For", "10.1.0.1")
-              .contentType(MediaType.APPLICATION_JSON)
-              .content(objectMapper.writeValueAsString(
-                  Map.of("email", "verifyrl-ip" + i + "@test.com"))))
+      mockMvc
+          .perform(post("/api/auth/email/verification/request")
+              .header("X-Forwarded-For", "10.1.0.1").contentType(MediaType.APPLICATION_JSON)
+              .content(objectMapper
+                  .writeValueAsString(Map.of("email", "verifyrl-ip" + i + "@test.com"))))
           .andExpect(status().isOk());
     }
 
-    mockMvc.perform(post("/api/auth/email/verification/request")
-            .header("X-Forwarded-For", "10.1.0.1")
+    mockMvc
+        .perform(post("/api/auth/email/verification/request").header("X-Forwarded-For", "10.1.0.1")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(
-                Map.of("email", "verifyrl-ip99@test.com"))))
-        .andExpect(status().isTooManyRequests())
-        .andExpect(header().exists("Retry-After"))
+            .content(objectMapper.writeValueAsString(Map.of("email", "verifyrl-ip99@test.com"))))
+        .andExpect(status().isTooManyRequests()).andExpect(header().exists("Retry-After"))
         .andExpect(jsonPath("$.success").value(false));
   }
 
@@ -96,39 +90,35 @@ class EmailVerificationRateLimitIntegrationTest {
   void requestRateLimitedByEmail() throws Exception {
     String email = "verifyrl-email-only@test.com";
     for (int i = 0; i < 2; i++) {
-      mockMvc.perform(post("/api/auth/email/verification/request")
-              .header("X-Forwarded-For", "10.1.0.2")
-              .contentType(MediaType.APPLICATION_JSON)
+      mockMvc
+          .perform(post("/api/auth/email/verification/request")
+              .header("X-Forwarded-For", "10.1.0.2").contentType(MediaType.APPLICATION_JSON)
               .content(objectMapper.writeValueAsString(Map.of("email", email))))
           .andExpect(status().isOk());
     }
 
-    mockMvc.perform(post("/api/auth/email/verification/request")
-            .header("X-Forwarded-For", "10.1.0.2")
+    mockMvc
+        .perform(post("/api/auth/email/verification/request").header("X-Forwarded-For", "10.1.0.2")
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(Map.of("email", email))))
-        .andExpect(status().isTooManyRequests())
-        .andExpect(header().exists("Retry-After"));
+        .andExpect(status().isTooManyRequests()).andExpect(header().exists("Retry-After"));
   }
 
   @Test
   @DisplayName("Email verification confirm rate limits by IP")
   void confirmRateLimitedByIp() throws Exception {
     for (int i = 0; i < 3; i++) {
-      mockMvc.perform(post("/api/auth/email/verification/confirm")
-              .header("X-Forwarded-For", "10.1.0.3")
-              .contentType(MediaType.APPLICATION_JSON)
-              .content(objectMapper.writeValueAsString(
-                  Map.of("token", "fake-token-" + i))))
+      mockMvc
+          .perform(post("/api/auth/email/verification/confirm")
+              .header("X-Forwarded-For", "10.1.0.3").contentType(MediaType.APPLICATION_JSON)
+              .content(objectMapper.writeValueAsString(Map.of("token", "fake-token-" + i))))
           .andExpect(status().isBadRequest());
     }
 
-    mockMvc.perform(post("/api/auth/email/verification/confirm")
-            .header("X-Forwarded-For", "10.1.0.3")
+    mockMvc
+        .perform(post("/api/auth/email/verification/confirm").header("X-Forwarded-For", "10.1.0.3")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(
-                Map.of("token", "fake-token-x"))))
-        .andExpect(status().isTooManyRequests())
-        .andExpect(header().exists("Retry-After"));
+            .content(objectMapper.writeValueAsString(Map.of("token", "fake-token-x"))))
+        .andExpect(status().isTooManyRequests()).andExpect(header().exists("Retry-After"));
   }
 }

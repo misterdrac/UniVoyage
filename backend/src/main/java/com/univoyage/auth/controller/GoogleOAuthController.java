@@ -62,8 +62,8 @@ public class GoogleOAuthController {
     long retryAfterSec = oauthCallbackIpRateLimiter.tryConsumeOrRetryAfterSeconds(ip);
     if (retryAfterSec >= 0) {
       log.warn("Google OAuth callback rate limited");
-      securityEventLogger.log(EventType.AUTH_RATE_LIMITED, Result.FAILURE, null,
-          null, ip, "google", "oauth-callback");
+      securityEventLogger.log(EventType.AUTH_RATE_LIMITED, Result.FAILURE, null, null, ip, "google",
+          "oauth-callback");
       return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
           .header(HttpHeaders.RETRY_AFTER, String.valueOf(retryAfterSec)).body(ApiResponse
               .fail("Too many OAuth attempts from this network. Please try again later."));
@@ -84,8 +84,8 @@ public class GoogleOAuthController {
 
     if (!payload.isSuccess()) {
       String err = payload.getError() != null ? payload.getError() : "Google login failed";
-      securityEventLogger.log(EventType.AUTH_OAUTH_FAILED, Result.FAILURE, null,
-          null, ip, "google", err);
+      securityEventLogger.log(EventType.AUTH_OAUTH_FAILED, Result.FAILURE, null, null, ip, "google",
+          err);
       if (GoogleOAuthService.ERROR_INVALID_STATE.equals(err)) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.fail(err));
       }
@@ -98,8 +98,8 @@ public class GoogleOAuthController {
     authCookieWriter.writeAuthCookies(response, payload.getToken(), payload.getCsrfToken(),
         refreshRaw);
 
-    securityEventLogger.log(EventType.AUTH_OAUTH_SUCCESS, Result.SUCCESS,
-        payload.getUser().getId(), payload.getUser().getEmail(), ip, "google");
+    securityEventLogger.log(EventType.AUTH_OAUTH_SUCCESS, Result.SUCCESS, payload.getUser().getId(),
+        payload.getUser().getEmail(), ip, "google");
 
     String role = payload.getUser().getRole();
     if ("ADMIN".equals(role) || "HEAD_ADMIN".equals(role)) {

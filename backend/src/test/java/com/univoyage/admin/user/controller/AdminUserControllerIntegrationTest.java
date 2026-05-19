@@ -76,8 +76,8 @@ class AdminUserControllerIntegrationTest {
   @WithMockUser(roles = "ADMIN")
   @DisplayName("GET /api/admin/users/{id} returns 404 when missing")
   void getUser_notFound() throws Exception {
-    mockMvc.perform(get("/api/admin/users/{id}", 9_999_999_999L).with(tfa())).andExpect(status().isNotFound())
-        .andExpect(jsonPath("$.success").value(false));
+    mockMvc.perform(get("/api/admin/users/{id}", 9_999_999_999L).with(tfa()))
+        .andExpect(status().isNotFound()).andExpect(jsonPath("$.success").value(false));
   }
 
   @Test
@@ -105,8 +105,7 @@ class AdminUserControllerIntegrationTest {
 
     mockMvc
         .perform(patch("/api/admin/users/{id}/role", target.getId())
-            .with(securityContextFor(headAdmin)).with(tfa())
-            .contentType(MediaType.APPLICATION_JSON)
+            .with(securityContextFor(headAdmin)).with(tfa()).contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(Map.of("role", "ADMIN"))))
         .andExpect(status().isOk()).andExpect(jsonPath("$.success").value(true))
         .andExpect(jsonPath("$.data.role").value("ADMIN"));

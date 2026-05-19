@@ -61,8 +61,8 @@ public class LinkedInOAuthController {
     String ip = ClientIpResolver.resolve(httpRequest);
     long retryAfterSec = oauthCallbackIpRateLimiter.tryConsumeOrRetryAfterSeconds(ip);
     if (retryAfterSec >= 0) {
-      securityEventLogger.log(EventType.AUTH_RATE_LIMITED, Result.FAILURE, null,
-          null, ip, "linkedin", "oauth-callback");
+      securityEventLogger.log(EventType.AUTH_RATE_LIMITED, Result.FAILURE, null, null, ip,
+          "linkedin", "oauth-callback");
       return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
           .header(HttpHeaders.RETRY_AFTER, String.valueOf(retryAfterSec)).body(ApiResponse
               .fail("Too many OAuth attempts from this network. Please try again later."));
@@ -83,8 +83,8 @@ public class LinkedInOAuthController {
 
     if (!payload.isSuccess()) {
       String err = payload.getError() != null ? payload.getError() : "LinkedIn login failed";
-      securityEventLogger.log(EventType.AUTH_OAUTH_FAILED, Result.FAILURE, null,
-          null, ip, "linkedin", err);
+      securityEventLogger.log(EventType.AUTH_OAUTH_FAILED, Result.FAILURE, null, null, ip,
+          "linkedin", err);
       if (LinkedInOAuthService.ERROR_INVALID_STATE.equals(err)) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.fail(err));
       }
@@ -97,8 +97,8 @@ public class LinkedInOAuthController {
     authCookieWriter.writeAuthCookies(response, payload.getToken(), payload.getCsrfToken(),
         refreshRaw);
 
-    securityEventLogger.log(EventType.AUTH_OAUTH_SUCCESS, Result.SUCCESS,
-        payload.getUser().getId(), payload.getUser().getEmail(), ip, "linkedin");
+    securityEventLogger.log(EventType.AUTH_OAUTH_SUCCESS, Result.SUCCESS, payload.getUser().getId(),
+        payload.getUser().getEmail(), ip, "linkedin");
 
     String role = payload.getUser().getRole();
     if ("ADMIN".equals(role) || "HEAD_ADMIN".equals(role)) {

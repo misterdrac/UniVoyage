@@ -33,24 +33,20 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
- * Comprehensive auth regression suite covering all critical authentication flows.
- * This is the "release confidence" gate — all tests must pass before merging.
+ * Comprehensive auth regression suite covering all critical authentication
+ * flows. This is the "release confidence" gate — all tests must pass before
+ * merging.
  */
-@SpringBootTest(properties = {
-    "app.auth.admin-2fa.challenge-email-max-attempts=50",
+@SpringBootTest(properties = {"app.auth.admin-2fa.challenge-email-max-attempts=50",
     "app.auth.admin-2fa.challenge-ip-max-attempts=50",
     "app.auth.admin-2fa.verify-email-max-attempts=50",
-    "app.auth.admin-2fa.verify-ip-max-attempts=50",
-    "app.auth.login-ip-max-attempts=50",
-    "app.auth.login-ip-window=PT1M",
-    "app.auth.otp.request-ip-max-attempts=50",
-    "app.auth.otp.request-email-max-attempts=50",
-    "app.auth.otp.verify-ip-max-attempts=50",
+    "app.auth.admin-2fa.verify-ip-max-attempts=50", "app.auth.login-ip-max-attempts=50",
+    "app.auth.login-ip-window=PT1M", "app.auth.otp.request-ip-max-attempts=50",
+    "app.auth.otp.request-email-max-attempts=50", "app.auth.otp.verify-ip-max-attempts=50",
     "app.auth.otp.verify-email-max-attempts=50",
     "app.auth.password-reset.forgot-ip-max-attempts=50",
     "app.auth.password-reset.forgot-email-max-attempts=50",
-    "app.auth.password-reset.submit-ip-max-attempts=50"
-})
+    "app.auth.password-reset.submit-ip-max-attempts=50"})
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
@@ -85,21 +81,16 @@ class AuthRegressionSuiteIntegrationTest {
   void setup() {
     testOtpNotificationPort.clear();
     country = countryRepository.findByIsoCode("RS")
-        .orElseGet(() -> countryRepository.save(
-            Country.builder().isoCode("RS").countryName("Serbia")
-                .currencyCode("RSD").currencyName("Serbian Dinar").build()));
+        .orElseGet(() -> countryRepository.save(Country.builder().isoCode("RS")
+            .countryName("Serbia").currencyCode("RSD").currencyName("Serbian Dinar").build()));
 
-    adminUser = userRepository.save(UserEntity.builder()
-        .email("regression-admin@test.com").name("Admin").surname("Regression")
-        .passwordHash(passwordEncoder.encode("Admin123!"))
-        .country(country).dateOfRegister(Instant.now())
-        .role(Role.ADMIN).build());
+    adminUser = userRepository.save(UserEntity.builder().email("regression-admin@test.com")
+        .name("Admin").surname("Regression").passwordHash(passwordEncoder.encode("Admin123!"))
+        .country(country).dateOfRegister(Instant.now()).role(Role.ADMIN).build());
 
-    regularUser = userRepository.save(UserEntity.builder()
-        .email("regression-user@test.com").name("User").surname("Regression")
-        .passwordHash(passwordEncoder.encode("User123!"))
-        .country(country).dateOfRegister(Instant.now())
-        .role(Role.USER).build());
+    regularUser = userRepository.save(UserEntity.builder().email("regression-user@test.com")
+        .name("User").surname("Regression").passwordHash(passwordEncoder.encode("User123!"))
+        .country(country).dateOfRegister(Instant.now()).role(Role.USER).build());
   }
 
   @Nested
@@ -109,35 +100,30 @@ class AuthRegressionSuiteIntegrationTest {
     @Test
     @DisplayName("Login -> access protected -> logout -> access denied")
     void fullPasswordLoginCycle() throws Exception {
-      MvcResult loginResult = mockMvc.perform(post("/api/auth/login")
-              .contentType(MediaType.APPLICATION_JSON)
+      MvcResult loginResult = mockMvc
+          .perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON)
               .content(objectMapper.writeValueAsString(
                   Map.of("email", "regression-user@test.com", "password", "User123!"))))
           .andExpect(status().isOk())
-          .andExpect(jsonPath("$.data.user.email").value("regression-user@test.com"))
-          .andReturn();
+          .andExpect(jsonPath("$.data.user.email").value("regression-user@test.com")).andReturn();
 
       Cookie authCookie = loginResult.getResponse().getCookie("auth_token");
       Cookie csrfCookie = loginResult.getResponse().getCookie("csrf_token");
 
-      mockMvc.perform(get("/api/auth/me").cookie(authCookie))
-          .andExpect(status().isOk())
+      mockMvc.perform(get("/api/auth/me").cookie(authCookie)).andExpect(status().isOk())
           .andExpect(jsonPath("$.data.email").value("regression-user@test.com"));
 
-      mockMvc.perform(post("/api/auth/logout")
-              .cookie(authCookie)
-              .header("X-CSRF-TOKEN", csrfCookie != null ? csrfCookie.getValue() : ""))
-          .andExpect(status().isOk());
+      mockMvc.perform(post("/api/auth/logout").cookie(authCookie).header("X-CSRF-TOKEN",
+          csrfCookie != null ? csrfCookie.getValue() : "")).andExpect(status().isOk());
 
-      mockMvc.perform(get("/api/auth/me"))
-          .andExpect(status().isUnauthorized());
+      mockMvc.perform(get("/api/auth/me")).andExpect(status().isUnauthorized());
     }
 
     @Test
     @DisplayName("Wrong password returns 401")
     void wrongPasswordReturns401() throws Exception {
-      mockMvc.perform(post("/api/auth/login")
-              .contentType(MediaType.APPLICATION_JSON)
+      mockMvc
+          .perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON)
               .content(objectMapper.writeValueAsString(
                   Map.of("email", "regression-user@test.com", "password", "WrongPass1!"))))
           .andExpect(status().isUnauthorized())
@@ -152,8 +138,8 @@ class AuthRegressionSuiteIntegrationTest {
     @Test
     @DisplayName("Request OTP -> verify -> access protected")
     void otpLoginHappyPath() throws Exception {
-      mockMvc.perform(post("/api/auth/otp/request")
-              .contentType(MediaType.APPLICATION_JSON)
+      mockMvc
+          .perform(post("/api/auth/otp/request").contentType(MediaType.APPLICATION_JSON)
               .content(objectMapper.writeValueAsString(
                   Map.of("email", "regression-user@test.com", "purpose", "LOGIN"))))
           .andExpect(status().isOk());
@@ -161,33 +147,31 @@ class AuthRegressionSuiteIntegrationTest {
       String code = testOtpNotificationPort.lastCode("regression-user@test.com",
           EmailOtpPurpose.LOGIN);
 
-      MvcResult verifyResult = mockMvc.perform(post("/api/auth/otp/verify")
-              .contentType(MediaType.APPLICATION_JSON)
+      MvcResult verifyResult = mockMvc
+          .perform(post("/api/auth/otp/verify").contentType(MediaType.APPLICATION_JSON)
               .content(objectMapper.writeValueAsString(
                   Map.of("email", "regression-user@test.com", "purpose", "LOGIN", "code", code))))
           .andExpect(status().isOk())
-          .andExpect(jsonPath("$.data.user.email").value("regression-user@test.com"))
-          .andReturn();
+          .andExpect(jsonPath("$.data.user.email").value("regression-user@test.com")).andReturn();
 
       Cookie authCookie = verifyResult.getResponse().getCookie("auth_token");
-      mockMvc.perform(get("/api/auth/me").cookie(authCookie))
-          .andExpect(status().isOk());
+      mockMvc.perform(get("/api/auth/me").cookie(authCookie)).andExpect(status().isOk());
     }
 
     @Test
     @DisplayName("Wrong OTP code returns 400")
     void wrongOtpCodeReturns400() throws Exception {
-      mockMvc.perform(post("/api/auth/otp/request")
-              .contentType(MediaType.APPLICATION_JSON)
+      mockMvc
+          .perform(post("/api/auth/otp/request").contentType(MediaType.APPLICATION_JSON)
               .content(objectMapper.writeValueAsString(
                   Map.of("email", "regression-user@test.com", "purpose", "LOGIN"))))
           .andExpect(status().isOk());
 
-      mockMvc.perform(post("/api/auth/otp/verify")
-              .contentType(MediaType.APPLICATION_JSON)
-              .content(objectMapper.writeValueAsString(
-                  Map.of("email", "regression-user@test.com", "purpose", "LOGIN",
-                      "code", "000000"))))
+      mockMvc
+          .perform(
+              post("/api/auth/otp/verify").contentType(MediaType.APPLICATION_JSON)
+                  .content(objectMapper.writeValueAsString(Map.of("email",
+                      "regression-user@test.com", "purpose", "LOGIN", "code", "000000"))))
           .andExpect(status().isBadRequest());
     }
   }
@@ -199,19 +183,18 @@ class AuthRegressionSuiteIntegrationTest {
     @Test
     @DisplayName("Forgot password returns 200 (anti-enumeration)")
     void forgotPasswordReturns200() throws Exception {
-      mockMvc.perform(post("/api/auth/password/forgot")
-              .contentType(MediaType.APPLICATION_JSON)
-              .content(objectMapper.writeValueAsString(
-                  Map.of("email", "regression-user@test.com"))))
-          .andExpect(status().isOk())
-          .andExpect(jsonPath("$.data.message").exists());
+      mockMvc
+          .perform(
+              post("/api/auth/password/forgot").contentType(MediaType.APPLICATION_JSON).content(
+                  objectMapper.writeValueAsString(Map.of("email", "regression-user@test.com"))))
+          .andExpect(status().isOk()).andExpect(jsonPath("$.data.message").exists());
     }
 
     @Test
     @DisplayName("Reset with invalid token returns 400")
     void resetInvalidTokenReturns400() throws Exception {
-      mockMvc.perform(post("/api/auth/password/reset")
-              .contentType(MediaType.APPLICATION_JSON)
+      mockMvc
+          .perform(post("/api/auth/password/reset").contentType(MediaType.APPLICATION_JSON)
               .content(objectMapper.writeValueAsString(
                   Map.of("token", "invalid-token-12345", "newPassword", "NewPass123!"))))
           .andExpect(status().isBadRequest())
@@ -230,30 +213,23 @@ class AuthRegressionSuiteIntegrationTest {
       Cookie jwtCookie = new Cookie("auth_token", pair.jwt());
       String csrf = pair.csrfSecret();
 
-      mockMvc.perform(get("/api/admin/users").cookie(jwtCookie))
-          .andExpect(status().isForbidden())
+      mockMvc.perform(get("/api/admin/users").cookie(jwtCookie)).andExpect(status().isForbidden())
           .andExpect(jsonPath("$.error").value(containsString("Two-factor authentication")));
 
-      mockMvc.perform(post("/api/auth/2fa/challenge")
-              .cookie(jwtCookie)
-              .header("X-CSRF-TOKEN", csrf)
-              .contentType(MediaType.APPLICATION_JSON))
-          .andExpect(status().isOk());
+      mockMvc.perform(post("/api/auth/2fa/challenge").cookie(jwtCookie).header("X-CSRF-TOKEN", csrf)
+          .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
 
       String code = testOtpNotificationPort.lastCode("regression-admin@test.com",
           EmailOtpPurpose.ADMIN_LOGIN);
 
-      MvcResult verifyResult = mockMvc.perform(post("/api/auth/2fa/verify")
-              .cookie(jwtCookie)
-              .header("X-CSRF-TOKEN", csrf)
+      MvcResult verifyResult = mockMvc
+          .perform(post("/api/auth/2fa/verify").cookie(jwtCookie).header("X-CSRF-TOKEN", csrf)
               .contentType(MediaType.APPLICATION_JSON)
               .content(objectMapper.writeValueAsString(Map.of("code", code))))
-          .andExpect(status().isOk())
-          .andReturn();
+          .andExpect(status().isOk()).andReturn();
 
       Cookie newJwtCookie = verifyResult.getResponse().getCookie("auth_token");
-      mockMvc.perform(get("/api/admin/users").cookie(newJwtCookie))
-          .andExpect(status().isOk());
+      mockMvc.perform(get("/api/admin/users").cookie(newJwtCookie)).andExpect(status().isOk());
     }
 
     @Test
@@ -262,10 +238,9 @@ class AuthRegressionSuiteIntegrationTest {
       JwtService.TokenPair pair = jwtService.generateForUser(regularUser);
       Cookie jwtCookie = new Cookie("auth_token", pair.jwt());
 
-      mockMvc.perform(post("/api/auth/2fa/challenge")
-              .cookie(jwtCookie)
-              .header("X-CSRF-TOKEN", pair.csrfSecret())
-              .contentType(MediaType.APPLICATION_JSON))
+      mockMvc
+          .perform(post("/api/auth/2fa/challenge").cookie(jwtCookie)
+              .header("X-CSRF-TOKEN", pair.csrfSecret()).contentType(MediaType.APPLICATION_JSON))
           .andExpect(status().isForbidden());
     }
 
@@ -276,15 +251,11 @@ class AuthRegressionSuiteIntegrationTest {
       Cookie jwtCookie = new Cookie("auth_token", pair.jwt());
       String csrf = pair.csrfSecret();
 
-      mockMvc.perform(post("/api/auth/2fa/challenge")
-              .cookie(jwtCookie)
-              .header("X-CSRF-TOKEN", csrf)
-              .contentType(MediaType.APPLICATION_JSON))
-          .andExpect(status().isOk());
+      mockMvc.perform(post("/api/auth/2fa/challenge").cookie(jwtCookie).header("X-CSRF-TOKEN", csrf)
+          .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
 
-      mockMvc.perform(post("/api/auth/2fa/verify")
-              .cookie(jwtCookie)
-              .header("X-CSRF-TOKEN", csrf)
+      mockMvc
+          .perform(post("/api/auth/2fa/verify").cookie(jwtCookie).header("X-CSRF-TOKEN", csrf)
               .contentType(MediaType.APPLICATION_JSON)
               .content(objectMapper.writeValueAsString(Map.of("code", "000000"))))
           .andExpect(status().isBadRequest())
@@ -299,12 +270,11 @@ class AuthRegressionSuiteIntegrationTest {
     @Test
     @DisplayName("Login sets refresh cookie -> refresh yields new tokens")
     void refreshTokenRotation() throws Exception {
-      MvcResult loginResult = mockMvc.perform(post("/api/auth/login")
-              .contentType(MediaType.APPLICATION_JSON)
+      MvcResult loginResult = mockMvc
+          .perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON)
               .content(objectMapper.writeValueAsString(
                   Map.of("email", "regression-user@test.com", "password", "User123!"))))
-          .andExpect(status().isOk())
-          .andReturn();
+          .andExpect(status().isOk()).andReturn();
 
       Cookie refreshCookie = loginResult.getResponse().getCookie("refresh_token");
       Cookie authCookie = loginResult.getResponse().getCookie("auth_token");
@@ -314,25 +284,21 @@ class AuthRegressionSuiteIntegrationTest {
         return;
       }
 
-      MvcResult refreshResult = mockMvc.perform(post("/api/auth/refresh")
-              .cookie(refreshCookie)
-              .header("X-CSRF-TOKEN", csrfCookie != null ? csrfCookie.getValue() : ""))
-          .andExpect(status().isOk())
-          .andExpect(jsonPath("$.data.token").exists())
-          .andReturn();
+      MvcResult refreshResult = mockMvc
+          .perform(post("/api/auth/refresh").cookie(refreshCookie).header("X-CSRF-TOKEN",
+              csrfCookie != null ? csrfCookie.getValue() : ""))
+          .andExpect(status().isOk()).andExpect(jsonPath("$.data.token").exists()).andReturn();
 
       Cookie newAuthCookie = refreshResult.getResponse().getCookie("auth_token");
       if (newAuthCookie != null) {
-        mockMvc.perform(get("/api/auth/me").cookie(newAuthCookie))
-            .andExpect(status().isOk());
+        mockMvc.perform(get("/api/auth/me").cookie(newAuthCookie)).andExpect(status().isOk());
       }
     }
 
     @Test
     @DisplayName("Refresh without cookie returns 401")
     void refreshWithoutCookieReturns401() throws Exception {
-      mockMvc.perform(post("/api/auth/refresh"))
-          .andExpect(status().isUnauthorized());
+      mockMvc.perform(post("/api/auth/refresh")).andExpect(status().isUnauthorized());
     }
   }
 
@@ -345,8 +311,8 @@ class AuthRegressionSuiteIntegrationTest {
     void loginRateLimitEnforced() throws Exception {
       // Use a separate SpringBootTest with low rate limit to test lockout
       // This test validates the rate limit response structure
-      mockMvc.perform(post("/api/auth/login")
-              .contentType(MediaType.APPLICATION_JSON)
+      mockMvc
+          .perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON)
               .content(objectMapper.writeValueAsString(
                   Map.of("email", "regression-user@test.com", "password", "Wrong1!"))))
           .andExpect(status().isUnauthorized());
@@ -363,17 +329,16 @@ class AuthRegressionSuiteIntegrationTest {
       JwtService.TokenPair pair = jwtService.generateForUser(regularUser);
       Cookie jwtCookie = new Cookie("auth_token", pair.jwt());
 
-      mockMvc.perform(post("/api/auth/logout")
-              .cookie(jwtCookie)
-              .header("X-CSRF-TOKEN", "wrong-csrf-token"))
+      mockMvc
+          .perform(
+              post("/api/auth/logout").cookie(jwtCookie).header("X-CSRF-TOKEN", "wrong-csrf-token"))
           .andExpect(status().isForbidden());
     }
 
     @Test
     @DisplayName("Unauthenticated access to protected endpoint returns 401")
     void unauthenticatedAccessReturns401() throws Exception {
-      mockMvc.perform(get("/api/auth/me"))
-          .andExpect(status().isUnauthorized());
+      mockMvc.perform(get("/api/auth/me")).andExpect(status().isUnauthorized());
     }
   }
 }

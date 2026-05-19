@@ -46,22 +46,22 @@ public class PasswordResetController {
     String ip = ClientIpResolver.resolve(httpRequest);
     long ipRetry = forgotIpRateLimiter.tryConsumeOrRetryAfterSeconds(ip);
     if (ipRetry >= 0) {
-      securityEventLogger.log(EventType.AUTH_RATE_LIMITED, Result.FAILURE, null,
-          body.getEmail(), ip, "password-reset", "forgot");
+      securityEventLogger.log(EventType.AUTH_RATE_LIMITED, Result.FAILURE, null, body.getEmail(),
+          ip, "password-reset", "forgot");
       return rateLimited(ipRetry);
     }
 
     String email = PasswordResetService.normalizeEmail(body.getEmail());
     long emailRetry = forgotEmailRateLimiter.tryConsumeOrRetryAfterSeconds(email);
     if (emailRetry >= 0) {
-      securityEventLogger.log(EventType.AUTH_RATE_LIMITED, Result.FAILURE, null,
-          email, ip, "password-reset", "forgot");
+      securityEventLogger.log(EventType.AUTH_RATE_LIMITED, Result.FAILURE, null, email, ip,
+          "password-reset", "forgot");
       return rateLimited(emailRetry);
     }
 
     passwordResetService.requestForgot(email);
-    securityEventLogger.log(EventType.AUTH_PASSWORD_RESET_REQUESTED, Result.SUCCESS, null,
-        email, ip, "password-reset");
+    securityEventLogger.log(EventType.AUTH_PASSWORD_RESET_REQUESTED, Result.SUCCESS, null, email,
+        ip, "password-reset");
     return ResponseEntity.ok(ApiResponse.ok(PasswordForgotAcceptedResponseDto.standard()));
   }
 
@@ -71,20 +71,20 @@ public class PasswordResetController {
     String ip = ClientIpResolver.resolve(httpRequest);
     long ipRetry = resetIpRateLimiter.tryConsumeOrRetryAfterSeconds(ip);
     if (ipRetry >= 0) {
-      securityEventLogger.log(EventType.AUTH_RATE_LIMITED, Result.FAILURE, null,
-          null, ip, "password-reset", "reset-submit");
+      securityEventLogger.log(EventType.AUTH_RATE_LIMITED, Result.FAILURE, null, null, ip,
+          "password-reset", "reset-submit");
       return resetRateLimited(ipRetry);
     }
 
     ResetOutcome outcome = passwordResetService.resetPassword(body.getToken(),
         body.getNewPassword());
     if (outcome == ResetOutcome.SUCCESS) {
-      securityEventLogger.log(EventType.AUTH_PASSWORD_RESET_COMPLETED, Result.SUCCESS, null,
-          null, ip, "password-reset");
+      securityEventLogger.log(EventType.AUTH_PASSWORD_RESET_COMPLETED, Result.SUCCESS, null, null,
+          ip, "password-reset");
       return ResponseEntity.ok(ApiResponse.ok(null));
     }
-    securityEventLogger.log(EventType.AUTH_PASSWORD_RESET_COMPLETED, Result.FAILURE, null,
-        null, ip, "password-reset", "invalid-token");
+    securityEventLogger.log(EventType.AUTH_PASSWORD_RESET_COMPLETED, Result.FAILURE, null, null, ip,
+        "password-reset", "invalid-token");
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.fail(RESET_FAIL_MSG));
   }
 

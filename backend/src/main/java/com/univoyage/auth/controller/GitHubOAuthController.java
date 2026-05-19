@@ -65,8 +65,8 @@ public class GitHubOAuthController {
     String ip = ClientIpResolver.resolve(httpRequest);
     long retryAfterSec = oauthCallbackIpRateLimiter.tryConsumeOrRetryAfterSeconds(ip);
     if (retryAfterSec >= 0) {
-      securityEventLogger.log(EventType.AUTH_RATE_LIMITED, Result.FAILURE, null,
-          null, ip, auditProvider, "oauth-callback");
+      securityEventLogger.log(EventType.AUTH_RATE_LIMITED, Result.FAILURE, null, null, ip,
+          auditProvider, "oauth-callback");
       return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
           .header(HttpHeaders.RETRY_AFTER, String.valueOf(retryAfterSec)).body(ApiResponse
               .fail("Too many OAuth attempts from this network. Please try again later."));
@@ -87,8 +87,8 @@ public class GitHubOAuthController {
 
     if (!payload.isSuccess()) {
       String err = payload.getError() != null ? payload.getError() : "GitHub login failed";
-      securityEventLogger.log(EventType.AUTH_OAUTH_FAILED, Result.FAILURE, null,
-          null, ip, auditProvider, err);
+      securityEventLogger.log(EventType.AUTH_OAUTH_FAILED, Result.FAILURE, null, null, ip,
+          auditProvider, err);
       if (GitHubOAuthService.ERROR_INVALID_STATE.equals(err)) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.fail(err));
       }
@@ -101,8 +101,8 @@ public class GitHubOAuthController {
     authCookieWriter.writeAuthCookies(response, payload.getToken(), payload.getCsrfToken(),
         refreshRaw);
 
-    securityEventLogger.log(EventType.AUTH_OAUTH_SUCCESS, Result.SUCCESS,
-        payload.getUser().getId(), payload.getUser().getEmail(), ip, auditProvider);
+    securityEventLogger.log(EventType.AUTH_OAUTH_SUCCESS, Result.SUCCESS, payload.getUser().getId(),
+        payload.getUser().getEmail(), ip, auditProvider);
 
     String role = payload.getUser().getRole();
     if ("ADMIN".equals(role) || "HEAD_ADMIN".equals(role)) {

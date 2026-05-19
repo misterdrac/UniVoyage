@@ -12,9 +12,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Emits structured JSON security event log lines for all auth operations.
- * Uses a dedicated Log4j2 logger ("security-events") routed to a separate
- * JSON Lines file for incident response and log aggregation.
+ * Emits structured JSON security event log lines for all auth operations. Uses
+ * a dedicated Log4j2 logger ("security-events") routed to a separate JSON Lines
+ * file for incident response and log aggregation.
  */
 @Service
 @RequiredArgsConstructor
@@ -24,12 +24,7 @@ public class AuthSecurityEventLogger {
   private final ObjectMapper objectMapper;
 
   public enum EventType {
-    AUTH_LOGIN_SUCCESS, AUTH_LOGIN_FAILED, AUTH_LOGOUT,
-    AUTH_OTP_REQUESTED, AUTH_OTP_VERIFIED, AUTH_OTP_FAILED,
-    AUTH_OAUTH_SUCCESS, AUTH_OAUTH_FAILED,
-    AUTH_PASSWORD_RESET_REQUESTED, AUTH_PASSWORD_RESET_COMPLETED,
-    AUTH_2FA_CHALLENGED, AUTH_2FA_VERIFIED, AUTH_2FA_FAILED,
-    AUTH_RATE_LIMITED
+    AUTH_LOGIN_SUCCESS, AUTH_LOGIN_FAILED, AUTH_LOGOUT, AUTH_OTP_REQUESTED, AUTH_OTP_VERIFIED, AUTH_OTP_FAILED, AUTH_OAUTH_SUCCESS, AUTH_OAUTH_FAILED, AUTH_PASSWORD_RESET_REQUESTED, AUTH_PASSWORD_RESET_COMPLETED, AUTH_2FA_CHALLENGED, AUTH_2FA_VERIFIED, AUTH_2FA_FAILED, AUTH_RATE_LIMITED
   }
 
   public enum Result {

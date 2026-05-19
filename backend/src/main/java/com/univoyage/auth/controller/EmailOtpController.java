@@ -60,16 +60,16 @@ public class EmailOtpController {
     String ip = ClientIpResolver.resolve(httpRequest);
     long ipRetry = requestIpRateLimiter.tryConsumeOrRetryAfterSeconds(ip);
     if (ipRetry >= 0) {
-      securityEventLogger.log(EventType.AUTH_RATE_LIMITED, Result.FAILURE, null,
-          body.getEmail(), ip, "otp", "otp-request");
+      securityEventLogger.log(EventType.AUTH_RATE_LIMITED, Result.FAILURE, null, body.getEmail(),
+          ip, "otp", "otp-request");
       return rateLimited(ipRetry);
     }
 
     String email = EmailOtpChallengeService.normalizeEmail(body.getEmail());
     long emailRetry = requestEmailRateLimiter.tryConsumeOrRetryAfterSeconds(email);
     if (emailRetry >= 0) {
-      securityEventLogger.log(EventType.AUTH_RATE_LIMITED, Result.FAILURE, null,
-          email, ip, "otp", "otp-request");
+      securityEventLogger.log(EventType.AUTH_RATE_LIMITED, Result.FAILURE, null, email, ip, "otp",
+          "otp-request");
       return rateLimited(emailRetry);
     }
 
@@ -97,16 +97,16 @@ public class EmailOtpController {
     String ip = ClientIpResolver.resolve(httpRequest);
     long ipRetry = verifyIpRateLimiter.tryConsumeOrRetryAfterSeconds(ip);
     if (ipRetry >= 0) {
-      securityEventLogger.log(EventType.AUTH_RATE_LIMITED, Result.FAILURE, null,
-          body.getEmail(), ip, "otp", "otp-verify");
+      securityEventLogger.log(EventType.AUTH_RATE_LIMITED, Result.FAILURE, null, body.getEmail(),
+          ip, "otp", "otp-verify");
       return verifyRateLimited(ipRetry);
     }
 
     String email = EmailOtpChallengeService.normalizeEmail(body.getEmail());
     long emailRetry = verifyEmailRateLimiter.tryConsumeOrRetryAfterSeconds(email);
     if (emailRetry >= 0) {
-      securityEventLogger.log(EventType.AUTH_RATE_LIMITED, Result.FAILURE, null,
-          email, ip, "otp", "otp-verify");
+      securityEventLogger.log(EventType.AUTH_RATE_LIMITED, Result.FAILURE, null, email, ip, "otp",
+          "otp-verify");
       return verifyRateLimited(emailRetry);
     }
 
@@ -119,19 +119,19 @@ public class EmailOtpController {
       return ResponseEntity.ok(ApiResponse.ok(success.auth()));
     }
     if (outcome instanceof OtpVerifyOutcome.Locked locked) {
-      securityEventLogger.log(EventType.AUTH_OTP_FAILED, Result.FAILURE, null,
-          email, ip, "otp", "locked");
+      securityEventLogger.log(EventType.AUTH_OTP_FAILED, Result.FAILURE, null, email, ip, "otp",
+          "locked");
       return verifyRateLimited(Math.max(1L, locked.retryAfter().getSeconds()));
     }
     if (outcome instanceof OtpVerifyOutcome.CannotCompleteSignIn) {
-      securityEventLogger.log(EventType.AUTH_OTP_FAILED, Result.FAILURE, null,
-          email, ip, "otp", "no-account");
+      securityEventLogger.log(EventType.AUTH_OTP_FAILED, Result.FAILURE, null, email, ip, "otp",
+          "no-account");
       return ResponseEntity.status(HttpStatus.BAD_REQUEST)
           .body(ApiResponse.fail("Unable to complete sign-in. Please register first."));
     }
 
-    securityEventLogger.log(EventType.AUTH_OTP_FAILED, Result.FAILURE, null,
-        email, ip, "otp", "invalid-code");
+    securityEventLogger.log(EventType.AUTH_OTP_FAILED, Result.FAILURE, null, email, ip, "otp",
+        "invalid-code");
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.fail(VERIFY_FAIL_MSG));
   }
 

@@ -74,8 +74,8 @@ public class AuthController {
     long retryAfterSec = loginIpRateLimiter.tryConsumeOrRetryAfterSeconds(ip);
     if (retryAfterSec >= 0) {
       log.warn("Login rate limited (too many attempts from client network)");
-      securityEventLogger.log(EventType.AUTH_RATE_LIMITED, Result.FAILURE, null,
-          request.getEmail(), ip, "password", "login");
+      securityEventLogger.log(EventType.AUTH_RATE_LIMITED, Result.FAILURE, null, request.getEmail(),
+          ip, "password", "login");
       return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
           .header(HttpHeaders.RETRY_AFTER, String.valueOf(retryAfterSec)).body(ApiResponse
               .fail("Too many login attempts from this network. Please try again later."));
@@ -103,8 +103,8 @@ public class AuthController {
 
     } catch (IllegalArgumentException e) {
       log.info("Login failed: invalid credentials");
-      securityEventLogger.log(EventType.AUTH_LOGIN_FAILED, Result.FAILURE, null,
-          request.getEmail(), ip, "password");
+      securityEventLogger.log(EventType.AUTH_LOGIN_FAILED, Result.FAILURE, null, request.getEmail(),
+          ip, "password");
       recordAdminLoginFailureIfApplicable(request.getEmail(), httpRequest);
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
           .body(ApiResponse.fail("Invalid email or password"));

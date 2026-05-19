@@ -64,23 +64,22 @@ public class AdminTwoFactorController {
     String email = user.getEmail().toLowerCase();
     long emailRetry = challengeEmailLimiter.tryConsumeOrRetryAfterSeconds(email);
     if (emailRetry >= 0) {
-      securityEventLogger.log(EventType.AUTH_RATE_LIMITED, Result.FAILURE, user.getId(),
-          email, ip, "admin-2fa", "challenge");
+      securityEventLogger.log(EventType.AUTH_RATE_LIMITED, Result.FAILURE, user.getId(), email, ip,
+          "admin-2fa", "challenge");
       return challengeRateLimited(emailRetry);
     }
 
     adminTwoFactorService.challenge(user);
-    securityEventLogger.log(EventType.AUTH_2FA_CHALLENGED, Result.SUCCESS, user.getId(),
-        email, ip, "admin-2fa");
+    securityEventLogger.log(EventType.AUTH_2FA_CHALLENGED, Result.SUCCESS, user.getId(), email, ip,
+        "admin-2fa");
 
-    return ResponseEntity.ok(ApiResponse.ok(
-        Map.of("message", "Verification code sent to your email.")));
+    return ResponseEntity
+        .ok(ApiResponse.ok(Map.of("message", "Verification code sent to your email.")));
   }
 
   @PostMapping("/verify")
   public ResponseEntity<ApiResponse<Map<String, String>>> verify(
-      @AuthenticationPrincipal UserEntity user,
-      @RequestBody Map<String, String> body,
+      @AuthenticationPrincipal UserEntity user, @RequestBody Map<String, String> body,
       HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
 
     if (user == null || !adminTwoFactorService.isAdminRole(user)) {
@@ -112,8 +111,8 @@ public class AdminTwoFactorController {
           user.getEmail(), ip, "admin-2fa");
       authCookieWriter.writeAuthCookies(httpResponse, result.tokenPair().jwt(),
           result.tokenPair().csrfSecret(), null);
-      return ResponseEntity.ok(ApiResponse.ok(
-          Map.of("message", "Two-factor authentication verified.")));
+      return ResponseEntity
+          .ok(ApiResponse.ok(Map.of("message", "Two-factor authentication verified.")));
     }
 
     securityEventLogger.log(EventType.AUTH_2FA_FAILED, Result.FAILURE, user.getId(),
