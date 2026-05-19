@@ -42,6 +42,7 @@ public class OtpEmailNotificationService implements OtpNotificationPort {
       case LOGIN -> "Sign in";
       case REGISTER -> "Complete registration";
       case PASSWORD_RESET -> "Reset your password";
+      case ADMIN_LOGIN -> "Admin verification";
     };
   }
 

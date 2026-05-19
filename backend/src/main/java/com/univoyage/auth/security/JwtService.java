@@ -34,6 +34,7 @@ public class JwtService {
   private final String audience;
 
   public static final String CSRF_CLAIM = "csrf";
+  public static final String TFA_CLAIM = "tfa";
 
   public JwtService(@Value("${app.jwt.secret}") String secret,
       @Value("${app.jwt.ttl-seconds}") long ttlSeconds,
@@ -137,6 +138,13 @@ public class JwtService {
   }
 
   /**
+   * Returns true if the token carries a verified two-factor claim.
+   */
+  public boolean extractTwoFactorVerified(String token) {
+    return Boolean.TRUE.equals(extractClaim(token, c -> c.get(TFA_CLAIM, Boolean.class)));
+  }
+
+  /**
    * JWT ID claim ({@code jti}); unique per issued access token (e.g. for future
    * revocation or audit).
    */
@@ -152,6 +160,18 @@ public class JwtService {
   public boolean isValid(String token) {
     parse(token);
     return true;
+  }
+
+  /**
+   * Reissues a JWT for the given user with the two-factor verified claim set.
+   */
+  public TokenPair generateForUserWithTwoFactor(UserEntity user) {
+    String csrfSecret = generateCsrfSecret();
+    Map<String, Object> claims = new HashMap<>();
+    claims.put(TFA_CLAIM, true);
+    String subject = String.valueOf(user.getId());
+    String jwt = generateJwtToken(subject, claims, csrfSecret);
+    return new TokenPair(jwt, csrfSecret);
   }
 
   /** Simple holder */

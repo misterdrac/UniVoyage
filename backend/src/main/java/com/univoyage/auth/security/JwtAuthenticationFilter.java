@@ -36,6 +36,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   private final UserDetailsService userDetailsService;
   private final AuthCookieWriter authCookieWriter;
 
+  public static final String TFA_REQUEST_ATTRIBUTE = "univoyage.tfa.verified";
+
   // Cookie name for the HttpOnly JWT (Token A)
   private static final String JWT_COOKIE_NAME = CookieUtils.JWT_COOKIE_NAME;
 
@@ -122,6 +124,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
           userDetails, null, userDetails.getAuthorities());
       authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
       SecurityContextHolder.getContext().setAuthentication(authToken);
+
+      // 6) Extract 2FA claim for downstream filters
+      boolean tfaVerified = jwtService.extractTwoFactorVerified(jwt);
+      request.setAttribute(TFA_REQUEST_ATTRIBUTE, tfaVerified);
 
       log.debug("Authentication set for user [{}] with authorities: {}", userIdString,
           userDetails.getAuthorities());

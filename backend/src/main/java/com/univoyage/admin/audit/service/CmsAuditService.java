@@ -78,6 +78,17 @@ public class CmsAuditService {
   }
 
   @Transactional
+  public void recordAdmin2faSuccess(Long userId, String email, String ip) {
+    persist(CmsAuditEventType.ADMIN_2FA_SUCCESS, userId, email, null, null, ip, Map.of());
+  }
+
+  @Transactional
+  public void recordAdmin2faFailed(Long userId, String email, String ip, String reason) {
+    Map<String, Object> meta = Map.of("reason", reason);
+    persist(CmsAuditEventType.ADMIN_2FA_FAILED, userId, email, null, null, ip, meta);
+  }
+
+  @Transactional
   public void recordRoleChange(Long actorUserId, String actorEmail, Long targetUserId,
       String targetEmail, Role fromRole, Role toRole, String ip) {
     Map<String, Object> meta = new LinkedHashMap<>(

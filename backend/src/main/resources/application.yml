@@ -113,6 +113,17 @@ app:
       frontend-reset-url: ${APP_FRONTEND_RESET_URL:http://localhost:5173/auth/reset-password}
       revoke-sessions-on-reset: ${PASSWORD_RESET_REVOKE_SESSIONS:true}
 
+    admin-2fa:
+      enabled: ${ADMIN_2FA_ENABLED:true}
+      challenge-ip-max-attempts: ${ADMIN_2FA_CHALLENGE_IP_MAX:5}
+      challenge-ip-window: ${ADMIN_2FA_CHALLENGE_IP_WINDOW:PT15M}
+      challenge-email-max-attempts: ${ADMIN_2FA_CHALLENGE_EMAIL_MAX:3}
+      challenge-email-window: ${ADMIN_2FA_CHALLENGE_EMAIL_WINDOW:PT15M}
+      verify-ip-max-attempts: ${ADMIN_2FA_VERIFY_IP_MAX:10}
+      verify-ip-window: ${ADMIN_2FA_VERIFY_IP_WINDOW:PT15M}
+      verify-email-max-attempts: ${ADMIN_2FA_VERIFY_EMAIL_MAX:5}
+      verify-email-window: ${ADMIN_2FA_VERIFY_EMAIL_WINDOW:PT15M}
+
     email-verification:
       ttl: ${EMAIL_VERIFICATION_TTL:PT24H}
       max-attempts-per-token: ${EMAIL_VERIFICATION_MAX_ATTEMPTS:5}
