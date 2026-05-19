@@ -51,8 +51,8 @@ public class AdminTwoFactorFilter extends OncePerRequestFilter {
       return;
     }
 
-    Boolean tfaVerified =
-        (Boolean) request.getAttribute(JwtAuthenticationFilter.TFA_REQUEST_ATTRIBUTE);
+    Boolean tfaVerified = (Boolean) request
+        .getAttribute(JwtAuthenticationFilter.TFA_REQUEST_ATTRIBUTE);
 
     if (!Boolean.TRUE.equals(tfaVerified)) {
       response.setStatus(HttpServletResponse.SC_FORBIDDEN);

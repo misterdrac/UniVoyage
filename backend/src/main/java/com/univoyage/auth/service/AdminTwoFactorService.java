@@ -62,13 +62,14 @@ public class AdminTwoFactorService {
     cmsAuditService.recordAdmin2faFailed(user.getId(), user.getEmail(), ip, reason);
 
     if (outcome instanceof OtpVerifyOutcome.Locked locked) {
-      return new Admin2faVerifyResult(false, null, "Too many failed attempts. Please try again later.",
-          locked.retryAfter().getSeconds());
+      return new Admin2faVerifyResult(false, null,
+          "Too many failed attempts. Please try again later.", locked.retryAfter().getSeconds());
     }
 
     if (outcome instanceof OtpVerifyOutcome.InvalidCode invalidCode) {
       return new Admin2faVerifyResult(false, null,
-          "Invalid verification code. " + invalidCode.attemptsRemaining() + " attempts remaining.", -1);
+          "Invalid verification code. " + invalidCode.attemptsRemaining() + " attempts remaining.",
+          -1);
     }
 
     if (outcome instanceof OtpVerifyOutcome.Expired) {
@@ -82,8 +83,8 @@ public class AdminTwoFactorService {
     }
 
     if (outcome instanceof OtpVerifyOutcome.AlreadyConsumed) {
-      return new Admin2faVerifyResult(false, null,
-          "Code already used. Please request a new code.", -1);
+      return new Admin2faVerifyResult(false, null, "Code already used. Please request a new code.",
+          -1);
     }
 
     return new Admin2faVerifyResult(false, null, "Verification failed.", -1);

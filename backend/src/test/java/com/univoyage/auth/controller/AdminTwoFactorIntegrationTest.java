@@ -31,12 +31,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(properties = {
-    "app.auth.admin-2fa.challenge-email-max-attempts=50",
+@SpringBootTest(properties = {"app.auth.admin-2fa.challenge-email-max-attempts=50",
     "app.auth.admin-2fa.challenge-ip-max-attempts=50",
     "app.auth.admin-2fa.verify-email-max-attempts=50",
-    "app.auth.admin-2fa.verify-ip-max-attempts=50"
-})
+    "app.auth.admin-2fa.verify-ip-max-attempts=50"})
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
@@ -70,21 +68,16 @@ class AdminTwoFactorIntegrationTest {
   void setup() {
     testOtpNotificationPort.clear();
     Country country = countryRepository.findByIsoCode("MT")
-        .orElseGet(() -> countryRepository.save(
-            Country.builder().isoCode("MT").countryName("Malta")
-                .currencyCode("EUR").currencyName("Euro").build()));
+        .orElseGet(() -> countryRepository.save(Country.builder().isoCode("MT").countryName("Malta")
+            .currencyCode("EUR").currencyName("Euro").build()));
 
-    adminUser = userRepository.save(UserEntity.builder()
-        .email("admin@test.com").name("Admin").surname("User")
-        .passwordHash(passwordEncoder.encode("Admin123!"))
-        .country(country).dateOfRegister(Instant.now())
-        .role(Role.ADMIN).build());
+    adminUser = userRepository.save(UserEntity.builder().email("admin@test.com").name("Admin")
+        .surname("User").passwordHash(passwordEncoder.encode("Admin123!")).country(country)
+        .dateOfRegister(Instant.now()).role(Role.ADMIN).build());
 
-    regularUser = userRepository.save(UserEntity.builder()
-        .email("user@test.com").name("Regular").surname("User")
-        .passwordHash(passwordEncoder.encode("User123!"))
-        .country(country).dateOfRegister(Instant.now())
-        .role(Role.USER).build());
+    regularUser = userRepository.save(UserEntity.builder().email("user@test.com").name("Regular")
+        .surname("User").passwordHash(passwordEncoder.encode("User123!")).country(country)
+        .dateOfRegister(Instant.now()).role(Role.USER).build());
   }
 
   private Cookie adminJwtCookie() {
@@ -106,9 +99,8 @@ class AdminTwoFactorIntegrationTest {
   @DisplayName("Admin without 2FA gets 403 on CMS endpoints")
   void adminWithout2faBlockedFromCms() throws Exception {
     mockMvc.perform(get("/api/admin/users").cookie(adminJwtCookie()))
-        .andExpect(status().isForbidden())
-        .andExpect(jsonPath("$.error").value(
-            "Two-factor authentication required. Please complete 2FA verification."));
+        .andExpect(status().isForbidden()).andExpect(jsonPath("$.error")
+            .value("Two-factor authentication required. Please complete 2FA verification."));
   }
 
   @Test
@@ -121,10 +113,8 @@ class AdminTwoFactorIntegrationTest {
   @Test
   @DisplayName("Regular user cannot call 2FA challenge endpoint")
   void regularUserCannotChallenge() throws Exception {
-    mockMvc.perform(post("/api/auth/2fa/challenge")
-            .cookie(userJwtCookie())
-            .contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isForbidden());
+    mockMvc.perform(post("/api/auth/2fa/challenge").cookie(userJwtCookie())
+        .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isForbidden());
   }
 
   @Test
@@ -133,10 +123,9 @@ class AdminTwoFactorIntegrationTest {
     JwtService.TokenPair pair = jwtService.generateForUser(adminUser);
     Cookie jwtCookie = new Cookie("auth_token", pair.jwt());
 
-    mockMvc.perform(post("/api/auth/2fa/challenge")
-            .cookie(jwtCookie)
-            .header("X-CSRF-TOKEN", pair.csrfSecret())
-            .contentType(MediaType.APPLICATION_JSON))
+    mockMvc
+        .perform(post("/api/auth/2fa/challenge").cookie(jwtCookie)
+            .header("X-CSRF-TOKEN", pair.csrfSecret()).contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.data.message").value("Verification code sent to your email."));
 
@@ -151,17 +140,13 @@ class AdminTwoFactorIntegrationTest {
     Cookie jwtCookie = new Cookie("auth_token", pair.jwt());
     String csrf = pair.csrfSecret();
 
-    mockMvc.perform(post("/api/auth/2fa/challenge")
-            .cookie(jwtCookie)
-            .header("X-CSRF-TOKEN", csrf)
-            .contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk());
+    mockMvc.perform(post("/api/auth/2fa/challenge").cookie(jwtCookie).header("X-CSRF-TOKEN", csrf)
+        .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
 
     String code = testOtpNotificationPort.lastCode("admin@test.com", EmailOtpPurpose.ADMIN_LOGIN);
 
-    MvcResult verifyResult = mockMvc.perform(post("/api/auth/2fa/verify")
-            .cookie(jwtCookie)
-            .header("X-CSRF-TOKEN", csrf)
+    MvcResult verifyResult = mockMvc
+        .perform(post("/api/auth/2fa/verify").cookie(jwtCookie).header("X-CSRF-TOKEN", csrf)
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(Map.of("code", code))))
         .andExpect(status().isOk())
@@ -171,8 +156,7 @@ class AdminTwoFactorIntegrationTest {
     Cookie newJwtCookie = verifyResult.getResponse().getCookie("auth_token");
     assert newJwtCookie != null;
 
-    mockMvc.perform(get("/api/admin/users").cookie(newJwtCookie))
-        .andExpect(status().isOk());
+    mockMvc.perform(get("/api/admin/users").cookie(newJwtCookie)).andExpect(status().isOk());
   }
 
   @Test
@@ -182,20 +166,15 @@ class AdminTwoFactorIntegrationTest {
     Cookie jwtCookie = new Cookie("auth_token", pair.jwt());
     String csrf = pair.csrfSecret();
 
-    mockMvc.perform(post("/api/auth/2fa/challenge")
-            .cookie(jwtCookie)
-            .header("X-CSRF-TOKEN", csrf)
-            .contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk());
+    mockMvc.perform(post("/api/auth/2fa/challenge").cookie(jwtCookie).header("X-CSRF-TOKEN", csrf)
+        .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
 
-    mockMvc.perform(post("/api/auth/2fa/verify")
-            .cookie(jwtCookie)
-            .header("X-CSRF-TOKEN", csrf)
+    mockMvc
+        .perform(post("/api/auth/2fa/verify").cookie(jwtCookie).header("X-CSRF-TOKEN", csrf)
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(Map.of("code", "000000"))))
-        .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.error").value(
-            org.hamcrest.Matchers.containsString("Invalid verification code")));
+        .andExpect(status().isBadRequest()).andExpect(jsonPath("$.error")
+            .value(org.hamcrest.Matchers.containsString("Invalid verification code")));
   }
 
   @Test
@@ -205,23 +184,17 @@ class AdminTwoFactorIntegrationTest {
     Cookie jwtCookie = new Cookie("auth_token", pair.jwt());
     String csrf = pair.csrfSecret();
 
-    mockMvc.perform(post("/api/auth/2fa/challenge")
-            .cookie(jwtCookie)
-            .header("X-CSRF-TOKEN", csrf)
-            .contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk());
+    mockMvc.perform(post("/api/auth/2fa/challenge").cookie(jwtCookie).header("X-CSRF-TOKEN", csrf)
+        .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
 
     for (int i = 0; i < 5; i++) {
-      mockMvc.perform(post("/api/auth/2fa/verify")
-          .cookie(jwtCookie)
-          .header("X-CSRF-TOKEN", csrf)
+      mockMvc.perform(post("/api/auth/2fa/verify").cookie(jwtCookie).header("X-CSRF-TOKEN", csrf)
           .contentType(MediaType.APPLICATION_JSON)
           .content(objectMapper.writeValueAsString(Map.of("code", "00000" + i))));
     }
 
-    mockMvc.perform(post("/api/auth/2fa/verify")
-            .cookie(jwtCookie)
-            .header("X-CSRF-TOKEN", csrf)
+    mockMvc
+        .perform(post("/api/auth/2fa/verify").cookie(jwtCookie).header("X-CSRF-TOKEN", csrf)
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(Map.of("code", "999999"))))
         .andExpect(status().isTooManyRequests());
