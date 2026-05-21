@@ -30,6 +30,8 @@ export const API_CONFIG = {
       PASSWORD_RESET: "/auth/password/reset",
       EMAIL_VERIFICATION_REQUEST: "/auth/email/verification/request",
       EMAIL_VERIFICATION_CONFIRM: "/auth/email/verification/confirm",
+      ADMIN_2FA_CHALLENGE: "/auth/2fa/challenge",
+      ADMIN_2FA_VERIFY: "/auth/2fa/verify",
     },
     USER: {
       UPDATE_PROFILE: "/user/profile",

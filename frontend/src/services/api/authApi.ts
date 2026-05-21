@@ -185,6 +185,12 @@ const emailVerificationInvalidLinkError =
   "This verification link did not work. Request a new verification email.";
 const emailActionRateLimitError =
   "Too many attempts. Please wait a little before trying again.";
+const adminTwoFactorGenericError =
+  "We could not complete admin verification. Please try again.";
+const adminTwoFactorInvalidCodeError =
+  "That code did not work. Check the 6 digits or request a new code.";
+const adminTwoFactorRateLimitError =
+  "Too many attempts. Please wait a little before trying again.";
 
 export interface OtpAcceptedResponse {
   success: boolean;
@@ -312,6 +318,12 @@ export interface AuthApi {
 
   /** Confirms an email verification token from an email deep link. */
   confirmEmailVerification(token: string): Promise<EmailActionResponse>;
+
+  /** Requests an admin 2FA email code for the current admin session. */
+  requestAdminTwoFactor(): Promise<EmailActionResponse>;
+
+  /** Verifies an admin 2FA email code for the current admin session. */
+  verifyAdminTwoFactor(code: string): Promise<EmailActionResponse>;
 
   /**
    * Logs out the current user
@@ -613,6 +625,74 @@ export const authApi: {
         "Email verification failed",
         emailVerificationInvalidLinkError,
       );
+    }
+  },
+
+  async requestAdminTwoFactor(this: ApiClient) {
+    try {
+      const response = await this.request<BackendEmailActionResponse>(
+        API_CONFIG.ENDPOINTS.AUTH.ADMIN_2FA_CHALLENGE,
+        {
+          method: "POST",
+        },
+      );
+
+      return {
+        success: response.success,
+        message:
+          response.data?.message || "Verification code sent to your email.",
+        error: response.error ? adminTwoFactorGenericError : undefined,
+      };
+    } catch (error: unknown) {
+      const retryAfterSeconds = getAuthRetryAfterSeconds(error);
+      return {
+        success: false,
+        error:
+          getAuthErrorStatus(error) === 429
+            ? adminTwoFactorRateLimitError
+            : adminTwoFactorGenericError,
+        retryAfterSeconds,
+      };
+    }
+  },
+
+  async verifyAdminTwoFactor(this: ApiClient, code) {
+    try {
+      const response = await this.request<BackendEmailActionResponse>(
+        API_CONFIG.ENDPOINTS.AUTH.ADMIN_2FA_VERIFY,
+        {
+          method: "POST",
+          body: JSON.stringify({ code }),
+        },
+      );
+
+      return {
+        success: response.success,
+        message:
+          response.data?.message || "Two-factor authentication verified.",
+        error: response.error ? adminTwoFactorGenericError : undefined,
+      };
+    } catch (error: unknown) {
+      const retryAfterSeconds = getAuthRetryAfterSeconds(error);
+      const status = getAuthErrorStatus(error);
+
+      if (status === 429) {
+        return {
+          success: false,
+          error: adminTwoFactorRateLimitError,
+          retryAfterSeconds,
+        };
+      }
+
+      if (status === 400) {
+        return { success: false, error: adminTwoFactorInvalidCodeError };
+      }
+
+      return {
+        success: false,
+        error: adminTwoFactorGenericError,
+        retryAfterSeconds,
+      };
     }
   },
 
