@@ -82,17 +82,42 @@ export function SignUpDialog({
     resetForm,
   } = useSignUpForm({ onSuccess: handleSuccess, signup });
 
-  const handleGoogleSignUp = useCallback(async () => {
-    try {
-      await beginOAuth("google");
-      toast.success("Account created with Google!");
-      onOpenChange(false);
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Google sign up failed";
-      toast.error(errorMessage);
-    }
-  }, [onOpenChange, beginOAuth]);
+  const handleOAuthSignUp = useCallback(
+    async (provider: "google" | "github" | "linkedin") => {
+      const labels = {
+        google: "Google",
+        github: "GitHub",
+        linkedin: "LinkedIn",
+      } as const;
+      try {
+        await beginOAuth(provider);
+        toast.success(`Account created with ${labels[provider]}!`);
+        onOpenChange(false);
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : `${labels[provider]} sign up failed`;
+        toast.error(errorMessage);
+      }
+    },
+    [onOpenChange, beginOAuth],
+  );
+
+  const handleGoogleSignUp = useCallback(
+    () => handleOAuthSignUp("google"),
+    [handleOAuthSignUp],
+  );
+
+  const handleGitHubSignUp = useCallback(
+    () => handleOAuthSignUp("github"),
+    [handleOAuthSignUp],
+  );
+
+  const handleLinkedInSignUp = useCallback(
+    () => handleOAuthSignUp("linkedin"),
+    [handleOAuthSignUp],
+  );
 
   const handleOpenChange = useCallback(
     (newOpen: boolean) => {
@@ -172,6 +197,8 @@ export function SignUpDialog({
             isLoading={isLoading}
             isFormValid={isFormValid}
             onGoogleSignUp={handleGoogleSignUp}
+            onGitHubSignUp={handleGitHubSignUp}
+            onLinkedInSignUp={handleLinkedInSignUp}
             onLoginClick={handleLoginClick}
           />
         </form>
