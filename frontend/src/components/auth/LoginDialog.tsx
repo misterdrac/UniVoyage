@@ -23,6 +23,7 @@ import { apiService } from "@/services/api";
 import { toast } from "sonner";
 import { VALIDATION } from "@/lib/constants";
 import { BrandGoogle } from "@mynaui/icons-react";
+import { FaGithub, FaLinkedin } from "react-icons/fa6";
 import univoyageIcon from "@/assets/univoyage_icon.svg";
 
 interface LoginDialogProps {
@@ -73,13 +74,44 @@ export function LoginDialog({
     try {
       setIsLoading(true);
       await apiService.googleAuth();
-      // Reload user after successful OAuth
       await loadUser();
       toast.success("Signed in with Google!");
       onOpenChange(false);
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Google sign in failed";
+      toast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGitHubSignIn = async () => {
+    try {
+      setIsLoading(true);
+      await apiService.githubAuth();
+      await loadUser();
+      toast.success("Signed in with GitHub!");
+      onOpenChange(false);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "GitHub sign in failed";
+      toast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLinkedInSignIn = async () => {
+    try {
+      setIsLoading(true);
+      await apiService.linkedinAuth();
+      await loadUser();
+      toast.success("Signed in with LinkedIn!");
+      onOpenChange(false);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "LinkedIn sign in failed";
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
@@ -223,16 +255,36 @@ export function LoginDialog({
             </div>
           </div>
 
-          {/* Google Sign In */}
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleGoogleSignIn}
-            className="w-full"
-          >
-            <BrandGoogle className="mr-2 h-4 w-4" />
-            Continue with Google
-          </Button>
+          {/* OAuth Sign In */}
+          <div className="flex flex-col gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleGoogleSignIn}
+              className="w-full"
+            >
+              <BrandGoogle className="mr-2 h-4 w-4" />
+              Continue with Google
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleGitHubSignIn}
+              className="w-full"
+            >
+              <FaGithub className="mr-2 h-4 w-4" />
+              Continue with GitHub
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleLinkedInSignIn}
+              className="w-full"
+            >
+              <FaLinkedin className="mr-2 h-4 w-4" />
+              Continue with LinkedIn
+            </Button>
+          </div>
 
           {/* Sign Up Link */}
           <div className="text-center text-sm">

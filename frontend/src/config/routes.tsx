@@ -28,6 +28,8 @@ import {
   AdminAuditPage,
 } from "@/pages/admin";
 import GoogleCallbackPage from "@/pages/GoogleCallbackPage";
+import OAuthCallbackPage from "@/pages/OAuthCallbackPage";
+import { apiService } from "@/services/api";
 import { MainLayout } from "@/components/layout";
 import { ProtectedRoute, AdminProtectedRoute } from "@/guards";
 
@@ -168,6 +170,26 @@ export const routes: RouteConfig[] = [
     element: <GoogleCallbackPage />,
     layout: false,
   },
+  {
+    path: "/auth/github/callback",
+    element: (
+      <OAuthCallbackPage
+        provider="GitHub"
+        callbackFn={(code) => apiService.githubCallback(code)}
+      />
+    ),
+    layout: false,
+  },
+  {
+    path: "/auth/linkedin/callback",
+    element: (
+      <OAuthCallbackPage
+        provider="LinkedIn"
+        callbackFn={(code) => apiService.linkedinCallback(code)}
+      />
+    ),
+    layout: false,
+  },
 
   // Protected Routes - With Header/Footer
   {
@@ -234,4 +256,6 @@ export const ROUTE_PATHS = {
   ADMIN_COUNTRIES: getRoutePath("/admin/countries"),
   ADMIN_AUDIT: getRoutePath("/admin/audit"),
   GOOGLE_CALLBACK: getRoutePath("/auth/google/callback"),
+  GITHUB_CALLBACK: getRoutePath("/auth/github/callback"),
+  LINKEDIN_CALLBACK: getRoutePath("/auth/linkedin/callback"),
 } as const;

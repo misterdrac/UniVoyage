@@ -86,13 +86,38 @@ export function SignUpDialog({
   const handleGoogleSignUp = useCallback(async () => {
     try {
       await apiService.googleAuth();
-      // Reload user after successful OAuth
       await loadUser();
       toast.success("Account created with Google!");
       onOpenChange(false);
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Google sign up failed";
+      toast.error(errorMessage);
+    }
+  }, [onOpenChange, loadUser]);
+
+  const handleGitHubSignUp = useCallback(async () => {
+    try {
+      await apiService.githubAuth();
+      await loadUser();
+      toast.success("Account created with GitHub!");
+      onOpenChange(false);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "GitHub sign up failed";
+      toast.error(errorMessage);
+    }
+  }, [onOpenChange, loadUser]);
+
+  const handleLinkedInSignUp = useCallback(async () => {
+    try {
+      await apiService.linkedinAuth();
+      await loadUser();
+      toast.success("Account created with LinkedIn!");
+      onOpenChange(false);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "LinkedIn sign up failed";
       toast.error(errorMessage);
     }
   }, [onOpenChange, loadUser]);
@@ -175,6 +200,8 @@ export function SignUpDialog({
             isLoading={isLoading}
             isFormValid={isFormValid}
             onGoogleSignUp={handleGoogleSignUp}
+            onGitHubSignUp={handleGitHubSignUp}
+            onLinkedInSignUp={handleLinkedInSignUp}
             onLoginClick={handleLoginClick}
           />
         </form>

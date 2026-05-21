@@ -29,3 +29,9 @@ logging:
     org.hibernate.SQL: WARN
     org.hibernate.orm.jdbc.bind: WARN
     com.univoyage: ${LOGGING_LEVEL_COM_UNIVOYAGE:DEBUG}
+
+# Outbound email uses Resend/Postmark/etc., not JavaMail SMTP — disable SMTP health check.
+management:
+  health:
+    mail:
+      enabled: false

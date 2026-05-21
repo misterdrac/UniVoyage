@@ -14,7 +14,8 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:8080',
+        // Use 127.0.0.1 — Docker binds 8080 to IPv4 only; localhost may resolve to ::1 on Windows.
+        target: 'http://127.0.0.1:8080',
         changeOrigin: true,
         secure: false,
       },

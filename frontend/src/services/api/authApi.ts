@@ -97,6 +97,91 @@ function normalizeAuthError(error: string): string {
 }
 
 /**
+ * Shared OAuth popup flow used by all providers.
+ * Opens a popup to the provider's auth URL, listens for postMessage
+ * from the callback page, and resolves/rejects accordingly.
+ */
+async function oauthStart(
+  this: ApiClient,
+  provider: string,
+  endpoint: string,
+): Promise<void> {
+  const currentUrl = window.location.pathname + window.location.search;
+  sessionStorage.setItem("oauth_redirect", currentUrl);
+
+  const width = 500;
+  const height = 600;
+  const left = window.screenX + (window.outerWidth - width) / 2;
+  const top = window.screenY + (window.outerHeight - height) / 2;
+
+  const popup = window.open(
+    `${this.baseURL}${endpoint}`,
+    `${provider.toLowerCase()}-oauth`,
+    `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no,scrollbars=yes,resizable=yes`,
+  );
+
+  if (!popup) {
+    throw new Error("Popup blocked. Please allow popups for this site.");
+  }
+
+  return new Promise((resolve, reject) => {
+    const messageListener = (event: MessageEvent) => {
+      const allowedOrigins = [
+        window.location.origin,
+        "https://univoyage-production-d7c5.up.railway.app",
+      ];
+      if (!allowedOrigins.includes(event.origin)) return;
+
+      if (event.data.type === "OAUTH_SUCCESS") {
+        window.removeEventListener("message", messageListener);
+        popup.close();
+        resolve();
+      } else if (event.data.type === "OAUTH_ERROR") {
+        window.removeEventListener("message", messageListener);
+        popup.close();
+        reject(new Error(event.data.error || `${provider} OAuth failed`));
+      }
+    };
+
+    window.addEventListener("message", messageListener);
+
+    const checkClosed = setInterval(() => {
+      if (popup.closed) {
+        clearInterval(checkClosed);
+        window.removeEventListener("message", messageListener);
+        reject(new Error("OAuth popup was closed"));
+      }
+    }, 500);
+  });
+}
+
+async function oauthCallback(
+  this: ApiClient,
+  provider: string,
+  endpoint: string,
+  code: string,
+): Promise<AuthResponse<User>> {
+  const res = await this.request<AuthResponse<BackendUserDto>>(endpoint, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ code }),
+  });
+
+  const payload = this.adaptAuthPayload(res.data);
+
+  if (payload.success && payload.token) {
+    this.setAuthToken(payload.token);
+  }
+
+  return payload.success
+    ? payload
+    : {
+        success: false,
+        error: payload.error || res.error || `${provider} login failed`,
+      };
+}
+
+/**
  * Authentication API interface
  * Handles user login, registration, logout, and OAuth flows
  */
@@ -153,6 +238,12 @@ export interface AuthApi {
    * @returns Promise resolving to auth response with user data and token
    */
   googleCallback(code: string): Promise<AuthResponse<User>>;
+
+  githubAuth(): Promise<void>;
+  githubCallback(code: string): Promise<AuthResponse<User>>;
+
+  linkedinAuth(): Promise<void>;
+  linkedinCallback(code: string): Promise<AuthResponse<User>>;
 }
 
 export const authApi: {
@@ -355,5 +446,41 @@ export const authApi: {
           success: false,
           error: payload.error || res.error || "Google login failed",
         };
+  },
+
+  async githubAuth(this: ApiClient): Promise<void> {
+    return oauthStart.call(this, "GitHub", API_CONFIG.ENDPOINTS.AUTH.GITHUB);
+  },
+
+  async githubCallback(
+    this: ApiClient,
+    code: string,
+  ): Promise<AuthResponse<User>> {
+    return oauthCallback.call(
+      this,
+      "GitHub",
+      API_CONFIG.ENDPOINTS.AUTH.GITHUB_CALLBACK,
+      code,
+    );
+  },
+
+  async linkedinAuth(this: ApiClient): Promise<void> {
+    return oauthStart.call(
+      this,
+      "LinkedIn",
+      API_CONFIG.ENDPOINTS.AUTH.LINKEDIN,
+    );
+  },
+
+  async linkedinCallback(
+    this: ApiClient,
+    code: string,
+  ): Promise<AuthResponse<User>> {
+    return oauthCallback.call(
+      this,
+      "LinkedIn",
+      API_CONFIG.ENDPOINTS.AUTH.LINKEDIN_CALLBACK,
+      code,
+    );
   },
 };
