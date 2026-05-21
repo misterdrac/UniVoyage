@@ -1,5 +1,11 @@
 import React, { useState, useCallback } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import {
   ThemeProvider,
   AuthProvider,
@@ -33,6 +39,32 @@ function AppRoutes() {
   );
 }
 
+function AuthDialogQueryController({
+  onOpenLogin,
+}: {
+  onOpenLogin: () => void;
+}) {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  React.useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get("login") !== "1") return;
+
+    onOpenLogin();
+    params.delete("login");
+    navigate(
+      {
+        pathname: location.pathname,
+        search: params.toString() ? `?${params.toString()}` : "",
+      },
+      { replace: true },
+    );
+  }, [location.pathname, location.search, navigate, onOpenLogin]);
+
+  return null;
+}
+
 /**
  * AppContent component manages authentication dialogs and routing
  * Handles coordination between destination context auth dialog trigger
@@ -54,6 +86,12 @@ function AppContent() {
     setShowAuthDialog(false);
   }, [setShowAuthDialog]);
 
+  const handleOpenLoginFromRoute = useCallback(() => {
+    setIsLoginOpen(true);
+    setIsSignUpOpen(false);
+    setShowAuthDialog(false);
+  }, [setShowAuthDialog]);
+
   // Show login dialog when showAuthDialog is triggered from destination context
   React.useEffect(() => {
     if (showAuthDialog && !isLoginOpen && !isSignUpOpen) {
@@ -65,6 +103,7 @@ function AppContent() {
     <>
       <AuthLoadingOverlay />
       <Router>
+        <AuthDialogQueryController onOpenLogin={handleOpenLoginFromRoute} />
         <RouteChangeHandler />
         <ScrollToTop />
         <AppRoutes />

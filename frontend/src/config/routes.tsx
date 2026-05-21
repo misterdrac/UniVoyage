@@ -3,7 +3,9 @@ import {
   HomePage,
   AboutPage,
   ContactPage,
+  EmailVerificationPage,
   ProfilePage,
+  PasswordResetPage,
   MyTripsPage,
   TripDetailPage,
   PlanTripPage,
@@ -168,6 +170,26 @@ export const routes: RouteConfig[] = [
     element: <OAuthCallbackPage />,
     layout: false,
   },
+  {
+    path: "/auth/reset-password",
+    element: <PasswordResetPage />,
+    layout: false,
+  },
+  {
+    path: "/auth/reset",
+    element: <PasswordResetPage />,
+    layout: false,
+  },
+  {
+    path: "/auth/verify-email",
+    element: <EmailVerificationPage />,
+    layout: false,
+  },
+  {
+    path: "/auth/verify",
+    element: <EmailVerificationPage />,
+    layout: false,
+  },
 
   // Protected Routes - With Header/Footer
   {
@@ -236,4 +258,8 @@ export const ROUTE_PATHS = {
   GOOGLE_CALLBACK: "/auth/google/callback",
   GITHUB_CALLBACK: "/auth/github/callback",
   LINKEDIN_CALLBACK: "/auth/linkedin/callback",
+  PASSWORD_RESET: getRoutePath("/auth/reset-password"),
+  PASSWORD_RESET_ALIAS: getRoutePath("/auth/reset"),
+  EMAIL_VERIFY: getRoutePath("/auth/verify-email"),
+  EMAIL_VERIFY_ALIAS: getRoutePath("/auth/verify"),
 } as const;

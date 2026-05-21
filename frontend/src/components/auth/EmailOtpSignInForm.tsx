@@ -318,7 +318,7 @@ export function EmailOtpSignInForm({
     if (state.status === "success") return "Email code verified.";
     if (!codeEntryVisible) return "";
     if (isExpired) return "Code expired. Request a new code to continue.";
-    return "Code expires in 10 minutes.";
+    return "Check your email. Code expires in 10 minutes.";
   }, [
     codeEntryVisible,
     isExpired,
@@ -374,7 +374,7 @@ export function EmailOtpSignInForm({
           <div className="flex items-center justify-between gap-3 text-sm">
             <div className="flex items-center gap-2 text-muted-foreground">
               <ShieldCheck className="h-4 w-4 text-primary" />
-              <span>Code sent to {trimmedEmail}</span>
+              <span>Check your email at {trimmedEmail}</span>
             </div>
             <button
               type="button"

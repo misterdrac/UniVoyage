@@ -207,12 +207,20 @@ export function LoginDialog({
 
             {/* Password Input */}
             <div className="space-y-2">
-              <label
-                htmlFor="password"
-                className="text-sm font-medium text-foreground"
-              >
-                Password
-              </label>
+              <div className="flex items-center justify-between gap-3">
+                <label
+                  htmlFor="password"
+                  className="text-sm font-medium text-foreground"
+                >
+                  Password
+                </label>
+                <a
+                  href="/auth/reset-password"
+                  className="text-sm font-medium text-primary hover:underline"
+                >
+                  Forgot password?
+                </a>
+              </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input

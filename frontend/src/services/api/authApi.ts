@@ -177,8 +177,23 @@ const otpInvalidCodeError =
   "That code did not work. Check the 6 digits or request a new code.";
 const otpRateLimitError =
   "Too many attempts. Please wait a little before trying again.";
+const emailActionGenericError =
+  "We could not complete that request. Please try again.";
+const passwordResetInvalidLinkError =
+  "This reset link did not work. Request a new password reset email.";
+const emailVerificationInvalidLinkError =
+  "This verification link did not work. Request a new verification email.";
+const emailActionRateLimitError =
+  "Too many attempts. Please wait a little before trying again.";
 
 export interface OtpAcceptedResponse {
+  success: boolean;
+  message?: string;
+  error?: string;
+  retryAfterSeconds?: number;
+}
+
+export interface EmailActionResponse {
   success: boolean;
   message?: string;
   error?: string;
@@ -188,6 +203,52 @@ export interface OtpAcceptedResponse {
 type BackendOtpAcceptedResponse = {
   message?: string;
 };
+
+type BackendEmailActionResponse = {
+  message?: string;
+};
+
+function emailActionFromResponse(
+  response: {
+    success: boolean;
+    data?: BackendEmailActionResponse;
+    error?: string;
+  },
+  defaultMessage?: string,
+): EmailActionResponse {
+  return {
+    success: response.success,
+    message: response.data?.message || defaultMessage,
+    error: response.error ? emailActionGenericError : undefined,
+  };
+}
+
+function emailActionFailure(
+  error: unknown,
+  fallback: string,
+  invalidLinkMessage?: string,
+): EmailActionResponse {
+  const retryAfterSeconds = getAuthRetryAfterSeconds(error);
+  const status = getAuthErrorStatus(error);
+
+  if (status === 429) {
+    return {
+      success: false,
+      error: emailActionRateLimitError,
+      retryAfterSeconds,
+    };
+  }
+
+  if (status === 400 && invalidLinkMessage) {
+    return { success: false, error: invalidLinkMessage };
+  }
+
+  const rawError = getAuthErrorMessage(error, fallback);
+  return {
+    success: false,
+    error: rawError ? emailActionGenericError : fallback,
+  };
+}
 
 /**
  * Authentication API interface
@@ -236,6 +297,21 @@ export interface AuthApi {
     code: string,
     purpose?: EmailOtpPurpose,
   ): Promise<AuthResponse<User>>;
+
+  /** Requests password reset instructions by email. */
+  requestPasswordReset(email: string): Promise<EmailActionResponse>;
+
+  /** Completes password reset using a token from an email deep link. */
+  resetPassword(
+    token: string,
+    newPassword: string,
+  ): Promise<EmailActionResponse>;
+
+  /** Requests email verification instructions by email. */
+  requestEmailVerification(email: string): Promise<EmailActionResponse>;
+
+  /** Confirms an email verification token from an email deep link. */
+  confirmEmailVerification(token: string): Promise<EmailActionResponse>;
 
   /**
    * Logs out the current user
@@ -464,6 +540,79 @@ export const authApi: {
         error: normalizeOtpError(rawError) || otpGenericError,
         retryAfterSeconds,
       };
+    }
+  },
+
+  async requestPasswordReset(this: ApiClient, email) {
+    const defaultMessage =
+      "If an account exists for this email, password reset instructions have been sent.";
+    try {
+      const response = await this.request<BackendEmailActionResponse>(
+        API_CONFIG.ENDPOINTS.AUTH.PASSWORD_FORGOT,
+        {
+          method: "POST",
+          body: JSON.stringify({ email }),
+        },
+      );
+
+      return emailActionFromResponse(response, defaultMessage);
+    } catch (error: unknown) {
+      return emailActionFailure(error, "Password reset request failed");
+    }
+  },
+
+  async resetPassword(this: ApiClient, token, newPassword) {
+    try {
+      await this.request<void>(API_CONFIG.ENDPOINTS.AUTH.PASSWORD_RESET, {
+        method: "POST",
+        body: JSON.stringify({ token, newPassword }),
+      });
+
+      return { success: true };
+    } catch (error: unknown) {
+      return emailActionFailure(
+        error,
+        "Password reset failed",
+        passwordResetInvalidLinkError,
+      );
+    }
+  },
+
+  async requestEmailVerification(this: ApiClient, email) {
+    const defaultMessage =
+      "If an account exists for this email, verification instructions have been sent.";
+    try {
+      const response = await this.request<BackendEmailActionResponse>(
+        API_CONFIG.ENDPOINTS.AUTH.EMAIL_VERIFICATION_REQUEST,
+        {
+          method: "POST",
+          body: JSON.stringify({ email }),
+        },
+      );
+
+      return emailActionFromResponse(response, defaultMessage);
+    } catch (error: unknown) {
+      return emailActionFailure(error, "Email verification request failed");
+    }
+  },
+
+  async confirmEmailVerification(this: ApiClient, token) {
+    try {
+      await this.request<void>(
+        API_CONFIG.ENDPOINTS.AUTH.EMAIL_VERIFICATION_CONFIRM,
+        {
+          method: "POST",
+          body: JSON.stringify({ token }),
+        },
+      );
+
+      return { success: true };
+    } catch (error: unknown) {
+      return emailActionFailure(
+        error,
+        "Email verification failed",
+        emailVerificationInvalidLinkError,
+      );
     }
   },
 

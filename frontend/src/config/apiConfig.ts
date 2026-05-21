@@ -26,6 +26,10 @@ export const API_CONFIG = {
       OTP_REQUEST: "/auth/otp/request",
       OTP_RESEND: "/auth/otp/resend",
       OTP_VERIFY: "/auth/otp/verify",
+      PASSWORD_FORGOT: "/auth/password/forgot",
+      PASSWORD_RESET: "/auth/password/reset",
+      EMAIL_VERIFICATION_REQUEST: "/auth/email/verification/request",
+      EMAIL_VERIFICATION_CONFIRM: "/auth/email/verification/confirm",
     },
     USER: {
       UPDATE_PROFILE: "/user/profile",

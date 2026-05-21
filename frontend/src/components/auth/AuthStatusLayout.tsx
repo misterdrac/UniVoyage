@@ -13,6 +13,7 @@ interface AuthStatusLayoutProps {
   title: string;
   description: string;
   icon: ReactNode;
+  children?: ReactNode;
   footer?: ReactNode;
 }
 
@@ -24,6 +25,7 @@ export function AuthStatusLayout({
   title,
   description,
   icon,
+  children,
   footer,
 }: AuthStatusLayoutProps) {
   return (
@@ -60,9 +62,10 @@ export function AuthStatusLayout({
                 </CardDescription>
               </div>
             </CardHeader>
-            {footer && (
-              <CardContent className="flex justify-center pt-0 pb-8">
-                {footer}
+            {(children || footer) && (
+              <CardContent className="space-y-4 pt-2 pb-8">
+                {children}
+                {footer && <div className="flex justify-center">{footer}</div>}
               </CardContent>
             )}
           </Card>
