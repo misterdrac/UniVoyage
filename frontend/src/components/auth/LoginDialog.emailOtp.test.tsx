@@ -127,13 +127,13 @@ const server = setupServer(
 );
 
 function renderLoginDialog(onOpenChange = vi.fn()) {
-  render(
+  const result = render(
     <AuthProvider>
       <LoginDialog open onOpenChange={onOpenChange} />
     </AuthProvider>,
   );
 
-  return { onOpenChange };
+  return { ...result, onOpenChange };
 }
 
 async function requestCode(email = "otp@example.com") {
@@ -219,6 +219,163 @@ describe("LoginDialog email OTP flow", () => {
     });
     expect(
       screen.getByRole("button", { name: /resend in|resend code/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("keeps cannot-complete verify errors generic", async () => {
+    server.use(
+      http.post(`${API_BASE_URL}/auth/otp/verify`, async ({ request }) => {
+        const body = (await request.json()) as Record<string, unknown>;
+        capturedOtpRequests.push({ endpoint: "verify", body });
+
+        return HttpResponse.json(
+          {
+            success: false,
+            data: null,
+            error: "Unable to complete sign-in. Please register first.",
+          },
+          { status: 400 },
+        );
+      }),
+    );
+
+    renderLoginDialog();
+    const user = await requestCode();
+
+    await user.click(screen.getByLabelText("Digit 1 of 6"));
+    await user.paste("123456");
+    await user.click(screen.getByRole("button", { name: /verify code/i }));
+
+    expect(
+      await screen.findByText(
+        /that code did not work\. check the 6 digits or request a new code\./i,
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("disables requesting after a request 429 Retry-After header", async () => {
+    server.use(
+      http.post(`${API_BASE_URL}/auth/otp/request`, async ({ request }) => {
+        capturedOtpRequests.push({
+          endpoint: "request",
+          body: (await request.json()) as Record<string, unknown>,
+        });
+
+        return HttpResponse.json(
+          {
+            success: false,
+            data: null,
+            error: "Too many attempts. Please try again later.",
+          },
+          {
+            status: 429,
+            headers: { "Retry-After": "120" },
+          },
+        );
+      }),
+    );
+
+    renderLoginDialog();
+    const user = userEvent.setup();
+
+    await user.click(
+      screen.getByRole("button", { name: /email me a sign-in code/i }),
+    );
+    await user.type(screen.getByLabelText(/^email$/i), "otp@example.com");
+    await user.click(screen.getByRole("button", { name: /email me a code/i }));
+
+    expect(
+      await screen.findByText(/too many attempts\. try again in 2 min\./i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /email me a code/i }),
+    ).toBeDisabled();
+  });
+
+  it("locks verify after a 429 Retry-After header and survives rerender", async () => {
+    server.use(
+      http.post(`${API_BASE_URL}/auth/otp/verify`, async ({ request }) => {
+        const body = (await request.json()) as Record<string, unknown>;
+        capturedOtpRequests.push({ endpoint: "verify", body });
+
+        return HttpResponse.json(
+          {
+            success: false,
+            data: null,
+            error: "Too many attempts. Please try again later.",
+          },
+          {
+            status: 429,
+            headers: { "Retry-After": "120" },
+          },
+        );
+      }),
+    );
+
+    const onOpenChange = vi.fn();
+    const { rerender } = renderLoginDialog(onOpenChange);
+    const user = await requestCode();
+
+    await user.click(screen.getByLabelText("Digit 1 of 6"));
+    await user.paste("123456");
+    await user.click(screen.getByRole("button", { name: /verify code/i }));
+
+    expect(
+      await screen.findByText(/too many attempts\. try again in 2 min\./i),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /verify code/i })).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: /resend in|resend code/i }),
+    ).toBeDisabled();
+
+    await user.click(screen.getByLabelText("Digit 6 of 6"));
+    await user.keyboard("{Backspace}");
+    expect(
+      screen.getByText(/too many attempts\. try again in 2 min\./i),
+    ).toBeInTheDocument();
+
+    rerender(
+      <AuthProvider>
+        <LoginDialog open onOpenChange={onOpenChange} />
+      </AuthProvider>,
+    );
+
+    expect(
+      screen.getByText(/too many attempts\. try again in 2 min\./i),
+    ).toBeInTheDocument();
+  });
+
+  it("uses retry seconds from a 429 JSON body when no header is present", async () => {
+    server.use(
+      http.post(`${API_BASE_URL}/auth/otp/request`, async ({ request }) => {
+        capturedOtpRequests.push({
+          endpoint: "request",
+          body: (await request.json()) as Record<string, unknown>,
+        });
+
+        return HttpResponse.json(
+          {
+            success: false,
+            data: null,
+            error: "Too many attempts. Please try again later.",
+            retryAfterSeconds: 75,
+          },
+          { status: 429 },
+        );
+      }),
+    );
+
+    renderLoginDialog();
+    const user = userEvent.setup();
+
+    await user.click(
+      screen.getByRole("button", { name: /email me a sign-in code/i }),
+    );
+    await user.type(screen.getByLabelText(/^email$/i), "otp@example.com");
+    await user.click(screen.getByRole("button", { name: /email me a code/i }));
+
+    expect(
+      await screen.findByText(/too many attempts\. try again in 2 min\./i),
     ).toBeInTheDocument();
   });
 

@@ -1,4 +1,4 @@
-import { API_CONFIG, type AuthResponse } from "@/config/apiConfig";
+import { API_CONFIG, ApiError, type AuthResponse } from "@/config/apiConfig";
 import { beginOAuth as runBeginOAuth } from "@/lib/oauth";
 import type {
   EmailOtpPurpose,
@@ -163,10 +163,26 @@ function getAuthErrorMessage(error: unknown, fallback: string): string {
   return fallback;
 }
 
+function getAuthErrorStatus(error: unknown): number | undefined {
+  return error instanceof ApiError ? error.status : undefined;
+}
+
+function getAuthRetryAfterSeconds(error: unknown): number | undefined {
+  return error instanceof ApiError ? error.retryAfterSeconds : undefined;
+}
+
+const otpGenericError =
+  "We could not send or verify your code. Please try again.";
+const otpInvalidCodeError =
+  "That code did not work. Check the 6 digits or request a new code.";
+const otpRateLimitError =
+  "Too many attempts. Please wait a little before trying again.";
+
 export interface OtpAcceptedResponse {
   success: boolean;
   message?: string;
   error?: string;
+  retryAfterSeconds?: number;
 }
 
 type BackendOtpAcceptedResponse = {
@@ -363,7 +379,15 @@ export const authApi: {
       };
     } catch (error: unknown) {
       const rawError = getAuthErrorMessage(error, "Email code request failed");
-      return { success: false, error: normalizeOtpError(rawError) };
+      const retryAfterSeconds = getAuthRetryAfterSeconds(error);
+      return {
+        success: false,
+        error:
+          getAuthErrorStatus(error) === 429
+            ? otpRateLimitError
+            : normalizeOtpError(rawError),
+        retryAfterSeconds,
+      };
     }
   },
 
@@ -386,7 +410,15 @@ export const authApi: {
       };
     } catch (error: unknown) {
       const rawError = getAuthErrorMessage(error, "Email code resend failed");
-      return { success: false, error: normalizeOtpError(rawError) };
+      const retryAfterSeconds = getAuthRetryAfterSeconds(error);
+      return {
+        success: false,
+        error:
+          getAuthErrorStatus(error) === 429
+            ? otpRateLimitError
+            : normalizeOtpError(rawError),
+        retryAfterSeconds,
+      };
     }
   },
 
@@ -416,7 +448,22 @@ export const authApi: {
         error,
         "Email code verification failed",
       );
-      return { success: false, error: normalizeOtpError(rawError) };
+      const retryAfterSeconds = getAuthRetryAfterSeconds(error);
+      if (getAuthErrorStatus(error) === 429) {
+        return {
+          success: false,
+          error: otpRateLimitError,
+          retryAfterSeconds,
+        };
+      }
+      if (getAuthErrorStatus(error) === 400) {
+        return { success: false, error: otpInvalidCodeError };
+      }
+      return {
+        success: false,
+        error: normalizeOtpError(rawError) || otpGenericError,
+        retryAfterSeconds,
+      };
     }
   },
 

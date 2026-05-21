@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { VALIDATION } from "@/lib/constants";
 import { apiService } from "@/services/api";
 import type { EmailOtpPurpose } from "@/types/auth";
+import { RetryAfterNotice } from "./RetryAfterNotice";
 import { OtpCodeInput } from "./OtpCodeInput";
 import { emptyOtpDigits, OTP_CODE_LENGTH } from "./otpCode";
 
@@ -24,6 +25,8 @@ interface OtpState {
   error: string;
   expiresAt: number | null;
   resendAvailableAt: number | null;
+  requestRetryUntil: number | null;
+  verifyLockoutUntil: number | null;
   now: number;
   isRequesting: boolean;
 }
@@ -33,10 +36,20 @@ type OtpAction =
   | { type: "set_code_digits"; codeDigits: string[] }
   | { type: "request_pending"; now: number }
   | { type: "request_success"; email: string; message: string; now: number }
-  | { type: "request_failure"; error: string; now: number }
+  | {
+      type: "request_failure";
+      error: string;
+      now: number;
+      retryUntil?: number;
+    }
   | { type: "verify_pending"; now: number }
   | { type: "verify_success"; now: number }
-  | { type: "verify_failure"; error: string; now: number }
+  | {
+      type: "verify_failure";
+      error: string;
+      now: number;
+      retryUntil?: number;
+    }
   | { type: "tick"; now: number }
   | { type: "edit_email" }
   | { type: "reset"; email?: string };
@@ -45,6 +58,8 @@ const defaultOtpMessage =
   "If this email can receive messages, a verification code has been sent.";
 const genericOtpError =
   "We could not send or verify your code. Please try again.";
+const retryOtpError =
+  "Too many attempts. Please wait a little before trying again.";
 
 function createInitialState(email = ""): OtpState {
   return {
@@ -55,6 +70,8 @@ function createInitialState(email = ""): OtpState {
     error: "",
     expiresAt: null,
     resendAvailableAt: null,
+    requestRetryUntil: null,
+    verifyLockoutUntil: null,
     now: Date.now(),
     isRequesting: false,
   };
@@ -63,7 +80,13 @@ function createInitialState(email = ""): OtpState {
 function otpReducer(state: OtpState, action: OtpAction): OtpState {
   switch (action.type) {
     case "set_email":
-      return { ...state, email: action.email, error: "" };
+      return {
+        ...state,
+        email: action.email,
+        error: "",
+        requestRetryUntil: null,
+        verifyLockoutUntil: null,
+      };
     case "set_code_digits":
       return { ...state, codeDigits: action.codeDigits, error: "" };
     case "request_pending":
@@ -78,6 +101,8 @@ function otpReducer(state: OtpState, action: OtpAction): OtpState {
         error: "",
         expiresAt: action.now + OTP_EXPIRY_MS,
         resendAvailableAt: action.now + RESEND_COOLDOWN_MS,
+        requestRetryUntil: null,
+        verifyLockoutUntil: null,
         now: action.now,
         isRequesting: false,
       };
@@ -86,6 +111,7 @@ function otpReducer(state: OtpState, action: OtpAction): OtpState {
         ...state,
         status: "error",
         error: action.error,
+        requestRetryUntil: action.retryUntil ?? null,
         now: action.now,
         isRequesting: false,
       };
@@ -98,10 +124,31 @@ function otpReducer(state: OtpState, action: OtpAction): OtpState {
         ...state,
         status: "error",
         error: action.error,
+        verifyLockoutUntil: action.retryUntil ?? null,
         now: action.now,
       };
-    case "tick":
-      return { ...state, now: action.now };
+    case "tick": {
+      const requestRetryUntil =
+        state.requestRetryUntil && state.requestRetryUntil > action.now
+          ? state.requestRetryUntil
+          : null;
+      const verifyLockoutUntil =
+        state.verifyLockoutUntil && state.verifyLockoutUntil > action.now
+          ? state.verifyLockoutUntil
+          : null;
+      const clearRetryError =
+        state.error === retryOtpError &&
+        !requestRetryUntil &&
+        !verifyLockoutUntil;
+
+      return {
+        ...state,
+        error: clearRetryError ? "" : state.error,
+        requestRetryUntil,
+        verifyLockoutUntil,
+        now: action.now,
+      };
+    }
     case "edit_email":
       return createInitialState(state.email);
     case "reset":
@@ -144,12 +191,24 @@ export function EmailOtpSignInForm({
   );
 
   React.useEffect(() => {
-    if (!state.expiresAt && !state.resendAvailableAt) return;
+    if (
+      !state.expiresAt &&
+      !state.resendAvailableAt &&
+      !state.requestRetryUntil &&
+      !state.verifyLockoutUntil
+    ) {
+      return;
+    }
     const intervalId = window.setInterval(() => {
       dispatch({ type: "tick", now: Date.now() });
     }, 1000);
     return () => window.clearInterval(intervalId);
-  }, [state.expiresAt, state.resendAvailableAt]);
+  }, [
+    state.expiresAt,
+    state.requestRetryUntil,
+    state.resendAvailableAt,
+    state.verifyLockoutUntil,
+  ]);
 
   const trimmedEmail = state.email.trim();
   const isEmailValid = VALIDATION.EMAIL_REGEX.test(trimmedEmail);
@@ -161,24 +220,35 @@ export function EmailOtpSignInForm({
   const resendInSeconds = state.resendAvailableAt
     ? Math.max(0, Math.ceil((state.resendAvailableAt - state.now) / 1000))
     : 0;
+  const requestRetryInSeconds = state.requestRetryUntil
+    ? Math.max(0, Math.ceil((state.requestRetryUntil - state.now) / 1000))
+    : 0;
+  const verifyLockoutInSeconds = state.verifyLockoutUntil
+    ? Math.max(0, Math.ceil((state.verifyLockoutUntil - state.now) / 1000))
+    : 0;
   const isExpired = expiresInSeconds === 0;
+  const isRequestRetryActive = requestRetryInSeconds > 0;
+  const isVerifyLockoutActive = verifyLockoutInSeconds > 0;
   const isVerifying = state.status === "verifying";
   const hasCodeChallenge = state.expiresAt !== null;
   const canSubmitCode =
     hasCodeChallenge &&
     !isExpired &&
+    !isVerifyLockoutActive &&
     isCodeValid &&
     !isVerifying &&
     !state.isRequesting;
   const canResend =
     hasCodeChallenge &&
     resendInSeconds === 0 &&
+    !isRequestRetryActive &&
+    !isVerifyLockoutActive &&
     !isVerifying &&
     !state.isRequesting;
   const codeEntryVisible = hasCodeChallenge;
 
   const requestCode = async (isResend = false) => {
-    if (!isEmailValid || state.isRequesting) return;
+    if (!isEmailValid || state.isRequesting || isRequestRetryActive) return;
 
     const now = Date.now();
     dispatch({ type: "request_pending", now });
@@ -196,9 +266,21 @@ export function EmailOtpSignInForm({
       return;
     }
 
-    const error = result.error || genericOtpError;
-    dispatch({ type: "request_failure", error, now: Date.now() });
-    toast.error(error);
+    const retryUntil = result.retryAfterSeconds
+      ? Date.now() + result.retryAfterSeconds * 1000
+      : undefined;
+    const error = result.retryAfterSeconds
+      ? retryOtpError
+      : result.error || genericOtpError;
+    dispatch({
+      type: "request_failure",
+      error,
+      retryUntil,
+      now: Date.now(),
+    });
+    if (!result.retryAfterSeconds) {
+      toast.error(error);
+    }
   };
 
   const verifyCode = async () => {
@@ -213,18 +295,38 @@ export function EmailOtpSignInForm({
       return;
     }
 
-    const error = result.error || genericOtpError;
-    dispatch({ type: "verify_failure", error, now: Date.now() });
-    toast.error(error);
+    const retryUntil = result.retryAfterSeconds
+      ? Date.now() + result.retryAfterSeconds * 1000
+      : undefined;
+    const error = result.retryAfterSeconds
+      ? retryOtpError
+      : result.error || genericOtpError;
+    dispatch({
+      type: "verify_failure",
+      error,
+      retryUntil,
+      now: Date.now(),
+    });
+    if (!result.retryAfterSeconds) {
+      toast.error(error);
+    }
   };
 
   const statusMessage = React.useMemo(() => {
+    if (isVerifyLockoutActive || isRequestRetryActive) return "";
     if (state.error) return state.error;
     if (state.status === "success") return "Email code verified.";
     if (!codeEntryVisible) return "";
     if (isExpired) return "Code expired. Request a new code to continue.";
     return "Code expires in 10 minutes.";
-  }, [codeEntryVisible, isExpired, state.error, state.status]);
+  }, [
+    codeEntryVisible,
+    isExpired,
+    isRequestRetryActive,
+    isVerifyLockoutActive,
+    state.error,
+    state.status,
+  ]);
 
   return (
     <form
@@ -319,13 +421,30 @@ export function EmailOtpSignInForm({
             {statusMessage}
           </p>
         )}
-        {codeEntryVisible && !isExpired && (
-          <p className="mt-1 text-xs text-muted-foreground">
-            {resendInSeconds > 0
-              ? `You can request another code in ${formatCountdown(resendInSeconds)}.`
-              : `You can request another code now.`}
-          </p>
+        {isRequestRetryActive && (
+          <RetryAfterNotice
+            retryAfterSeconds={requestRetryInSeconds}
+            message="Too many attempts."
+            variant="cooldown"
+          />
         )}
+        {isVerifyLockoutActive && (
+          <RetryAfterNotice
+            retryAfterSeconds={verifyLockoutInSeconds}
+            message="Too many attempts."
+            variant="lockout"
+          />
+        )}
+        {codeEntryVisible &&
+          !isExpired &&
+          !isRequestRetryActive &&
+          !isVerifyLockoutActive && (
+            <p className="mt-1 text-xs text-muted-foreground">
+              {resendInSeconds > 0
+                ? `You can request another code in ${formatCountdown(resendInSeconds)}.`
+                : `You can request another code now.`}
+            </p>
+          )}
       </div>
 
       <Button
@@ -334,7 +453,7 @@ export function EmailOtpSignInForm({
         disabled={
           codeEntryVisible
             ? !canSubmitCode
-            : !isEmailValid || state.isRequesting
+            : !isEmailValid || state.isRequesting || isRequestRetryActive
         }
       >
         {codeEntryVisible

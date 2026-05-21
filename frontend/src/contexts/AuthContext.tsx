@@ -47,7 +47,11 @@ interface AuthContextType {
     email: string,
     code: string,
     purpose?: EmailOtpPurpose,
-  ) => Promise<{ success: boolean; error?: string }>;
+  ) => Promise<{
+    success: boolean;
+    error?: string;
+    retryAfterSeconds?: number;
+  }>;
   signup: (data: SignupData) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   updateProfile: (data: {
@@ -237,7 +241,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       email: string,
       code: string,
       purpose: EmailOtpPurpose = "REGISTER",
-    ): Promise<{ success: boolean; error?: string }> => {
+    ): Promise<{
+      success: boolean;
+      error?: string;
+      retryAfterSeconds?: number;
+    }> => {
       try {
         setIsLoading(true);
         if (!email || !code || code.length !== 6) {
@@ -254,6 +262,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return {
           success: false,
           error: result.error || "We could not complete email-code sign-in.",
+          retryAfterSeconds: result.retryAfterSeconds,
         };
       } catch (error) {
         console.error("Email OTP sign-in error:", error);

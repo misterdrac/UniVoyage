@@ -79,6 +79,7 @@ export interface ApiResponse<T = unknown> {
   data?: T;
   error?: string;
   message?: string;
+  retryAfterSeconds?: number;
 }
 
 export interface AuthResponse<TUser = unknown> {
@@ -87,17 +88,25 @@ export interface AuthResponse<TUser = unknown> {
   token?: string;
   csrfToken?: string;
   error?: string;
+  retryAfterSeconds?: number;
 }
 
 // Error types
 export class ApiError extends Error {
   status?: number;
   code?: string;
+  retryAfterSeconds?: number;
 
-  constructor(message: string, status?: number, code?: string) {
+  constructor(
+    message: string,
+    status?: number,
+    code?: string,
+    retryAfterSeconds?: number,
+  ) {
     super(message);
     this.name = "ApiError";
     this.status = status;
     this.code = code;
+    this.retryAfterSeconds = retryAfterSeconds;
   }
 }

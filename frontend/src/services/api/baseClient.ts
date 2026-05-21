@@ -8,6 +8,46 @@ import { API_CONSTANTS } from "@/lib/constants";
 import type { User, CountryDto, VisitedCountryDto } from "@/types/user";
 import type { BackendUserDto } from "./types";
 
+type ApiResponseBody = {
+  error?: unknown;
+  message?: unknown;
+  code?: unknown;
+  retryAfter?: unknown;
+  retryAfterSec?: unknown;
+  retryAfterSeconds?: unknown;
+};
+
+function parsePositiveSeconds(value: unknown): number | undefined {
+  if (typeof value === "number" && Number.isFinite(value) && value > 0) {
+    return Math.ceil(value);
+  }
+  if (typeof value !== "string") return undefined;
+
+  const trimmed = value.trim();
+  if (!trimmed) return undefined;
+
+  const seconds = Number(trimmed);
+  if (Number.isFinite(seconds) && seconds > 0) {
+    return Math.ceil(seconds);
+  }
+
+  const dateMs = Date.parse(trimmed);
+  if (!Number.isNaN(dateMs)) {
+    const deltaSeconds = Math.ceil((dateMs - Date.now()) / 1000);
+    return deltaSeconds > 0 ? deltaSeconds : undefined;
+  }
+
+  return undefined;
+}
+
+function retryAfterFromBody(body: ApiResponseBody): number | undefined {
+  return (
+    parsePositiveSeconds(body.retryAfterSeconds) ??
+    parsePositiveSeconds(body.retryAfterSec) ??
+    parsePositiveSeconds(body.retryAfter)
+  );
+}
+
 /**
  * Base HTTP client for API communication
  */
@@ -156,26 +196,37 @@ export class ApiClient {
       const response = await fetch(url, config);
 
       const contentType = response.headers.get("content-type");
-      let data: any = {};
+      let data: ApiResponseBody = {};
 
       if (contentType && contentType.includes("application/json")) {
         const text = await response.text();
         if (text) {
           try {
             data = JSON.parse(text);
-          } catch (e) {
+          } catch {
             data = { error: "Invalid JSON response", message: text };
           }
         }
       }
 
       if (!response.ok) {
+        const retryAfterSeconds =
+          parsePositiveSeconds(response.headers.get("Retry-After")) ??
+          retryAfterFromBody(data);
         const errorMessage =
-          data.error || data.message || `Request failed: ${response.status}`;
-        throw new ApiError(errorMessage, response.status, data.code);
+          (typeof data.error === "string" && data.error) ||
+          (typeof data.message === "string" && data.message) ||
+          `Request failed: ${response.status}`;
+        const errorCode = typeof data.code === "string" ? data.code : undefined;
+        throw new ApiError(
+          errorMessage,
+          response.status,
+          errorCode,
+          retryAfterSeconds,
+        );
       }
 
-      return data;
+      return data as ApiResponse<T>;
     } catch (error) {
       if (error instanceof ApiError) throw error;
       throw new ApiError(
