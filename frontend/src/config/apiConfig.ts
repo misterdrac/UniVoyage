@@ -23,6 +23,9 @@ export const API_CONFIG = {
       LINKEDIN: "/auth/linkedin",
       LINKEDIN_CALLBACK: "/auth/linkedin/callback",
       IDENTITIES: "/auth/identities",
+      OTP_REQUEST: "/auth/otp/request",
+      OTP_RESEND: "/auth/otp/resend",
+      OTP_VERIFY: "/auth/otp/verify",
     },
     USER: {
       UPDATE_PROFILE: "/user/profile",
@@ -78,7 +81,7 @@ export interface ApiResponse<T = unknown> {
   message?: string;
 }
 
-export interface AuthResponse<TUser = any> {
+export interface AuthResponse<TUser = unknown> {
   success: boolean;
   user?: TUser;
   token?: string;

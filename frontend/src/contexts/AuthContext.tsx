@@ -6,7 +6,12 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import type { LinkedIdentity, OAuthProvider, SignInMethod } from "@/types/auth";
+import type {
+  EmailOtpPurpose,
+  LinkedIdentity,
+  OAuthProvider,
+  SignInMethod,
+} from "@/types/auth";
 import type { User } from "@/types/user";
 import { apiService } from "@/services/api";
 import { API_CONSTANTS } from "@/lib/constants";
@@ -37,6 +42,11 @@ interface AuthContextType {
   login: (
     email: string,
     password: string,
+  ) => Promise<{ success: boolean; error?: string }>;
+  emailOtpSignIn: (
+    email: string,
+    code: string,
+    purpose?: EmailOtpPurpose,
   ) => Promise<{ success: boolean; error?: string }>;
   signup: (data: SignupData) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
@@ -222,6 +232,45 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const emailOtpSignIn = useCallback(
+    async (
+      email: string,
+      code: string,
+      purpose: EmailOtpPurpose = "REGISTER",
+    ): Promise<{ success: boolean; error?: string }> => {
+      try {
+        setIsLoading(true);
+        if (!email || !code || code.length !== 6) {
+          return {
+            success: false,
+            error: "Enter the 6-digit code from your email.",
+          };
+        }
+        const result = await apiService.verifyEmailOtp(email, code, purpose);
+        if (result.success && result.user) {
+          await refreshSession();
+          return { success: true };
+        }
+        return {
+          success: false,
+          error: result.error || "We could not complete email-code sign-in.",
+        };
+      } catch (error) {
+        console.error("Email OTP sign-in error:", error);
+        return {
+          success: false,
+          error:
+            error instanceof Error
+              ? error.message
+              : "An error occurred during email-code sign-in",
+        };
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [refreshSession],
+  );
+
   const beginOAuth = useCallback(
     async (provider: OAuthProvider) => {
       await startOAuth(provider);
@@ -290,6 +339,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       identitiesLoading,
       identitiesError,
       login,
+      emailOtpSignIn,
       signup,
       logout,
       updateProfile,
@@ -306,6 +356,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       identitiesLoading,
       identitiesError,
       login,
+      emailOtpSignIn,
       signup,
       logout,
       updateProfile,

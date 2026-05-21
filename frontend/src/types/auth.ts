@@ -1,6 +1,13 @@
 /** Supported OAuth provider keys (must match backend). */
 export type OAuthProvider = "google" | "github" | "linkedin";
 
+/** Supported email OTP purposes (must match backend). */
+export type EmailOtpPurpose =
+  | "LOGIN"
+  | "REGISTER"
+  | "PASSWORD_RESET"
+  | "ADMIN_LOGIN";
+
 /** How the user last signed in (from GET /auth/me). */
 export type SignInMethod =
   | OAuthProvider

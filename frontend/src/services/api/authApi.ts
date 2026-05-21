@@ -1,6 +1,10 @@
 import { API_CONFIG, type AuthResponse } from "@/config/apiConfig";
 import { beginOAuth as runBeginOAuth } from "@/lib/oauth";
-import type { LinkedIdentity, OAuthProvider } from "@/types/auth";
+import type {
+  EmailOtpPurpose,
+  LinkedIdentity,
+  OAuthProvider,
+} from "@/types/auth";
 import type { User } from "@/types/user";
 import type { BackendLinkedIdentityDto, BackendUserDto } from "./types";
 import type { ApiClient } from "./baseClient";
@@ -99,6 +103,76 @@ function normalizeAuthError(error: string): string {
   return error;
 }
 
+function normalizeOtpError(error: string): string {
+  if (!error || typeof error !== "string") {
+    return "We could not send or verify your code. Please try again.";
+  }
+
+  const lowerError = error.toLowerCase();
+
+  if (
+    lowerError.includes("invalid") ||
+    lowerError.includes("expired") ||
+    lowerError.includes("verification code") ||
+    lowerError.includes("wrong code")
+  ) {
+    return "That code did not work. Check the 6 digits or request a new code.";
+  }
+
+  if (
+    lowerError.includes("too many") ||
+    lowerError.includes("rate") ||
+    lowerError.includes("429")
+  ) {
+    return "Too many attempts. Please wait a little before trying again.";
+  }
+
+  if (
+    lowerError.includes("unable to complete") ||
+    lowerError.includes("register first") ||
+    lowerError.includes("cannot complete")
+  ) {
+    return "We could not complete email-code sign-in. Try another sign-in method.";
+  }
+
+  if (
+    lowerError.includes("network") ||
+    lowerError.includes("fetch") ||
+    lowerError.includes("connection") ||
+    lowerError.includes("server") ||
+    lowerError.includes("500") ||
+    lowerError.includes("internal")
+  ) {
+    return "We could not send or verify your code. Please try again.";
+  }
+
+  return "We could not send or verify your code. Please try again.";
+}
+
+function getAuthErrorMessage(error: unknown, fallback: string): string {
+  if (typeof error === "string") return error;
+  if (error instanceof Error) return error.message;
+  if (typeof error === "object" && error !== null) {
+    const { message, error: nestedError } = error as {
+      message?: unknown;
+      error?: unknown;
+    };
+    if (typeof message === "string") return message;
+    if (typeof nestedError === "string") return nestedError;
+  }
+  return fallback;
+}
+
+export interface OtpAcceptedResponse {
+  success: boolean;
+  message?: string;
+  error?: string;
+}
+
+type BackendOtpAcceptedResponse = {
+  message?: string;
+};
+
 /**
  * Authentication API interface
  * Handles user login, registration, logout, and OAuth flows
@@ -127,6 +201,25 @@ export interface AuthApi {
     languageCodes?: string[];
     visitedCountryCodes?: string[];
   }): Promise<AuthResponse<User>>;
+
+  /** Requests an email OTP for passwordless sign-in/sign-up. */
+  requestEmailOtp(
+    email: string,
+    purpose?: EmailOtpPurpose,
+  ): Promise<OtpAcceptedResponse>;
+
+  /** Resends an active email OTP challenge when allowed by backend policy. */
+  resendEmailOtp(
+    email: string,
+    purpose?: EmailOtpPurpose,
+  ): Promise<OtpAcceptedResponse>;
+
+  /** Verifies a 6-digit email OTP and returns the normal auth payload. */
+  verifyEmailOtp(
+    email: string,
+    code: string,
+    purpose?: EmailOtpPurpose,
+  ): Promise<AuthResponse<User>>;
 
   /**
    * Logs out the current user
@@ -197,13 +290,10 @@ export const authApi: {
         success: false,
         error: normalizedError,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Handle ApiError and network errors
       // ApiError has message property, also check error property for nested errors
-      const rawError =
-        error?.message ||
-        error?.error ||
-        (typeof error === "string" ? error : "Login failed");
+      const rawError = getAuthErrorMessage(error, "Login failed");
       const normalizedError = normalizeAuthError(rawError);
       return {
         success: false,
@@ -245,15 +335,88 @@ export const authApi: {
         payload.error || res.error || res.message || "Registration failed";
       const normalizedError = normalizeAuthError(rawError);
       return { success: false, error: normalizedError };
-    } catch (err: any) {
+    } catch (err: unknown) {
       // Handle ApiError and network errors
       // ApiError has message property, also check error property for nested errors
-      const rawError =
-        err?.message ||
-        err?.error ||
-        (typeof err === "string" ? err : "Registration failed");
+      const rawError = getAuthErrorMessage(err, "Registration failed");
       const normalizedError = normalizeAuthError(rawError);
       return { success: false, error: normalizedError };
+    }
+  },
+
+  async requestEmailOtp(this: ApiClient, email, purpose = "REGISTER") {
+    try {
+      const response = await this.request<BackendOtpAcceptedResponse>(
+        API_CONFIG.ENDPOINTS.AUTH.OTP_REQUEST,
+        {
+          method: "POST",
+          body: JSON.stringify({ email, purpose }),
+        },
+      );
+
+      return {
+        success: response.success,
+        message:
+          response.data?.message ||
+          "If this email can receive messages, a verification code has been sent.",
+        error: response.error ? normalizeOtpError(response.error) : undefined,
+      };
+    } catch (error: unknown) {
+      const rawError = getAuthErrorMessage(error, "Email code request failed");
+      return { success: false, error: normalizeOtpError(rawError) };
+    }
+  },
+
+  async resendEmailOtp(this: ApiClient, email, purpose = "REGISTER") {
+    try {
+      const response = await this.request<BackendOtpAcceptedResponse>(
+        API_CONFIG.ENDPOINTS.AUTH.OTP_RESEND,
+        {
+          method: "POST",
+          body: JSON.stringify({ email, purpose }),
+        },
+      );
+
+      return {
+        success: response.success,
+        message:
+          response.data?.message ||
+          "If this email can receive messages, a verification code has been sent.",
+        error: response.error ? normalizeOtpError(response.error) : undefined,
+      };
+    } catch (error: unknown) {
+      const rawError = getAuthErrorMessage(error, "Email code resend failed");
+      return { success: false, error: normalizeOtpError(rawError) };
+    }
+  },
+
+  async verifyEmailOtp(this: ApiClient, email, code, purpose = "REGISTER") {
+    try {
+      const response = await this.request<AuthResponse<BackendUserDto>>(
+        API_CONFIG.ENDPOINTS.AUTH.OTP_VERIFY,
+        {
+          method: "POST",
+          body: JSON.stringify({ email, purpose, code }),
+        },
+      );
+
+      const payload = this.adaptAuthPayload(response.data);
+      if (payload.success) {
+        if (payload.token) {
+          this.setAuthToken(payload.token);
+        }
+        return payload;
+      }
+
+      const rawError =
+        payload.error || response.error || "Email code verification failed";
+      return { success: false, error: normalizeOtpError(rawError) };
+    } catch (error: unknown) {
+      const rawError = getAuthErrorMessage(
+        error,
+        "Email code verification failed",
+      );
+      return { success: false, error: normalizeOtpError(rawError) };
     }
   },
 
