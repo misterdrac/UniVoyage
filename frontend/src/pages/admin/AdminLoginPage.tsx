@@ -18,6 +18,7 @@ import {
 import heroImage from "@/assets/images/hero.jpg";
 import { ROUTE_PATHS } from "@/config/routes";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
+import { PageFooterVersion } from "@/components/layout/PageFooterVersion";
 
 const AdminLoginPage: React.FC = () => {
   useDocumentTitle("Admin Login");
@@ -95,6 +96,7 @@ const AdminLoginPage: React.FC = () => {
               Return to Home
             </Button>
           </div>
+          <PageFooterVersion className="mt-6" />
         </div>
       </div>
     );
@@ -314,8 +316,9 @@ const AdminLoginPage: React.FC = () => {
         </div>
 
         {/* Footer */}
-        <div className="p-6 text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} UniVoyage. Admin Panel.
+        <div className="p-6 text-center text-sm text-muted-foreground space-y-1">
+          <p>© {new Date().getFullYear()} UniVoyage. Admin Panel.</p>
+          <PageFooterVersion />
         </div>
       </div>
     </div>
