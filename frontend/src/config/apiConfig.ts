@@ -18,6 +18,11 @@ export const API_CONFIG = {
       ME: "/auth/me",
       GOOGLE: "/auth/google",
       GOOGLE_CALLBACK: "/auth/google/callback",
+      GITHUB: "/auth/github",
+      GITHUB_CALLBACK: "/auth/github/callback",
+      LINKEDIN: "/auth/linkedin",
+      LINKEDIN_CALLBACK: "/auth/linkedin/callback",
+      IDENTITIES: "/auth/identities",
     },
     USER: {
       UPDATE_PROFILE: "/user/profile",

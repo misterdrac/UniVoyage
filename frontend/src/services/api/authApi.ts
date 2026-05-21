@@ -1,7 +1,10 @@
 import { API_CONFIG, type AuthResponse } from "@/config/apiConfig";
+import { beginOAuth as runBeginOAuth } from "@/lib/oauth";
+import type { LinkedIdentity, OAuthProvider } from "@/types/auth";
 import type { User } from "@/types/user";
-import type { BackendUserDto } from "./types";
+import type { BackendLinkedIdentityDto, BackendUserDto } from "./types";
 import type { ApiClient } from "./baseClient";
+import { OAUTH_PROVIDER_CONFIG } from "@/lib/oauth/constants";
 
 /**
  * Normalizes authentication error messages for better user experience
@@ -139,20 +142,27 @@ export interface AuthApi {
   getCurrentUser(): Promise<User | null>;
 
   /**
-   * Initiates Google OAuth authentication flow
-   * Opens OAuth popup window and handles authentication
-   * @returns Promise that resolves when OAuth completes successfully
-   * @throws Error if popup is blocked or OAuth fails
+   * @deprecated Use {@link beginOAuth} from `@/lib/oauth` or `useAuth().beginOAuth`.
    */
   googleAuth(): Promise<void>;
 
   /**
-   * Completes Google OAuth callback
-   * Exchanges authorization code for user data and token
-   * @param code - OAuth authorization code from Google
-   * @returns Promise resolving to auth response with user data and token
+   * @deprecated Use {@link oauthCallback}.
    */
-  googleCallback(code: string): Promise<AuthResponse<User>>;
+  googleCallback(code: string, state?: string): Promise<AuthResponse<User>>;
+
+  /** Starts OAuth for the given provider (popup). */
+  beginOAuth(provider: OAuthProvider): Promise<void>;
+
+  /** Exchanges authorization code (+ state) after OAuth redirect. */
+  oauthCallback(
+    provider: OAuthProvider,
+    code: string,
+    state?: string,
+  ): Promise<AuthResponse<User>>;
+
+  /** Linked sign-in methods for the current user (read-only). */
+  getIdentities(): Promise<LinkedIdentity[]>;
 }
 
 export const authApi: {
@@ -274,74 +284,31 @@ export const authApi: {
   },
 
   async googleAuth(this: ApiClient): Promise<void> {
-    // Store current page URL for redirect after OAuth
-    const currentUrl = window.location.pathname + window.location.search;
-    sessionStorage.setItem("google_oauth_redirect", currentUrl);
-
-    // Open OAuth in a popup window
-    const width = 500;
-    const height = 600;
-    const left = window.screenX + (window.outerWidth - width) / 2;
-    const top = window.screenY + (window.outerHeight - height) / 2;
-
-    const popup = window.open(
-      `${this.baseURL}${API_CONFIG.ENDPOINTS.AUTH.GOOGLE}`,
-      "google-oauth",
-      `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no,scrollbars=yes,resizable=yes`,
-    );
-
-    if (!popup) {
-      throw new Error("Popup blocked. Please allow popups for this site.");
-    }
-
-    // Listen for messages from the popup
-    return new Promise((resolve, reject) => {
-      const messageListener = (event: MessageEvent) => {
-        const allowedOrigins = [
-          window.location.origin,
-          "https://univoyage-production-d7c5.up.railway.app",
-        ];
-
-        if (!allowedOrigins.includes(event.origin)) {
-          return;
-        }
-
-        if (event.data.type === "GOOGLE_OAUTH_SUCCESS") {
-          window.removeEventListener("message", messageListener);
-          popup.close();
-          resolve();
-        } else if (event.data.type === "GOOGLE_OAUTH_ERROR") {
-          window.removeEventListener("message", messageListener);
-          popup.close();
-          reject(new Error(event.data.error || "Google OAuth failed"));
-        }
-      };
-
-      window.addEventListener("message", messageListener);
-
-      // Check if popup is closed manually
-      const checkClosed = setInterval(() => {
-        if (popup.closed) {
-          clearInterval(checkClosed);
-          window.removeEventListener("message", messageListener);
-          reject(new Error("OAuth popup was closed"));
-        }
-      }, 500);
-    });
+    return runBeginOAuth("google");
   },
 
-  async googleCallback(
+  async beginOAuth(this: ApiClient, provider: OAuthProvider): Promise<void> {
+    void this;
+    return runBeginOAuth(provider);
+  },
+
+  async oauthCallback(
     this: ApiClient,
+    provider: OAuthProvider,
     code: string,
+    state?: string,
   ): Promise<AuthResponse<User>> {
-    const res = await this.request<AuthResponse<BackendUserDto>>(
-      API_CONFIG.ENDPOINTS.AUTH.GOOGLE_CALLBACK,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code }),
-      },
-    );
+    const endpoint = OAUTH_PROVIDER_CONFIG[provider].callbackEndpoint;
+    const body: { code: string; state?: string } = { code };
+    if (state) {
+      body.state = state;
+    }
+
+    const res = await this.request<AuthResponse<BackendUserDto>>(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
 
     const payload = this.adaptAuthPayload(res.data);
 
@@ -349,11 +316,36 @@ export const authApi: {
       this.setAuthToken(payload.token);
     }
 
+    const label = OAUTH_PROVIDER_CONFIG[provider].label;
     return payload.success
       ? payload
       : {
           success: false,
-          error: payload.error || res.error || "Google login failed",
+          error: payload.error || res.error || `${label} login failed`,
         };
+  },
+
+  async googleCallback(
+    this: ApiClient,
+    code: string,
+    state?: string,
+  ): Promise<AuthResponse<User>> {
+    return authApi.oauthCallback.call(this, "google", code, state);
+  },
+
+  async getIdentities(this: ApiClient): Promise<LinkedIdentity[]> {
+    try {
+      const response = await this.request<BackendLinkedIdentityDto[]>(
+        API_CONFIG.ENDPOINTS.AUTH.IDENTITIES,
+      );
+      return (response.data ?? []).map((row) => ({
+        provider: row.provider,
+        label: row.label,
+        linkedAt: row.linkedAt,
+      }));
+    } catch (error) {
+      console.error("Failed to load sign-in methods:", error);
+      return [];
+    }
   },
 };

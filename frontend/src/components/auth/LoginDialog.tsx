@@ -19,7 +19,6 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { useAuth } from "@/contexts/AuthContext";
-import { apiService } from "@/services/api";
 import { toast } from "sonner";
 import { VALIDATION } from "@/lib/constants";
 import { BrandGoogle } from "@mynaui/icons-react";
@@ -41,7 +40,7 @@ export function LoginDialog({
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { login, loadUser } = useAuth();
+  const { login, beginOAuth } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,9 +71,7 @@ export function LoginDialog({
   const handleGoogleSignIn = async () => {
     try {
       setIsLoading(true);
-      await apiService.googleAuth();
-      // Reload user after successful OAuth
-      await loadUser();
+      await beginOAuth("google");
       toast.success("Signed in with Google!");
       onOpenChange(false);
     } catch (error) {

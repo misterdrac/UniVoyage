@@ -27,7 +27,7 @@ import {
   AdminCountriesPage,
   AdminAuditPage,
 } from "@/pages/admin";
-import GoogleCallbackPage from "@/pages/GoogleCallbackPage";
+import OAuthCallbackPage from "@/pages/OAuthCallbackPage";
 import { MainLayout } from "@/components/layout";
 import { ProtectedRoute, AdminProtectedRoute } from "@/guards";
 
@@ -164,8 +164,8 @@ export const routes: RouteConfig[] = [
     element: <OceaniaDestinationsPage />,
   },
   {
-    path: "/auth/google/callback",
-    element: <GoogleCallbackPage />,
+    path: "/auth/:provider/callback",
+    element: <OAuthCallbackPage />,
     layout: false,
   },
 
@@ -233,5 +233,7 @@ export const ROUTE_PATHS = {
   ADMIN_LANGUAGES: getRoutePath("/admin/languages"),
   ADMIN_COUNTRIES: getRoutePath("/admin/countries"),
   ADMIN_AUDIT: getRoutePath("/admin/audit"),
-  GOOGLE_CALLBACK: getRoutePath("/auth/google/callback"),
+  GOOGLE_CALLBACK: "/auth/google/callback",
+  GITHUB_CALLBACK: "/auth/github/callback",
+  LINKEDIN_CALLBACK: "/auth/linkedin/callback",
 } as const;

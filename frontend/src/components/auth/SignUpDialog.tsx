@@ -7,7 +7,6 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { useAuth } from "@/contexts/AuthContext";
-import { apiService } from "@/services/api";
 import { toast } from "sonner";
 import {
   SignUpBasicFields,
@@ -34,7 +33,7 @@ export function SignUpDialog({
   onOpenChange,
   onLoginClick,
 }: SignUpDialogProps) {
-  const { signup, loadUser } = useAuth();
+  const { signup, beginOAuth } = useAuth();
 
   const { data: reference, isLoading: referenceLoading } =
     useReferenceDictionaries();
@@ -85,9 +84,7 @@ export function SignUpDialog({
 
   const handleGoogleSignUp = useCallback(async () => {
     try {
-      await apiService.googleAuth();
-      // Reload user after successful OAuth
-      await loadUser();
+      await beginOAuth("google");
       toast.success("Account created with Google!");
       onOpenChange(false);
     } catch (error) {
@@ -95,7 +92,7 @@ export function SignUpDialog({
         error instanceof Error ? error.message : "Google sign up failed";
       toast.error(errorMessage);
     }
-  }, [onOpenChange, loadUser]);
+  }, [onOpenChange, beginOAuth]);
 
   const handleOpenChange = useCallback(
     (newOpen: boolean) => {
