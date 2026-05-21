@@ -1,6 +1,5 @@
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { apiService } from "@/services/api";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts";
 import { Spinner } from "@/components/ui/spinner";
