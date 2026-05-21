@@ -7,7 +7,6 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { useAuth } from "@/contexts/AuthContext";
-import { apiService } from "@/services/api";
 import { toast } from "sonner";
 import {
   SignUpBasicFields,
@@ -34,7 +33,7 @@ export function SignUpDialog({
   onOpenChange,
   onLoginClick,
 }: SignUpDialogProps) {
-  const { signup, loadUser } = useAuth();
+  const { signup, beginOAuth } = useAuth();
 
   const { data: reference, isLoading: referenceLoading } =
     useReferenceDictionaries();
@@ -83,44 +82,42 @@ export function SignUpDialog({
     resetForm,
   } = useSignUpForm({ onSuccess: handleSuccess, signup });
 
-  const handleGoogleSignUp = useCallback(async () => {
-    try {
-      await apiService.googleAuth();
-      await loadUser();
-      toast.success("Account created with Google!");
-      onOpenChange(false);
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Google sign up failed";
-      toast.error(errorMessage);
-    }
-  }, [onOpenChange, loadUser]);
+  const handleOAuthSignUp = useCallback(
+    async (provider: "google" | "github" | "linkedin") => {
+      const labels = {
+        google: "Google",
+        github: "GitHub",
+        linkedin: "LinkedIn",
+      } as const;
+      try {
+        await beginOAuth(provider);
+        toast.success(`Account created with ${labels[provider]}!`);
+        onOpenChange(false);
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : `${labels[provider]} sign up failed`;
+        toast.error(errorMessage);
+      }
+    },
+    [onOpenChange, beginOAuth],
+  );
 
-  const handleGitHubSignUp = useCallback(async () => {
-    try {
-      await apiService.githubAuth();
-      await loadUser();
-      toast.success("Account created with GitHub!");
-      onOpenChange(false);
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "GitHub sign up failed";
-      toast.error(errorMessage);
-    }
-  }, [onOpenChange, loadUser]);
+  const handleGoogleSignUp = useCallback(
+    () => handleOAuthSignUp("google"),
+    [handleOAuthSignUp],
+  );
 
-  const handleLinkedInSignUp = useCallback(async () => {
-    try {
-      await apiService.linkedinAuth();
-      await loadUser();
-      toast.success("Account created with LinkedIn!");
-      onOpenChange(false);
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "LinkedIn sign up failed";
-      toast.error(errorMessage);
-    }
-  }, [onOpenChange, loadUser]);
+  const handleGitHubSignUp = useCallback(
+    () => handleOAuthSignUp("github"),
+    [handleOAuthSignUp],
+  );
+
+  const handleLinkedInSignUp = useCallback(
+    () => handleOAuthSignUp("linkedin"),
+    [handleOAuthSignUp],
+  );
 
   const handleOpenChange = useCallback(
     (newOpen: boolean) => {

@@ -1,146 +1,137 @@
-import { useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
+import { AlertCircle, Loader2, LogIn } from "lucide-react";
 import { useAuth } from "@/contexts";
-import { Spinner } from "@/components/ui/spinner";
-import { LogIn } from "lucide-react";
-import univoyageIcon from "@/assets/univoyage_icon.svg";
+import { AuthStatusLayout } from "@/components/auth/AuthStatusLayout";
 import { ROUTE_PATHS } from "@/config/routes";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
-import type { AuthResponse } from "@/config/apiConfig";
-import type { User } from "@/types/user";
+import { consumeOAuthReturnUrl } from "@/lib/auth/session";
+import {
+  handleOAuthCallback,
+  isOAuthProvider,
+  OAUTH_PROVIDER_CONFIG,
+  postOAuthError,
+  postOAuthSuccess,
+} from "@/lib/oauth";
 
-interface OAuthCallbackPageProps {
-  provider: "GitHub" | "LinkedIn";
-  callbackFn: (code: string) => Promise<AuthResponse<User>>;
-}
+type CallbackPhase = "loading" | "error";
 
-export default function OAuthCallbackPage({
-  provider,
-  callbackFn,
-}: OAuthCallbackPageProps) {
-  useDocumentTitle("Signing in...");
+export default function OAuthCallbackPage() {
+  const { provider: providerParam } = useParams<{ provider: string }>();
   const navigate = useNavigate();
-  const { loadUser } = useAuth();
+  const { refreshSession } = useAuth();
   const ran = useRef(false);
   const isPopup = window.opener !== null;
+  const [phase, setPhase] = useState<CallbackPhase>("loading");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const provider =
+    providerParam && isOAuthProvider(providerParam) ? providerParam : null;
+
+  const label = provider ? OAUTH_PROVIDER_CONFIG[provider].label : "Sign-in";
+
+  useDocumentTitle(
+    phase === "error"
+      ? "Sign-in failed"
+      : provider
+        ? `Signing in with ${label}…`
+        : "Signing in…",
+  );
 
   useEffect(() => {
     if (ran.current) return;
     ran.current = true;
 
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get("code");
-    const error = params.get("error");
-
-    if (error) {
-      const errorMsg = `${provider} auth error: ${error}`;
+    if (!provider) {
+      const msg = "Unknown sign-in provider";
       if (isPopup) {
-        window.opener?.postMessage(
-          { type: "OAUTH_ERROR", error: errorMsg },
-          window.location.origin,
-        );
         window.close();
       } else {
-        toast.error(errorMsg);
-        navigate(ROUTE_PATHS.HOME);
+        setErrorMessage(msg);
+        setPhase("error");
+        toast.error(msg);
       }
       return;
     }
 
-    if (!code) {
-      const errorMsg = `Missing ${provider} authorization code`;
+    const finishError = (message: string) => {
       if (isPopup) {
-        window.opener?.postMessage(
-          { type: "OAUTH_ERROR", error: errorMsg },
+        postOAuthError(
+          window.opener,
+          provider,
+          message,
           window.location.origin,
         );
         window.close();
       } else {
-        toast.error(errorMsg);
-        navigate(ROUTE_PATHS.HOME);
+        setErrorMessage(message);
+        setPhase("error");
+        toast.error(message);
       }
-      return;
-    }
+    };
+
+    const finishSuccess = async () => {
+      await refreshSession();
+      const redirectUrl = consumeOAuthReturnUrl();
+      if (isPopup) {
+        postOAuthSuccess(window.opener, provider, window.location.origin);
+        window.close();
+      } else {
+        toast.success(`Signed in with ${label}!`);
+        navigate(redirectUrl);
+      }
+    };
 
     (async () => {
+      const result = await handleOAuthCallback(
+        provider,
+        window.location.search,
+      );
+
+      if (!result.success) {
+        finishError(result.error);
+        return;
+      }
+
       try {
-        const res = await callbackFn(code);
-
-        if (!res.success) {
-          const errorMsg = res.error || `${provider} login failed`;
-          if (isPopup) {
-            window.opener?.postMessage(
-              { type: "OAUTH_ERROR", error: errorMsg },
-              window.location.origin,
-            );
-            window.close();
-          } else {
-            toast.error(errorMsg);
-            navigate(ROUTE_PATHS.HOME);
-          }
-          return;
-        }
-
-        await loadUser();
-
-        const redirectUrl = sessionStorage.getItem("oauth_redirect");
-        sessionStorage.removeItem("oauth_redirect");
-
-        if (isPopup) {
-          window.opener?.postMessage(
-            { type: "OAUTH_SUCCESS" },
-            window.location.origin,
-          );
-          window.close();
-        } else {
-          toast.success(`Signed in with ${provider}!`);
-          navigate(redirectUrl || ROUTE_PATHS.HOME);
-        }
-      } catch (e: any) {
-        const errorMsg = e?.message || `${provider} login failed`;
-        if (isPopup) {
-          window.opener?.postMessage(
-            { type: "OAUTH_ERROR", error: errorMsg },
-            window.location.origin,
-          );
-          window.close();
-        } else {
-          toast.error(errorMsg);
-          navigate(ROUTE_PATHS.HOME);
-        }
+        await finishSuccess();
+      } catch (e) {
+        finishError(e instanceof Error ? e.message : `${label} sign-in failed`);
       }
     })();
-  }, [navigate, loadUser, isPopup, provider, callbackFn]);
+  }, [navigate, refreshSession, isPopup, provider, label]);
+
+  if (phase === "error" && errorMessage) {
+    return (
+      <AuthStatusLayout
+        title="Sign-in didn't complete"
+        description={errorMessage}
+        icon={<AlertCircle className="h-8 w-8 text-destructive" aria-hidden />}
+        footer={
+          <button
+            type="button"
+            onClick={() => navigate(ROUTE_PATHS.HOME)}
+            className="text-sm font-medium text-primary hover:underline"
+          >
+            Return to home
+          </button>
+        }
+      />
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      <div className="text-center space-y-6 max-w-md">
-        <div className="flex items-center justify-center gap-3 mb-4">
-          <img
-            src={univoyageIcon}
-            alt="UniVoyage Logo"
-            className="w-10 h-10 sm:w-12 sm:h-12"
-          />
-          <div className="relative">
-            <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl"></div>
-            <div className="relative p-4 rounded-full bg-primary/10 border-2 border-primary/20">
-              <LogIn className="h-8 w-8 text-primary" />
-            </div>
-          </div>
-        </div>
-        <div className="space-y-3">
-          <h2 className="text-2xl font-semibold text-foreground">
-            Signing you in with {provider}
-          </h2>
-          <p className="text-muted-foreground">
-            Please wait while we complete your authentication...
-          </p>
-        </div>
-        <div className="flex justify-center pt-2">
-          <Spinner className="h-6 w-6 text-primary" />
-        </div>
-      </div>
-    </div>
+    <AuthStatusLayout
+      title={provider ? `Signing in with ${label}` : "Signing you in"}
+      description="Please wait while we complete your authentication…"
+      icon={<LogIn className="h-8 w-8 text-primary" aria-hidden />}
+      footer={
+        <Loader2
+          className="h-8 w-8 text-primary animate-spin"
+          aria-label="Loading"
+        />
+      }
+    />
   );
 }

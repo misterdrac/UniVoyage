@@ -19,7 +19,6 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { useAuth } from "@/contexts/AuthContext";
-import { apiService } from "@/services/api";
 import { toast } from "sonner";
 import { VALIDATION } from "@/lib/constants";
 import { BrandGoogle } from "@mynaui/icons-react";
@@ -42,7 +41,7 @@ export function LoginDialog({
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { login, loadUser } = useAuth();
+  const { login, beginOAuth } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,48 +69,24 @@ export function LoginDialog({
     password.trim().length >= VALIDATION.MIN_PASSWORD_LENGTH &&
     VALIDATION.EMAIL_REGEX.test(email);
 
-  const handleGoogleSignIn = async () => {
+  const handleOAuthSignIn = async (
+    provider: "google" | "github" | "linkedin",
+  ) => {
+    const labels = {
+      google: "Google",
+      github: "GitHub",
+      linkedin: "LinkedIn",
+    } as const;
     try {
       setIsLoading(true);
-      await apiService.googleAuth();
-      await loadUser();
-      toast.success("Signed in with Google!");
+      await beginOAuth(provider);
+      toast.success(`Signed in with ${labels[provider]}!`);
       onOpenChange(false);
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Google sign in failed";
-      toast.error(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleGitHubSignIn = async () => {
-    try {
-      setIsLoading(true);
-      await apiService.githubAuth();
-      await loadUser();
-      toast.success("Signed in with GitHub!");
-      onOpenChange(false);
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "GitHub sign in failed";
-      toast.error(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleLinkedInSignIn = async () => {
-    try {
-      setIsLoading(true);
-      await apiService.linkedinAuth();
-      await loadUser();
-      toast.success("Signed in with LinkedIn!");
-      onOpenChange(false);
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "LinkedIn sign in failed";
+        error instanceof Error
+          ? error.message
+          : `${labels[provider]} sign in failed`;
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
@@ -260,7 +235,7 @@ export function LoginDialog({
             <Button
               type="button"
               variant="outline"
-              onClick={handleGoogleSignIn}
+              onClick={() => handleOAuthSignIn("google")}
               className="w-full"
             >
               <BrandGoogle className="mr-2 h-4 w-4" />
@@ -269,7 +244,7 @@ export function LoginDialog({
             <Button
               type="button"
               variant="outline"
-              onClick={handleGitHubSignIn}
+              onClick={() => handleOAuthSignIn("github")}
               className="w-full"
             >
               <FaGithub className="mr-2 h-4 w-4" />
@@ -278,7 +253,7 @@ export function LoginDialog({
             <Button
               type="button"
               variant="outline"
-              onClick={handleLinkedInSignIn}
+              onClick={() => handleOAuthSignIn("linkedin")}
               className="w-full"
             >
               <FaLinkedin className="mr-2 h-4 w-4" />

@@ -48,6 +48,7 @@ public class EmailOtpChallengeService {
   private final OtpNotificationPort notificationPort;
   private final JwtService jwtService;
   private final PasswordEncoder passwordEncoder;
+  private final AuthSignInMethodService authSignInMethodService;
   private final Clock clock;
 
   @Transactional
@@ -187,6 +188,7 @@ public class EmailOtpChallengeService {
     UserEntity user = userOpt.get();
     user.setDateOfLastSignin(clock.instant());
     userRepository.save(user);
+    authSignInMethodService.record(user, AuthSignInMethodService.METHOD_EMAIL_OTP);
     return issueAuth(user);
   }
 

@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { ROUTE_PATHS } from "@/config/routes";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
+import { PageFooterVersion } from "@/components/layout/PageFooterVersion";
 
 const AdminDashboardPage: React.FC = () => {
   useDocumentTitle("Admin Dashboard");
@@ -296,7 +297,7 @@ const AdminDashboardPage: React.FC = () => {
       </main>
 
       {/* Footer with Actions */}
-      <footer className="relative z-10 p-6 flex justify-between">
+      <footer className="relative z-10 p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
         <Button
           variant="outline"
           onClick={() => navigate(ROUTE_PATHS.HOME)}
@@ -313,6 +314,7 @@ const AdminDashboardPage: React.FC = () => {
           <LogOut className="w-4 h-4" />
           LOGOUT
         </Button>
+        <PageFooterVersion className="sm:absolute sm:left-1/2 sm:-translate-x-1/2 order-first sm:order-none" />
       </footer>
     </div>
   );

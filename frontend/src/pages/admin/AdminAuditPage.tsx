@@ -8,6 +8,7 @@ import {
   AdminLoadingState,
   AdminEmptyState,
   SortableTableHeader,
+  AdminPageFooter,
 } from "@/components/admin";
 import { useAdminTable } from "@/hooks/useAdminTable";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
@@ -304,6 +305,7 @@ const AdminAuditPage: React.FC = () => {
           />
         </div>
       </main>
+      <AdminPageFooter />
     </div>
   );
 };

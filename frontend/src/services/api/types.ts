@@ -18,4 +18,11 @@ export type BackendUserDto = {
   profileImagePath?: string;
   dateOfRegister?: string;
   dateOfLastSignin?: string;
+  lastSignInMethod?: string;
+};
+
+export type BackendLinkedIdentityDto = {
+  provider: string;
+  label: string;
+  linkedAt?: string;
 };

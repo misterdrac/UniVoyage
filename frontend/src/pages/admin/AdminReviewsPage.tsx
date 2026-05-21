@@ -7,6 +7,7 @@ import {
   AdminPagination,
   AdminLoadingState,
   AdminEmptyState,
+  AdminPageFooter,
 } from "@/components/admin";
 import { Star, Check, X, MessageSquare, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -219,6 +220,7 @@ const AdminReviewsPage: React.FC = () => {
           />
         </div>
       </main>
+      <AdminPageFooter />
     </div>
   );
 };

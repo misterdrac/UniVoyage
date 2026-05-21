@@ -4,7 +4,9 @@
  */
 
 const NOMINATIM_SEARCH_URL = "https://nominatim.openstreetmap.org/search";
-const USER_AGENT = "UniVoyage/1.0";
+import { APP_VERSION } from "@/config/version";
+
+const USER_AGENT = `UniVoyage/${APP_VERSION}`;
 
 export interface NominatimGeocodeResult {
   lat: number;

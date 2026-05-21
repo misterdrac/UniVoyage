@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import {
   HomePage,
   AboutPage,
@@ -27,9 +27,7 @@ import {
   AdminCountriesPage,
   AdminAuditPage,
 } from "@/pages/admin";
-import GoogleCallbackPage from "@/pages/GoogleCallbackPage";
 import OAuthCallbackPage from "@/pages/OAuthCallbackPage";
-import { apiService } from "@/services/api";
 import { MainLayout } from "@/components/layout";
 import { ProtectedRoute, AdminProtectedRoute } from "@/guards";
 
@@ -166,28 +164,8 @@ export const routes: RouteConfig[] = [
     element: <OceaniaDestinationsPage />,
   },
   {
-    path: "/auth/google/callback",
-    element: <GoogleCallbackPage />,
-    layout: false,
-  },
-  {
-    path: "/auth/github/callback",
-    element: (
-      <OAuthCallbackPage
-        provider="GitHub"
-        callbackFn={(code) => apiService.githubCallback(code)}
-      />
-    ),
-    layout: false,
-  },
-  {
-    path: "/auth/linkedin/callback",
-    element: (
-      <OAuthCallbackPage
-        provider="LinkedIn"
-        callbackFn={(code) => apiService.linkedinCallback(code)}
-      />
-    ),
+    path: "/auth/:provider/callback",
+    element: <OAuthCallbackPage />,
     layout: false,
   },
 
@@ -255,7 +233,7 @@ export const ROUTE_PATHS = {
   ADMIN_LANGUAGES: getRoutePath("/admin/languages"),
   ADMIN_COUNTRIES: getRoutePath("/admin/countries"),
   ADMIN_AUDIT: getRoutePath("/admin/audit"),
-  GOOGLE_CALLBACK: getRoutePath("/auth/google/callback"),
-  GITHUB_CALLBACK: getRoutePath("/auth/github/callback"),
-  LINKEDIN_CALLBACK: getRoutePath("/auth/linkedin/callback"),
+  GOOGLE_CALLBACK: "/auth/google/callback",
+  GITHUB_CALLBACK: "/auth/github/callback",
+  LINKEDIN_CALLBACK: "/auth/linkedin/callback",
 } as const;

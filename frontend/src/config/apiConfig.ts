@@ -22,6 +22,7 @@ export const API_CONFIG = {
       GITHUB_CALLBACK: "/auth/github/callback",
       LINKEDIN: "/auth/linkedin",
       LINKEDIN_CALLBACK: "/auth/linkedin/callback",
+      IDENTITIES: "/auth/identities",
     },
     USER: {
       UPDATE_PROFILE: "/user/profile",

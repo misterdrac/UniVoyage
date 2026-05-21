@@ -56,6 +56,13 @@ public class UserEntity implements UserDetails {
   @Column(name = "date_of_last_signin")
   private Instant dateOfLastSignin;
 
+  /**
+   * How the user last signed in: {@code password}, {@code google},
+   * {@code github}, {@code linkedin}, {@code email_otp}, etc.
+   */
+  @Column(name = "last_sign_in_method", length = 32)
+  private String lastSignInMethod;
+
   @Builder.Default
   @Column(name = "failed_login_attempts", nullable = false)
   private int failedLoginAttempts = 0;

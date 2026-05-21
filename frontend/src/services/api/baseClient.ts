@@ -47,6 +47,7 @@ export class ApiClient {
       profileImagePath: user.profileImagePath,
       dateOfRegister: user.dateOfRegister,
       dateOfLastSignin: user.dateOfLastSignin,
+      lastSignInMethod: user.lastSignInMethod,
     };
   }
 
