@@ -108,6 +108,82 @@ describe("email-driven auth entry pages", () => {
 
   afterAll(() => server.close());
 
+  it("keeps reset disabled on empty submit and sends no reset request", async () => {
+    renderEmailRoutes("/auth/reset-password?token=fake-token");
+    const user = userEvent.setup();
+    const resetButton = screen.getByRole("button", {
+      name: /^reset password$/i,
+    });
+
+    expect(resetButton).toBeDisabled();
+    await user.click(resetButton);
+    expect(resetRequests).toHaveLength(0);
+  });
+
+  it("keeps reset disabled for a weak password and shows strength requirements", async () => {
+    renderEmailRoutes("/auth/reset-password?token=fake-token");
+    const user = userEvent.setup();
+
+    await user.type(screen.getByLabelText(/^new password$/i), "weak");
+    await user.type(screen.getByLabelText(/^confirm password$/i), "weak");
+
+    expect(screen.getByText(/weak password/i)).toBeInTheDocument();
+    expect(screen.getByText(/at least 8 characters/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /^reset password$/i }),
+    ).toBeDisabled();
+    expect(resetRequests).toHaveLength(0);
+  });
+
+  it("shows mismatch copy and keeps reset disabled for different passwords", async () => {
+    renderEmailRoutes("/auth/reset-password?token=fake-token");
+    const user = userEvent.setup();
+
+    await user.type(screen.getByLabelText(/^new password$/i), "ValidPass1");
+    await user.type(screen.getByLabelText(/^confirm password$/i), "ValidPass2");
+
+    expect(screen.getByText(/passwords do not match/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /^reset password$/i }),
+    ).toBeDisabled();
+    expect(resetRequests).toHaveLength(0);
+  });
+
+  it("toggles reset password visibility without rendering values as page text", async () => {
+    renderEmailRoutes("/auth/reset-password?token=fake-token");
+    const user = userEvent.setup();
+    const newPasswordInput = screen.getByLabelText(
+      /^new password$/i,
+    ) as HTMLInputElement;
+    const confirmPasswordInput = screen.getByLabelText(
+      /^confirm password$/i,
+    ) as HTMLInputElement;
+
+    await user.type(newPasswordInput, "VisiblePass1");
+    await user.type(confirmPasswordInput, "VisiblePass1");
+
+    expect(newPasswordInput.type).toBe("password");
+    expect(confirmPasswordInput.type).toBe("password");
+    expect(document.body.textContent).not.toContain("VisiblePass1");
+
+    await user.click(
+      screen.getByRole("button", { name: /show new password/i }),
+    );
+    await user.click(
+      screen.getByRole("button", { name: /show confirm password/i }),
+    );
+
+    expect(newPasswordInput.type).toBe("text");
+    expect(confirmPasswordInput.type).toBe("text");
+    expect(
+      screen.getByRole("button", { name: /hide new password/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /hide confirm password/i }),
+    ).toBeInTheDocument();
+    expect(document.body.textContent).not.toContain("VisiblePass1");
+  });
+
   it("opens reset deep links, submits a new password, and never puts token in the title", async () => {
     renderEmailRoutes("/auth/reset-password?token=fake-token");
     const user = userEvent.setup();

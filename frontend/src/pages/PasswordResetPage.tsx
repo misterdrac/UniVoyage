@@ -1,5 +1,12 @@
 import * as React from "react";
-import { AlertCircle, CheckCircle2, KeyRound, MailCheck } from "lucide-react";
+import {
+  AlertCircle,
+  CheckCircle2,
+  Eye,
+  EyeOff,
+  KeyRound,
+  MailCheck,
+} from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { AuthEmailRequestForm } from "@/components/auth/AuthEmailRequestForm";
 import { AuthStatusLayout } from "@/components/auth/AuthStatusLayout";
@@ -45,6 +52,8 @@ export default function PasswordResetPage() {
   const [errorMessage, setErrorMessage] = React.useState("");
   const [newPassword, setNewPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
+  const [showNewPassword, setShowNewPassword] = React.useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
   const [retryAfterSeconds, setRetryAfterSeconds] = React.useState<
     number | undefined
   >();
@@ -55,6 +64,8 @@ export default function PasswordResetPage() {
     setErrorMessage("");
     setNewPassword("");
     setConfirmPassword("");
+    setShowNewPassword(false);
+    setShowConfirmPassword(false);
     setRetryAfterSeconds(undefined);
   }, [token]);
 
@@ -184,19 +195,37 @@ export default function PasswordResetPage() {
           <label htmlFor="new-password" className="text-sm font-medium">
             New password
           </label>
-          <Input
-            id="new-password"
-            type="password"
-            value={newPassword}
-            onChange={(event) => {
-              setNewPassword(event.target.value);
-              setErrorMessage("");
-              setRetryAfterSeconds(undefined);
-            }}
-            autoComplete="new-password"
-            disabled={phase === "submitting"}
-            required
-          />
+          <div className="relative">
+            <Input
+              id="new-password"
+              type={showNewPassword ? "text" : "password"}
+              value={newPassword}
+              onChange={(event) => {
+                setNewPassword(event.target.value);
+                setErrorMessage("");
+                setRetryAfterSeconds(undefined);
+              }}
+              className="pr-10"
+              autoComplete="new-password"
+              disabled={phase === "submitting"}
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowNewPassword((value) => !value)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+              aria-label={
+                showNewPassword ? "Hide new password" : "Show new password"
+              }
+              disabled={phase === "submitting"}
+            >
+              {showNewPassword ? (
+                <EyeOff className="h-4 w-4" aria-hidden />
+              ) : (
+                <Eye className="h-4 w-4" aria-hidden />
+              )}
+            </button>
+          </div>
           <PasswordStrength password={newPassword} />
         </div>
 
@@ -204,19 +233,39 @@ export default function PasswordResetPage() {
           <label htmlFor="confirm-new-password" className="text-sm font-medium">
             Confirm password
           </label>
-          <Input
-            id="confirm-new-password"
-            type="password"
-            value={confirmPassword}
-            onChange={(event) => {
-              setConfirmPassword(event.target.value);
-              setErrorMessage("");
-              setRetryAfterSeconds(undefined);
-            }}
-            autoComplete="new-password"
-            disabled={phase === "submitting"}
-            required
-          />
+          <div className="relative">
+            <Input
+              id="confirm-new-password"
+              type={showConfirmPassword ? "text" : "password"}
+              value={confirmPassword}
+              onChange={(event) => {
+                setConfirmPassword(event.target.value);
+                setErrorMessage("");
+                setRetryAfterSeconds(undefined);
+              }}
+              className="pr-10"
+              autoComplete="new-password"
+              disabled={phase === "submitting"}
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword((value) => !value)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+              aria-label={
+                showConfirmPassword
+                  ? "Hide confirm password"
+                  : "Show confirm password"
+              }
+              disabled={phase === "submitting"}
+            >
+              {showConfirmPassword ? (
+                <EyeOff className="h-4 w-4" aria-hidden />
+              ) : (
+                <Eye className="h-4 w-4" aria-hidden />
+              )}
+            </button>
+          </div>
           {confirmPassword && !passwordsMatch && (
             <p className="text-xs text-destructive" role="alert">
               Passwords do not match.
