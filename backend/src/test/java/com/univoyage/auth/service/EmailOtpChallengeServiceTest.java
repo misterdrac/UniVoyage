@@ -51,6 +51,8 @@ class EmailOtpChallengeServiceTest {
   @Mock
   private JwtService jwtService;
   @Mock
+  private AuthSignInMethodService authSignInMethodService;
+  @Mock
   private OtpCodeGenerator codeGenerator;
 
   private OtpSecurityProperties properties;
@@ -71,7 +73,7 @@ class EmailOtpChallengeServiceTest {
 
     service = new EmailOtpChallengeService(challengeRepository, userRepository, countryRepository,
         properties, codeGenerator, otpHasher, notificationPort, jwtService,
-        new BCryptPasswordEncoder(), clock);
+        new BCryptPasswordEncoder(), authSignInMethodService, clock);
   }
 
   @Test
