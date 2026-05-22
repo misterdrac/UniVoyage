@@ -396,6 +396,7 @@ export function AdminTwoFactorChallenge() {
                   }
                   disabled={isVerifying || isVerifyLockoutActive}
                   ariaDescribedBy={`${codeHelpId} ${statusId}`}
+                  autoFocusFirst
                 />
                 <p id={codeHelpId} className="text-xs text-muted-foreground">
                   Paste the full code or type one digit per box.
@@ -411,6 +412,7 @@ export function AdminTwoFactorChallenge() {
           >
             {statusMessage && (
               <p
+                role={state.error || isExpired ? "alert" : undefined}
                 className={
                   state.error || isExpired
                     ? "text-destructive"

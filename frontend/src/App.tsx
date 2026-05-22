@@ -15,6 +15,7 @@ import {
 import { ScrollToTop } from "@/components";
 import { AuthLoadingOverlay } from "@/components/layout/AuthLoadingOverlay";
 import { Toaster } from "@/components/ui/sonner";
+import { AuthLiveAnnouncer } from "@/lib/auth/authAnnounce";
 import { LoginDialog, SignUpDialog } from "@/components/auth";
 import {
   useDestination,
@@ -108,6 +109,7 @@ function AppContent() {
         <ScrollToTop />
         <AppRoutes />
         <Toaster />
+        <AuthLiveAnnouncer />
       </Router>
 
       <LoginDialog

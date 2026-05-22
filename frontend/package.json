@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:run": "vitest run",
-    "test:e2e": "vitest run --testNamePattern \"OAuth callback E2E\""
+    "test:e2e": "vitest run --testNamePattern \"OAuth callback E2E\"",
+    "test:auth-matrix": "vitest run src/test/authRegression.matrix.test.tsx"
   },
   "dependencies": {
     "@ark-ui/react": "^5.27.1",

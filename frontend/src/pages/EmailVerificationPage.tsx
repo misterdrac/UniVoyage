@@ -6,7 +6,8 @@ import {
   MailCheck,
   ShieldCheck,
 } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { useConsumeQueryParam } from "@/lib/auth/useConsumeQueryParam";
 import { AuthEmailRequestForm } from "@/components/auth/AuthEmailRequestForm";
 import { AuthStatusLayout } from "@/components/auth/AuthStatusLayout";
 import { RetryAfterNotice } from "@/components/auth/RetryAfterNotice";
@@ -29,16 +30,8 @@ const verificationRequestFallback =
 const verificationInvalidLinkCopy =
   "This verification link did not work. Request a new verification email.";
 
-function tokenFromSearch(search: string) {
-  return new URLSearchParams(search).get("token")?.trim() || "";
-}
-
 export default function EmailVerificationPage() {
-  const location = useLocation();
-  const token = React.useMemo(
-    () => tokenFromSearch(location.search),
-    [location.search],
-  );
+  const token = useConsumeQueryParam("token");
   const confirmedTokenRef = React.useRef("");
   const [phase, setPhase] = React.useState<VerificationPhase>(
     token ? "loading" : "request",

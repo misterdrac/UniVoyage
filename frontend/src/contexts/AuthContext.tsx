@@ -15,6 +15,7 @@ import type {
 import type { User } from "@/types/user";
 import { apiService } from "@/services/api";
 import { API_CONSTANTS } from "@/lib/constants";
+import { safeAuthError } from "@/lib/auth/safeAuthLog";
 import { beginOAuth as startOAuth } from "@/lib/oauth";
 import { clearAllPlacesCache } from "@/lib/placesCache";
 import { clearAllWeatherCache } from "@/lib/weatherCache";
@@ -188,7 +189,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       persistUser(me);
       return me;
     } catch (err) {
-      console.error("loadUser error:", err);
+      safeAuthError("loadUser error:", err);
       persistUser(null);
       return null;
     }
@@ -227,7 +228,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setIdentities(list);
         }
       } catch (error) {
-        console.error("Error initializing auth:", error);
+        safeAuthError("Error initializing auth:", error);
         localStorage.removeItem(API_CONSTANTS.USER_KEY);
         localStorage.removeItem(API_CONSTANTS.AUTH_TOKEN_KEY);
       } finally {
@@ -254,7 +255,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
       return { success: false, error: result.error || "Login failed" };
     } catch (error) {
-      console.error("Login error:", error);
+      safeAuthError("Login error:", error);
       return {
         success: false,
         error:
@@ -282,7 +283,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
       return { success: false, error: result.error || "Signup failed" };
     } catch (error) {
-      console.error("Signup error:", error);
+      safeAuthError("Signup error:", error);
       return {
         success: false,
         error:
@@ -324,7 +325,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           retryAfterSeconds: result.retryAfterSeconds,
         };
       } catch (error) {
-        console.error("Email OTP sign-in error:", error);
+        safeAuthError("Email OTP sign-in error:", error);
         return {
           success: false,
           error:
@@ -351,7 +352,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       await apiService.logout();
     } catch (error) {
-      console.error("Logout error:", error);
+      safeAuthError("Logout error:", error);
     } finally {
       persistUser(null);
       setAdminTwoFactorVerifiedState(false);
@@ -384,7 +385,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
       return { success: false, error: result.error || "Update failed" };
     } catch (error) {
-      console.error("Update profile error:", error);
+      safeAuthError("Update profile error:", error);
       return {
         success: false,
         error:

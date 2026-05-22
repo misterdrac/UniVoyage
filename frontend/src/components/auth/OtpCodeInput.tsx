@@ -7,6 +7,7 @@ interface OtpCodeInputProps {
   onChange: (value: string[]) => void;
   disabled?: boolean;
   ariaDescribedBy?: string;
+  autoFocusFirst?: boolean;
 }
 
 function sanitizeDigit(value?: string) {
@@ -22,6 +23,7 @@ export function OtpCodeInput({
   onChange,
   disabled,
   ariaDescribedBy,
+  autoFocusFirst = false,
 }: OtpCodeInputProps) {
   const inputRefs = React.useRef<Array<HTMLInputElement | null>>([]);
   const digits = Array.from({ length: OTP_CODE_LENGTH }, (_, index) =>
@@ -56,6 +58,11 @@ export function OtpCodeInput({
     nextDigits[index] = "";
     onChange(nextDigits);
   };
+
+  React.useEffect(() => {
+    if (!autoFocusFirst || disabled) return;
+    focusDigit(0);
+  }, [autoFocusFirst, disabled]);
 
   return (
     <div

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { toast } from "sonner";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { authToast } from "@/lib/auth/authToast";
+import { locationHasSensitiveQueryParams } from "@/lib/auth/sensitiveUrl";
 import { AlertCircle, Loader2, LogIn } from "lucide-react";
 import { useAuth } from "@/contexts";
 import { AuthStatusLayout } from "@/components/auth/AuthStatusLayout";
@@ -19,6 +20,7 @@ type CallbackPhase = "loading" | "error";
 
 export default function OAuthCallbackPage() {
   const { provider: providerParam } = useParams<{ provider: string }>();
+  const location = useLocation();
   const navigate = useNavigate();
   const { refreshSession } = useAuth();
   const ran = useRef(false);
@@ -50,7 +52,7 @@ export default function OAuthCallbackPage() {
       } else {
         setErrorMessage(msg);
         setPhase("error");
-        toast.error(msg);
+        authToast.error(msg);
       }
       return;
     }
@@ -67,7 +69,7 @@ export default function OAuthCallbackPage() {
       } else {
         setErrorMessage(message);
         setPhase("error");
-        toast.error(message);
+        authToast.error(message);
       }
     };
 
@@ -78,16 +80,18 @@ export default function OAuthCallbackPage() {
         postOAuthSuccess(window.opener, provider, window.location.origin);
         window.close();
       } else {
-        toast.success(`Signed in with ${label}!`);
+        authToast.success(`Signed in with ${label}!`);
         navigate(redirectUrl);
       }
     };
 
     (async () => {
-      const result = await handleOAuthCallback(
-        provider,
-        window.location.search,
-      );
+      const search = window.location.search;
+      if (locationHasSensitiveQueryParams(search)) {
+        navigate(location.pathname, { replace: true });
+      }
+
+      const result = await handleOAuthCallback(provider, search);
 
       if (!result.success) {
         finishError(result.error);
@@ -100,7 +104,7 @@ export default function OAuthCallbackPage() {
         finishError(e instanceof Error ? e.message : `${label} sign-in failed`);
       }
     })();
-  }, [navigate, refreshSession, isPopup, provider, label]);
+  }, [location.pathname, navigate, refreshSession, isPopup, provider, label]);
 
   if (phase === "error" && errorMessage) {
     return (

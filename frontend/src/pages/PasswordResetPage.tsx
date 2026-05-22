@@ -7,7 +7,8 @@ import {
   KeyRound,
   MailCheck,
 } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { useConsumeQueryParam } from "@/lib/auth/useConsumeQueryParam";
 import { AuthEmailRequestForm } from "@/components/auth/AuthEmailRequestForm";
 import { AuthStatusLayout } from "@/components/auth/AuthStatusLayout";
 import { RetryAfterNotice } from "@/components/auth/RetryAfterNotice";
@@ -35,16 +36,8 @@ const resetRequestFallback =
 const resetInvalidLinkCopy =
   "This reset link did not work. Request a new password reset email.";
 
-function tokenFromSearch(search: string) {
-  return new URLSearchParams(search).get("token")?.trim() || "";
-}
-
 export default function PasswordResetPage() {
-  const location = useLocation();
-  const token = React.useMemo(
-    () => tokenFromSearch(location.search),
-    [location.search],
-  );
+  const token = useConsumeQueryParam("token");
   const [phase, setPhase] = React.useState<ResetPhase>(
     token ? "form" : "request",
   );

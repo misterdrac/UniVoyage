@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Mail, ShieldCheck } from "lucide-react";
-import { toast } from "sonner";
+import { authToast } from "@/lib/auth/authToast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
@@ -279,7 +279,7 @@ export function EmailOtpSignInForm({
       now: Date.now(),
     });
     if (!result.retryAfterSeconds) {
-      toast.error(error);
+      authToast.error(error);
     }
   };
 
@@ -290,7 +290,7 @@ export function EmailOtpSignInForm({
     const result = await emailOtpSignIn(trimmedEmail, code, EMAIL_OTP_PURPOSE);
     if (result.success) {
       dispatch({ type: "verify_success", now: Date.now() });
-      toast.success("Welcome! You've been signed in with your email code.");
+      authToast.success("Welcome! You've been signed in with your email code.");
       onSuccess();
       return;
     }
@@ -308,7 +308,7 @@ export function EmailOtpSignInForm({
       now: Date.now(),
     });
     if (!result.retryAfterSeconds) {
-      toast.error(error);
+      authToast.error(error);
     }
   };
 
@@ -397,6 +397,7 @@ export function EmailOtpSignInForm({
               }
               disabled={isVerifying}
               ariaDescribedBy={`${codeHelpId} ${statusId}`}
+              autoFocusFirst
             />
             <p id={codeHelpId} className="text-xs text-muted-foreground">
               Paste the full code or type one digit per box.
@@ -412,6 +413,7 @@ export function EmailOtpSignInForm({
       >
         {statusMessage && (
           <p
+            role={state.error || isExpired ? "alert" : undefined}
             className={
               state.error || isExpired
                 ? "text-destructive"

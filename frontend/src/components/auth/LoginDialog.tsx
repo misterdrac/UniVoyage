@@ -19,7 +19,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { useAuth } from "@/contexts/AuthContext";
-import { toast } from "sonner";
+import { authToast } from "@/lib/auth/authToast";
 import { VALIDATION } from "@/lib/constants";
 import { BrandGoogle } from "@mynaui/icons-react";
 import { FaGithub, FaLinkedin } from "react-icons/fa6";
@@ -63,13 +63,13 @@ export function LoginDialog({
     const result = await login(email, password);
 
     if (result.success) {
-      toast.success("Welcome back! You've been logged in successfully.");
+      authToast.success("Welcome back! You've been logged in successfully.");
       handleDialogOpenChange(false);
       setEmail("");
       setPassword("");
     } else {
       setError(result.error || "Login failed");
-      toast.error(result.error || "Login failed");
+      authToast.error(result.error || "Login failed");
     }
 
     setIsLoading(false);
@@ -92,14 +92,14 @@ export function LoginDialog({
     try {
       setIsLoading(true);
       await beginOAuth(provider);
-      toast.success(`Signed in with ${labels[provider]}!`);
+      authToast.success(`Signed in with ${labels[provider]}!`);
       handleDialogOpenChange(false);
     } catch (error) {
       const errorMessage =
         error instanceof Error
           ? error.message
           : `${labels[provider]} sign in failed`;
-      toast.error(errorMessage);
+      authToast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -235,6 +235,7 @@ export function LoginDialog({
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
                 >
                   {showPassword ? (
@@ -248,7 +249,10 @@ export function LoginDialog({
 
             {/* Error Message */}
             {error && (
-              <div className="text-center text-sm text-destructive">
+              <div
+                role="alert"
+                className="text-center text-sm text-destructive"
+              >
                 {error}
               </div>
             )}

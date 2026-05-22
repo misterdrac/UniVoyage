@@ -23,8 +23,8 @@ vi.mock("@/config/routes", () => ({
   },
 }));
 
-vi.mock("sonner", () => ({
-  toast: { success: vi.fn(), error: vi.fn() },
+vi.mock("@/lib/auth/authToast", () => ({
+  authToast: { success: vi.fn(), error: vi.fn(), info: vi.fn() },
 }));
 
 vi.mock("@/services/api", () => ({
@@ -65,7 +65,8 @@ function renderOAuthCallback(initialPath = "/auth/google/callback") {
     { initialEntries: [initialPath] },
   );
 
-  return render(<RouterProvider router={router} />);
+  const view = render(<RouterProvider router={router} />);
+  return { router, ...view };
 }
 
 describe("OAuth callback E2E", () => {
@@ -111,7 +112,7 @@ describe("OAuth callback E2E", () => {
       { provider: "google", label: "Google", linkedAt: "2024-01-01T00:00:00Z" },
     ]);
 
-    const { unmount } = renderOAuthCallback(
+    const { router, unmount } = renderOAuthCallback(
       "/auth/google/callback?code=oauth-code-123&state=signed-state-xyz",
     );
 
@@ -124,6 +125,7 @@ describe("OAuth callback E2E", () => {
     });
 
     await waitFor(() => {
+      expect(router.state.location.search).toBe("");
       expect(hasAuthTokenInStorage()).toBe(true);
       expect(localStorage.getItem(API_CONSTANTS.AUTH_TOKEN_KEY)).toBe(
         "e2e-jwt-token",
