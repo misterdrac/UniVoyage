@@ -17,6 +17,7 @@ import {
   AdminEmptySelection,
   SortableTableHeader,
   AdminEmojiCell,
+  AdminPageFooter,
 } from "@/components/admin";
 import { useAdminTable } from "@/hooks/useAdminTable";
 import { Loader2, Sparkles, Plus, Trash2 } from "lucide-react";
@@ -389,6 +390,7 @@ const AdminHobbiesPage: React.FC = () => {
           </div>
         </div>
       </main>
+      <AdminPageFooter />
     </div>
   );
 };

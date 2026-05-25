@@ -66,6 +66,8 @@ jobs:
           }
       - name: Run Prettier check
         run: npx prettier --check "src/**/*.{js,jsx,ts,tsx,css,scss,md,json}"
+      - name: Run unit tests (auth regression matrix)
+        run: npm run test:run
       - name: npm audit (high+critical)
         run: npm audit --audit-level=high
 

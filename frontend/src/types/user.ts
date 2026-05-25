@@ -36,4 +36,5 @@ export interface User {
   profileImagePath?: string;
   dateOfRegister?: string;
   dateOfLastSignin?: string;
+  lastSignInMethod?: string;
 }

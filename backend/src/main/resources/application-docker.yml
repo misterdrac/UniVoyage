@@ -1,4 +1,11 @@
 spring:
+  main:
+    banner-mode: console
+
+  banner:
+    location: classpath:banner.txt
+    charset: UTF-8
+
   datasource:
     url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME:${POSTGRES_USER:postgres}}
@@ -29,3 +36,9 @@ logging:
     org.hibernate.SQL: WARN
     org.hibernate.orm.jdbc.bind: WARN
     com.univoyage: ${LOGGING_LEVEL_COM_UNIVOYAGE:DEBUG}
+
+# Outbound email uses Resend/Postmark/etc., not JavaMail SMTP — disable SMTP health check.
+management:
+  health:
+    mail:
+      enabled: false

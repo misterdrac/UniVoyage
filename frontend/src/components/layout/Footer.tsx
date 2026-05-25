@@ -3,6 +3,7 @@ import { Facebook, Instagram } from "lucide-react";
 import { FaXTwitter } from "react-icons/fa6";
 import univoyageIcon from "@/assets/univoyage_icon.svg";
 import { ROUTE_PATHS } from "@/config/routes";
+import { PageFooterVersion } from "@/components/layout/PageFooterVersion";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -205,10 +206,11 @@ export function Footer() {
         </div>
 
         {/* Copyright */}
-        <div className="pt-6 border-t border-border">
-          <p className="text-sm text-muted-foreground text-center">
+        <div className="pt-6 border-t border-border text-center space-y-2">
+          <p className="text-sm text-muted-foreground">
             © {currentYear} UniVoyage. All rights reserved.
           </p>
+          <PageFooterVersion />
         </div>
       </div>
     </footer>

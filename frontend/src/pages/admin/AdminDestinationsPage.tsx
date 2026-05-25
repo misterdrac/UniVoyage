@@ -25,6 +25,7 @@ import {
   AdminEmptyState,
   AdminEmptySelection,
   SortableTableHeader,
+  AdminPageFooter,
 } from "@/components/admin";
 import { useAdminTable } from "@/hooks/useAdminTable";
 import { formatDateShort } from "@/lib/dateUtils";
@@ -823,6 +824,7 @@ const AdminDestinationsPage: React.FC = () => {
           </div>
         </div>
       </main>
+      <AdminPageFooter />
     </div>
   );
 };

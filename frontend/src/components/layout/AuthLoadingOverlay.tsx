@@ -1,19 +1,14 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { Spinner } from "@/components/ui/spinner";
+import { AuthSignInOverlay } from "@/components/auth/AuthSignInOverlay";
 
 export function AuthLoadingOverlay() {
-  const { isLoading } = useAuth();
-
-  if (!isLoading) {
-    return null;
-  }
+  const { isLoading, signInOverlayMethod } = useAuth();
 
   return (
-    <div className="fixed inset-0 z-100 bg-background/80 backdrop-blur-sm flex items-center justify-center">
-      <div className="flex flex-col items-center gap-4">
-        <Spinner className="size-8 text-primary" />
-        <p className="text-sm text-muted-foreground">Loading...</p>
-      </div>
-    </div>
+    <AuthSignInOverlay
+      open={isLoading && !signInOverlayMethod}
+      title="Loading"
+      description="Please wait a moment while we load your account."
+    />
   );
 }

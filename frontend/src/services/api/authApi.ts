@@ -1,7 +1,14 @@
-import { API_CONFIG, type AuthResponse } from "@/config/apiConfig";
+import { API_CONFIG, ApiError, type AuthResponse } from "@/config/apiConfig";
+import { beginOAuth as runBeginOAuth } from "@/lib/oauth";
+import type {
+  EmailOtpPurpose,
+  LinkedIdentity,
+  OAuthProvider,
+} from "@/types/auth";
 import type { User } from "@/types/user";
-import type { BackendUserDto } from "./types";
+import type { BackendLinkedIdentityDto, BackendUserDto } from "./types";
 import type { ApiClient } from "./baseClient";
+import { OAUTH_PROVIDER_CONFIG } from "@/lib/oauth/constants";
 
 /**
  * Normalizes authentication error messages for better user experience
@@ -96,6 +103,159 @@ function normalizeAuthError(error: string): string {
   return error;
 }
 
+function normalizeOtpError(error: string): string {
+  if (!error || typeof error !== "string") {
+    return "We could not send or verify your code. Please try again.";
+  }
+
+  const lowerError = error.toLowerCase();
+
+  if (
+    lowerError.includes("invalid") ||
+    lowerError.includes("expired") ||
+    lowerError.includes("verification code") ||
+    lowerError.includes("wrong code")
+  ) {
+    return "That code did not work. Check the 6 digits or request a new code.";
+  }
+
+  if (
+    lowerError.includes("too many") ||
+    lowerError.includes("rate") ||
+    lowerError.includes("429")
+  ) {
+    return "Too many attempts. Please wait a little before trying again.";
+  }
+
+  if (
+    lowerError.includes("unable to complete") ||
+    lowerError.includes("register first") ||
+    lowerError.includes("cannot complete")
+  ) {
+    return "We could not complete email-code sign-in. Try another sign-in method.";
+  }
+
+  if (
+    lowerError.includes("network") ||
+    lowerError.includes("fetch") ||
+    lowerError.includes("connection") ||
+    lowerError.includes("server") ||
+    lowerError.includes("500") ||
+    lowerError.includes("internal")
+  ) {
+    return "We could not send or verify your code. Please try again.";
+  }
+
+  return "We could not send or verify your code. Please try again.";
+}
+
+function getAuthErrorMessage(error: unknown, fallback: string): string {
+  if (typeof error === "string") return error;
+  if (error instanceof Error) return error.message;
+  if (typeof error === "object" && error !== null) {
+    const { message, error: nestedError } = error as {
+      message?: unknown;
+      error?: unknown;
+    };
+    if (typeof message === "string") return message;
+    if (typeof nestedError === "string") return nestedError;
+  }
+  return fallback;
+}
+
+function getAuthErrorStatus(error: unknown): number | undefined {
+  return error instanceof ApiError ? error.status : undefined;
+}
+
+function getAuthRetryAfterSeconds(error: unknown): number | undefined {
+  return error instanceof ApiError ? error.retryAfterSeconds : undefined;
+}
+
+const otpGenericError =
+  "We could not send or verify your code. Please try again.";
+const otpInvalidCodeError =
+  "That code did not work. Check the 6 digits or request a new code.";
+const otpRateLimitError =
+  "Too many attempts. Please wait a little before trying again.";
+const emailActionGenericError =
+  "We could not complete that request. Please try again.";
+const passwordResetInvalidLinkError =
+  "This reset link did not work. Request a new password reset email.";
+const emailVerificationInvalidLinkError =
+  "This verification link did not work. Request a new verification email.";
+const emailActionRateLimitError =
+  "Too many attempts. Please wait a little before trying again.";
+const adminTwoFactorGenericError =
+  "We could not complete admin verification. Please try again.";
+const adminTwoFactorInvalidCodeError =
+  "That code did not work. Check the 6 digits or request a new code.";
+const adminTwoFactorRateLimitError =
+  "Too many attempts. Please wait a little before trying again.";
+
+export interface OtpAcceptedResponse {
+  success: boolean;
+  message?: string;
+  error?: string;
+  retryAfterSeconds?: number;
+}
+
+export interface EmailActionResponse {
+  success: boolean;
+  message?: string;
+  error?: string;
+  retryAfterSeconds?: number;
+}
+
+type BackendOtpAcceptedResponse = {
+  message?: string;
+};
+
+type BackendEmailActionResponse = {
+  message?: string;
+};
+
+function emailActionFromResponse(
+  response: {
+    success: boolean;
+    data?: BackendEmailActionResponse;
+    error?: string;
+  },
+  defaultMessage?: string,
+): EmailActionResponse {
+  return {
+    success: response.success,
+    message: response.data?.message || defaultMessage,
+    error: response.error ? emailActionGenericError : undefined,
+  };
+}
+
+function emailActionFailure(
+  error: unknown,
+  fallback: string,
+  invalidLinkMessage?: string,
+): EmailActionResponse {
+  const retryAfterSeconds = getAuthRetryAfterSeconds(error);
+  const status = getAuthErrorStatus(error);
+
+  if (status === 429) {
+    return {
+      success: false,
+      error: emailActionRateLimitError,
+      retryAfterSeconds,
+    };
+  }
+
+  if (status === 400 && invalidLinkMessage) {
+    return { success: false, error: invalidLinkMessage };
+  }
+
+  const rawError = getAuthErrorMessage(error, fallback);
+  return {
+    success: false,
+    error: rawError ? emailActionGenericError : fallback,
+  };
+}
+
 /**
  * Authentication API interface
  * Handles user login, registration, logout, and OAuth flows
@@ -125,6 +285,46 @@ export interface AuthApi {
     visitedCountryCodes?: string[];
   }): Promise<AuthResponse<User>>;
 
+  /** Requests an email OTP for passwordless sign-in/sign-up. */
+  requestEmailOtp(
+    email: string,
+    purpose?: EmailOtpPurpose,
+  ): Promise<OtpAcceptedResponse>;
+
+  /** Resends an active email OTP challenge when allowed by backend policy. */
+  resendEmailOtp(
+    email: string,
+    purpose?: EmailOtpPurpose,
+  ): Promise<OtpAcceptedResponse>;
+
+  /** Verifies a 6-digit email OTP and returns the normal auth payload. */
+  verifyEmailOtp(
+    email: string,
+    code: string,
+    purpose?: EmailOtpPurpose,
+  ): Promise<AuthResponse<User>>;
+
+  /** Requests password reset instructions by email. */
+  requestPasswordReset(email: string): Promise<EmailActionResponse>;
+
+  /** Completes password reset using a token from an email deep link. */
+  resetPassword(
+    token: string,
+    newPassword: string,
+  ): Promise<EmailActionResponse>;
+
+  /** Requests email verification instructions by email. */
+  requestEmailVerification(email: string): Promise<EmailActionResponse>;
+
+  /** Confirms an email verification token from an email deep link. */
+  confirmEmailVerification(token: string): Promise<EmailActionResponse>;
+
+  /** Requests an admin 2FA email code for the current admin session. */
+  requestAdminTwoFactor(): Promise<EmailActionResponse>;
+
+  /** Verifies an admin 2FA email code for the current admin session. */
+  verifyAdminTwoFactor(code: string): Promise<EmailActionResponse>;
+
   /**
    * Logs out the current user
    * Clears authentication token from storage
@@ -139,20 +339,27 @@ export interface AuthApi {
   getCurrentUser(): Promise<User | null>;
 
   /**
-   * Initiates Google OAuth authentication flow
-   * Opens OAuth popup window and handles authentication
-   * @returns Promise that resolves when OAuth completes successfully
-   * @throws Error if popup is blocked or OAuth fails
+   * @deprecated Use {@link beginOAuth} from `@/lib/oauth` or `useAuth().beginOAuth`.
    */
   googleAuth(): Promise<void>;
 
   /**
-   * Completes Google OAuth callback
-   * Exchanges authorization code for user data and token
-   * @param code - OAuth authorization code from Google
-   * @returns Promise resolving to auth response with user data and token
+   * @deprecated Use {@link oauthCallback}.
    */
-  googleCallback(code: string): Promise<AuthResponse<User>>;
+  googleCallback(code: string, state?: string): Promise<AuthResponse<User>>;
+
+  /** Starts OAuth for the given provider (popup). */
+  beginOAuth(provider: OAuthProvider): void;
+
+  /** Exchanges authorization code (+ state) after OAuth redirect. */
+  oauthCallback(
+    provider: OAuthProvider,
+    code: string,
+    state?: string,
+  ): Promise<AuthResponse<User>>;
+
+  /** Linked sign-in methods for the current user (read-only). */
+  getIdentities(): Promise<LinkedIdentity[]>;
 }
 
 export const authApi: {
@@ -187,13 +394,10 @@ export const authApi: {
         success: false,
         error: normalizedError,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Handle ApiError and network errors
       // ApiError has message property, also check error property for nested errors
-      const rawError =
-        error?.message ||
-        error?.error ||
-        (typeof error === "string" ? error : "Login failed");
+      const rawError = getAuthErrorMessage(error, "Login failed");
       const normalizedError = normalizeAuthError(rawError);
       return {
         success: false,
@@ -235,15 +439,260 @@ export const authApi: {
         payload.error || res.error || res.message || "Registration failed";
       const normalizedError = normalizeAuthError(rawError);
       return { success: false, error: normalizedError };
-    } catch (err: any) {
+    } catch (err: unknown) {
       // Handle ApiError and network errors
       // ApiError has message property, also check error property for nested errors
-      const rawError =
-        err?.message ||
-        err?.error ||
-        (typeof err === "string" ? err : "Registration failed");
+      const rawError = getAuthErrorMessage(err, "Registration failed");
       const normalizedError = normalizeAuthError(rawError);
       return { success: false, error: normalizedError };
+    }
+  },
+
+  async requestEmailOtp(this: ApiClient, email, purpose = "REGISTER") {
+    try {
+      const response = await this.request<BackendOtpAcceptedResponse>(
+        API_CONFIG.ENDPOINTS.AUTH.OTP_REQUEST,
+        {
+          method: "POST",
+          body: JSON.stringify({ email, purpose }),
+        },
+      );
+
+      return {
+        success: response.success,
+        message:
+          response.data?.message ||
+          "If this email can receive messages, a verification code has been sent.",
+        error: response.error ? normalizeOtpError(response.error) : undefined,
+      };
+    } catch (error: unknown) {
+      const rawError = getAuthErrorMessage(error, "Email code request failed");
+      const retryAfterSeconds = getAuthRetryAfterSeconds(error);
+      return {
+        success: false,
+        error:
+          getAuthErrorStatus(error) === 429
+            ? otpRateLimitError
+            : normalizeOtpError(rawError),
+        retryAfterSeconds,
+      };
+    }
+  },
+
+  async resendEmailOtp(this: ApiClient, email, purpose = "REGISTER") {
+    try {
+      const response = await this.request<BackendOtpAcceptedResponse>(
+        API_CONFIG.ENDPOINTS.AUTH.OTP_RESEND,
+        {
+          method: "POST",
+          body: JSON.stringify({ email, purpose }),
+        },
+      );
+
+      return {
+        success: response.success,
+        message:
+          response.data?.message ||
+          "If this email can receive messages, a verification code has been sent.",
+        error: response.error ? normalizeOtpError(response.error) : undefined,
+      };
+    } catch (error: unknown) {
+      const rawError = getAuthErrorMessage(error, "Email code resend failed");
+      const retryAfterSeconds = getAuthRetryAfterSeconds(error);
+      return {
+        success: false,
+        error:
+          getAuthErrorStatus(error) === 429
+            ? otpRateLimitError
+            : normalizeOtpError(rawError),
+        retryAfterSeconds,
+      };
+    }
+  },
+
+  async verifyEmailOtp(this: ApiClient, email, code, purpose = "REGISTER") {
+    try {
+      const response = await this.request<AuthResponse<BackendUserDto>>(
+        API_CONFIG.ENDPOINTS.AUTH.OTP_VERIFY,
+        {
+          method: "POST",
+          body: JSON.stringify({ email, purpose, code }),
+        },
+      );
+
+      const payload = this.adaptAuthPayload(response.data);
+      if (payload.success) {
+        if (payload.token) {
+          this.setAuthToken(payload.token);
+        }
+        return payload;
+      }
+
+      const rawError =
+        payload.error || response.error || "Email code verification failed";
+      return { success: false, error: normalizeOtpError(rawError) };
+    } catch (error: unknown) {
+      const rawError = getAuthErrorMessage(
+        error,
+        "Email code verification failed",
+      );
+      const retryAfterSeconds = getAuthRetryAfterSeconds(error);
+      if (getAuthErrorStatus(error) === 429) {
+        return {
+          success: false,
+          error: otpRateLimitError,
+          retryAfterSeconds,
+        };
+      }
+      if (getAuthErrorStatus(error) === 400) {
+        return { success: false, error: otpInvalidCodeError };
+      }
+      return {
+        success: false,
+        error: normalizeOtpError(rawError) || otpGenericError,
+        retryAfterSeconds,
+      };
+    }
+  },
+
+  async requestPasswordReset(this: ApiClient, email) {
+    const defaultMessage =
+      "If an account exists for this email, password reset instructions have been sent.";
+    try {
+      const response = await this.request<BackendEmailActionResponse>(
+        API_CONFIG.ENDPOINTS.AUTH.PASSWORD_FORGOT,
+        {
+          method: "POST",
+          body: JSON.stringify({ email }),
+        },
+      );
+
+      return emailActionFromResponse(response, defaultMessage);
+    } catch (error: unknown) {
+      return emailActionFailure(error, "Password reset request failed");
+    }
+  },
+
+  async resetPassword(this: ApiClient, token, newPassword) {
+    try {
+      await this.request<void>(API_CONFIG.ENDPOINTS.AUTH.PASSWORD_RESET, {
+        method: "POST",
+        body: JSON.stringify({ token, newPassword }),
+      });
+
+      return { success: true };
+    } catch (error: unknown) {
+      return emailActionFailure(
+        error,
+        "Password reset failed",
+        passwordResetInvalidLinkError,
+      );
+    }
+  },
+
+  async requestEmailVerification(this: ApiClient, email) {
+    const defaultMessage =
+      "If an account exists for this email, verification instructions have been sent.";
+    try {
+      const response = await this.request<BackendEmailActionResponse>(
+        API_CONFIG.ENDPOINTS.AUTH.EMAIL_VERIFICATION_REQUEST,
+        {
+          method: "POST",
+          body: JSON.stringify({ email }),
+        },
+      );
+
+      return emailActionFromResponse(response, defaultMessage);
+    } catch (error: unknown) {
+      return emailActionFailure(error, "Email verification request failed");
+    }
+  },
+
+  async confirmEmailVerification(this: ApiClient, token) {
+    try {
+      await this.request<void>(
+        API_CONFIG.ENDPOINTS.AUTH.EMAIL_VERIFICATION_CONFIRM,
+        {
+          method: "POST",
+          body: JSON.stringify({ token }),
+        },
+      );
+
+      return { success: true };
+    } catch (error: unknown) {
+      return emailActionFailure(
+        error,
+        "Email verification failed",
+        emailVerificationInvalidLinkError,
+      );
+    }
+  },
+
+  async requestAdminTwoFactor(this: ApiClient) {
+    try {
+      const response = await this.request<BackendEmailActionResponse>(
+        API_CONFIG.ENDPOINTS.AUTH.ADMIN_2FA_CHALLENGE,
+        {
+          method: "POST",
+        },
+      );
+
+      return {
+        success: response.success,
+        message:
+          response.data?.message || "Verification code sent to your email.",
+        error: response.error ? adminTwoFactorGenericError : undefined,
+      };
+    } catch (error: unknown) {
+      const retryAfterSeconds = getAuthRetryAfterSeconds(error);
+      return {
+        success: false,
+        error:
+          getAuthErrorStatus(error) === 429
+            ? adminTwoFactorRateLimitError
+            : adminTwoFactorGenericError,
+        retryAfterSeconds,
+      };
+    }
+  },
+
+  async verifyAdminTwoFactor(this: ApiClient, code) {
+    try {
+      const response = await this.request<BackendEmailActionResponse>(
+        API_CONFIG.ENDPOINTS.AUTH.ADMIN_2FA_VERIFY,
+        {
+          method: "POST",
+          body: JSON.stringify({ code }),
+        },
+      );
+
+      return {
+        success: response.success,
+        message:
+          response.data?.message || "Two-factor authentication verified.",
+        error: response.error ? adminTwoFactorGenericError : undefined,
+      };
+    } catch (error: unknown) {
+      const retryAfterSeconds = getAuthRetryAfterSeconds(error);
+      const status = getAuthErrorStatus(error);
+
+      if (status === 429) {
+        return {
+          success: false,
+          error: adminTwoFactorRateLimitError,
+          retryAfterSeconds,
+        };
+      }
+
+      if (status === 400) {
+        return { success: false, error: adminTwoFactorInvalidCodeError };
+      }
+
+      return {
+        success: false,
+        error: adminTwoFactorGenericError,
+        retryAfterSeconds,
+      };
     }
   },
 
@@ -274,74 +723,31 @@ export const authApi: {
   },
 
   async googleAuth(this: ApiClient): Promise<void> {
-    // Store current page URL for redirect after OAuth
-    const currentUrl = window.location.pathname + window.location.search;
-    sessionStorage.setItem("google_oauth_redirect", currentUrl);
-
-    // Open OAuth in a popup window
-    const width = 500;
-    const height = 600;
-    const left = window.screenX + (window.outerWidth - width) / 2;
-    const top = window.screenY + (window.outerHeight - height) / 2;
-
-    const popup = window.open(
-      `${this.baseURL}${API_CONFIG.ENDPOINTS.AUTH.GOOGLE}`,
-      "google-oauth",
-      `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no,scrollbars=yes,resizable=yes`,
-    );
-
-    if (!popup) {
-      throw new Error("Popup blocked. Please allow popups for this site.");
-    }
-
-    // Listen for messages from the popup
-    return new Promise((resolve, reject) => {
-      const messageListener = (event: MessageEvent) => {
-        const allowedOrigins = [
-          window.location.origin,
-          "https://univoyage-production-d7c5.up.railway.app",
-        ];
-
-        if (!allowedOrigins.includes(event.origin)) {
-          return;
-        }
-
-        if (event.data.type === "GOOGLE_OAUTH_SUCCESS") {
-          window.removeEventListener("message", messageListener);
-          popup.close();
-          resolve();
-        } else if (event.data.type === "GOOGLE_OAUTH_ERROR") {
-          window.removeEventListener("message", messageListener);
-          popup.close();
-          reject(new Error(event.data.error || "Google OAuth failed"));
-        }
-      };
-
-      window.addEventListener("message", messageListener);
-
-      // Check if popup is closed manually
-      const checkClosed = setInterval(() => {
-        if (popup.closed) {
-          clearInterval(checkClosed);
-          window.removeEventListener("message", messageListener);
-          reject(new Error("OAuth popup was closed"));
-        }
-      }, 500);
-    });
+    return runBeginOAuth("google");
   },
 
-  async googleCallback(
+  beginOAuth(this: ApiClient, provider: OAuthProvider): void {
+    void this;
+    runBeginOAuth(provider);
+  },
+
+  async oauthCallback(
     this: ApiClient,
+    provider: OAuthProvider,
     code: string,
+    state?: string,
   ): Promise<AuthResponse<User>> {
-    const res = await this.request<AuthResponse<BackendUserDto>>(
-      API_CONFIG.ENDPOINTS.AUTH.GOOGLE_CALLBACK,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code }),
-      },
-    );
+    const endpoint = OAUTH_PROVIDER_CONFIG[provider].callbackEndpoint;
+    const body: { code: string; state?: string } = { code };
+    if (state) {
+      body.state = state;
+    }
+
+    const res = await this.request<AuthResponse<BackendUserDto>>(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
 
     const payload = this.adaptAuthPayload(res.data);
 
@@ -349,11 +755,36 @@ export const authApi: {
       this.setAuthToken(payload.token);
     }
 
+    const label = OAUTH_PROVIDER_CONFIG[provider].label;
     return payload.success
       ? payload
       : {
           success: false,
-          error: payload.error || res.error || "Google login failed",
+          error: payload.error || res.error || `${label} login failed`,
         };
+  },
+
+  async googleCallback(
+    this: ApiClient,
+    code: string,
+    state?: string,
+  ): Promise<AuthResponse<User>> {
+    return authApi.oauthCallback.call(this, "google", code, state);
+  },
+
+  async getIdentities(this: ApiClient): Promise<LinkedIdentity[]> {
+    try {
+      const response = await this.request<BackendLinkedIdentityDto[]>(
+        API_CONFIG.ENDPOINTS.AUTH.IDENTITIES,
+      );
+      return (response.data ?? []).map((row) => ({
+        provider: row.provider,
+        label: row.label,
+        linkedAt: row.linkedAt,
+      }));
+    } catch (error) {
+      console.error("Failed to load sign-in methods:", error);
+      return [];
+    }
   },
 };

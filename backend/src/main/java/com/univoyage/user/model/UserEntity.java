@@ -56,12 +56,22 @@ public class UserEntity implements UserDetails {
   @Column(name = "date_of_last_signin")
   private Instant dateOfLastSignin;
 
+  /**
+   * How the user last signed in: {@code password}, {@code google},
+   * {@code github}, {@code linkedin}, {@code email_otp}, etc.
+   */
+  @Column(name = "last_sign_in_method", length = 32)
+  private String lastSignInMethod;
+
   @Builder.Default
   @Column(name = "failed_login_attempts", nullable = false)
   private int failedLoginAttempts = 0;
 
   @Column(name = "locked_until")
   private Instant lockedUntil;
+
+  @Column(name = "email_verified_at")
+  private Instant emailVerifiedAt;
 
   @Builder.Default
   @Enumerated(EnumType.STRING)
@@ -111,5 +121,9 @@ public class UserEntity implements UserDetails {
   @Override
   public boolean isEnabled() {
     return true;
+  }
+
+  public boolean isEmailVerified() {
+    return emailVerifiedAt != null;
   }
 }

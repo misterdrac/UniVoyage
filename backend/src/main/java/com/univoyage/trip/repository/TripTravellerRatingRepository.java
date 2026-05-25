@@ -50,6 +50,17 @@ public interface TripTravellerRatingRepository
       @Param("destinationId") Long destinationId, @Param("status") ReviewModerationStatus status,
       Pageable pageable);
 
+  @Query(value = """
+      SELECT r FROM TripTravellerRatingEntity r
+      JOIN FETCH r.trip t
+      JOIN FETCH t.destination
+      JOIN FETCH r.user
+      WHERE r.moderationStatus = :status
+      ORDER BY r.updatedAt ASC
+      """, countQuery = """
+      SELECT COUNT(r) FROM TripTravellerRatingEntity r
+      WHERE r.moderationStatus = :status
+      """)
   Page<TripTravellerRatingEntity> findByModerationStatusOrderByUpdatedAtAsc(
-      ReviewModerationStatus status, Pageable pageable);
+      @Param("status") ReviewModerationStatus status, Pageable pageable);
 }

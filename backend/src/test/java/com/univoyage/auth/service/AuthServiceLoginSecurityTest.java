@@ -55,6 +55,8 @@ class AuthServiceLoginSecurityTest {
   private HobbyRepository hobbyRepository;
   @Mock
   private LanguageRepository languageRepository;
+  @Mock
+  private AuthSignInMethodService authSignInMethodService;
 
   private Clock clock;
   private LoginSecurityProperties loginSecurityProperties;
@@ -69,7 +71,8 @@ class AuthServiceLoginSecurityTest {
     loginSecurityProperties.setLockDuration(Duration.ofMinutes(15));
 
     authService = new AuthService(userRepository, passwordEncoder, jwtService, clock,
-        loginSecurityProperties, countryRepository, hobbyRepository, languageRepository);
+        loginSecurityProperties, authSignInMethodService, countryRepository, hobbyRepository,
+        languageRepository);
 
     lenient().when(userRepository.save(any(UserEntity.class)))
         .thenAnswer(inv -> inv.getArgument(0));

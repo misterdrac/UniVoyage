@@ -35,6 +35,8 @@ app:
     issuer: "univoyage"
     audience: "web"
 
+  email:
+    provider: logging
   auth:
     oauth:
       state-secret: ${app.jwt.secret}

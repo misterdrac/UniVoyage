@@ -8,6 +8,7 @@ import {
   AchievementsSection,
   TravelInformationCard,
   AccountInformationCard,
+  SignInMethodsCard,
   useProfileForm,
 } from "@/components/profile";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
@@ -20,7 +21,15 @@ import {
 
 const ProfilePage = () => {
   useDocumentTitle("Profile");
-  const { user, logout, updateProfile } = useAuth();
+  const {
+    user,
+    logout,
+    updateProfile,
+    identities,
+    identitiesLoading,
+    identitiesError,
+    lastSignInMethod,
+  } = useAuth();
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isEditingInterests, setIsEditingInterests] = useState(false);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
@@ -213,6 +222,13 @@ const ProfilePage = () => {
           onHobbiesChange={setHobbies}
           onLanguagesChange={setLanguages}
           onVisitedChange={setVisited}
+        />
+
+        <SignInMethodsCard
+          identities={identities}
+          lastSignInMethod={lastSignInMethod}
+          isLoading={identitiesLoading}
+          error={identitiesError}
         />
 
         <AccountInformationCard

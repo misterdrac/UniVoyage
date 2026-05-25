@@ -7,6 +7,13 @@ spring:
     activate:
       on-profile: prod
 
+  main:
+    banner-mode: console
+
+  banner:
+    location: classpath:banner.txt
+    charset: UTF-8
+
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://${DB_HOST:${PGHOST:localhost}}:${DB_PORT:${PGPORT:5432}}/${DB_NAME:${PGDATABASE:univoyage_db}}}
     username: ${SPRING_DATASOURCE_USERNAME:${DB_USERNAME:${PGUSER:postgres}}}
@@ -31,8 +38,7 @@ app:
     ttl-seconds: ${JWT_TTL_SECONDS:3600}
 
   cors:
-    # Falls back to local frontend if CORS_ALLOWED_ORIGINS is unset
-    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
+    allowed-origins: ${CORS_ALLOWED_ORIGINS}
 
   cookies:
     secure: ${COOKIE_SECURE:true}
@@ -41,6 +47,7 @@ app:
 
 logging:
   level:
+    com.univoyage: INFO
     org.springframework.security: INFO
     org.hibernate.SQL: WARN
     org.hibernate.orm.jdbc.bind: WARN

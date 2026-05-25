@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 /**
  * Controller for user-related operations.
@@ -25,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
+@Log4j2
 public class UserController {
 
   private final AuthService authService;
@@ -56,8 +58,9 @@ public class UserController {
     } catch (IllegalArgumentException e) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.fail(e.getMessage()));
     } catch (Exception e) {
+      log.error("Profile update failed for userId={}", userId, e);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-          .body(ApiResponse.fail("Failed to update profile: " + e.getMessage()));
+          .body(ApiResponse.fail("Failed to update profile. Please try again later."));
     }
   }
 }

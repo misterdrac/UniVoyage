@@ -15,6 +15,7 @@ import {
   AdminEmptyState,
   AdminEmptySelection,
   SortableTableHeader,
+  AdminPageFooter,
 } from "@/components/admin";
 import { useAdminTable } from "@/hooks/useAdminTable";
 import { Loader2, Languages, Plus, Trash2 } from "lucide-react";
@@ -353,6 +354,7 @@ const AdminLanguagesPage: React.FC = () => {
           </div>
         </div>
       </main>
+      <AdminPageFooter />
     </div>
   );
 };

@@ -133,7 +133,7 @@ class TripControllerCurrencyIntegrationTest {
 
     mockMvc.perform(get("/api/trips/{tripId}/currency", trip.getId()))
         .andExpect(status().isInternalServerError()).andExpect(jsonPath("$.success").value(false))
-        .andExpect(jsonPath("$.error").value("Destination country currency is not configured"));
+        .andExpect(jsonPath("$.error").value("An unexpected error occurred."));
   }
 
   /**

@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.time.LocalDate;
 
+import static org.hamcrest.Matchers.contains;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -73,8 +74,8 @@ class HeatmapControllerIntegrationTest {
     mockMvc.perform(get("/api/heatmap")).andExpect(status().isOk())
         .andExpect(jsonPath("$.data.points[0].destinationName").value("HeatmapCityA"))
         .andExpect(jsonPath("$.data.points[0].tripCount").value(2))
-        .andExpect(jsonPath("$.data.points[1].destinationName").value("HeatmapCityB"))
-        .andExpect(jsonPath("$.data.points[1].tripCount").value(1));
+        .andExpect(jsonPath("$.data.points[?(@.destinationName == 'HeatmapCityB')].tripCount")
+            .value(contains(1)));
   }
 
   private Country country(String isoCode) {

@@ -55,7 +55,7 @@ public class RefreshTokenService {
    * access + CSRF payload and a new refresh raw value.
    */
   @Transactional
-  public Optional<RefreshRotationResult> rotate(String rawRefreshToken) {
+  public Optional<RefreshRotationResult> rotate(String rawRefreshToken, boolean twoFactorVerified) {
     if (rawRefreshToken == null || rawRefreshToken.isBlank()) {
       return Optional.empty();
     }
@@ -78,7 +78,9 @@ public class RefreshTokenService {
       return Optional.empty();
     }
 
-    JwtService.TokenPair pair = jwtService.generateForUser(user);
+    JwtService.TokenPair pair = twoFactorVerified
+        ? jwtService.generateForUserWithTwoFactor(user)
+        : jwtService.generateForUser(user);
     AuthPayload payload = AuthPayload.ok(UserDto.from(user), pair.jwt(), pair.csrfSecret());
     String newRefreshRaw = issueRefreshToken(user);
     return Optional.of(new RefreshRotationResult(payload, newRefreshRaw));

@@ -38,7 +38,7 @@ public class GeminiService {
   @Value("${GEMINI_API_KEY:}")
   private String geminiApiKey;
 
-  @Value("${GEMINI_MODEL:}")
+  @Value("${GEMINI_MODEL:gemini-2.5-flash-lite}")
   private String geminiModel;
 
   private final RestTemplate restTemplate;
