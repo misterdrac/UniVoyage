@@ -1,0 +1,15 @@
+{
+  "name": "univoyage-backend",
+  "private": true,
+  "description": "Local Docker dev helpers (Spring Boot runs in containers)",
+  "scripts": {
+    "run:local": "mvnw spring-boot:run",
+    "run:local:win": "mvnw.cmd spring-boot:run",
+    "dev": "docker compose up --build",
+    "start": "docker compose up --build -d && docker compose logs -f backend",
+    "start:detached": "docker compose up --build -d",
+    "stop": "docker compose down",
+    "logs": "docker compose logs -f backend",
+    "ps": "docker compose ps"
+  }
+}
