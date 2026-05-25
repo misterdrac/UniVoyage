@@ -81,28 +81,8 @@ export function LoginDialog({
     password.trim().length >= VALIDATION.MIN_PASSWORD_LENGTH &&
     VALIDATION.EMAIL_REGEX.test(email);
 
-  const handleOAuthSignIn = async (
-    provider: "google" | "github" | "linkedin",
-  ) => {
-    const labels = {
-      google: "Google",
-      github: "GitHub",
-      linkedin: "LinkedIn",
-    } as const;
-    try {
-      setIsLoading(true);
-      await beginOAuth(provider);
-      authToast.success(`Signed in with ${labels[provider]}!`);
-      handleDialogOpenChange(false);
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : `${labels[provider]} sign in failed`;
-      authToast.error(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
+  const handleOAuthSignIn = (provider: "google" | "github" | "linkedin") => {
+    beginOAuth(provider);
   };
 
   const handleSignUpTransition = () => {

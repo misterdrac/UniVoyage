@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import univoyageIcon from "@/assets/univoyage_icon.svg";
-import { PageFooterVersion } from "@/components/layout/PageFooterVersion";
 import {
   Card,
   CardContent,
@@ -71,9 +70,6 @@ export function AuthStatusLayout({
           </Card>
         </div>
       </div>
-      <footer className="py-6 text-center">
-        <PageFooterVersion />
-      </footer>
     </div>
   );
 }

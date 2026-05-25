@@ -17,6 +17,8 @@ import { apiService } from "@/services/api";
 import { API_CONSTANTS } from "@/lib/constants";
 import { safeAuthError } from "@/lib/auth/safeAuthLog";
 import { beginOAuth as startOAuth } from "@/lib/oauth";
+import { OAUTH_PROVIDER_CONFIG } from "@/lib/oauth/constants";
+import { AuthSignInOverlay } from "@/components/auth/AuthSignInOverlay";
 import { clearAllPlacesCache } from "@/lib/placesCache";
 import { clearAllWeatherCache } from "@/lib/weatherCache";
 import { clearAllTripData } from "@/lib/tripCacheUtils";
@@ -70,8 +72,11 @@ interface AuthContextType {
   loadIdentities: () => Promise<LinkedIdentity[]>;
   /** Reload user + linked sign-in methods (single entry for post-login / OAuth). */
   refreshSession: () => Promise<User | null>;
-  beginOAuth: (provider: OAuthProvider) => Promise<void>;
+  beginOAuth: (provider: OAuthProvider) => void;
   isLoading: boolean;
+  signInOverlayMethod: string | null;
+  showSignInOverlay: (method: string) => void;
+  hideSignInOverlay: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -128,6 +133,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [identitiesError, setIdentitiesError] = useState<string | null>(null);
   const [adminTwoFactorVerified, setAdminTwoFactorVerifiedState] =
     useState(false);
+  const [signInOverlayMethod, setSignInOverlayMethod] = useState<string | null>(
+    null,
+  );
+
+  const showSignInOverlay = useCallback((method: string) => {
+    setSignInOverlayMethod(method);
+  }, []);
+
+  const hideSignInOverlay = useCallback(() => {
+    setSignInOverlayMethod(null);
+  }, []);
 
   const persistUser = useCallback((next: User | null) => {
     setUser(next);
@@ -244,7 +260,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     password: string,
   ): Promise<{ success: boolean; error?: string }> => {
     try {
-      setIsLoading(true);
+      showSignInOverlay("Email & password");
       if (!email || !password) {
         return { success: false, error: "Email and password are required" };
       }
@@ -264,7 +280,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             : "An error occurred during login",
       };
     } finally {
-      setIsLoading(false);
+      hideSignInOverlay();
     }
   };
 
@@ -272,7 +288,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     data: SignupData,
   ): Promise<{ success: boolean; error?: string }> => {
     try {
-      setIsLoading(true);
+      showSignInOverlay("Email & password");
       if (!data.email || !data.password) {
         return { success: false, error: "Email and password are required" };
       }
@@ -292,7 +308,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             : "An error occurred during signup",
       };
     } finally {
-      setIsLoading(false);
+      hideSignInOverlay();
     }
   };
 
@@ -307,7 +323,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       retryAfterSeconds?: number;
     }> => {
       try {
-        setIsLoading(true);
+        showSignInOverlay("Email code");
         if (!email || !code || code.length !== 6) {
           return {
             success: false,
@@ -334,18 +350,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               : "An error occurred during email-code sign-in",
         };
       } finally {
-        setIsLoading(false);
+        hideSignInOverlay();
       }
     },
-    [refreshSession],
+    [refreshSession, showSignInOverlay, hideSignInOverlay],
   );
 
   const beginOAuth = useCallback(
-    async (provider: OAuthProvider) => {
-      await startOAuth(provider);
-      await refreshSession();
+    (provider: OAuthProvider) => {
+      showSignInOverlay(OAUTH_PROVIDER_CONFIG[provider].label);
+      startOAuth(provider);
     },
-    [refreshSession],
+    [showSignInOverlay],
   );
 
   const logout = async () => {
@@ -421,6 +437,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       refreshSession,
       beginOAuth,
       isLoading,
+      signInOverlayMethod,
+      showSignInOverlay,
+      hideSignInOverlay,
     }),
     [
       user,
@@ -440,8 +459,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       refreshSession,
       beginOAuth,
       isLoading,
+      signInOverlayMethod,
+      showSignInOverlay,
+      hideSignInOverlay,
     ],
   );
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+      <AuthSignInOverlay
+        open={!!signInOverlayMethod}
+        method={signInOverlayMethod}
+      />
+    </AuthContext.Provider>
+  );
 };

@@ -83,25 +83,10 @@ export function SignUpDialog({
   } = useSignUpForm({ onSuccess: handleSuccess, signup });
 
   const handleOAuthSignUp = useCallback(
-    async (provider: "google" | "github" | "linkedin") => {
-      const labels = {
-        google: "Google",
-        github: "GitHub",
-        linkedin: "LinkedIn",
-      } as const;
-      try {
-        await beginOAuth(provider);
-        toast.success(`Account created with ${labels[provider]}!`);
-        onOpenChange(false);
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error
-            ? error.message
-            : `${labels[provider]} sign up failed`;
-        toast.error(errorMessage);
-      }
+    (provider: "google" | "github" | "linkedin") => {
+      beginOAuth(provider);
     },
-    [onOpenChange, beginOAuth],
+    [beginOAuth],
   );
 
   const handleGoogleSignUp = useCallback(

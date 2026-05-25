@@ -186,7 +186,14 @@ function shouldSkipRecentAutoChallenge(key: string, now: number) {
 }
 
 export function AdminTwoFactorChallenge() {
-  const { user, logout, refreshSession, setAdminTwoFactorVerified } = useAuth();
+  const {
+    user,
+    logout,
+    refreshSession,
+    setAdminTwoFactorVerified,
+    showSignInOverlay,
+    hideSignInOverlay,
+  } = useAuth();
   const navigate = useNavigate();
   const descriptionId = React.useId();
   const codeHelpId = React.useId();
@@ -260,30 +267,35 @@ export function AdminTwoFactorChallenge() {
     if (!canSendChallenge) return;
 
     dispatch({ type: "challenge_pending", now: Date.now() });
-    const result = await apiService.requestAdminTwoFactor();
-    const now = Date.now();
+    showSignInOverlay("Admin verification");
+    try {
+      const result = await apiService.requestAdminTwoFactor();
+      const now = Date.now();
 
-    if (result.success) {
+      if (result.success) {
+        dispatch({
+          type: "challenge_success",
+          message: result.message || "Verification code sent to your email.",
+          now,
+        });
+        return;
+      }
+
+      const retryUntil = result.retryAfterSeconds
+        ? now + result.retryAfterSeconds * 1000
+        : undefined;
       dispatch({
-        type: "challenge_success",
-        message: result.message || "Verification code sent to your email.",
+        type: "challenge_failure",
+        error: result.retryAfterSeconds
+          ? retryError
+          : result.error || genericError,
+        retryUntil,
         now,
       });
-      return;
+    } finally {
+      hideSignInOverlay();
     }
-
-    const retryUntil = result.retryAfterSeconds
-      ? now + result.retryAfterSeconds * 1000
-      : undefined;
-    dispatch({
-      type: "challenge_failure",
-      error: result.retryAfterSeconds
-        ? retryError
-        : result.error || genericError,
-      retryUntil,
-      now,
-    });
-  }, [canSendChallenge]);
+  }, [canSendChallenge, showSignInOverlay, hideSignInOverlay]);
 
   React.useEffect(() => {
     if (!user || autoChallengeStartedRef.current) return;
@@ -300,27 +312,32 @@ export function AdminTwoFactorChallenge() {
     if (!canSubmitCode) return;
 
     dispatch({ type: "verify_pending", now: Date.now() });
-    const result = await apiService.verifyAdminTwoFactor(code);
-    const now = Date.now();
+    showSignInOverlay("Admin verification");
+    try {
+      const result = await apiService.verifyAdminTwoFactor(code);
+      const now = Date.now();
 
-    if (result.success) {
-      dispatch({ type: "verify_success", now });
-      setAdminTwoFactorVerified(true);
-      await refreshSession();
-      return;
+      if (result.success) {
+        dispatch({ type: "verify_success", now });
+        setAdminTwoFactorVerified(true);
+        await refreshSession();
+        return;
+      }
+
+      const retryUntil = result.retryAfterSeconds
+        ? now + result.retryAfterSeconds * 1000
+        : undefined;
+      dispatch({
+        type: "verify_failure",
+        error: result.retryAfterSeconds
+          ? retryError
+          : result.error || invalidCodeError,
+        retryUntil,
+        now,
+      });
+    } finally {
+      hideSignInOverlay();
     }
-
-    const retryUntil = result.retryAfterSeconds
-      ? now + result.retryAfterSeconds * 1000
-      : undefined;
-    dispatch({
-      type: "verify_failure",
-      error: result.retryAfterSeconds
-        ? retryError
-        : result.error || invalidCodeError,
-      retryUntil,
-      now,
-    });
   };
 
   const handleSignOut = () => {

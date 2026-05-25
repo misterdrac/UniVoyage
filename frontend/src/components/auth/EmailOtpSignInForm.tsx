@@ -180,7 +180,7 @@ export function EmailOtpSignInForm({
   onPasswordModeClick,
   onSignUpClick,
 }: EmailOtpSignInFormProps) {
-  const { emailOtpSignIn } = useAuth();
+  const { emailOtpSignIn, showSignInOverlay, hideSignInOverlay } = useAuth();
   const descriptionId = React.useId();
   const statusId = React.useId();
   const codeHelpId = React.useId();
@@ -252,34 +252,39 @@ export function EmailOtpSignInForm({
 
     const now = Date.now();
     dispatch({ type: "request_pending", now });
-    const result = isResend
-      ? await apiService.resendEmailOtp(trimmedEmail, EMAIL_OTP_PURPOSE)
-      : await apiService.requestEmailOtp(trimmedEmail, EMAIL_OTP_PURPOSE);
+    showSignInOverlay("Email code");
+    try {
+      const result = isResend
+        ? await apiService.resendEmailOtp(trimmedEmail, EMAIL_OTP_PURPOSE)
+        : await apiService.requestEmailOtp(trimmedEmail, EMAIL_OTP_PURPOSE);
 
-    if (result.success) {
+      if (result.success) {
+        dispatch({
+          type: "request_success",
+          email: trimmedEmail,
+          message: result.message || defaultOtpMessage,
+          now: Date.now(),
+        });
+        return;
+      }
+
+      const retryUntil = result.retryAfterSeconds
+        ? Date.now() + result.retryAfterSeconds * 1000
+        : undefined;
+      const error = result.retryAfterSeconds
+        ? retryOtpError
+        : result.error || genericOtpError;
       dispatch({
-        type: "request_success",
-        email: trimmedEmail,
-        message: result.message || defaultOtpMessage,
+        type: "request_failure",
+        error,
+        retryUntil,
         now: Date.now(),
       });
-      return;
-    }
-
-    const retryUntil = result.retryAfterSeconds
-      ? Date.now() + result.retryAfterSeconds * 1000
-      : undefined;
-    const error = result.retryAfterSeconds
-      ? retryOtpError
-      : result.error || genericOtpError;
-    dispatch({
-      type: "request_failure",
-      error,
-      retryUntil,
-      now: Date.now(),
-    });
-    if (!result.retryAfterSeconds) {
-      authToast.error(error);
+      if (!result.retryAfterSeconds) {
+        authToast.error(error);
+      }
+    } finally {
+      hideSignInOverlay();
     }
   };
 
