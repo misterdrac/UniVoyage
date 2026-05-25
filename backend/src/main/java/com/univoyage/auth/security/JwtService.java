@@ -145,6 +145,28 @@ public class JwtService {
   }
 
   /**
+   * Reads the two-factor claim from a signed JWT even when the access token is
+   * expired. Used only during refresh rotation to preserve admin 2FA state.
+   */
+  public boolean extractTwoFactorVerifiedAllowExpired(String token) {
+    if (token == null || token.isBlank()) {
+      return false;
+    }
+    try {
+      return extractTwoFactorVerified(token);
+    } catch (IllegalArgumentException e) {
+      try {
+        Claims claims = Jwts.parser().verifyWith((SecretKey) key).requireIssuer(issuer)
+            .requireAudience(audience).clockSkewSeconds(604_800).build().parseSignedClaims(token)
+            .getPayload();
+        return Boolean.TRUE.equals(claims.get(TFA_CLAIM, Boolean.class));
+      } catch (JwtException | IllegalArgumentException ex) {
+        return false;
+      }
+    }
+  }
+
+  /**
    * JWT ID claim ({@code jti}); unique per issued access token (e.g. for future
    * revocation or audit).
    */

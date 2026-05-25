@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { apiService } from "@/services/api";
 import type { AdminPendingReview } from "@/services/api/adminApi";
+import { ApiError } from "@/config/apiConfig";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
   AdminHeader,
@@ -15,6 +17,7 @@ import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 const AdminReviewsPage: React.FC = () => {
   useDocumentTitle("Admin - Reviews");
+  const { setAdminTwoFactorVerified } = useAuth();
 
   const [reviews, setReviews] = useState<AdminPendingReview[]>([]);
   const [totalPages, setTotalPages] = useState(0);
@@ -34,12 +37,19 @@ const AdminReviewsPage: React.FC = () => {
       setReviews(result.content);
       setTotalPages(result.totalPages);
       setTotalElements(result.totalElements);
-    } catch {
-      toast.error("Failed to load pending reviews");
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 403) {
+        setAdminTwoFactorVerified(false);
+        toast.error(
+          "Admin verification expired. Enter the code from your email again.",
+        );
+      } else {
+        toast.error("Failed to load pending reviews");
+      }
     } finally {
       setIsLoading(false);
     }
-  }, [page]);
+  }, [page, setAdminTwoFactorVerified]);
 
   useEffect(() => {
     fetchReviews();

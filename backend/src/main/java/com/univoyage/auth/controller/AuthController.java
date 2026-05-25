@@ -4,6 +4,7 @@ import com.univoyage.auth.dto.AuthPayload;
 import com.univoyage.auth.dto.RegisterRequestDto;
 import com.univoyage.auth.dto.LoginRequestDto;
 import com.univoyage.auth.security.AuthCookieWriter;
+import com.univoyage.auth.security.JwtService;
 import com.univoyage.auth.service.AuthSecurityEventLogger;
 import com.univoyage.auth.service.AuthSecurityEventLogger.EventType;
 import com.univoyage.auth.service.AuthSecurityEventLogger.Result;
@@ -47,6 +48,7 @@ public class AuthController {
   private final LoginIpRateLimiter loginIpRateLimiter;
   private final RefreshIpRateLimiter refreshIpRateLimiter;
   private final RefreshTokenService refreshTokenService;
+  private final JwtService jwtService;
   private final AuthCookieWriter authCookieWriter;
   private final CmsAuditService cmsAuditService;
   private final AuthSecurityEventLogger securityEventLogger;
@@ -129,7 +131,11 @@ public class AuthController {
 
     Cookie cookie = WebUtils.getCookie(request, CookieUtils.REFRESH_TOKEN_COOKIE_NAME);
     String raw = cookie != null ? cookie.getValue() : null;
-    Optional<RefreshTokenService.RefreshRotationResult> result = refreshTokenService.rotate(raw);
+    Cookie jwtCookie = WebUtils.getCookie(request, CookieUtils.JWT_COOKIE_NAME);
+    String jwtValue = jwtCookie != null ? jwtCookie.getValue() : null;
+    boolean preserveTwoFactor = jwtService.extractTwoFactorVerifiedAllowExpired(jwtValue);
+    Optional<RefreshTokenService.RefreshRotationResult> result = refreshTokenService.rotate(raw,
+        preserveTwoFactor);
     if (result.isEmpty()) {
       log.info("Refresh rejected: missing or invalid session");
       authCookieWriter.clearAuthCookies(response);
