@@ -167,6 +167,10 @@ app:
     secure: ${COOKIE_SECURE:false}
     same-site: ${COOKIE_SAMESITE:Lax}
 
+  quiz:
+    ip-max-attempts: ${QUIZ_IP_MAX_ATTEMPTS:10}
+    ip-window: ${QUIZ_IP_WINDOW:PT1M}
+
   trip:
     rating:
       ip-max-attempts: 40
