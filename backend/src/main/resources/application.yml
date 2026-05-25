@@ -1,6 +1,14 @@
 spring:
   application:
     name: UniVoyage
+    version: 1.0.0
+
+  main:
+    banner-mode: console
+
+  banner:
+    location: classpath:banner.txt
+    charset: UTF-8
 
   datasource:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${DB_NAME:univoyage_db}

@@ -7,6 +7,13 @@ spring:
     activate:
       on-profile: prod
 
+  main:
+    banner-mode: console
+
+  banner:
+    location: classpath:banner.txt
+    charset: UTF-8
+
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://${DB_HOST:${PGHOST:localhost}}:${DB_PORT:${PGPORT:5432}}/${DB_NAME:${PGDATABASE:univoyage_db}}}
     username: ${SPRING_DATASOURCE_USERNAME:${DB_USERNAME:${PGUSER:postgres}}}
