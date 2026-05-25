@@ -139,8 +139,9 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(IllegalStateException.class)
   public ResponseEntity<ApiResponse<Object>> handleIllegalStateException(IllegalStateException ex,
       WebRequest request) {
-    ApiResponse<Object> response = ApiResponse.fail(ex.getMessage());
-    return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    log.error("IllegalStateException", ex);
+    return new ResponseEntity<>(ApiResponse.fail("An unexpected error occurred."),
+        HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
   /**
