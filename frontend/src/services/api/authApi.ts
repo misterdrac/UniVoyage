@@ -349,7 +349,7 @@ export interface AuthApi {
   googleCallback(code: string, state?: string): Promise<AuthResponse<User>>;
 
   /** Starts OAuth for the given provider (popup). */
-  beginOAuth(provider: OAuthProvider): Promise<void>;
+  beginOAuth(provider: OAuthProvider): void;
 
   /** Exchanges authorization code (+ state) after OAuth redirect. */
   oauthCallback(
@@ -726,9 +726,9 @@ export const authApi: {
     return runBeginOAuth("google");
   },
 
-  async beginOAuth(this: ApiClient, provider: OAuthProvider): Promise<void> {
+  beginOAuth(this: ApiClient, provider: OAuthProvider): void {
     void this;
-    return runBeginOAuth(provider);
+    runBeginOAuth(provider);
   },
 
   async oauthCallback(

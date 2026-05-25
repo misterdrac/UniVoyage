@@ -181,36 +181,4 @@ describe("OAuth callback E2E", () => {
     expect(hasAuthTokenInStorage()).toBe(false);
     expect(hasSessionCookies()).toBe(false);
   });
-
-  it("popup success: posts message to opener and does not require cookies in opener document", async () => {
-    const postMessage = vi.fn();
-    const close = vi.fn();
-    Object.defineProperty(window, "opener", {
-      configurable: true,
-      value: { postMessage, closed: false },
-    });
-    vi.spyOn(window, "close").mockImplementation(close);
-
-    mockWindowLocation({
-      search: "?code=popup-code&state=popup-state",
-      pathname: "/auth/google/callback",
-    });
-
-    vi.mocked(apiService.oauthCallback).mockResolvedValue({
-      success: true,
-      token: "popup-jwt",
-      user: mockUser,
-    });
-    vi.mocked(apiService.getCurrentUser).mockResolvedValue(mockUser);
-
-    renderOAuthCallback("/auth/google/callback");
-
-    await waitFor(() => {
-      expect(postMessage).toHaveBeenCalledWith(
-        expect.objectContaining({ type: "OAUTH_SUCCESS", provider: "google" }),
-        "http://localhost:5173",
-      );
-      expect(close).toHaveBeenCalled();
-    });
-  });
 });

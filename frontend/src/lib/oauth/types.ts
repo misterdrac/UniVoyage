@@ -19,7 +19,7 @@ export type OAuthPostMessage =
   | { type: "OAUTH_SUCCESS"; provider: OAuthProvider }
   | { type: "OAUTH_ERROR"; provider: OAuthProvider; error: string };
 
-/** @deprecated Legacy Google popup messages — still accepted by {@link beginOAuth}. */
+/** @deprecated Legacy Google popup messages — kept for compatibility if an old callback tab posts to opener. */
 export type LegacyGoogleOAuthPostMessage =
   | { type: "GOOGLE_OAUTH_SUCCESS" }
   | { type: "GOOGLE_OAUTH_ERROR"; error: string };

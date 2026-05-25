@@ -2,6 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { authToast } from "@/lib/auth/authToast";
 import { locationHasSensitiveQueryParams } from "@/lib/auth/sensitiveUrl";
+import {
+  SIGN_IN_OVERLAY_WAIT_MESSAGE,
+  signInOverlayMethodMessage,
+} from "@/components/auth/AuthSignInOverlay";
 import { AlertCircle, Loader2, LogIn } from "lucide-react";
 import { useAuth } from "@/contexts";
 import { AuthStatusLayout } from "@/components/auth/AuthStatusLayout";
@@ -12,8 +16,6 @@ import {
   handleOAuthCallback,
   isOAuthProvider,
   OAUTH_PROVIDER_CONFIG,
-  postOAuthError,
-  postOAuthSuccess,
 } from "@/lib/oauth";
 
 type CallbackPhase = "loading" | "error";
@@ -24,7 +26,6 @@ export default function OAuthCallbackPage() {
   const navigate = useNavigate();
   const { refreshSession } = useAuth();
   const ran = useRef(false);
-  const isPopup = window.opener !== null;
   const [phase, setPhase] = useState<CallbackPhase>("loading");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -47,42 +48,23 @@ export default function OAuthCallbackPage() {
 
     if (!provider) {
       const msg = "Unknown sign-in provider";
-      if (isPopup) {
-        window.close();
-      } else {
-        setErrorMessage(msg);
-        setPhase("error");
-        authToast.error(msg);
-      }
+      setErrorMessage(msg);
+      setPhase("error");
+      authToast.error(msg);
       return;
     }
 
     const finishError = (message: string) => {
-      if (isPopup) {
-        postOAuthError(
-          window.opener,
-          provider,
-          message,
-          window.location.origin,
-        );
-        window.close();
-      } else {
-        setErrorMessage(message);
-        setPhase("error");
-        authToast.error(message);
-      }
+      setErrorMessage(message);
+      setPhase("error");
+      authToast.error(message);
     };
 
     const finishSuccess = async () => {
       await refreshSession();
       const redirectUrl = consumeOAuthReturnUrl();
-      if (isPopup) {
-        postOAuthSuccess(window.opener, provider, window.location.origin);
-        window.close();
-      } else {
-        authToast.success(`Signed in with ${label}!`);
-        navigate(redirectUrl);
-      }
+      authToast.success(`Signed in with ${label}!`);
+      navigate(redirectUrl);
     };
 
     (async () => {
@@ -104,7 +86,7 @@ export default function OAuthCallbackPage() {
         finishError(e instanceof Error ? e.message : `${label} sign-in failed`);
       }
     })();
-  }, [location.pathname, navigate, refreshSession, isPopup, provider, label]);
+  }, [location.pathname, navigate, refreshSession, provider, label]);
 
   if (phase === "error" && errorMessage) {
     return (
@@ -127,8 +109,8 @@ export default function OAuthCallbackPage() {
 
   return (
     <AuthStatusLayout
-      title={provider ? `Signing in with ${label}` : "Signing you in"}
-      description="Please wait while we complete your authentication…"
+      title={provider ? signInOverlayMethodMessage(label) : "Signing you in"}
+      description={SIGN_IN_OVERLAY_WAIT_MESSAGE}
       icon={<LogIn className="h-8 w-8 text-primary" aria-hidden />}
       footer={
         <Loader2
