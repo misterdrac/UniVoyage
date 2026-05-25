@@ -19,6 +19,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 
 /**
  * Filter that authenticates requests based on JWT stored in HttpOnly cookies
@@ -35,19 +37,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   private final JwtService jwtService;
   private final UserDetailsService userDetailsService;
   private final AuthCookieWriter authCookieWriter;
+  private final PublicApiRequestMatcher publicApiRequestMatcher;
 
   public static final String TFA_REQUEST_ATTRIBUTE = "univoyage.tfa.verified";
 
-  // Cookie name for the HttpOnly JWT (Token A)
   private static final String JWT_COOKIE_NAME = CookieUtils.JWT_COOKIE_NAME;
-
-  // Header name for the client-sent CSRF secret (Token B)
   private static final String CSRF_HEADER_NAME = "X-CSRF-TOKEN";
-
-  // Public endpoints that don't require authentication
-  private static final String[] PUBLIC_PATHS = {"/api/auth/register", "/api/auth/register/",
-      "/api/auth/login", "/api/auth/login/", "/api/auth/google", "/api/auth/google/",
-      "/api/auth/google/callback", "/api/auth/google/callback/"};
 
   private boolean csrfRequired(HttpServletRequest request) {
     String method = request.getMethod();
@@ -58,37 +53,32 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     authCookieWriter.clearAuthCookies(response);
   }
 
-  /**
-   * Main filter method that processes each request. Bypasses public paths,
-   * extracts and validates JWT and CSRF tokens, and sets authentication in the
-   * security context. Clears cookies and responds with 401/403 on failure.
-   */
+  private static boolean csrfSecretsMatch(String headerCsrfSecret, String jwtCsrfSecret) {
+    if (headerCsrfSecret == null || jwtCsrfSecret == null) {
+      return false;
+    }
+    return MessageDigest.isEqual(headerCsrfSecret.getBytes(StandardCharsets.UTF_8),
+        jwtCsrfSecret.getBytes(StandardCharsets.UTF_8));
+  }
+
   @Override
   protected void doFilterInternal(@SuppressWarnings("null") HttpServletRequest request,
       @SuppressWarnings("null") HttpServletResponse response,
       @SuppressWarnings("null") FilterChain filterChain) throws ServletException, IOException {
 
-    String path = request.getRequestURI();
-
-    if (path.contains("/api/auth/login") || path.contains("/api/auth/register")
-        || path.contains("/api/auth/refresh") || path.contains("/api/auth/google")
-        || path.contains("/api/destinations") || path.contains("/api/quiz")
-        || path.contains("/error") || path.startsWith("/actuator/health")) {
+    if (publicApiRequestMatcher.shouldSkipJwtProcessing(request)) {
       filterChain.doFilter(request, response);
       return;
     }
 
-    // 2) Extract JWT from HttpOnly cookie
     Cookie jwtCookie = WebUtils.getCookie(request, JWT_COOKIE_NAME);
     final String jwt = (jwtCookie != null) ? jwtCookie.getValue() : null;
 
     if (jwt == null || jwt.isBlank()) {
-      // No JWT present - let Spring Security handle the 401/403
       filterChain.doFilter(request, response);
       return;
     }
 
-    // 3) Extract CSRF secret from header
     final String headerCsrfSecret = request.getHeader(CSRF_HEADER_NAME);
 
     final String userIdString;
@@ -105,9 +95,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       return;
     }
 
-    // 4) Double submit CSRF check (only for state-changing)
     if (csrfRequired(request)) {
-      if (headerCsrfSecret == null || !headerCsrfSecret.equals(jwtCsrfSecret)) {
+      if (!csrfSecretsMatch(headerCsrfSecret, jwtCsrfSecret)) {
         log.debug("JWT rejected: CSRF header mismatch for state-changing request");
         clearAuthCookies(response);
         SecurityContextHolder.clearContext();
@@ -116,7 +105,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       }
     }
 
-    // 5) Authenticate (load user by ID)
     try {
       UserDetails userDetails = this.userDetailsService.loadUserByUsername(userIdString);
 
@@ -125,7 +113,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
       SecurityContextHolder.getContext().setAuthentication(authToken);
 
-      // 6) Extract 2FA claim for downstream filters
       boolean tfaVerified = jwtService.extractTwoFactorVerified(jwt);
       request.setAttribute(TFA_REQUEST_ATTRIBUTE, tfaVerified);
 
