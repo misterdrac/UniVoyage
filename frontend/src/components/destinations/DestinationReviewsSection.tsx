@@ -12,6 +12,7 @@ export function DestinationReviewsSection({ destinationId }: DestinationReviewsS
   const [totalElements, setTotalElements] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [currentIndex, setCurrentIndex] = useState(0)
+  const [isExpanded, setIsExpanded] = useState(false)
 
   useEffect(() => {
     let isMounted = true
@@ -43,10 +44,12 @@ export function DestinationReviewsSection({ destinationId }: DestinationReviewsS
 
   const handlePrev = () => {
     setCurrentIndex((prev) => (prev - 1 + reviews.length) % reviews.length)
+    setIsExpanded(false)
   }
 
   const handleNext = () => {
     setCurrentIndex((prev) => (prev + 1) % reviews.length)
+    setIsExpanded(false)
   }
 
   if (isLoading) {
@@ -83,7 +86,15 @@ export function DestinationReviewsSection({ destinationId }: DestinationReviewsS
           </div>
           <span className="text-xs text-muted-foreground">{review.reviewerDisplayName}</span>
         </div>
-        <p className="text-sm text-muted-foreground italic break-words">"{review.comment}"</p>
+        <p className={`text-sm text-muted-foreground italic break-words ${isExpanded ? '' : 'line-clamp-3'}`}>"{review.comment}"</p>
+        {review.comment.length > 120 && (
+          <button
+            onClick={() => setIsExpanded((prev) => !prev)}
+            className="text-xs text-primary hover:underline cursor-pointer"
+          >
+            {isExpanded ? 'Show less' : 'Read more'}
+          </button>
+        )}
       </div>
 
       {/* Navigation */}
