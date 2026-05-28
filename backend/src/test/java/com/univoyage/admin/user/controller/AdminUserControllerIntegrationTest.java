@@ -123,10 +123,10 @@ class AdminUserControllerIntegrationTest {
   }
 
   private UserEntity findOrCreateHeadAdmin() {
-    return userRepository.findByEmail(SEEDED_HEAD_ADMIN_EMAIL).orElseGet(() -> userRepository
-        .save(UserEntity.builder().name("Papa").surname("Volarić").email(SEEDED_HEAD_ADMIN_EMAIL)
-            .passwordHash("{noop}unused").dateOfRegister(Instant.now()).role(Role.HEAD_ADMIN)
-            .build()));
+    return userRepository.findByEmail(SEEDED_HEAD_ADMIN_EMAIL)
+        .orElseGet(() -> userRepository.save(UserEntity.builder().name("Papa").surname("Volarić")
+            .email(SEEDED_HEAD_ADMIN_EMAIL).passwordHash("{noop}unused")
+            .dateOfRegister(Instant.now()).role(Role.HEAD_ADMIN).build()));
   }
 
   private UserEntity saveUser(String email, Role role) {

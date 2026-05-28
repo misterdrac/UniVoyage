@@ -14,11 +14,10 @@ public class ContactService {
   public ContactResponse submitContactForm(ContactRequest request) {
     String referenceId = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
 
-    log.info("Contact form submission [ref={}]: from={}, email={}, subject={}",
-        referenceId, request.getName(), request.getEmail(), request.getSubject());
+    log.info("Contact form submission [ref={}]: from={}, email={}, subject={}", referenceId,
+        request.getName(), request.getEmail(), request.getSubject());
 
     return new ContactResponse(
-        "Thank you for reaching out! We'll get back to you within 24-48 hours.",
-        referenceId);
+        "Thank you for reaching out! We'll get back to you within 24-48 hours.", referenceId);
   }
 }
