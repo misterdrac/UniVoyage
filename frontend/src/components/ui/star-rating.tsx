@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from "react";
 
 interface StarRatingProps {
   rating: number; // 0–5
