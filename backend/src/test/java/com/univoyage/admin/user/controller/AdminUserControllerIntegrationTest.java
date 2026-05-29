@@ -83,9 +83,7 @@ class AdminUserControllerIntegrationTest {
   @Test
   @DisplayName("PATCH /api/admin/users/{id}/role returns 400 when role is missing")
   void updateRole_validationFails() throws Exception {
-    UserEntity headAdmin = userRepository.findByEmail(SEEDED_HEAD_ADMIN_EMAIL)
-        .orElseThrow(() -> new IllegalStateException(
-            "Seed HEAD_ADMIN user required: " + SEEDED_HEAD_ADMIN_EMAIL));
+    UserEntity headAdmin = findOrCreateHeadAdmin();
     UserEntity target = saveUser("admin-role-val@example.com", Role.USER);
 
     mockMvc
@@ -98,9 +96,7 @@ class AdminUserControllerIntegrationTest {
   @Test
   @DisplayName("PATCH /api/admin/users/{id}/role promotes USER to ADMIN when HEAD_ADMIN acts")
   void updateRole_headAdminPromotesUser() throws Exception {
-    UserEntity headAdmin = userRepository.findByEmail(SEEDED_HEAD_ADMIN_EMAIL)
-        .orElseThrow(() -> new IllegalStateException(
-            "Seed HEAD_ADMIN user required: " + SEEDED_HEAD_ADMIN_EMAIL));
+    UserEntity headAdmin = findOrCreateHeadAdmin();
     UserEntity target = saveUser("admin-promote@example.com", Role.USER);
 
     mockMvc
@@ -124,6 +120,13 @@ class AdminUserControllerIntegrationTest {
       request.setAttribute(JwtAuthenticationFilter.TFA_REQUEST_ATTRIBUTE, Boolean.TRUE);
       return request;
     };
+  }
+
+  private UserEntity findOrCreateHeadAdmin() {
+    return userRepository.findByEmail(SEEDED_HEAD_ADMIN_EMAIL)
+        .orElseGet(() -> userRepository.save(UserEntity.builder().name("Papa").surname("Volarić")
+            .email(SEEDED_HEAD_ADMIN_EMAIL).passwordHash("{noop}unused")
+            .dateOfRegister(Instant.now()).role(Role.HEAD_ADMIN).build()));
   }
 
   private UserEntity saveUser(String email, Role role) {

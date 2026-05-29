@@ -62,6 +62,8 @@ public class SecurityConfiguration {
             .requestMatchers(HttpMethod.GET, "/api/reference/**").permitAll()
             // Public heatmap endpoint (landing page)
             .requestMatchers(HttpMethod.GET, "/api/heatmap/**").permitAll()
+            // Public contact form endpoint
+            .requestMatchers(HttpMethod.POST, "/api/contact").permitAll()
             // Admin 2FA endpoints (require authentication but not 2FA yet)
             .requestMatchers("/api/auth/2fa/**").hasAnyRole("ADMIN", "HEAD_ADMIN")
             // Admin routes (2FA enforced by AdminTwoFactorFilter)

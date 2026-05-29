@@ -18,8 +18,8 @@ public class PublicApiRequestMatcher {
   private static final String[] PUBLIC_PATH_PATTERNS = {"/api/auth/login", "/api/auth/login/**",
       "/api/auth/register", "/api/auth/register/**", "/api/auth/refresh", "/api/auth/refresh/",
       "/api/auth/google/**", "/api/auth/github/**", "/api/auth/linkedin/**", "/api/auth/otp/**",
-      "/api/auth/password/**", "/api/auth/email/verification/**", "/api/quiz/**", "/error",
-      "/actuator/health", "/actuator/health/**"};
+      "/api/auth/password/**", "/api/auth/email/verification/**", "/api/quiz/**", "/api/contact",
+      "/error", "/actuator/health", "/actuator/health/**"};
 
   private static final String[] PUBLIC_GET_PATTERNS = {"/api/destinations/**", "/api/reference/**",
       "/api/heatmap/**"};
