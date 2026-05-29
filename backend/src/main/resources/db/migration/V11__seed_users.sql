@@ -41,9 +41,12 @@ INSERT INTO users (
 ('sturmbannfuhrer@univoyage.com', '$2a$15$Z0zzsMN8Xz0UQ4mgDVSof.wCvR3dj6aiEibejqUg2Vr17E7xidUb2', 'StürmbannFührer', 'D.J.', 'ADMIN', 'HR', NOW(), NOW()),
 ('ivaipsic@univoyage.com', '$2a$15$k59NaFl33iUmj7p/rwpnouIrAIRTSuWS7jHAHVXcffFi4oSn6sF3K', 'IVO', 'IPŠIČČ', 'ADMIN', 'HR', '1666-09-02 17:47:48', NOW()),
 ('nvic@urs.com', '$2a$15$anVwebfXsLq4C/2d5hel0uXxTyGy1e181.w6H2jZ52GsHNCzmxSCO', 'NVIC', 'Registar', 'ADMIN', 'HR', NOW(), NOW()),
+('misterdrac69@gmail.com', '$2a$15$xLutFyBTvJKhm9Y3SBDO0.duhMyxwX0TGXDofzpmzFm7B6rt9B4mi', 'Drac', 'Registar', 'ADMIN', 'HR', NOW(), NOW()),
 
 -- ===== HEAD_ADMINs =====
-('mladentomic@najboljiucitelj.urs.com', '$2a$15$y4h8gUx7UNu6MOzE3Dxk/OYedBNH/NHlXqAIMWqtGezpgA9rKT9dq', 'Mladen', 'Tomić', 'HEAD_ADMIN', 'HR', '1939-09-01 03:47:48', NOW()),
+('golubovicdario@gmail.com', '$2a$15$mID.C34xK7yjvDYwqKlHLe54OCEGcOFvc5zKUqdGSOjOfGT8tfHKu', 'Dario', 'Golubović', 'HEAD_ADMIN', 'HR', '1939-09-01 03:47:48', NOW()),
+('matej.brodarac@gmail.com', '$2a$15$mID.C34xK7yjvDYwqKlHLe54OCEGcOFvc5zKUqdGSOjOfGT8tfHKu', 'Mata', 'Brodić', 'HEAD_ADMIN', 'HR', '1965-09-01 03:47:48', NOW()),
+('dgolubovic@uniri.hr', '$2a$15$mID.C34xK7yjvDYwqKlHLe54OCEGcOFvc5zKUqdGSOjOfGT8tfHKu', 'Student', 'Dario', 'HEAD_ADMIN', 'HR', '2023-10-01 00:00:00', NOW()),
 ('niko.crvelin@univoyage.com', '$2a$15$hBjkzpbQKckIOJX1yQnXKOts4SAuyrXEM6W0Z1JfYZPWWRQAevAhe', 'Niko', 'Crvelin', 'HEAD_ADMIN', 'HR', NOW(), NOW()),
 ('dario.golubovic@univoyage.com', '$2a$15$zrxWh3CpsbJmb7lOmHb6LerDd3/w0c3enc4p1EncK37Vmif/tyCsK', 'LIK', 'koji je ovo radio', 'HEAD_ADMIN', 'DE', NOW(), NOW()),
 ('mrs.napravnik@uniri.hr', '$2a$15$ZVdqct0fJBZfiGW5INptTeZwtauHo.nysiczgsvoEvQ4Qko6qg3Q6', 'Mateica', 'iz Rwa', 'HEAD_ADMIN', 'IT', NOW(), NOW()),

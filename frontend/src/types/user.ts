@@ -6,11 +6,15 @@ export interface CountryDto {
 export interface HobbyDto {
   id: number;
   hobbyName: string;
+  /** CMS display label; falls back to hobbyName when absent */
+  displayLabel?: string;
+  emoji?: string | null;
 }
 
 export interface LanguageDto {
   langCode: string;
   langName: string;
+  emoji?: string | null;
 }
 
 export interface VisitedCountryDto {
@@ -32,5 +36,5 @@ export interface User {
   profileImagePath?: string;
   dateOfRegister?: string;
   dateOfLastSignin?: string;
+  lastSignInMethod?: string;
 }
-

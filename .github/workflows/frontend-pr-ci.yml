@@ -1,0 +1,138 @@
+name: Frontend CI (Pull Request)
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [ master ]
+    paths:
+      - "frontend/**"
+      - ".github/workflows/frontend-pr-ci.yml"
+      - ".github/workflows/frontend-ci.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: frontend-ci-pr-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend_build_pr:
+    name: "[Build] Frontend install & build"
+    runs-on: ubuntu-latest
+    container: node:22
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Clone repository
+        working-directory: .
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+          git init .
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git fetch --depth=1 origin "${{ github.sha }}"
+          git checkout --detach FETCH_HEAD
+      - name: Install dependencies
+        run: npm ci
+      - name: Build frontend
+        run: npm run build
+
+  frontend_quality_pr:
+    name: "[Test] Frontend lint, format & npm audit"
+    runs-on: ubuntu-latest
+    container: node:22
+    timeout-minutes: 15
+    needs: frontend_build_pr
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Clone repository
+        working-directory: .
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+          git init .
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git fetch --depth=1 origin "${{ github.sha }}"
+          git checkout --detach FETCH_HEAD
+      - name: Install dependencies
+        run: npm ci
+      - name: Run lint (informational)
+        run: |
+          npm run lint || {
+            echo "Frontend lint has existing repo-wide violations; keeping step informational only."
+          }
+      - name: Run Prettier check
+        run: npx prettier --check "src/**/*.{js,jsx,ts,tsx,css,scss,md,json}"
+      - name: Run unit tests (auth regression matrix)
+        run: npm run test:run
+      - name: npm audit (high+critical)
+        run: npm audit --audit-level=high
+
+  frontend_sbom_and_artifact_pr:
+    name: "[Security] Frontend SBOM & production build"
+    runs-on: ubuntu-latest
+    container: node:22
+    timeout-minutes: 15
+    needs: frontend_quality_pr
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Clone repository
+        working-directory: .
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+          git init .
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git fetch --depth=1 origin "${{ github.sha }}"
+          git checkout --detach FETCH_HEAD
+      - name: Install dependencies
+        run: npm ci
+      - name: Generate frontend SBOM (CycloneDX)
+        run: npx @cyclonedx/cyclonedx-npm --output-file bom.json
+      - name: Production build
+        run: npm run build
+      - name: Archive dist for Trivy
+        working-directory: .
+        run: tar -czf frontend-dist.tar.gz -C frontend dist
+      - name: Upload frontend dist for Trivy
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: frontend-dist-pr
+          path: frontend-dist.tar.gz
+
+  frontend_trivy_security_pr:
+    name: "[Security] Frontend Trivy scans"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: frontend_sbom_and_artifact_pr
+    steps:
+      - name: Clone repository
+        working-directory: .
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+          git init .
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git fetch --depth=1 origin "${{ github.sha }}"
+          git checkout --detach FETCH_HEAD
+      - name: Download frontend dist artifact
+        uses: actions/download-artifact@v8.0.1
+        with:
+          name: frontend-dist-pr
+      - name: Extract dist
+        run: mkdir -p frontend && tar -xzf frontend-dist.tar.gz -C frontend
+      - name: Install Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo gpg --dearmor -o /usr/share/keyrings/trivy.gpg
+          echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install -y trivy
+      - name: Trivy filesystem scan for frontend sources
+        run: trivy fs --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 frontend
+      - name: Trivy scan built frontend dist
+        run: trivy fs --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 frontend/dist

@@ -15,16 +15,24 @@ import lombok.*;
 @Builder
 public class Country {
 
-    @Id
-    @Column(name = "iso_code", length = 2)
-    private String isoCode;
+  @Id
+  @Column(name = "iso_code", length = 2)
+  private String isoCode;
 
-    @Column(name = "country_name", nullable = false, unique = true, length = 100)
-    private String countryName;
+  @Column(name = "country_name", nullable = false, unique = true, length = 100)
+  private String countryName;
 
-    @Column(name = "currency_code", length = 3)
-    private String currencyCode;
+  @Column(name = "currency_code", length = 3)
+  private String currencyCode;
 
-    @Column(name = "currency_name", length = 100)
-    private String currencyName;
+  @Column(name = "currency_name", length = 100)
+  private String currencyName;
+
+  @Column(name = "sort_order", nullable = false)
+  @Builder.Default
+  private Integer sortOrder = 0;
+
+  @Column(name = "active", nullable = false)
+  @Builder.Default
+  private boolean active = true;
 }

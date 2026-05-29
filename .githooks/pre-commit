@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(git rev-parse --show-toplevel)"
+cd "$ROOT_DIR"
+
+echo "[pre-commit] Running backend formatter..."
+(
+  cd backend
+  chmod +x mvnw
+  ./mvnw --batch-mode --no-transfer-progress formatter:format
+)
+backend_changed=()
+while IFS= read -r path; do
+  [[ -n "${path}" ]] && backend_changed+=("${path}")
+done < <(git diff --name-only -- backend || true)
+
+if [[ ${#backend_changed[@]} -eq 0 ]]; then
+  echo "[formatter] backend (unchanged)"
+else
+  for path in "${backend_changed[@]}"; do
+    echo "[formatter] ${path}"
+  done
+fi
+
+echo "[pre-commit] Running frontend formatter..."
+(
+  cd frontend
+  npx prettier --write "src/**/*.{js,jsx,ts,tsx,css,scss,md,json}"
+)
+
+echo "[pre-commit] Re-staging formatted files..."
+while IFS= read -r path; do
+  [[ -n "${path}" ]] || continue
+  if [[ -f "${path}" ]]; then
+    git add -- "${path}"
+  else
+    # Staged deletions (e.g. removed pages) — plain git add fails if file is gone from disk
+    git add -u -- "${path}" 2>/dev/null || true
+  fi
+done < <(git diff --cached --name-only || true)
+
+echo "[pre-commit] Done."

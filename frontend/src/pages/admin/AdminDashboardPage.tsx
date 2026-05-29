@@ -1,14 +1,29 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import { useTheme } from '@/contexts/ThemeContext';
-import { Button } from '@/components/ui/button';
-import { Users, MapPin, LogOut, Sun, Moon, Shield, Settings, ExternalLink, MessageSquare } from 'lucide-react';
-import { ROUTE_PATHS } from '@/config/routes';
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/contexts/ThemeContext";
+import { Button } from "@/components/ui/button";
+import {
+  Users,
+  MapPin,
+  LogOut,
+  Sun,
+  Moon,
+  Shield,
+  Settings,
+  ExternalLink,
+  MessageSquare,
+  Sparkles,
+  Languages,
+  Globe2,
+  ScrollText,
+} from "lucide-react";
+import { ROUTE_PATHS } from "@/config/routes";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
+import { PageFooterVersion } from "@/components/layout/PageFooterVersion";
 
 const AdminDashboardPage: React.FC = () => {
-  useDocumentTitle('Admin Dashboard');
+  useDocumentTitle("Admin Dashboard");
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
@@ -19,23 +34,44 @@ const AdminDashboardPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden" style={{ background: 'var(--admin-bg-gradient)' }}>
+    <div
+      className="min-h-screen relative overflow-hidden"
+      style={{ background: "var(--admin-bg-gradient)" }}
+    >
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,var(--admin-decorative-purple),transparent_50%),radial-gradient(circle_at_70%_80%,var(--admin-decorative-purple-light),transparent_50%)]" />
-      
+
       {/* Decorative Elements */}
-      <div className="absolute top-20 left-10 w-72 h-72 rounded-full blur-3xl" style={{ backgroundColor: 'var(--admin-decorative-emerald)' }} />
-      <div className="absolute bottom-20 right-10 w-96 h-96 rounded-full blur-3xl" style={{ backgroundColor: 'var(--admin-decorative-teal)' }} />
+      <div
+        className="absolute top-20 left-10 w-72 h-72 rounded-full blur-3xl"
+        style={{ backgroundColor: "var(--admin-decorative-emerald)" }}
+      />
+      <div
+        className="absolute bottom-20 right-10 w-96 h-96 rounded-full blur-3xl"
+        style={{ backgroundColor: "var(--admin-decorative-teal)" }}
+      />
 
       {/* Header */}
       <header className="relative z-10 p-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg" style={{ background: 'linear-gradient(to bottom right, var(--admin-gradient-start), var(--admin-gradient-end))', boxShadow: `0 10px 15px -3px var(--admin-shadow-emerald-25)` }}>
-            <Shield className="w-5 h-5" style={{ color: 'var(--ds-contrast-fg)' }} />
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg"
+            style={{
+              background:
+                "linear-gradient(to bottom right, var(--admin-gradient-start), var(--admin-gradient-end))",
+              boxShadow: `0 10px 15px -3px var(--admin-shadow-emerald-25)`,
+            }}
+          >
+            <Shield
+              className="w-5 h-5"
+              style={{ color: "var(--ds-contrast-fg)" }}
+            />
           </div>
           <div>
             <h1 className="font-bold text-foreground">UniVoyage Admin</h1>
-            <p className="text-xs text-muted-foreground">Welcome, {user?.name || user?.email}</p>
+            <p className="text-xs text-muted-foreground">
+              Welcome, {user?.name || user?.email}
+            </p>
           </div>
         </div>
 
@@ -46,10 +82,16 @@ const AdminDashboardPage: React.FC = () => {
             onClick={toggleTheme}
             className="rounded-full bg-card/80 backdrop-blur-sm border shadow-sm hover:bg-card"
           >
-            {theme === 'dark' ? (
-              <Sun className="h-5 w-5" style={{ color: 'var(--admin-badge-admin-text)' }} />
+            {theme === "dark" ? (
+              <Sun
+                className="h-5 w-5"
+                style={{ color: "var(--admin-badge-admin-text)" }}
+              />
             ) : (
-              <Moon className="h-5 w-5" style={{ color: 'var(--muted-foreground)' }} />
+              <Moon
+                className="h-5 w-5"
+                style={{ color: "var(--muted-foreground)" }}
+              />
             )}
           </Button>
         </div>
@@ -58,23 +100,45 @@ const AdminDashboardPage: React.FC = () => {
       {/* Main Content */}
       <main className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-200px)] px-4">
         <div className="text-center mb-12">
-          <div className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl" style={{ background: 'linear-gradient(to bottom right, var(--admin-gradient-start), var(--admin-gradient-end))', boxShadow: `0 20px 25px -5px var(--admin-shadow-emerald-30)` }}>
-            <Settings className="w-10 h-10" style={{ color: 'var(--ds-contrast-fg)' }} />
+          <div
+            className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl"
+            style={{
+              background:
+                "linear-gradient(to bottom right, var(--admin-gradient-start), var(--admin-gradient-end))",
+              boxShadow: `0 20px 25px -5px var(--admin-shadow-emerald-30)`,
+            }}
+          >
+            <Settings
+              className="w-10 h-10"
+              style={{ color: "var(--ds-contrast-fg)" }}
+            />
           </div>
-          <h2 className="text-4xl font-bold text-foreground mb-3">Admin Dashboard</h2>
-          <p className="text-muted-foreground text-lg max-w-md">
-            Manage users and destinations for the UniVoyage platform
+          <h2 className="text-4xl font-bold text-foreground mb-3">
+            Admin Dashboard
+          </h2>
+          <p className="text-muted-foreground text-lg max-w-md mx-auto">
+            Manage users, destinations, and reference data
           </p>
         </div>
 
-        <div className="grid w-full max-w-4xl grid-cols-1 gap-6 sm:grid-cols-3 sm:items-stretch">
+        <div className="grid w-full max-w-5xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 sm:items-stretch">
           {/* Users Button */}
           <button
             onClick={() => navigate(ROUTE_PATHS.ADMIN_USERS)}
             className="group flex h-full flex-col bg-card hover:bg-card/80 rounded-2xl p-8 border shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 text-left"
           >
-            <div className="w-16 h-16 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform" style={{ background: 'linear-gradient(to bottom right, var(--admin-users-gradient-start), var(--admin-users-gradient-end))', boxShadow: `0 10px 15px -3px var(--admin-shadow-blue-30)` }}>
-              <Users className="w-8 h-8" style={{ color: 'var(--ds-contrast-fg)' }} />
+            <div
+              className="w-16 h-16 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform"
+              style={{
+                background:
+                  "linear-gradient(to bottom right, var(--admin-users-gradient-start), var(--admin-users-gradient-end))",
+                boxShadow: `0 10px 15px -3px var(--admin-shadow-blue-30)`,
+              }}
+            >
+              <Users
+                className="w-8 h-8"
+                style={{ color: "var(--ds-contrast-fg)" }}
+              />
             </div>
             <h3 className="text-2xl font-bold text-foreground mb-2">USERS</h3>
             <p className="text-muted-foreground">
@@ -87,10 +151,22 @@ const AdminDashboardPage: React.FC = () => {
             onClick={() => navigate(ROUTE_PATHS.ADMIN_DESTINATIONS)}
             className="group flex h-full flex-col bg-card hover:bg-card/80 rounded-2xl p-8 border shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 text-left"
           >
-            <div className="w-16 h-16 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform" style={{ background: 'linear-gradient(to bottom right, var(--admin-gradient-start), var(--admin-gradient-end))', boxShadow: `0 10px 15px -3px var(--admin-shadow-emerald-30)` }}>
-              <MapPin className="w-8 h-8" style={{ color: 'var(--ds-contrast-fg)' }} />
+            <div
+              className="w-16 h-16 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform"
+              style={{
+                background:
+                  "linear-gradient(to bottom right, var(--admin-gradient-start), var(--admin-gradient-end))",
+                boxShadow: `0 10px 15px -3px var(--admin-shadow-emerald-30)`,
+              }}
+            >
+              <MapPin
+                className="w-8 h-8"
+                style={{ color: "var(--ds-contrast-fg)" }}
+              />
             </div>
-            <h3 className="text-2xl font-bold text-foreground mb-2">DESTINATIONS</h3>
+            <h3 className="text-2xl font-bold text-foreground mb-2">
+              DESTINATIONS
+            </h3>
             <p className="text-muted-foreground">
               Manage travel destinations and content
             </p>
@@ -101,19 +177,127 @@ const AdminDashboardPage: React.FC = () => {
             onClick={() => navigate(ROUTE_PATHS.ADMIN_REVIEWS)}
             className="group flex h-full flex-col bg-card hover:bg-card/80 rounded-2xl p-8 border shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 text-left"
           >
-            <div className="w-16 h-16 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform" style={{ background: 'linear-gradient(to bottom right, #f59e0b, #d97706)', boxShadow: `0 10px 15px -3px rgba(245, 158, 11, 0.3)` }}>
-              <MessageSquare className="w-8 h-8" style={{ color: 'var(--ds-contrast-fg)' }} />
+            <div
+              className="w-16 h-16 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform"
+              style={{
+                background:
+                  "linear-gradient(to bottom right, #f59e0b, #d97706)",
+                boxShadow: `0 10px 15px -3px rgba(245, 158, 11, 0.3)`,
+              }}
+            >
+              <MessageSquare
+                className="w-8 h-8"
+                style={{ color: "var(--ds-contrast-fg)" }}
+              />
             </div>
             <h3 className="text-2xl font-bold text-foreground mb-2">REVIEWS</h3>
             <p className="text-muted-foreground">
               Moderate traveller reviews and comments
             </p>
           </button>
+
+          <button
+            onClick={() => navigate(ROUTE_PATHS.ADMIN_HOBBIES)}
+            className="group flex h-full flex-col bg-card hover:bg-card/80 rounded-2xl p-8 border shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 text-left"
+          >
+            <div
+              className="w-16 h-16 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform"
+              style={{
+                background:
+                  "linear-gradient(to bottom right, #8b5cf6, #6d28d9)",
+                boxShadow: `0 10px 15px -3px rgba(139, 92, 246, 0.35)`,
+              }}
+            >
+              <Sparkles
+                className="w-8 h-8"
+                style={{ color: "var(--ds-contrast-fg)" }}
+              />
+            </div>
+            <h3 className="text-2xl font-bold text-foreground mb-2">HOBBIES</h3>
+            <p className="text-muted-foreground">
+              Manage interest tags for profiles and signup
+            </p>
+          </button>
+
+          <button
+            onClick={() => navigate(ROUTE_PATHS.ADMIN_LANGUAGES)}
+            className="group flex h-full flex-col bg-card hover:bg-card/80 rounded-2xl p-8 border shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 text-left"
+          >
+            <div
+              className="w-16 h-16 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform"
+              style={{
+                background:
+                  "linear-gradient(to bottom right, #0ea5e9, #0369a1)",
+                boxShadow: `0 10px 15px -3px rgba(14, 165, 233, 0.35)`,
+              }}
+            >
+              <Languages
+                className="w-8 h-8"
+                style={{ color: "var(--ds-contrast-fg)" }}
+              />
+            </div>
+            <h3 className="text-2xl font-bold text-foreground mb-2">
+              LANGUAGES
+            </h3>
+            <p className="text-muted-foreground">
+              Manage spoken languages for profiles
+            </p>
+          </button>
+
+          <button
+            onClick={() => navigate(ROUTE_PATHS.ADMIN_COUNTRIES)}
+            className="group flex h-full flex-col bg-card hover:bg-card/80 rounded-2xl p-8 border shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 text-left"
+          >
+            <div
+              className="w-16 h-16 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform"
+              style={{
+                background:
+                  "linear-gradient(to bottom right, #10b981, #047857)",
+                boxShadow: `0 10px 15px -3px rgba(16, 185, 129, 0.35)`,
+              }}
+            >
+              <Globe2
+                className="w-8 h-8"
+                style={{ color: "var(--ds-contrast-fg)" }}
+              />
+            </div>
+            <h3 className="text-2xl font-bold text-foreground mb-2">
+              COUNTRIES
+            </h3>
+            <p className="text-muted-foreground">
+              Manage countries for profiles and destinations
+            </p>
+          </button>
+
+          <button
+            onClick={() => navigate(ROUTE_PATHS.ADMIN_AUDIT)}
+            className="group flex h-full flex-col bg-card hover:bg-card/80 rounded-2xl p-8 border shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 text-left sm:col-span-2 lg:col-span-3"
+          >
+            <div
+              className="w-16 h-16 rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform"
+              style={{
+                background:
+                  "linear-gradient(to bottom right, #64748b, #334155)",
+                boxShadow: `0 10px 15px -3px rgba(51, 65, 85, 0.35)`,
+              }}
+            >
+              <ScrollText
+                className="w-8 h-8"
+                style={{ color: "var(--ds-contrast-fg)" }}
+              />
+            </div>
+            <h3 className="text-2xl font-bold text-foreground mb-2">
+              AUDIT LOG
+            </h3>
+            <p className="text-muted-foreground">
+              Admin sign-ins, sign-outs, and role changes
+            </p>
+          </button>
         </div>
       </main>
 
       {/* Footer with Actions */}
-      <footer className="relative z-10 p-6 flex justify-between">
+      <footer className="relative z-10 p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
         <Button
           variant="outline"
           onClick={() => navigate(ROUTE_PATHS.HOME)}
@@ -130,10 +314,10 @@ const AdminDashboardPage: React.FC = () => {
           <LogOut className="w-4 h-4" />
           LOGOUT
         </Button>
+        <PageFooterVersion className="sm:absolute sm:left-1/2 sm:-translate-x-1/2 order-first sm:order-none" />
       </footer>
     </div>
   );
 };
 
 export default AdminDashboardPage;
-

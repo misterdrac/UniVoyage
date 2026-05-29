@@ -12,17 +12,17 @@ import java.util.Optional;
  * Repository interface for TripEntity.
  */
 public interface TripRepository extends JpaRepository<TripEntity, Long> {
-    List<TripEntity> findAllByUserIdOrderByCreatedAtDesc(Long userId);
-    Optional<TripEntity> findByIdAndUserId(Long tripId, Long userId);
-    boolean existsByIdAndUserId(Long tripId, Long userId);
+  List<TripEntity> findAllByUserIdOrderByCreatedAtDesc(Long userId);
+  Optional<TripEntity> findByIdAndUserId(Long tripId, Long userId);
+  boolean existsByIdAndUserId(Long tripId, Long userId);
 
-    @Query("""
-            SELECT new com.univoyage.trip.dto.HeatmapPointDto(
-                d.name, d.location, COUNT(t.id)
-            )
-            FROM TripEntity t JOIN t.destination d
-            GROUP BY d.name, d.location
-            ORDER BY COUNT(t.id) DESC
-            """)
-    List<HeatmapPointDto> findHeatmapData();
+  @Query("""
+      SELECT new com.univoyage.trip.dto.HeatmapPointDto(
+          d.name, d.location, COUNT(t.id)
+      )
+      FROM TripEntity t JOIN t.destination d
+      GROUP BY d.name, d.location
+      ORDER BY COUNT(t.id) DESC
+      """)
+  List<HeatmapPointDto> findHeatmapData();
 }

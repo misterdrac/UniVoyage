@@ -22,23 +22,20 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class PlacesController {
 
-    private final GeoapifyService geoapifyService;
+  private final GeoapifyService geoapifyService;
 
-    @GetMapping("/search")
-    public ResponseEntity<ApiResponse<Map<String, Object>>> searchPlaces(
-            @RequestParam String city,
-            @RequestParam(defaultValue = "10") int limit
-    ) {
-        try {
-            List<PointOfInterest> places = geoapifyService.searchPlaces(city, Math.min(limit, 22));
-            return ResponseEntity.ok(ApiResponse.ok(Map.of("places", places)));
-        } catch (IllegalStateException e) {
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                    .body(ApiResponse.fail(e.getMessage()));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
-                    .body(ApiResponse.fail("Failed to fetch places: " + e.getMessage()));
-        }
+  @GetMapping("/search")
+  public ResponseEntity<ApiResponse<Map<String, Object>>> searchPlaces(@RequestParam String city,
+      @RequestParam(defaultValue = "10") int limit) {
+    try {
+      List<PointOfInterest> places = geoapifyService.searchPlaces(city, Math.min(limit, 22));
+      return ResponseEntity.ok(ApiResponse.ok(Map.of("places", places)));
+    } catch (IllegalStateException e) {
+      return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+          .body(ApiResponse.fail(e.getMessage()));
+    } catch (RuntimeException e) {
+      return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+          .body(ApiResponse.fail("Failed to fetch places: " + e.getMessage()));
     }
+  }
 }
-

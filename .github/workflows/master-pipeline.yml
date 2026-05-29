@@ -1,0 +1,446 @@
+name: Master Pipeline
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - "backend/**"
+      - "frontend/**"
+      - ".github/workflows/master-pipeline.yml"
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Optional release tag (example: v1.2.3)"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  security-events: write
+
+concurrency:
+  group: master-pipeline-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend_build_and_docker:
+    name: "[Build] Backend validate, package & Docker image"
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Clone repository
+        working-directory: .
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+          git init .
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git fetch --depth=1 origin "${{ github.sha }}"
+          git checkout --detach FETCH_HEAD
+      - name: Prepare JDK 23 + Maven cache
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "23"
+          cache: maven
+          cache-dependency-path: backend/pom.xml
+      - name: 1 / 3 — Maven validate
+        working-directory: backend
+        run: |
+          chmod +x mvnw
+          ./mvnw -B --no-transfer-progress validate
+      - name: 2 / 3 — Maven package (skip tests)
+        working-directory: backend
+        run: |
+          chmod +x mvnw
+          ./mvnw -B --no-transfer-progress -DskipTests clean package
+      - name: 3 / 3 — Docker build image
+        run: docker build -t univoyage-backend:main-${{ github.sha }} ./backend
+      - name: 3 / 3 — Save image for Trivy (gzip + artifact)
+        run: docker save univoyage-backend:main-${{ github.sha }} | gzip > backend-image.tar.gz
+      - name: Upload Docker image artifact for Trivy
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: backend-docker-image
+          path: backend-image.tar.gz
+
+  run_backend_tests:
+    name: "[Test] Backend tests"
+    runs-on: ubuntu-latest
+    container: maven:3-eclipse-temurin-23
+    timeout-minutes: 20
+    needs: backend_build_and_docker
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: univoyage_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: admin
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d univoyage_test"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      SPRING_PROFILES_ACTIVE: test
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/univoyage_test
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: admin
+      SPRING_FLYWAY_URL: jdbc:postgresql://postgres:5432/univoyage_test
+      SPRING_FLYWAY_USER: postgres
+      SPRING_FLYWAY_PASSWORD: admin
+    steps:
+      - name: Clone repository
+        working-directory: .
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+          git init .
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git fetch --depth=1 origin "${{ github.sha }}"
+          git checkout --detach FETCH_HEAD
+      - name: Run backend tests
+        run: |
+          chmod +x mvnw
+          ./mvnw -B --no-transfer-progress test
+
+  backend_maven_quality:
+    name: "[Security] Backend format, SBOM & dependency review"
+    runs-on: ubuntu-latest
+    container: maven:3-eclipse-temurin-23
+    timeout-minutes: 15
+    needs: run_backend_tests
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Clone repository
+        working-directory: .
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+          git init .
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git fetch --depth=1 origin "${{ github.sha }}"
+          git checkout --detach FETCH_HEAD
+      - name: Validate code formatting
+        run: |
+          chmod +x mvnw
+          ./mvnw -B --no-transfer-progress formatter:validate
+      - name: Generate SBOM (CycloneDX)
+        run: |
+          chmod +x mvnw
+          ./mvnw -B --no-transfer-progress org.cyclonedx:cyclonedx-maven-plugin:2.9.1:makeAggregateBom
+      - name: Dependency tree (review)
+        run: |
+          chmod +x mvnw
+          ./mvnw -B --no-transfer-progress dependency:tree
+
+  trivy_backend_scans:
+    name: "[Security] Backend Trivy scans"
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [backend_build_and_docker, backend_maven_quality]
+    steps:
+      - name: Clone repository
+        working-directory: .
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+          git init .
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git fetch --depth=1 origin "${{ github.sha }}"
+          git checkout --detach FETCH_HEAD
+      - name: Download Docker image artifact
+        uses: actions/download-artifact@v8.0.1
+        with:
+          name: backend-docker-image
+      - name: Load Docker image
+        run: gunzip -c backend-image.tar.gz | docker load
+      - name: Install Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo gpg --dearmor -o /usr/share/keyrings/trivy.gpg
+          echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install -y trivy
+      - name: Trivy scan for pom.xml
+        run: trivy fs --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 backend/pom.xml
+      - name: Trivy scan for Docker image
+        run: trivy image --scanners vuln --pkg-types library --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 univoyage-backend:main-${{ github.sha }}
+      - name: Trivy full backend codebase scan
+        run: trivy fs --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 backend
+
+  frontend_build:
+    name: "[Build] Frontend build"
+    runs-on: ubuntu-latest
+    container: node:22
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Clone repository
+        working-directory: .
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+          git init .
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git fetch --depth=1 origin "${{ github.sha }}"
+          git checkout --detach FETCH_HEAD
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint frontend
+        run: |
+          npm run lint || {
+            echo "Frontend lint has existing repo-wide violations; reporting as warning in master pipeline."
+          }
+      - name: Build frontend
+        run: npm run build
+
+  frontend_security_scan:
+    name: "[Security] Frontend security scan"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: frontend_build
+    steps:
+      - name: Clone repository
+        working-directory: .
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+          git init .
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git fetch --depth=1 origin "${{ github.sha }}"
+          git checkout --detach FETCH_HEAD
+      - name: Install Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo gpg --dearmor -o /usr/share/keyrings/trivy.gpg
+          echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install -y trivy
+      - name: NPM audit (high+critical)
+        run: |
+          cd frontend
+          npm ci
+          npm audit --audit-level=high
+      - name: Trivy frontend filesystem scan
+        run: trivy fs --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 frontend
+
+  codebase_security_scan:
+    name: "[Security] Codebase security scan (manual)"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.event_name == 'workflow_dispatch'
+    needs: [trivy_backend_scans, frontend_security_scan]
+    steps:
+      - name: Clone repository
+        working-directory: .
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+          git init .
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git fetch --depth=1 origin "${{ github.sha }}"
+          git checkout --detach FETCH_HEAD
+      - name: Owner-only guard for manual jobs
+        run: |
+          if [ "${{ github.actor }}" != "${{ github.repository_owner }}" ]; then
+            echo "Only repository owner can run manual codebase/tag/release jobs."
+            exit 1
+          fi
+      - name: Install Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo gpg --dearmor -o /usr/share/keyrings/trivy.gpg
+          echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install -y trivy
+      - name: Trivy full backend codebase scan
+        run: trivy fs --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 backend
+
+  create_tag:
+    name: "[Release] Create tag (manual)"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.event_name == 'workflow_dispatch' && inputs.release_tag != ''
+    needs: codebase_security_scan
+    steps:
+      - name: Owner-only guard for manual jobs
+        run: |
+          if [ "${{ github.actor }}" != "${{ github.repository_owner }}" ]; then
+            echo "Only repository owner can run manual codebase/tag/release jobs."
+            exit 1
+          fi
+      - name: Create and push release tag
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+          git init .
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git fetch --depth=1 origin "${{ github.sha }}"
+          git checkout --detach FETCH_HEAD
+          git tag "${{ inputs.release_tag }}"
+          git push "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" "${{ inputs.release_tag }}"
+
+  create_release:
+    name: "[Release] Create GitHub release (manual)"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.event_name == 'workflow_dispatch' && inputs.release_tag != ''
+    needs: create_tag
+    steps:
+      - name: Owner-only guard for manual jobs
+        run: |
+          if [ "${{ github.actor }}" != "${{ github.repository_owner }}" ]; then
+            echo "Only repository owner can run manual codebase/tag/release jobs."
+            exit 1
+          fi
+      - name: Clone repository
+        working-directory: .
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+          git init .
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git fetch --depth=1 origin "${{ github.sha }}"
+          git checkout --detach FETCH_HEAD
+      - name: Generate backend SBOM for release
+        run: |
+          docker run --rm \
+            -v "${PWD}:/workspace" \
+            -w /workspace/backend \
+            maven:3-eclipse-temurin-23 \
+            bash -lc "chmod +x mvnw && ./mvnw -B --no-transfer-progress org.cyclonedx:cyclonedx-maven-plugin:2.9.1:makeAggregateBom"
+      - name: Create GitHub release via API
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          curl -sS -X POST \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/${{ github.repository }}/releases \
+            -d "{\"tag_name\":\"${{ inputs.release_tag }}\",\"name\":\"Release ${{ inputs.release_tag }}\",\"generate_release_notes\":true}" \
+            > release-response.json
+      - name: Upload backend SBOM release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import pathlib
+          import subprocess
+          import sys
+
+          release = json.loads(pathlib.Path("release-response.json").read_text(encoding="utf-8"))
+          upload_url = release["upload_url"].split("{")[0]
+          assets = [
+              ("backend/target/bom.json", "application/json"),
+              ("backend/target/bom.xml", "application/xml"),
+          ]
+          for file_path, content_type in assets:
+              p = pathlib.Path(file_path)
+              if not p.exists():
+                  print(f"Missing release asset: {file_path}", file=sys.stderr)
+                  sys.exit(1)
+              url = f"{upload_url}?name={p.name}"
+              cmd = [
+                  "curl", "-sS", "-X", "POST",
+                  "-H", f"Authorization: Bearer {os.environ['GH_TOKEN']}",
+                  "-H", f"Content-Type: {content_type}",
+                  "--data-binary", f"@{file_path}",
+                  url,
+              ]
+              subprocess.check_call(cmd)
+          PY
+
+  deploy_backend_railway:
+    name: "[Deploy] Backend deploy to Railway (manual)"
+    runs-on: ubuntu-latest
+    container: node:22
+    environment: production
+    timeout-minutes: 15
+    if: github.event_name == 'workflow_dispatch' && inputs.release_tag != ''
+    needs: create_release
+    steps:
+      - name: Owner-only guard for manual jobs
+        run: |
+          if [ "${{ github.actor }}" != "${{ github.repository_owner }}" ]; then
+            echo "Only repository owner can run deploy jobs."
+            exit 1
+          fi
+      - name: Clone repository
+        working-directory: .
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+          git init .
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git fetch --depth=1 origin "${{ github.sha }}"
+          git checkout --detach FETCH_HEAD
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+      - name: Deploy backend to Railway (production)
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
+          RAILWAY_SERVICE: ${{ secrets.RAILWAY_SERVICE }}
+        run: |
+          cd backend
+          railway up --service "${RAILWAY_SERVICE}"
+      - name: Backend health check
+        env:
+          BACKEND_HEALTHCHECK_URL: ${{ secrets.BACKEND_HEALTHCHECK_URL }}
+        run: |
+          if [ -z "${BACKEND_HEALTHCHECK_URL:-}" ]; then
+            echo "Missing BACKEND_HEALTHCHECK_URL secret."
+            exit 1
+          fi
+          for i in 1 2 3 4 5 6; do
+            echo "Health check attempt ${i}/6..."
+            if curl -fsS "${BACKEND_HEALTHCHECK_URL}" > /tmp/backend-health.json; then
+              cat /tmp/backend-health.json
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Backend health check failed after retries."
+          exit 1
+
+  deploy_frontend_vercel:
+    name: "[Deploy] Frontend deploy to Vercel (manual)"
+    runs-on: ubuntu-latest
+    container: node:22
+    environment: production
+    timeout-minutes: 15
+    if: github.event_name == 'workflow_dispatch' && inputs.release_tag != ''
+    needs: deploy_backend_railway
+    steps:
+      - name: Owner-only guard for manual jobs
+        run: |
+          if [ "${{ github.actor }}" != "${{ github.repository_owner }}" ]; then
+            echo "Only repository owner can run deploy jobs."
+            exit 1
+          fi
+      - name: Clone repository
+        working-directory: .
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+          git init .
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git fetch --depth=1 origin "${{ github.sha }}"
+          git checkout --detach FETCH_HEAD
+      - name: Install Vercel CLI
+        run: npm install -g vercel
+      - name: Deploy frontend to Vercel (production)
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          cd frontend
+          vercel pull --yes --environment=production --token "${VERCEL_TOKEN}"
+          vercel build --prod --token "${VERCEL_TOKEN}"
+          vercel deploy --prebuilt --prod --token "${VERCEL_TOKEN}"

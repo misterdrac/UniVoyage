@@ -1,6 +1,7 @@
 package com.univoyage.admin.user.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.univoyage.auth.security.JwtAuthenticationFilter;
 import com.univoyage.user.model.Role;
 import com.univoyage.user.model.UserEntity;
 import com.univoyage.user.repository.UserRepository;
@@ -29,10 +30,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Full-stack integration tests for {@link AdminUserController}.
- * Role updates use a seeded HEAD_ADMIN {@link UserEntity} in the request security context so
- * {@link com.univoyage.admin.user.service.AdminUserService#updateRole} receives a real acting user id.
- * Other admin routes use {@link WithMockUser} so the secured URL patterns match production.
+ * Full-stack integration tests for {@link AdminUserController}. Role updates
+ * use a seeded HEAD_ADMIN {@link UserEntity} in the request security context so
+ * {@link com.univoyage.admin.user.service.AdminUserService#updateRole} receives
+ * a real acting user id. Other admin routes use {@link WithMockUser} so the
+ * secured URL patterns match production.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -40,94 +42,95 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 class AdminUserControllerIntegrationTest {
 
-    private static final String SEEDED_HEAD_ADMIN_EMAIL = "papavolaric@univoyage.com";
+  private static final String SEEDED_HEAD_ADMIN_EMAIL = "papavolaric@univoyage.com";
 
-    @Autowired
-    private MockMvc mockMvc;
+  @Autowired
+  private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+  @Autowired
+  private ObjectMapper objectMapper;
 
-    @Autowired
-    private UserRepository userRepository;
+  @Autowired
+  private UserRepository userRepository;
 
-    @Test
-    @WithMockUser(roles = "ADMIN")
-    @DisplayName("GET /api/admin/users returns a page")
-    void listUsers() throws Exception {
-        mockMvc.perform(get("/api/admin/users"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.content").isArray());
-    }
+  @Test
+  @WithMockUser(roles = "ADMIN")
+  @DisplayName("GET /api/admin/users returns a page")
+  void listUsers() throws Exception {
+    mockMvc.perform(get("/api/admin/users").with(tfa())).andExpect(status().isOk())
+        .andExpect(jsonPath("$.success").value(true))
+        .andExpect(jsonPath("$.data.content").isArray());
+  }
 
-    @Test
-    @WithMockUser(roles = "ADMIN")
-    @DisplayName("GET /api/admin/users/{id} returns user when present")
-    void getUser_ok() throws Exception {
-        UserEntity u = saveUser("admin-get-user@example.com", Role.USER);
-        mockMvc.perform(get("/api/admin/users/{id}", u.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.email").value("admin-get-user@example.com"));
-    }
+  @Test
+  @WithMockUser(roles = "ADMIN")
+  @DisplayName("GET /api/admin/users/{id} returns user when present")
+  void getUser_ok() throws Exception {
+    UserEntity u = saveUser("admin-get-user@example.com", Role.USER);
+    mockMvc.perform(get("/api/admin/users/{id}", u.getId()).with(tfa())).andExpect(status().isOk())
+        .andExpect(jsonPath("$.success").value(true))
+        .andExpect(jsonPath("$.data.email").value("admin-get-user@example.com"));
+  }
 
-    @Test
-    @WithMockUser(roles = "ADMIN")
-    @DisplayName("GET /api/admin/users/{id} returns 404 when missing")
-    void getUser_notFound() throws Exception {
-        mockMvc.perform(get("/api/admin/users/{id}", 9_999_999_999L))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.success").value(false));
-    }
+  @Test
+  @WithMockUser(roles = "ADMIN")
+  @DisplayName("GET /api/admin/users/{id} returns 404 when missing")
+  void getUser_notFound() throws Exception {
+    mockMvc.perform(get("/api/admin/users/{id}", 9_999_999_999L).with(tfa()))
+        .andExpect(status().isNotFound()).andExpect(jsonPath("$.success").value(false));
+  }
 
-    @Test
-    @DisplayName("PATCH /api/admin/users/{id}/role returns 400 when role is missing")
-    void updateRole_validationFails() throws Exception {
-        UserEntity headAdmin = userRepository.findByEmail(SEEDED_HEAD_ADMIN_EMAIL)
-                .orElseThrow(() -> new IllegalStateException("Seed HEAD_ADMIN user required: " + SEEDED_HEAD_ADMIN_EMAIL));
-        UserEntity target = saveUser("admin-role-val@example.com", Role.USER);
+  @Test
+  @DisplayName("PATCH /api/admin/users/{id}/role returns 400 when role is missing")
+  void updateRole_validationFails() throws Exception {
+    UserEntity headAdmin = findOrCreateHeadAdmin();
+    UserEntity target = saveUser("admin-role-val@example.com", Role.USER);
 
-        mockMvc.perform(patch("/api/admin/users/{id}/role", target.getId())
-                        .with(securityContextFor(headAdmin))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.success").value(false));
-    }
+    mockMvc
+        .perform(
+            patch("/api/admin/users/{id}/role", target.getId()).with(securityContextFor(headAdmin))
+                .with(tfa()).contentType(MediaType.APPLICATION_JSON).content("{}"))
+        .andExpect(status().isBadRequest()).andExpect(jsonPath("$.success").value(false));
+  }
 
-    @Test
-    @DisplayName("PATCH /api/admin/users/{id}/role promotes USER to ADMIN when HEAD_ADMIN acts")
-    void updateRole_headAdminPromotesUser() throws Exception {
-        UserEntity headAdmin = userRepository.findByEmail(SEEDED_HEAD_ADMIN_EMAIL)
-                .orElseThrow(() -> new IllegalStateException("Seed HEAD_ADMIN user required: " + SEEDED_HEAD_ADMIN_EMAIL));
-        UserEntity target = saveUser("admin-promote@example.com", Role.USER);
+  @Test
+  @DisplayName("PATCH /api/admin/users/{id}/role promotes USER to ADMIN when HEAD_ADMIN acts")
+  void updateRole_headAdminPromotesUser() throws Exception {
+    UserEntity headAdmin = findOrCreateHeadAdmin();
+    UserEntity target = saveUser("admin-promote@example.com", Role.USER);
 
-        mockMvc.perform(patch("/api/admin/users/{id}/role", target.getId())
-                        .with(securityContextFor(headAdmin))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(Map.of("role", "ADMIN"))))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.role").value("ADMIN"));
-    }
+    mockMvc
+        .perform(patch("/api/admin/users/{id}/role", target.getId())
+            .with(securityContextFor(headAdmin)).with(tfa()).contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(Map.of("role", "ADMIN"))))
+        .andExpect(status().isOk()).andExpect(jsonPath("$.success").value(true))
+        .andExpect(jsonPath("$.data.role").value("ADMIN"));
+  }
 
-    private static RequestPostProcessor securityContextFor(UserEntity principal) {
-        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                principal, principal.getPassword(), principal.getAuthorities());
-        SecurityContext context = SecurityContextHolder.createEmptyContext();
-        context.setAuthentication(authentication);
-        return securityContext(context);
-    }
+  private static RequestPostProcessor securityContextFor(UserEntity principal) {
+    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+        principal, principal.getPassword(), principal.getAuthorities());
+    SecurityContext context = SecurityContextHolder.createEmptyContext();
+    context.setAuthentication(authentication);
+    return securityContext(context);
+  }
 
-    private UserEntity saveUser(String email, Role role) {
-        return userRepository.save(UserEntity.builder()
-                .name("A")
-                .surname("B")
-                .email(email)
-                .passwordHash("{noop}unused")
-                .dateOfRegister(Instant.now())
-                .role(role)
-                .build());
-    }
+  private static RequestPostProcessor tfa() {
+    return request -> {
+      request.setAttribute(JwtAuthenticationFilter.TFA_REQUEST_ATTRIBUTE, Boolean.TRUE);
+      return request;
+    };
+  }
+
+  private UserEntity findOrCreateHeadAdmin() {
+    return userRepository.findByEmail(SEEDED_HEAD_ADMIN_EMAIL)
+        .orElseGet(() -> userRepository.save(UserEntity.builder().name("Papa").surname("Volarić")
+            .email(SEEDED_HEAD_ADMIN_EMAIL).passwordHash("{noop}unused")
+            .dateOfRegister(Instant.now()).role(Role.HEAD_ADMIN).build()));
+  }
+
+  private UserEntity saveUser(String email, Role role) {
+    return userRepository.save(UserEntity.builder().name("A").surname("B").email(email)
+        .passwordHash("{noop}unused").dateOfRegister(Instant.now()).role(role).build());
+  }
 }

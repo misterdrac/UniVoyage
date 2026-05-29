@@ -1,22 +1,22 @@
-import { cn } from '@/lib/utils'
+import { cn } from "@/lib/utils";
 
 export interface HeatmapTopDestinationItem {
-  rank: number
-  name: string
-  country: string
-  imageUrl: string
-  imageAlt: string
+  rank: number;
+  name: string;
+  country: string;
+  imageUrl: string;
+  imageAlt: string;
 }
 
 interface HeatmapTopDestinationsProps {
-  items: HeatmapTopDestinationItem[]
+  items: HeatmapTopDestinationItem[];
 }
 
 /**
  * Minimal top-3 strip: rank on image, city + country only.
  */
 export function HeatmapTopDestinations({ items }: HeatmapTopDestinationsProps) {
-  if (items.length === 0) return null
+  if (items.length === 0) return null;
 
   return (
     <div className="mt-10 md:mt-14">
@@ -28,10 +28,10 @@ export function HeatmapTopDestinations({ items }: HeatmapTopDestinationsProps) {
 
       <div
         className={cn(
-          'grid gap-5 sm:gap-6',
-          items.length === 1 && 'mx-auto max-w-sm',
-          items.length === 2 && 'mx-auto max-w-3xl sm:grid-cols-2',
-          items.length >= 3 && 'md:grid-cols-3'
+          "grid gap-5 sm:gap-6",
+          items.length === 1 && "mx-auto max-w-sm",
+          items.length === 2 && "mx-auto max-w-3xl sm:grid-cols-2",
+          items.length >= 3 && "md:grid-cols-3",
         )}
       >
         {items.map((item) => (
@@ -59,11 +59,13 @@ export function HeatmapTopDestinations({ items }: HeatmapTopDestinationsProps) {
               <h3 className="text-base font-semibold leading-snug text-foreground sm:text-lg">
                 {item.name}
               </h3>
-              <p className="mt-1 text-sm text-muted-foreground">{item.country}</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {item.country}
+              </p>
             </div>
           </article>
         ))}
       </div>
     </div>
-  )
+  );
 }

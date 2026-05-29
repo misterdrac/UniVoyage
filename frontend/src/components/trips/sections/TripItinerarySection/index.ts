@@ -1,3 +1,1 @@
-export { TripItinerarySection } from './TripItinerarySection'
-
-
+export { TripItinerarySection } from "./TripItinerarySection";

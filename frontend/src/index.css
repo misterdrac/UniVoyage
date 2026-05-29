@@ -20,44 +20,44 @@ summary,
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: oklch(0.9730 0.0133 286.1503);
+  --background: oklch(0.973 0.0133 286.1503);
   --foreground: oklch(0.3015 0.0572 282.4176);
-  --card: oklch(1.0000 0 0);
+  --card: oklch(1 0 0);
   --card-foreground: oklch(0.3015 0.0572 282.4176);
-  --popover: oklch(1.0000 0 0);
+  --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.3015 0.0572 282.4176);
-  --primary: oklch(0.5417 0.1790 288.0332);
-  --primary-foreground: oklch(1.0000 0 0);
+  --primary: oklch(0.5417 0.179 288.0332);
+  --primary-foreground: oklch(1 0 0);
   --secondary: oklch(0.9174 0.0435 292.6901);
   --secondary-foreground: oklch(0.4143 0.1039 288.1742);
-  --muted: oklch(0.9580 0.0133 286.1454);
+  --muted: oklch(0.958 0.0133 286.1454);
   --muted-foreground: oklch(0.5426 0.0465 284.7435);
-  --accent: oklch(0.9221 0.0373 262.1410);
+  --accent: oklch(0.9221 0.0373 262.141);
   --accent-foreground: oklch(0.3015 0.0572 282.4176);
   --destructive: oklch(0.6861 0.2061 14.9941);
-  --destructive-foreground: oklch(1.0000 0 0);
+  --destructive-foreground: oklch(1 0 0);
   --info: rgb(245, 158, 11);
   --border: oklch(0.9115 0.0216 285.9625);
   --input: oklch(0.9115 0.0216 285.9625);
-  --ring: oklch(0.5417 0.1790 288.0332);
-  --chart-1: oklch(0.5417 0.1790 288.0332);
-  --chart-2: oklch(0.7042 0.1602 288.9880);
+  --ring: oklch(0.5417 0.179 288.0332);
+  --chart-1: oklch(0.5417 0.179 288.0332);
+  --chart-2: oklch(0.7042 0.1602 288.988);
   --chart-3: oklch(0.5679 0.2113 276.7065);
   --chart-4: oklch(0.6356 0.1922 281.8054);
   --chart-5: oklch(0.4509 0.1758 279.3838);
   --spent: oklch(0.5571 0.1778 251.3265);
-  --spent-foreground: oklch(1.0000 0 0);
+  --spent-foreground: oklch(1 0 0);
   --success: oklch(0.6356 0.1922 141.8054);
-  --success-foreground: oklch(1.0000 0 0);
-  --sidebar: oklch(0.9580 0.0133 286.1454);
+  --success-foreground: oklch(1 0 0);
+  --sidebar: oklch(0.958 0.0133 286.1454);
   --sidebar-foreground: oklch(0.3015 0.0572 282.4176);
-  --sidebar-primary: oklch(0.5417 0.1790 288.0332);
-  --sidebar-primary-foreground: oklch(1.0000 0 0);
-  --sidebar-accent: oklch(0.9221 0.0373 262.1410);
+  --sidebar-primary: oklch(0.5417 0.179 288.0332);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.9221 0.0373 262.141);
   --sidebar-accent-foreground: oklch(0.3015 0.0572 282.4176);
   --sidebar-border: oklch(0.9115 0.0216 285.9625);
-  --sidebar-ring: oklch(0.5417 0.1790 288.0332);
-  --hero-text: oklch(1.0000 0 0); /* White for hero sections */
+  --sidebar-ring: oklch(0.5417 0.179 288.0332);
+  --hero-text: oklch(1 0 0); /* White for hero sections */
   --booking-partner-orange-from: oklch(0.7042 0.1602 14.9941); /* orange-500 */
   --booking-partner-orange-to: oklch(0.6861 0.2061 14.9941); /* red-500 */
   --booking-partner-blue-from: oklch(0.6356 0.1922 251.3265); /* blue-500 */
@@ -74,18 +74,30 @@ summary,
   --shadow-color: hsl(240 30% 25%);
   --shadow-2xs: 0px 4px 10px 0px hsl(240 30% 25% / 0.06);
   --shadow-xs: 0px 4px 10px 0px hsl(240 30% 25% / 0.06);
-  --shadow-sm: 0px 4px 10px 0px hsl(240 30% 25% / 0.12), 0px 1px 2px -1px hsl(240 30% 25% / 0.12);
-  --shadow: 0px 4px 10px 0px hsl(240 30% 25% / 0.12), 0px 1px 2px -1px hsl(240 30% 25% / 0.12);
-  --shadow-md: 0px 4px 10px 0px hsl(240 30% 25% / 0.12), 0px 2px 4px -1px hsl(240 30% 25% / 0.12);
-  --shadow-lg: 0px 4px 10px 0px hsl(240 30% 25% / 0.12), 0px 4px 6px -1px hsl(240 30% 25% / 0.12);
-  --shadow-xl: 0px 4px 10px 0px hsl(240 30% 25% / 0.12), 0px 8px 10px -1px hsl(240 30% 25% / 0.12);
-  --shadow-2xl: 0px 4px 10px 0px hsl(240 30% 25% / 0.30);
+  --shadow-sm:
+    0px 4px 10px 0px hsl(240 30% 25% / 0.12),
+    0px 1px 2px -1px hsl(240 30% 25% / 0.12);
+  --shadow:
+    0px 4px 10px 0px hsl(240 30% 25% / 0.12),
+    0px 1px 2px -1px hsl(240 30% 25% / 0.12);
+  --shadow-md:
+    0px 4px 10px 0px hsl(240 30% 25% / 0.12),
+    0px 2px 4px -1px hsl(240 30% 25% / 0.12);
+  --shadow-lg:
+    0px 4px 10px 0px hsl(240 30% 25% / 0.12),
+    0px 4px 6px -1px hsl(240 30% 25% / 0.12);
+  --shadow-xl:
+    0px 4px 10px 0px hsl(240 30% 25% / 0.12),
+    0px 8px 10px -1px hsl(240 30% 25% / 0.12);
+  --shadow-2xl: 0px 4px 10px 0px hsl(240 30% 25% / 0.3);
   --tracking-normal: 0em;
   --spacing: 0.25rem;
   --context-card-border: hsla(0, 0%, 92%, 1);
   --ds-contrast-fg: #ffffff;
   --geist-background: #fff;
-  --ds-shadow-menu: var(--ds-shadow-border), 0px 1px 1px rgba(0, 0, 0, 0.02), 0px 4px 8px -4px rgba(0, 0, 0, 0.04), 0px 16px 24px -8px rgba(0, 0, 0, 0.06);
+  --ds-shadow-menu:
+    var(--ds-shadow-border), 0px 1px 1px rgba(0, 0, 0, 0.02),
+    0px 4px 8px -4px rgba(0, 0, 0, 0.04), 0px 16px 24px -8px rgba(0, 0, 0, 0.06);
   --ds-red-800: oklch(58.19% 0.2482 25.15);
   --ds-red-900: oklch(54.99% 0.232 25.29);
   --ds-blue-700: oklch(57.61% 0.2508 258.23);
@@ -100,7 +112,8 @@ summary,
   --ds-gray-alpha-400: hsla(0, 0%, 0%, 0.08);
   --ds-background-100: hsla(0, 0%, 100%, 1);
   --ds-focus-color: var(--ds-blue-700);
-  --ds-focus-ring: 0 0 0 2px var(--ds-background-100), 0 0 0 4px var(--ds-focus-color);
+  --ds-focus-ring:
+    0 0 0 2px var(--ds-background-100), 0 0 0 4px var(--ds-focus-color);
   --ds-shadow-border: 0 0 0 1px rgba(0, 0, 0, 0.08);
   --ds-shadow-small: 0px 2px 2px rgba(0, 0, 0, 0.04);
   --ds-shadow-border-small: var(--ds-shadow-border), var(--ds-shadow-small);
@@ -115,22 +128,22 @@ summary,
   --profile-stat-blue-light: rgb(59, 130, 246); /* blue-500 */
   --profile-stat-blue-bg-from: rgba(59, 130, 246, 0.2); /* blue-500/20 */
   --profile-stat-blue-bg-to: rgba(37, 99, 235, 0.1); /* blue-600/10 */
-  
+
   --profile-stat-purple: rgb(147, 51, 234); /* purple-600 */
   --profile-stat-purple-light: rgb(168, 85, 247); /* purple-500 */
   --profile-stat-purple-bg-from: rgba(168, 85, 247, 0.2); /* purple-500/20 */
   --profile-stat-purple-bg-to: rgba(147, 51, 234, 0.1); /* purple-600/10 */
-  
+
   --profile-stat-amber: rgb(217, 119, 6); /* amber-600 */
   --profile-stat-amber-light: rgb(245, 158, 11); /* amber-500 */
   --profile-stat-amber-bg-from: rgba(245, 158, 11, 0.2); /* amber-500/20 */
   --profile-stat-amber-bg-to: rgba(217, 119, 6, 0.1); /* amber-600/10 */
-  
+
   --profile-stat-green: rgb(22, 163, 74); /* green-600 */
   --profile-stat-green-light: rgb(34, 197, 94); /* green-500 */
   --profile-stat-green-bg-from: rgba(34, 197, 94, 0.2); /* green-500/20 */
   --profile-stat-green-bg-to: rgba(22, 163, 74, 0.1); /* green-600/10 */
-  
+
   --profile-achievement-trophy: rgb(217, 119, 6); /* amber-600 */
   --profile-account-status: rgb(34, 197, 94); /* green-500 */
   --profile-account-status-text: rgb(22, 163, 74); /* green-600 */
@@ -190,59 +203,59 @@ summary,
   --place-category-castle-bg: rgb(254, 243, 199); /* amber-100 */
   --place-category-castle-text: rgb(146, 64, 14); /* amber-800 */
   --place-category-castle-border: rgb(245, 158, 11); /* amber-500 */
-  
+
   --place-category-monument-bg: rgb(241, 245, 249); /* slate-100 */
   --place-category-monument-text: rgb(30, 41, 59); /* slate-800 */
   --place-category-monument-border: rgb(100, 116, 139); /* slate-500 */
-  
+
   --place-category-museum-bg: rgb(243, 232, 255); /* purple-100 */
   --place-category-museum-text: rgb(107, 33, 168); /* purple-800 */
   --place-category-museum-border: rgb(168, 85, 247); /* purple-500 */
-  
+
   --place-category-religious-bg: rgb(253, 244, 255); /* fuchsia-100 */
   --place-category-religious-text: rgb(162, 28, 175); /* fuchsia-800 */
   --place-category-religious-border: rgb(217, 70, 239); /* fuchsia-500 */
-  
+
   --place-category-park-bg: rgb(220, 252, 231); /* green-100 */
   --place-category-park-text: rgb(22, 101, 52); /* green-800 */
   --place-category-park-border: rgb(34, 197, 94); /* green-500 */
-  
+
   --place-category-tower-bg: rgb(219, 234, 254); /* blue-100 */
   --place-category-tower-text: rgb(30, 64, 175); /* blue-800 */
   --place-category-tower-border: rgb(59, 130, 246); /* blue-500 */
-  
+
   --place-category-square-bg: rgb(252, 231, 243); /* pink-100 */
   --place-category-square-text: rgb(157, 23, 77); /* pink-800 */
   --place-category-square-border: rgb(236, 72, 153); /* pink-500 */
-  
+
   --place-category-memorial-bg: rgb(243, 244, 246); /* gray-100 */
   --place-category-memorial-text: rgb(31, 41, 55); /* gray-800 */
   --place-category-memorial-border: rgb(107, 114, 128); /* gray-500 */
-  
+
   --place-category-attraction-bg: rgb(255, 228, 230); /* rose-100 */
   --place-category-attraction-text: rgb(159, 18, 57); /* rose-800 */
   --place-category-attraction-border: rgb(244, 63, 94); /* rose-500 */
-  
+
   --place-category-artwork-bg: rgb(245, 243, 255); /* violet-100 */
   --place-category-artwork-text: rgb(109, 40, 217); /* violet-800 */
   --place-category-artwork-border: rgb(139, 92, 246); /* violet-500 */
-  
+
   --place-category-fort-bg: rgb(255, 237, 213); /* orange-100 */
   --place-category-fort-text: rgb(154, 52, 18); /* orange-800 */
   --place-category-fort-border: rgb(249, 115, 22); /* orange-500 */
-  
+
   --place-category-city-gate-bg: rgb(204, 251, 241); /* teal-100 */
   --place-category-city-gate-text: rgb(17, 94, 89); /* teal-800 */
   --place-category-city-gate-border: rgb(20, 184, 166); /* teal-500 */
-  
+
   --place-category-historic-bg: rgb(251, 207, 232); /* pink-200 */
   --place-category-historic-text: rgb(131, 24, 67); /* pink-900 */
   --place-category-historic-border: rgb(236, 72, 153); /* pink-500 */
-  
+
   --place-category-landmark-bg: rgb(224, 231, 255); /* indigo-100 */
   --place-category-landmark-text: rgb(55, 48, 163); /* indigo-800 */
   --place-category-landmark-border: rgb(99, 102, 241); /* indigo-500 */
-  
+
   --place-category-default-bg: rgb(243, 244, 246); /* gray-100 */
   --place-category-default-text: rgb(31, 41, 55); /* gray-800 */
   --place-category-default-border: rgb(107, 114, 128); /* gray-500 */
@@ -269,7 +282,12 @@ summary,
   --admin-shadow-emerald-25: rgba(16, 185, 129, 0.25); /* emerald-500/25 */
   --admin-shadow-emerald-30: rgba(16, 185, 129, 0.3); /* emerald-500/30 */
   --admin-shadow-blue-30: rgba(59, 130, 246, 0.3); /* blue-500/30 */
-  --admin-bg-gradient: linear-gradient(to bottom right, var(--muted), var(--background), var(--muted));
+  --admin-bg-gradient: linear-gradient(
+    to bottom right,
+    var(--muted),
+    var(--background),
+    var(--muted)
+  );
 }
 
 .dark {
@@ -283,12 +301,12 @@ summary,
   --primary-foreground: oklch(0.1743 0.0227 283.7998);
   --secondary: oklch(0.3139 0.0736 283.4591);
   --secondary-foreground: oklch(0.8367 0.0849 285.9111);
-  --muted: oklch(0.2710 0.0621 281.4377);
+  --muted: oklch(0.271 0.0621 281.4377);
   --muted-foreground: oklch(0.7166 0.0462 285.1741);
   --accent: oklch(0.3354 0.0828 280.9705);
   --accent-foreground: oklch(0.9185 0.0257 285.8834);
   --destructive: oklch(0.6861 0.2061 14.9941);
-  --destructive-foreground: oklch(1.0000 0 0);
+  --destructive-foreground: oklch(1 0 0);
   --info: rgb(245, 158, 11);
   --border: oklch(0.3261 0.0597 282.5832);
   --input: oklch(0.3261 0.0597 282.5832);
@@ -299,9 +317,9 @@ summary,
   --chart-4: oklch(0.7124 0.0977 186.6761);
   --chart-5: oklch(0.7546 0.1831 346.8124);
   --spent: oklch(0.6571 0.1778 251.3265);
-  --spent-foreground: oklch(1.0000 0 0);
+  --spent-foreground: oklch(1 0 0);
   --success: oklch(0.7356 0.1922 141.8054);
-  --success-foreground: oklch(1.0000 0 0);
+  --success-foreground: oklch(1 0 0);
   --sidebar: oklch(0.2284 0.0384 282.9324);
   --sidebar-foreground: oklch(0.9185 0.0257 285.8834);
   --sidebar-primary: oklch(0.7162 0.1597 290.3962);
@@ -322,15 +340,27 @@ summary,
   --shadow-color: hsl(240 30% 25%);
   --shadow-2xs: 0px 4px 10px 0px hsl(240 30% 25% / 0.06);
   --shadow-xs: 0px 4px 10px 0px hsl(240 30% 25% / 0.06);
-  --shadow-sm: 0px 4px 10px 0px hsl(240 30% 25% / 0.12), 0px 1px 2px -1px hsl(240 30% 25% / 0.12);
-  --shadow: 0px 4px 10px 0px hsl(240 30% 25% / 0.12), 0px 1px 2px -1px hsl(240 30% 25% / 0.12);
-  --shadow-md: 0px 4px 10px 0px hsl(240 30% 25% / 0.12), 0px 2px 4px -1px hsl(240 30% 25% / 0.12);
-  --shadow-lg: 0px 4px 10px 0px hsl(240 30% 25% / 0.12), 0px 4px 6px -1px hsl(240 30% 25% / 0.12);
-  --shadow-xl: 0px 4px 10px 0px hsl(240 30% 25% / 0.12), 0px 8px 10px -1px hsl(240 30% 25% / 0.12);
-  --shadow-2xl: 0px 4px 10px 0px hsl(240 30% 25% / 0.30);
+  --shadow-sm:
+    0px 4px 10px 0px hsl(240 30% 25% / 0.12),
+    0px 1px 2px -1px hsl(240 30% 25% / 0.12);
+  --shadow:
+    0px 4px 10px 0px hsl(240 30% 25% / 0.12),
+    0px 1px 2px -1px hsl(240 30% 25% / 0.12);
+  --shadow-md:
+    0px 4px 10px 0px hsl(240 30% 25% / 0.12),
+    0px 2px 4px -1px hsl(240 30% 25% / 0.12);
+  --shadow-lg:
+    0px 4px 10px 0px hsl(240 30% 25% / 0.12),
+    0px 4px 6px -1px hsl(240 30% 25% / 0.12);
+  --shadow-xl:
+    0px 4px 10px 0px hsl(240 30% 25% / 0.12),
+    0px 8px 10px -1px hsl(240 30% 25% / 0.12);
+  --shadow-2xl: 0px 4px 10px 0px hsl(240 30% 25% / 0.3);
   --context-card-border: hsla(0, 0%, 18%, 1);
   --geist-background: #000;
-  --ds-shadow-menu: var(--ds-shadow-border), 0px 1px 1px rgba(0, 0, 0, 0.02), 0px 4px 8px -4px rgba(0, 0, 0, 0.04), 0px 16px 24px -8px rgba(0, 0, 0, 0.06);
+  --ds-shadow-menu:
+    var(--ds-shadow-border), 0px 1px 1px rgba(0, 0, 0, 0.02),
+    0px 4px 8px -4px rgba(0, 0, 0, 0.04), 0px 16px 24px -8px rgba(0, 0, 0, 0.06);
   --ds-red-800: oklch(58.01% 0.227 25.12);
   --ds-red-900: oklch(69.96% 0.2136 22.03);
   --ds-blue-700: oklch(57.61% 0.2321 258.23);
@@ -345,7 +375,8 @@ summary,
   --ds-background-100: hsla(0, 0%, 4%, 1);
   --ds-shadow-border: 0 0 0 1px rgba(255, 255, 255, 0.145);
   --ds-shadow-small: 0px 1px 2px rgba(0, 0, 0, 0.16);
-  --ds-shadow-border-small: var(--ds-shadow-border), 0px 1px 2px rgba(0, 0, 0, 0.16);
+  --ds-shadow-border-small:
+    var(--ds-shadow-border), 0px 1px 2px rgba(0, 0, 0, 0.16);
   --ds-blue-100: oklch(22.17% 0.069 259.89);
   --ds-blue-900: oklch(71.7% 0.1648 250.79360374054167);
   --ds-red-100: oklch(22.1% 0.0657 15.11);
@@ -357,22 +388,22 @@ summary,
   --profile-stat-blue-light: rgb(59, 130, 246); /* blue-500 */
   --profile-stat-blue-bg-from: rgba(59, 130, 246, 0.2);
   --profile-stat-blue-bg-to: rgba(37, 99, 235, 0.1);
-  
+
   --profile-stat-purple: rgb(196, 181, 253); /* purple-400 */
   --profile-stat-purple-light: rgb(168, 85, 247); /* purple-500 */
   --profile-stat-purple-bg-from: rgba(168, 85, 247, 0.2);
   --profile-stat-purple-bg-to: rgba(147, 51, 234, 0.1);
-  
+
   --profile-stat-amber: rgb(251, 191, 36); /* amber-400 */
   --profile-stat-amber-light: rgb(245, 158, 11); /* amber-500 */
   --profile-stat-amber-bg-from: rgba(245, 158, 11, 0.2);
   --profile-stat-amber-bg-to: rgba(217, 119, 6, 0.1);
-  
+
   --profile-stat-green: rgb(74, 222, 128); /* green-400 */
   --profile-stat-green-light: rgb(34, 197, 94); /* green-500 */
   --profile-stat-green-bg-from: rgba(34, 197, 94, 0.2);
   --profile-stat-green-bg-to: rgba(22, 163, 74, 0.1);
-  
+
   --profile-achievement-trophy: rgb(251, 191, 36); /* amber-400 */
   --profile-account-status: rgb(34, 197, 94); /* green-500 */
   --profile-account-status-text: rgb(22, 163, 74); /* green-600 */
@@ -396,59 +427,59 @@ summary,
   --place-category-castle-bg: rgb(120, 53, 15); /* amber-900 */
   --place-category-castle-text: rgb(253, 230, 138); /* amber-200 */
   --place-category-castle-border: rgb(245, 158, 11); /* amber-500 */
-  
+
   --place-category-monument-bg: rgb(30, 41, 59); /* slate-800 */
   --place-category-monument-text: rgb(226, 232, 240); /* slate-200 */
   --place-category-monument-border: rgb(100, 116, 139); /* slate-500 */
-  
+
   --place-category-museum-bg: rgb(88, 28, 135); /* purple-900 */
   --place-category-museum-text: rgb(233, 213, 255); /* purple-200 */
   --place-category-museum-border: rgb(168, 85, 247); /* purple-500 */
-  
+
   --place-category-religious-bg: rgb(112, 26, 117); /* fuchsia-900 */
   --place-category-religious-text: rgb(250, 232, 255); /* fuchsia-200 */
   --place-category-religious-border: rgb(217, 70, 239); /* fuchsia-500 */
-  
+
   --place-category-park-bg: rgb(20, 83, 45); /* green-900 */
   --place-category-park-text: rgb(187, 247, 208); /* green-200 */
   --place-category-park-border: rgb(34, 197, 94); /* green-500 */
-  
+
   --place-category-tower-bg: rgb(30, 58, 138); /* blue-900 */
   --place-category-tower-text: rgb(191, 219, 254); /* blue-200 */
   --place-category-tower-border: rgb(59, 130, 246); /* blue-500 */
-  
+
   --place-category-square-bg: rgb(131, 24, 67); /* pink-900 */
   --place-category-square-text: rgb(252, 231, 243); /* pink-200 */
   --place-category-square-border: rgb(236, 72, 153); /* pink-500 */
-  
+
   --place-category-memorial-bg: rgb(55, 65, 81); /* gray-700 */
   --place-category-memorial-text: rgb(229, 231, 235); /* gray-200 */
   --place-category-memorial-border: rgb(107, 114, 128); /* gray-500 */
-  
+
   --place-category-attraction-bg: rgb(159, 18, 57); /* rose-900 */
   --place-category-attraction-text: rgb(255, 228, 230); /* rose-200 */
   --place-category-attraction-border: rgb(244, 63, 94); /* rose-500 */
-  
+
   --place-category-artwork-bg: rgb(91, 33, 182); /* violet-900 */
   --place-category-artwork-text: rgb(237, 233, 254); /* violet-200 */
   --place-category-artwork-border: rgb(139, 92, 246); /* violet-500 */
-  
+
   --place-category-fort-bg: rgb(154, 52, 18); /* orange-900 */
   --place-category-fort-text: rgb(255, 237, 213); /* orange-200 */
   --place-category-fort-border: rgb(249, 115, 22); /* orange-500 */
-  
+
   --place-category-city-gate-bg: rgb(19, 78, 74); /* teal-900 */
   --place-category-city-gate-text: rgb(153, 246, 228); /* teal-200 */
   --place-category-city-gate-border: rgb(20, 184, 166); /* teal-500 */
-  
+
   --place-category-historic-bg: rgb(80, 7, 36); /* pink-950 */
   --place-category-historic-text: rgb(252, 231, 243); /* pink-200 */
   --place-category-historic-border: rgb(236, 72, 153); /* pink-500 */
-  
+
   --place-category-landmark-bg: rgb(55, 48, 163); /* indigo-900 */
   --place-category-landmark-text: rgb(224, 231, 255); /* indigo-200 */
   --place-category-landmark-border: rgb(99, 102, 241); /* indigo-500 */
-  
+
   --place-category-default-bg: rgb(31, 41, 55); /* gray-800 */
   --place-category-default-text: rgb(229, 231, 235); /* gray-200 */
   --place-category-default-border: rgb(107, 114, 128); /* gray-500 */
@@ -475,7 +506,12 @@ summary,
   --admin-shadow-emerald-25: rgba(52, 211, 153, 0.25); /* emerald-400/25 */
   --admin-shadow-emerald-30: rgba(52, 211, 153, 0.3); /* emerald-400/30 */
   --admin-shadow-blue-30: rgba(96, 165, 250, 0.3); /* blue-400/30 */
-  --admin-bg-gradient: linear-gradient(to bottom right, var(--muted), var(--background), var(--muted));
+  --admin-bg-gradient: linear-gradient(
+    to bottom right,
+    var(--muted),
+    var(--background),
+    var(--muted)
+  );
 }
 
 @theme inline {
@@ -583,35 +619,35 @@ summary,
   --ds-shadow-menu: var(----ds-shadow-menu);
   --color-ds-contrast-fg: var(----ds-contrast-fg);
   @keyframes fade-spin {
-  0% {
-    opacity: 0.15;
+    0% {
+      opacity: 0.15;
     }
-  100% {
-    opacity: 1;
+    100% {
+      opacity: 1;
     }
   }
   @keyframes fade-spin {
-  0% {
-    opacity: 0.15;
+    0% {
+      opacity: 0.15;
     }
-  100% {
-    opacity: 1;
+    100% {
+      opacity: 1;
     }
   }
   @keyframes collapsible-down {
-  from {
-    height: 0;
+    from {
+      height: 0;
     }
-  to {
-    height: var(--radix-collapsible-content-height);
+    to {
+      height: var(--radix-collapsible-content-height);
     }
   }
   @keyframes collapsible-up {
-  from {
-    height: var(--radix-collapsible-content-height);
+    from {
+      height: var(--radix-collapsible-content-height);
     }
-  to {
-    height: 0;
+    to {
+      height: 0;
     }
   }
 }
@@ -626,15 +662,23 @@ summary,
 }
 
 @layer utilities {
+  /* Force colorful emoji presentation (works with Inter + system fallbacks; matches profile pickers). */
+  .admin-cms-emoji {
+    font-variant-emoji: emoji;
+    -webkit-font-feature-settings: "liga" off;
+    font-feature-settings: "liga" off;
+  }
+
   @keyframes bounce-once {
-    0%, 100% {
+    0%,
+    100% {
       transform: translateY(0);
     }
     50% {
       transform: translateY(-8px);
     }
   }
-  
+
   .animate-bounce-once {
     animation: bounce-once 0.3s ease-in-out;
   }

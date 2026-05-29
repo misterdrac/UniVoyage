@@ -1,15 +1,43 @@
-import React from 'react';
-import { HomePage, AboutPage, ContactPage, ProfilePage, MyTripsPage, TripDetailPage, PlanTripPage, QuizPage, PopularDestinationsPage, EuropeDestinationsPage, NorthAmericaDestinationsPage, SouthAmericaDestinationsPage, AsiaDestinationsPage, AfricaDestinationsPage, OceaniaDestinationsPage } from '@/pages';
-import { AdminLoginPage, AdminDashboardPage, AdminUsersPage, AdminDestinationsPage, AdminReviewsPage } from '@/pages/admin';
-import GoogleCallbackPage from '@/pages/GoogleCallbackPage';
-import { MainLayout } from '@/components/layout';
-import { ProtectedRoute, AdminProtectedRoute } from '@/guards';
+﻿import React from "react";
+import {
+  HomePage,
+  AboutPage,
+  ContactPage,
+  EmailVerificationPage,
+  ProfilePage,
+  PasswordResetPage,
+  MyTripsPage,
+  TripDetailPage,
+  PlanTripPage,
+  QuizPage,
+  PopularDestinationsPage,
+  EuropeDestinationsPage,
+  NorthAmericaDestinationsPage,
+  SouthAmericaDestinationsPage,
+  AsiaDestinationsPage,
+  AfricaDestinationsPage,
+  OceaniaDestinationsPage,
+} from "@/pages";
+import {
+  AdminLoginPage,
+  AdminDashboardPage,
+  AdminUsersPage,
+  AdminDestinationsPage,
+  AdminReviewsPage,
+  AdminHobbiesPage,
+  AdminLanguagesPage,
+  AdminCountriesPage,
+  AdminAuditPage,
+} from "@/pages/admin";
+import OAuthCallbackPage from "@/pages/OAuthCallbackPage";
+import { MainLayout } from "@/components/layout";
+import { ProtectedRoute, AdminProtectedRoute } from "@/guards";
 
 export type RouteConfig = {
   path: string;
   element: React.ReactElement;
   layout?: boolean; // true = MainLayout, false = no layout, undefined = default (true)
-  protected?: boolean | 'admin'; // true = ProtectedRoute, 'admin' = AdminProtectedRoute
+  protected?: boolean | "admin"; // true = ProtectedRoute, 'admin' = AdminProtectedRoute
 };
 
 /**
@@ -21,7 +49,7 @@ export function createRouteElement(config: RouteConfig): React.ReactElement {
   // Apply protection
   if (config.protected === true) {
     element = <ProtectedRoute>{element}</ProtectedRoute>;
-  } else if (config.protected === 'admin') {
+  } else if (config.protected === "admin") {
     element = <AdminProtectedRoute>{element}</AdminProtectedRoute>;
   }
 
@@ -39,104 +67,148 @@ export function createRouteElement(config: RouteConfig): React.ReactElement {
 export const routes: RouteConfig[] = [
   // Admin Routes - No Header/Footer
   {
-    path: '/admin',
+    path: "/admin",
     element: <AdminLoginPage />,
     layout: false,
   },
   {
-    path: '/admin/dashboard',
+    path: "/admin/dashboard",
     element: <AdminDashboardPage />,
     layout: false,
-    protected: 'admin',
+    protected: "admin",
   },
   {
-    path: '/admin/users',
+    path: "/admin/users",
     element: <AdminUsersPage />,
     layout: false,
-    protected: 'admin',
+    protected: "admin",
   },
   {
-    path: '/admin/destinations',
+    path: "/admin/destinations",
     element: <AdminDestinationsPage />,
     layout: false,
-    protected: 'admin',
+    protected: "admin",
   },
   {
-    path: '/admin/reviews',
+    path: "/admin/reviews",
     element: <AdminReviewsPage />,
     layout: false,
-    protected: 'admin',
+    protected: "admin",
+  },
+  {
+    path: "/admin/hobbies",
+    element: <AdminHobbiesPage />,
+    layout: false,
+    protected: "admin",
+  },
+  {
+    path: "/admin/languages",
+    element: <AdminLanguagesPage />,
+    layout: false,
+    protected: "admin",
+  },
+  {
+    path: "/admin/countries",
+    element: <AdminCountriesPage />,
+    layout: false,
+    protected: "admin",
+  },
+  {
+    path: "/admin/audit",
+    element: <AdminAuditPage />,
+    layout: false,
+    protected: "admin",
   },
 
   // Public Routes - With Header/Footer
   {
-    path: '/',
+    path: "/",
     element: <HomePage />,
   },
   {
-    path: '/about',
+    path: "/about",
     element: <AboutPage />,
   },
   {
-    path: '/contact',
+    path: "/contact",
     element: <ContactPage />,
   },
   {
-    path: '/quiz',
+    path: "/quiz",
     element: <QuizPage />,
   },
   {
-    path: '/destinations',
+    path: "/destinations",
     element: <PopularDestinationsPage />,
   },
   {
-    path: '/destinations/europe',
+    path: "/destinations/europe",
     element: <EuropeDestinationsPage />,
   },
   {
-    path: '/destinations/north-america',
+    path: "/destinations/north-america",
     element: <NorthAmericaDestinationsPage />,
   },
   {
-    path: '/destinations/south-america',
+    path: "/destinations/south-america",
     element: <SouthAmericaDestinationsPage />,
   },
   {
-    path: '/destinations/asia',
+    path: "/destinations/asia",
     element: <AsiaDestinationsPage />,
   },
   {
-    path: '/destinations/africa',
+    path: "/destinations/africa",
     element: <AfricaDestinationsPage />,
   },
   {
-    path: '/destinations/oceania',
+    path: "/destinations/oceania",
     element: <OceaniaDestinationsPage />,
   },
   {
-    path: '/auth/google/callback',
-    element: <GoogleCallbackPage />,
+    path: "/auth/:provider/callback",
+    element: <OAuthCallbackPage />,
+    layout: false,
+  },
+  {
+    path: "/auth/reset-password",
+    element: <PasswordResetPage />,
+    layout: false,
+  },
+  {
+    path: "/auth/reset",
+    element: <PasswordResetPage />,
+    layout: false,
+  },
+  {
+    path: "/auth/verify-email",
+    element: <EmailVerificationPage />,
+    layout: false,
+  },
+  {
+    path: "/auth/verify",
+    element: <EmailVerificationPage />,
     layout: false,
   },
 
   // Protected Routes - With Header/Footer
   {
-    path: '/profile',
+    path: "/profile",
     element: <ProfilePage />,
     protected: true,
   },
   {
-    path: '/plan-trip',
+    path: "/plan-trip",
     element: <PlanTripPage />,
     protected: true,
   },
   {
-    path: '/my-trips',
+    path: "/my-trips",
     element: <MyTripsPage />,
     protected: true,
   },
   {
-    path: '/trips/:id',
+    path: "/trips/:id",
     element: <TripDetailPage />,
     protected: true,
   },
@@ -147,7 +219,7 @@ export const routes: RouteConfig[] = [
  * Used to extract paths from routes array for ROUTE_PATHS
  */
 function getRoutePath(pattern: string): string {
-  const route = routes.find(r => r.path === pattern);
+  const route = routes.find((r) => r.path === pattern);
   if (!route) {
     throw new Error(`Route not found for pattern: ${pattern}`);
   }
@@ -159,26 +231,35 @@ function getRoutePath(pattern: string): string {
  * These can be imported and used instead of hardcoded strings
  */
 export const ROUTE_PATHS = {
-  HOME: getRoutePath('/'),
-  ABOUT: getRoutePath('/about'),
-  CONTACT: getRoutePath('/contact'),
-  QUIZ: getRoutePath('/quiz'),
-  DESTINATIONS: getRoutePath('/destinations'),
-  DESTINATIONS_EUROPE: getRoutePath('/destinations/europe'),
-  DESTINATIONS_NORTH_AMERICA: getRoutePath('/destinations/north-america'),
-  DESTINATIONS_SOUTH_AMERICA: getRoutePath('/destinations/south-america'),
-  DESTINATIONS_ASIA: getRoutePath('/destinations/asia'),
-  DESTINATIONS_AFRICA: getRoutePath('/destinations/africa'),
-  DESTINATIONS_OCEANIA: getRoutePath('/destinations/oceania'),
-  PROFILE: getRoutePath('/profile'),
-  PLAN_TRIP: getRoutePath('/plan-trip'),
-  MY_TRIPS: getRoutePath('/my-trips'),
+  HOME: getRoutePath("/"),
+  ABOUT: getRoutePath("/about"),
+  CONTACT: getRoutePath("/contact"),
+  QUIZ: getRoutePath("/quiz"),
+  DESTINATIONS: getRoutePath("/destinations"),
+  DESTINATIONS_EUROPE: getRoutePath("/destinations/europe"),
+  DESTINATIONS_NORTH_AMERICA: getRoutePath("/destinations/north-america"),
+  DESTINATIONS_SOUTH_AMERICA: getRoutePath("/destinations/south-america"),
+  DESTINATIONS_ASIA: getRoutePath("/destinations/asia"),
+  DESTINATIONS_AFRICA: getRoutePath("/destinations/africa"),
+  DESTINATIONS_OCEANIA: getRoutePath("/destinations/oceania"),
+  PROFILE: getRoutePath("/profile"),
+  PLAN_TRIP: getRoutePath("/plan-trip"),
+  MY_TRIPS: getRoutePath("/my-trips"),
   TRIP_DETAIL: (id: number | string) => `/trips/${id}`,
-  ADMIN: getRoutePath('/admin'),
-  ADMIN_DASHBOARD: getRoutePath('/admin/dashboard'),
-  ADMIN_USERS: getRoutePath('/admin/users'),
-  ADMIN_DESTINATIONS: getRoutePath('/admin/destinations'),
-  ADMIN_REVIEWS: getRoutePath('/admin/reviews'),
-  GOOGLE_CALLBACK: getRoutePath('/auth/google/callback'),
+  ADMIN: getRoutePath("/admin"),
+  ADMIN_DASHBOARD: getRoutePath("/admin/dashboard"),
+  ADMIN_USERS: getRoutePath("/admin/users"),
+  ADMIN_DESTINATIONS: getRoutePath("/admin/destinations"),
+  ADMIN_REVIEWS: getRoutePath("/admin/reviews"),
+  ADMIN_HOBBIES: getRoutePath("/admin/hobbies"),
+  ADMIN_LANGUAGES: getRoutePath("/admin/languages"),
+  ADMIN_COUNTRIES: getRoutePath("/admin/countries"),
+  ADMIN_AUDIT: getRoutePath("/admin/audit"),
+  GOOGLE_CALLBACK: "/auth/google/callback",
+  GITHUB_CALLBACK: "/auth/github/callback",
+  LINKEDIN_CALLBACK: "/auth/linkedin/callback",
+  PASSWORD_RESET: getRoutePath("/auth/reset-password"),
+  PASSWORD_RESET_ALIAS: getRoutePath("/auth/reset"),
+  EMAIL_VERIFY: getRoutePath("/auth/verify-email"),
+  EMAIL_VERIFY_ALIAS: getRoutePath("/auth/verify"),
 } as const;
-

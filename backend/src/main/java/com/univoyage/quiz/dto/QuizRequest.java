@@ -6,18 +6,18 @@ import lombok.Data;
 @Data
 public class QuizRequest {
 
-    @NotBlank
-    private String budget;
+  @NotBlank
+  private String budget;
 
-    @NotBlank
-    private String climate;
+  @NotBlank
+  private String climate;
 
-    @NotBlank
-    private String activityType;
+  @NotBlank
+  private String activityType;
 
-    @NotBlank
-    private String continent;
+  @NotBlank
+  private String continent;
 
-    @NotBlank
-    private String travelStyle;
+  @NotBlank
+  private String travelStyle;
 }

@@ -12,14 +12,15 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class HobbyDto {
-    private Long id;
-    private String hobbyName;
+  private Long id;
+  private String hobbyName;
+  private String displayLabel;
+  private String emoji;
 
-    public static HobbyDto from(Hobby entity) {
-        if (entity == null) return null;
-        return HobbyDto.builder()
-                .id(entity.getId())
-                .hobbyName(entity.getHobbyName())
-                .build();
-    }
+  public static HobbyDto from(Hobby entity) {
+    if (entity == null)
+      return null;
+    return HobbyDto.builder().id(entity.getId()).hobbyName(entity.getHobbyName())
+        .displayLabel(entity.getDisplayLabel()).emoji(entity.getEmoji()).build();
+  }
 }

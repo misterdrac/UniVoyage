@@ -4,30 +4,49 @@
         <!-- Do not name this LOG_DIR: same key as env lookup causes infinite interpolation. -->
         <Property name="app.log.dir">${env:LOG_DIR:-logs}</Property>
         <Property name="LOG_FILE_NAME">univoyage</Property>
+        <Property name="SECURITY_LOG_FILE_NAME">security-events</Property>
         <Property name="PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} %5p [%t] %c{1.} - %m%n%wEx</Property>
     </Properties>
 
     <Appenders>
-        <!-- INFO+ on stdout (DEBUG stays in file only for com.univoyage) -->
+        <!-- INFO+ on stdout (DEBUG stays below Threshold unless elevated via filters elsewhere). -->
         <Console name="Console" target="SYSTEM_OUT">
             <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout pattern="${PATTERN}" charset="UTF-8"/>
         </Console>
 
+        <!-- Application log: 30-day retention, 50MB per file -->
         <RollingFile name="RollingFile"
                      fileName="${app.log.dir}/${LOG_FILE_NAME}.log"
                      filePattern="${app.log.dir}/${LOG_FILE_NAME}-%d{yyyy-MM-dd}-%i.log.gz">
             <PatternLayout pattern="${PATTERN}" charset="UTF-8"/>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
-                <SizeBasedTriggeringPolicy size="10 MB"/>
+                <SizeBasedTriggeringPolicy size="${env:LOG_FILE_MAX_SIZE:-50 MB}"/>
             </Policies>
-            <DefaultRolloverStrategy max="14"/>
+            <DefaultRolloverStrategy max="${env:LOG_ROLLING_MAX_FILES:-30}"/>
+        </RollingFile>
+
+        <!-- Security events: JSON Lines, 90-day retention for incident response -->
+        <RollingFile name="SecurityEventsFile"
+                     fileName="${app.log.dir}/${SECURITY_LOG_FILE_NAME}.jsonl"
+                     filePattern="${app.log.dir}/${SECURITY_LOG_FILE_NAME}-%d{yyyy-MM-dd}-%i.jsonl.gz">
+            <PatternLayout pattern="%m%n" charset="UTF-8"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="50 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="90"/>
         </RollingFile>
     </Appenders>
 
     <Loggers>
-        <!-- Application DEBUG in log file; console still INFO+ via ThresholdFilter -->
+        <!-- Security events logger: separate file, no console noise -->
+        <Logger name="security-events" level="info" additivity="false">
+            <AppenderRef ref="SecurityEventsFile"/>
+        </Logger>
+
+        <!-- Boot baseline DEBUG here; Spring overrides via logging.level.com.univoyage (e.g. application-docker.yml). -->
         <Logger name="com.univoyage" level="debug" additivity="false">
             <AppenderRef ref="Console"/>
             <AppenderRef ref="RollingFile"/>

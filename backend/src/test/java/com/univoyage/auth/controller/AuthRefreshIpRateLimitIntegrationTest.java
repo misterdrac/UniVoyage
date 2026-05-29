@@ -14,30 +14,24 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(properties = {
-        "app.auth.login.refresh-ip-max-attempts=2",
-        "app.auth.login.refresh-ip-window=PT1H"
-})
+@SpringBootTest(properties = {"app.auth.login.refresh-ip-max-attempts=2",
+    "app.auth.login.refresh-ip-window=PT1H"})
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
 class AuthRefreshIpRateLimitIntegrationTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+  @Autowired
+  private MockMvc mockMvc;
 
-    @Test
-    @DisplayName("POST /api/auth/refresh returns 429 when IP exceeds refresh window limit")
-    void refreshRateLimitedByIp() throws Exception {
-        mockMvc.perform(post("/api/auth/refresh"))
-                .andExpect(status().isUnauthorized());
+  @Test
+  @DisplayName("POST /api/auth/refresh returns 429 when IP exceeds refresh window limit")
+  void refreshRateLimitedByIp() throws Exception {
+    mockMvc.perform(post("/api/auth/refresh")).andExpect(status().isUnauthorized());
 
-        mockMvc.perform(post("/api/auth/refresh"))
-                .andExpect(status().isUnauthorized());
+    mockMvc.perform(post("/api/auth/refresh")).andExpect(status().isUnauthorized());
 
-        mockMvc.perform(post("/api/auth/refresh"))
-                .andExpect(status().isTooManyRequests())
-                .andExpect(jsonPath("$.success").value(false))
-                .andExpect(header().exists("Retry-After"));
-    }
+    mockMvc.perform(post("/api/auth/refresh")).andExpect(status().isTooManyRequests())
+        .andExpect(jsonPath("$.success").value(false)).andExpect(header().exists("Retry-After"));
+  }
 }

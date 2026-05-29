@@ -94,6 +94,7 @@ Before running the back-end of this project, ensure you have the following softw
 #### **H. Production and staging**
 - Set `SPRING_PROFILES_ACTIVE=prod` and provide database credentials and `JWT_SECRET` via your host’s secret store (Railway, Kubernetes secrets, etc.), not in the image.
 - Set `CORS_ALLOWED_ORIGINS` to your real HTTPS frontend origins (comma-separated). In production, `application-prod.yml` uses secure cookies by default (`COOKIE_SECURE=true`, `COOKIE_SAMESITE=None`).
+- **Email OTP:** set `EMAIL_PROVIDER`, `EMAIL_FROM`, and provider API key (`SENDGRID_API_KEY`, etc.) on Railway — see [Email & OTP production setup](docs/Email%20&%20otp/guide.md#production-setup-railway).
 - Only `/actuator/health` is exposed publicly; other actuator routes are denied.
 - If any API key or `JWT_SECRET` was ever printed in logs or committed, rotate it before go-live.
 
@@ -186,7 +187,7 @@ spring.datasource.password=${DB_PASSWORD}
   docker ps
 ```
 - or you can go to Docker Desktop and check the "Containers/Apps" section to see if the container is running. You should see Docker image named "backend" and under that image are two containers, one for the back-end application and another for the PostgreSQL database.
-- **Log files on disk (Docker):** Compose bind-mounts logs under `backend/logs/` — PostgreSQL server log at `logs/postgres/postgresql.log`, Spring Boot file log at `logs/spring/univoyage.log` (see `application-docker.yml`). The `logs/` directory is gitignored.
+- **Log files on disk (Docker):** Compose bind-mounts logs under `backend/logs/` — PostgreSQL collector logs under `logs/postgres/` (daily filenames `postgresql-YYYYMMDD.log`), backend rolling logs under `logs/backend/` (`univoyage.log` + gz archives). Spring levels live in `application-docker.yml`; appenders/rotation in `log4j2.xml`. Full operational guide: `docs/logging-docker.md`. The `logs/` directory is gitignored.
 - This will build the Docker image for the back-end application and start it in a container. The application will be accessible at `http://localhost:8080` and it will be able to communicate with the front-end running on port 5173.
 - Using Docker is highly recommended as it simplifies the setup process and ensures that all dependencies are correctly configured.
 

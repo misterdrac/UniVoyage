@@ -1,16 +1,19 @@
-import { useMemo } from 'react';
-import { DestinationsPageLayout, LoadingSpinner } from '@/components/destinations';
-import { getDestinationsByContinent } from '@/lib/destinationUtils';
-import { useDestinations } from '@/hooks/useDestinations';
+import { useMemo } from "react";
+import {
+  DestinationsPageLayout,
+  LoadingSpinner,
+} from "@/components/destinations";
+import { getDestinationsByContinent } from "@/lib/destinationUtils";
+import { useDestinations } from "@/hooks/useDestinations";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 const NorthAmericaDestinationsPage = () => {
-  useDocumentTitle('North America Destinations');
+  useDocumentTitle("North America Destinations");
   const { destinations: apiDestinations, isLoading } = useDestinations();
-  
-  const northAmericaDestinations = useMemo(() => 
-    getDestinationsByContinent(apiDestinations, 'North America'),
-    [apiDestinations]
+
+  const northAmericaDestinations = useMemo(
+    () => getDestinationsByContinent(apiDestinations, "North America"),
+    [apiDestinations],
   );
 
   if (isLoading) {
@@ -28,9 +31,10 @@ const NorthAmericaDestinationsPage = () => {
       title="Explore North America"
       description={
         <p className="text-center text-lg sm:text-xl text-muted-foreground">
-          From the bustling streets of New York and Los Angeles to the vibrant cities of Canada and Mexico, 
-          North America offers diverse landscapes, cultures, and experiences. Explore iconic cities, stunning 
-          natural beauty, and endless opportunities for adventure and discovery.
+          From the bustling streets of New York and Los Angeles to the vibrant
+          cities of Canada and Mexico, North America offers diverse landscapes,
+          cultures, and experiences. Explore iconic cities, stunning natural
+          beauty, and endless opportunities for adventure and discovery.
         </p>
       }
       destinations={northAmericaDestinations}
@@ -41,4 +45,3 @@ const NorthAmericaDestinationsPage = () => {
 };
 
 export default NorthAmericaDestinationsPage;
-

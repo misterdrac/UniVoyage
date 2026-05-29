@@ -1,8 +1,16 @@
-import React, { createContext, useContext, useState, type ReactNode, useCallback, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
-import type { Option } from '@/components/ui/autocomplete';
-import type { DateRange } from 'react-day-picker';
-import { useAuth } from './AuthContext';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+} from "react";
+import { useLocation } from "react-router-dom";
+import type { Option } from "@/components/ui/autocomplete";
+import type { DateRange } from "react-day-picker";
+import { useAuth } from "./AuthContext";
 
 /**
  * Destination data for navigating to the plan trip page
@@ -42,7 +50,11 @@ interface DestinationContextType {
   /** Reset all destination picker state */
   resetAll: () => void;
   /** Handle planning a trip from a destination card click */
-  handlePlanTrip: (destination: { id: number; title: string; location: string }) => void;
+  handlePlanTrip: (destination: {
+    id: number;
+    title: string;
+    location: string;
+  }) => void;
   /** Get destination data and check auth for navigating to the plan trip wizard */
   getPlanTripDestination: () => PlanTripDestination | null;
   /** Scroll to top of page */
@@ -51,7 +63,9 @@ interface DestinationContextType {
   setShowAuthDialog: (show: boolean) => void;
 }
 
-const DestinationContext = createContext<DestinationContextType | undefined>(undefined);
+const DestinationContext = createContext<DestinationContextType | undefined>(
+  undefined,
+);
 
 /**
  * Hook to access destination context
@@ -61,7 +75,7 @@ const DestinationContext = createContext<DestinationContextType | undefined>(und
 export const useDestination = () => {
   const context = useContext(DestinationContext);
   if (context === undefined) {
-    throw new Error('useDestination must be used within a DestinationProvider');
+    throw new Error("useDestination must be used within a DestinationProvider");
   }
   return context;
 };
@@ -75,7 +89,7 @@ interface DestinationProviderProps {
  * Manages country/destination selection, date range, and trip creation flow
  * Automatically resets state on route changes via RouteChangeHandler
  * Provides loading animations and authentication dialog triggers
- * 
+ *
  * @example
  * ```tsx
  * <DestinationProvider>
@@ -83,36 +97,45 @@ interface DestinationProviderProps {
  * </DestinationProvider>
  * ```
  */
-export const DestinationProvider: React.FC<DestinationProviderProps> = ({ children }) => {
+export const DestinationProvider: React.FC<DestinationProviderProps> = ({
+  children,
+}) => {
   const [selectedCountry, setSelectedCountry] = useState<Option | undefined>();
-  const [selectedDestination, setSelectedDestination] = useState<Option | undefined>();
+  const [selectedDestination, setSelectedDestination] = useState<
+    Option | undefined
+  >();
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [isLoading, setIsLoading] = useState(false);
-  const [loadingCountry, setLoadingCountry] = useState<string>('');
+  const [loadingCountry, setLoadingCountry] = useState<string>("");
   const [isAnimating, setIsAnimating] = useState(false);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
-  const previousCountryRef = useRef<string>('');
-  const animationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const previousCountryRef = useRef<string>("");
+  const animationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
   const { user } = useAuth();
 
   // Watch for country changes and trigger loading animation
   useEffect(() => {
-    if (selectedCountry && selectedCountry.label !== previousCountryRef.current) {
+    if (
+      selectedCountry &&
+      selectedCountry.label !== previousCountryRef.current
+    ) {
       setLoadingCountry(selectedCountry.label);
       setIsLoading(true);
       previousCountryRef.current = selectedCountry.label;
-      
+
       // Simulate flight time - show spinner for 2 seconds
       const timer = setTimeout(() => {
         setIsLoading(false);
-        setLoadingCountry('');
+        setLoadingCountry("");
       }, 2000);
-      
+
       return () => clearTimeout(timer);
     } else if (!selectedCountry) {
       setIsLoading(false);
-      setLoadingCountry('');
-      previousCountryRef.current = '';
+      setLoadingCountry("");
+      previousCountryRef.current = "";
     }
   }, [selectedCountry]);
 
@@ -152,16 +175,16 @@ export const DestinationProvider: React.FC<DestinationProviderProps> = ({ childr
     setSelectedDestination(undefined);
     setDateRange(undefined);
     setIsLoading(false);
-    setLoadingCountry('');
+    setLoadingCountry("");
     setIsAnimating(false);
-    previousCountryRef.current = '';
+    previousCountryRef.current = "";
   }, []);
 
   /**
    * Scrolls to the top of the page
    */
   const scrollToTop = useCallback(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
   /**
@@ -169,39 +192,47 @@ export const DestinationProvider: React.FC<DestinationProviderProps> = ({ childr
    * Sets the destination and country, triggers animation, and scrolls to top
    * @param destination - Destination data from card click
    */
-  const handlePlanTrip = useCallback((destination: { id: number; title: string; location: string; imageUrl?: string }) => {
-    // Clear any existing animation timeout
-    if (animationTimeoutRef.current) {
-      clearTimeout(animationTimeoutRef.current);
-    }
+  const handlePlanTrip = useCallback(
+    (destination: {
+      id: number;
+      title: string;
+      location: string;
+      imageUrl?: string;
+    }) => {
+      // Clear any existing animation timeout
+      if (animationTimeoutRef.current) {
+        clearTimeout(animationTimeoutRef.current);
+      }
 
-    const option: Option = {
-      value: destination.id.toString(),
-      label: destination.title,
-      location: destination.location,
-      imageUrl: destination.imageUrl || '',
-    };
-    
-    const countryOption: Option = {
-      value: destination.location,
-      label: destination.location,
-      location: destination.location
-    };
-    
-    // Only set country if it's different from current selection
-    if (!selectedCountry || selectedCountry.label !== destination.location) {
-      setSelectedCountry(countryOption);
-    }
-    
-    setSelectedDestination(option);
-    setIsAnimating(true);
-    scrollToTop();
-    
-    animationTimeoutRef.current = setTimeout(() => {
-      setIsAnimating(false);
-      animationTimeoutRef.current = null;
-    }, 300);
-  }, [selectedCountry, scrollToTop]);
+      const option: Option = {
+        value: destination.id.toString(),
+        label: destination.title,
+        location: destination.location,
+        imageUrl: destination.imageUrl || "",
+      };
+
+      const countryOption: Option = {
+        value: destination.location,
+        label: destination.location,
+        location: destination.location,
+      };
+
+      // Only set country if it's different from current selection
+      if (!selectedCountry || selectedCountry.label !== destination.location) {
+        setSelectedCountry(countryOption);
+      }
+
+      setSelectedDestination(option);
+      setIsAnimating(true);
+      scrollToTop();
+
+      animationTimeoutRef.current = setTimeout(() => {
+        setIsAnimating(false);
+        animationTimeoutRef.current = null;
+      }, 300);
+    },
+    [selectedCountry, scrollToTop],
+  );
 
   /**
    * Returns the currently selected destination data for navigating to the plan trip wizard.
@@ -221,7 +252,7 @@ export const DestinationProvider: React.FC<DestinationProviderProps> = ({ childr
     return {
       destinationId: parseInt(selectedDestination.value),
       destinationName: selectedDestination.label,
-      destinationLocation: selectedDestination.location || '',
+      destinationLocation: selectedDestination.location || "",
       destinationImageUrl: selectedDestination.imageUrl || undefined,
     };
   }, [user, selectedDestination]);
@@ -255,7 +286,7 @@ export const DestinationProvider: React.FC<DestinationProviderProps> = ({ childr
  * Component to handle route changes and reset destination picker state
  * Automatically resets destination fields when navigating between pages
  * Must be used inside a Router component (typically in App.tsx)
- * 
+ *
  * @example
  * ```tsx
  * <Router>
@@ -271,7 +302,10 @@ export const RouteChangeHandler: React.FC = () => {
 
   useEffect(() => {
     const currentPathname = location.pathname;
-    if (previousPathnameRef.current && previousPathnameRef.current !== currentPathname) {
+    if (
+      previousPathnameRef.current &&
+      previousPathnameRef.current !== currentPathname
+    ) {
       resetAll();
     }
     previousPathnameRef.current = currentPathname;
@@ -279,4 +313,3 @@ export const RouteChangeHandler: React.FC = () => {
 
   return null;
 };
-

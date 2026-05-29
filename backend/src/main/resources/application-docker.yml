@@ -1,4 +1,11 @@
 spring:
+  main:
+    banner-mode: console
+
+  banner:
+    location: classpath:banner.txt
+    charset: UTF-8
+
   datasource:
     url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME:${POSTGRES_USER:postgres}}
@@ -20,16 +27,18 @@ spring:
     show-sql: false
     open-in-view: false
 
+# Log4j2 appenders + rollover: classpath log4j2.xml (this stack uses spring-boot-starter-log4j2, not Logback).
+# File directory in Docker: LOG_DIR=/app/logs (see docker-compose). Sizes/history: LOG_FILE_MAX_SIZE, LOG_ROLLING_MAX_FILES.
 logging:
-  file:
-    name: /app/logs/univoyage.log
-  logback:
-    rollingpolicy:
-      max-file-size: 10MB
-      max-history: 30
-      total-size-cap: 1GB
   level:
-    root: INFO
+    root: ${LOGGING_LEVEL_ROOT:INFO}
     org.springframework.security: INFO
     org.hibernate.SQL: WARN
     org.hibernate.orm.jdbc.bind: WARN
+    com.univoyage: ${LOGGING_LEVEL_COM_UNIVOYAGE:DEBUG}
+
+# Outbound email uses Resend/Postmark/etc., not JavaMail SMTP — disable SMTP health check.
+management:
+  health:
+    mail:
+      enabled: false

@@ -1,7 +1,6 @@
 import { User, Mail } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { AutoComplete, type Option } from "@/components/ui/autocomplete";
-import { COUNTRIES } from "@/lib/constants";
 
 interface SignUpBasicFieldsProps {
   name: string;
@@ -12,6 +11,8 @@ interface SignUpBasicFieldsProps {
   setEmail: (value: string) => void;
   country: Option | undefined;
   setCountry: (value: Option | undefined) => void;
+  countryOptions: Option[];
+  referenceLoading?: boolean;
 }
 
 export const SignUpBasicFields = ({
@@ -23,6 +24,8 @@ export const SignUpBasicFields = ({
   setEmail,
   country,
   setCountry,
+  countryOptions,
+  referenceLoading = false,
 }: SignUpBasicFieldsProps) => {
   return (
     <>
@@ -30,7 +33,10 @@ export const SignUpBasicFields = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* First Name Input */}
         <div className="space-y-2">
-          <label htmlFor="signup-firstname" className="text-sm font-medium text-foreground">
+          <label
+            htmlFor="signup-firstname"
+            className="text-sm font-medium text-foreground"
+          >
             Name <span className="text-destructive">*</span>
           </label>
           <div className="relative">
@@ -49,7 +55,10 @@ export const SignUpBasicFields = ({
 
         {/* Surname Input */}
         <div className="space-y-2">
-          <label htmlFor="signup-surname" className="text-sm font-medium text-foreground">
+          <label
+            htmlFor="signup-surname"
+            className="text-sm font-medium text-foreground"
+          >
             Surname
           </label>
           <div className="relative">
@@ -70,7 +79,10 @@ export const SignUpBasicFields = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Email Input */}
         <div className="space-y-2">
-          <label htmlFor="signup-email" className="text-sm font-medium text-foreground">
+          <label
+            htmlFor="signup-email"
+            className="text-sm font-medium text-foreground"
+          >
             Email <span className="text-destructive">*</span>
           </label>
           <div className="relative">
@@ -93,15 +105,15 @@ export const SignUpBasicFields = ({
             Country of Origin <span className="text-destructive">*</span>
           </label>
           <AutoComplete
-            options={COUNTRIES}
+            options={countryOptions}
             placeholder="Select your country..."
             emptyMessage="No countries found"
             value={country}
             onValueChange={setCountry}
+            disabled={referenceLoading}
           />
         </div>
       </div>
     </>
   );
 };
-

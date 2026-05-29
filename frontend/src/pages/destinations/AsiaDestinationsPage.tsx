@@ -1,16 +1,19 @@
-import { useMemo } from 'react';
-import { DestinationsPageLayout, LoadingSpinner } from '@/components/destinations';
-import { getDestinationsByContinent } from '@/lib/destinationUtils';
-import { useDestinations } from '@/hooks/useDestinations';
+import { useMemo } from "react";
+import {
+  DestinationsPageLayout,
+  LoadingSpinner,
+} from "@/components/destinations";
+import { getDestinationsByContinent } from "@/lib/destinationUtils";
+import { useDestinations } from "@/hooks/useDestinations";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 const AsiaDestinationsPage = () => {
-  useDocumentTitle('Asia Destinations');
+  useDocumentTitle("Asia Destinations");
   const { destinations: apiDestinations, isLoading } = useDestinations();
-  
-  const asiaDestinations = useMemo(() => 
-    getDestinationsByContinent(apiDestinations, 'Asia'),
-    [apiDestinations]
+
+  const asiaDestinations = useMemo(
+    () => getDestinationsByContinent(apiDestinations, "Asia"),
+    [apiDestinations],
   );
 
   if (isLoading) {
@@ -28,10 +31,11 @@ const AsiaDestinationsPage = () => {
       title="Discover Asia"
       description={
         <p className="text-center text-lg sm:text-xl text-muted-foreground">
-          From zen gardens and ancient temples to neon-lit megacities and tropical beaches. Asia 
-          delivers the world's most incredible value—where $20 can buy paradise, street food 
-          rivals Michelin stars, and ancient wisdom flows alongside cutting-edge innovation. 
-          Your wallet will thank you, but your Instagram will explode.
+          From zen gardens and ancient temples to neon-lit megacities and
+          tropical beaches. Asia delivers the world's most incredible
+          value—where $20 can buy paradise, street food rivals Michelin stars,
+          and ancient wisdom flows alongside cutting-edge innovation. Your
+          wallet will thank you, but your Instagram will explode.
         </p>
       }
       destinations={asiaDestinations}

@@ -1,5 +1,6 @@
 package com.univoyage.config;
 
+import com.univoyage.auth.security.AdminTwoFactorFilter;
 import com.univoyage.auth.security.JwtAuthenticationFilter;
 import com.univoyage.exception.security.RestAccessDeniedHandler;
 import com.univoyage.exception.security.RestAuthenticationEntryPoint;
@@ -21,62 +22,62 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfiguration {
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
-    private final RestAccessDeniedHandler restAccessDeniedHandler;
+  private final JwtAuthenticationFilter jwtAuthenticationFilter;
+  private final AdminTwoFactorFilter adminTwoFactorFilter;
+  private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
+  private final RestAccessDeniedHandler restAccessDeniedHandler;
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+  @Bean
+  public PasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder();
+  }
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+  @Bean
+  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    http.cors(Customizer.withDefaults()).csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"))
+        .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .headers(headers -> headers
+            .contentTypeOptions(Customizer.withDefaults()).frameOptions(frame -> frame.deny()))
+        .authorizeHttpRequests(auth -> auth
+            // Allow preflight CORS requests
+            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+            // Public routes for error handling; actuator only health (defense in depth)
+            .requestMatchers("/error").permitAll()
+            .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
+            .requestMatchers("/actuator/**").denyAll()
+            // Specific public routes for authentication
+            .requestMatchers("/api/auth/login/**", "/api/auth/register/**").permitAll()
+            .requestMatchers(HttpMethod.POST, "/api/auth/refresh", "/api/auth/refresh/").permitAll()
+            .requestMatchers("/api/auth/google/**").permitAll()
+            .requestMatchers("/api/auth/github/**").permitAll()
+            .requestMatchers("/api/auth/linkedin/**").permitAll()
+            .requestMatchers("/api/auth/otp/**").permitAll()
+            .requestMatchers("/api/auth/password/**").permitAll()
+            .requestMatchers("/api/auth/email/verification/**").permitAll()
+            // Public routes for destinations
+            .requestMatchers(HttpMethod.GET, "/api/destinations/**").permitAll()
+            // Public quiz endpoint
+            .requestMatchers("/api/quiz/**").permitAll()
+            // Public reference data for forms (hobbies, languages, countries)
+            .requestMatchers(HttpMethod.GET, "/api/reference/**").permitAll()
+            // Public heatmap endpoint (landing page)
+            .requestMatchers(HttpMethod.GET, "/api/heatmap/**").permitAll()
+            // Public contact form endpoint
+            .requestMatchers(HttpMethod.POST, "/api/contact").permitAll()
+            // Admin 2FA endpoints (require authentication but not 2FA yet)
+            .requestMatchers("/api/auth/2fa/**").hasAnyRole("ADMIN", "HEAD_ADMIN")
+            // Admin routes (2FA enforced by AdminTwoFactorFilter)
+            .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "HEAD_ADMIN")
+            // Everything under /api/auth/me requires authentication
+            .requestMatchers("/api/auth/me").authenticated().requestMatchers("/api/auth/**")
+            .authenticated()
+            // Secure catch-all
+            .anyRequest().authenticated())
+        .exceptionHandling(eh -> eh.authenticationEntryPoint(restAuthenticationEntryPoint)
+            .accessDeniedHandler(restAccessDeniedHandler))
+        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+        .addFilterAfter(adminTwoFactorFilter, JwtAuthenticationFilter.class);
 
-        http
-                .cors(Customizer.withDefaults())
-                .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"))
-                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        // Allow preflight CORS requests
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
-                        // Public routes for error handling; actuator only health (defense in depth)
-                        .requestMatchers("/error").permitAll()
-                        .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
-                        .requestMatchers("/actuator/**").denyAll()
-
-                        // Specific public routes for authentication
-                        .requestMatchers("/api/auth/login/**", "/api/auth/register/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/refresh", "/api/auth/refresh/").permitAll()
-                        .requestMatchers("/api/auth/google/**").permitAll()
-
-                        // Public routes for destinations
-                        .requestMatchers(HttpMethod.GET, "/api/destinations/**").permitAll()
-
-                        // Public quiz endpoint
-                        .requestMatchers("/api/quiz/**").permitAll()
-
-                        // Public heatmap endpoint (landing page)
-                        .requestMatchers(HttpMethod.GET, "/api/heatmap/**").permitAll()
-
-                        // Admin routes
-                        .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "HEAD_ADMIN")
-
-                        // Everything under /api/auth/me requires authentication
-                        .requestMatchers("/api/auth/me").authenticated()
-                        .requestMatchers("/api/auth/**").authenticated()
-
-                        // Secure catch-all
-                        .anyRequest().authenticated()
-                )
-                .exceptionHandling(eh -> eh
-                        .authenticationEntryPoint(restAuthenticationEntryPoint)
-                        .accessDeniedHandler(restAccessDeniedHandler)
-                )
-                // We add our custom JWT security filter before the default UsernamePasswordAuthenticationFilter
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
-        return http.build();
-    }
+    return http.build();
+  }
 }

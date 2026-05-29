@@ -1,7 +1,9 @@
-import React from 'react';
-import { Navigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import { ROUTE_PATHS } from '@/config/routes';
+import React from "react";
+import { Loader2 } from "lucide-react";
+import { Navigate } from "react-router-dom";
+import { AuthStatusLayout } from "@/components/auth/AuthStatusLayout";
+import { useAuth } from "@/contexts/AuthContext";
+import { ROUTE_PATHS } from "@/config/routes";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -12,22 +14,23 @@ interface ProtectedRouteProps {
  * Redirects to home if user is not logged in
  */
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, isAuthenticated } = useAuth();
 
   // Show loading state while checking authentication
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background pt-24 pb-8 px-8 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
-      </div>
+      <AuthStatusLayout
+        title="Checking your session"
+        description="Please wait while we verify you're signed in…"
+        icon={
+          <Loader2 className="h-8 w-8 text-primary animate-spin" aria-hidden />
+        }
+      />
     );
   }
 
   // Redirect to home if not authenticated
-  if (!user) {
+  if (!isAuthenticated || !user) {
     return <Navigate to={ROUTE_PATHS.HOME} replace />;
   }
 

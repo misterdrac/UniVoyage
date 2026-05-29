@@ -25,132 +25,105 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(properties = {
-        "app.auth.login.max-failed-attempts=5",
-        "app.auth.login.lock-duration=PT24H"
-})
+@SpringBootTest(properties = {"app.auth.login.max-failed-attempts=5",
+    "app.auth.login.lock-duration=PT24H"})
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
 class AuthLoginLockoutIntegrationTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+  @Autowired
+  private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+  @Autowired
+  private ObjectMapper objectMapper;
 
-    @Autowired
-    private CountryRepository countryRepository;
+  @Autowired
+  private CountryRepository countryRepository;
 
-    @Autowired
-    private UserRepository userRepository;
+  @Autowired
+  private UserRepository userRepository;
 
-    @Test
-    @DisplayName("After 5 consecutive wrong passwords, account is locked and correct password is rejected")
-    void accountLocksAfterFiveFailedAttempts() throws Exception {
-        seedCountry("MT", "Malta");
+  @Test
+  @DisplayName("After 5 consecutive wrong passwords, account is locked and correct password is rejected")
+  void accountLocksAfterFiveFailedAttempts() throws Exception {
+    seedCountry("MT", "Malta");
 
-        mockMvc.perform(post("/api/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(Map.of(
-                                "email", "lockme@example.com",
-                                "password", "Good-Secret-1",
-                                "name", "L",
-                                "surname", "K",
-                                "countryCode", "MT"
-                        ))))
-                .andExpect(status().isCreated());
+    mockMvc
+        .perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(Map.of("email", "lockme@example.com",
+                "password", "Good-Secret-1", "name", "L", "surname", "K", "countryCode", "MT"))))
+        .andExpect(status().isCreated());
 
-        String wrongLogin = objectMapper.writeValueAsString(Map.of(
-                "email", "lockme@example.com",
-                "password", "wrong-password"
-        ));
+    String wrongLogin = objectMapper
+        .writeValueAsString(Map.of("email", "lockme@example.com", "password", "wrong-password"));
 
-        for (int i = 0; i < 5; i++) {
-            mockMvc.perform(post("/api/auth/login")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(wrongLogin))
-                    .andExpect(status().isUnauthorized())
-                    .andExpect(jsonPath("$.success").value(false))
-                    .andExpect(jsonPath("$.error").value("Invalid credentials"));
-        }
-
-        UserEntity user = userRepository.findByEmail("lockme@example.com").orElseThrow();
-        assertNotNull(user.getLockedUntil());
-        assertTrue(user.getLockedUntil().isAfter(Instant.now()));
-        assertEquals(5, user.getFailedLoginAttempts());
-
-        mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(Map.of(
-                                "email", "lockme@example.com",
-                                "password", "Good-Secret-1"
-                        ))))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.error").value("Invalid credentials"));
+    for (int i = 0; i < 5; i++) {
+      mockMvc
+          .perform(
+              post("/api/auth/login").contentType(MediaType.APPLICATION_JSON).content(wrongLogin))
+          .andExpect(status().isUnauthorized()).andExpect(jsonPath("$.success").value(false))
+          .andExpect(jsonPath("$.error").value("Invalid credentials"));
     }
 
-    @Test
-    @DisplayName("Successful login resets failed attempts; next 5 wrong passwords lock again")
-    void successfulLoginResetsFailedAttemptsCounter() throws Exception {
-        seedCountry("CY", "Cyprus");
+    UserEntity user = userRepository.findByEmail("lockme@example.com").orElseThrow();
+    assertNotNull(user.getLockedUntil());
+    assertTrue(user.getLockedUntil().isAfter(Instant.now()));
+    assertEquals(5, user.getFailedLoginAttempts());
 
-        mockMvc.perform(post("/api/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(Map.of(
-                                "email", "reset@example.com",
-                                "password", "Valid-1",
-                                "name", "R",
-                                "surname", "S",
-                                "countryCode", "CY"
-                        ))))
-                .andExpect(status().isCreated());
+    mockMvc
+        .perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(
+                Map.of("email", "lockme@example.com", "password", "Good-Secret-1"))))
+        .andExpect(status().isUnauthorized()).andExpect(jsonPath("$.success").value(false))
+        .andExpect(jsonPath("$.error").value("Invalid credentials"));
+  }
 
-        String wrong = objectMapper.writeValueAsString(Map.of(
-                "email", "reset@example.com",
-                "password", "bad"
-        ));
+  @Test
+  @DisplayName("Successful login resets failed attempts; next 5 wrong passwords lock again")
+  void successfulLoginResetsFailedAttemptsCounter() throws Exception {
+    seedCountry("CY", "Cyprus");
 
-        for (int i = 0; i < 2; i++) {
-            mockMvc.perform(post("/api/auth/login")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(wrong))
-                    .andExpect(status().isUnauthorized());
-        }
+    mockMvc
+        .perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(Map.of("email", "reset@example.com",
+                "password", "ValidPass1", "name", "R", "surname", "S", "countryCode", "CY"))))
+        .andExpect(status().isCreated());
 
-        mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(Map.of(
-                                "email", "reset@example.com",
-                                "password", "Valid-1"
-                        ))))
-                .andExpect(status().isOk());
+    String wrong = objectMapper
+        .writeValueAsString(Map.of("email", "reset@example.com", "password", "bad"));
 
-        UserEntity afterOk = userRepository.findByEmail("reset@example.com").orElseThrow();
-        assertEquals(0, afterOk.getFailedLoginAttempts());
-        assertTrue(afterOk.getLockedUntil() == null || !afterOk.getLockedUntil().isAfter(Instant.now()));
-
-        for (int i = 0; i < 5; i++) {
-            mockMvc.perform(post("/api/auth/login")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(wrong))
-                    .andExpect(status().isUnauthorized())
-                    .andExpect(jsonPath("$.error").value("Invalid credentials"));
-        }
-
-        UserEntity locked = userRepository.findByEmail("reset@example.com").orElseThrow();
-        assertNotNull(locked.getLockedUntil());
-        assertEquals(5, locked.getFailedLoginAttempts());
+    for (int i = 0; i < 2; i++) {
+      mockMvc
+          .perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON).content(wrong))
+          .andExpect(status().isUnauthorized());
     }
 
-    private void seedCountry(String iso, String name) {
-        countryRepository.save(Country.builder()
-                .isoCode(iso)
-                .countryName(name)
-                .currencyCode("EUR")
-                .currencyName("Euro")
-                .build());
+    mockMvc
+        .perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(
+                Map.of("email", "reset@example.com", "password", "ValidPass1"))))
+        .andExpect(status().isOk());
+
+    UserEntity afterOk = userRepository.findByEmail("reset@example.com").orElseThrow();
+    assertEquals(0, afterOk.getFailedLoginAttempts());
+    assertTrue(
+        afterOk.getLockedUntil() == null || !afterOk.getLockedUntil().isAfter(Instant.now()));
+
+    for (int i = 0; i < 5; i++) {
+      mockMvc
+          .perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON).content(wrong))
+          .andExpect(status().isUnauthorized())
+          .andExpect(jsonPath("$.error").value("Invalid credentials"));
     }
+
+    UserEntity locked = userRepository.findByEmail("reset@example.com").orElseThrow();
+    assertNotNull(locked.getLockedUntil());
+    assertEquals(5, locked.getFailedLoginAttempts());
+  }
+
+  private void seedCountry(String iso, String name) {
+    countryRepository.save(Country.builder().isoCode(iso).countryName(name).currencyCode("EUR")
+        .currencyName("Euro").build());
+  }
 }

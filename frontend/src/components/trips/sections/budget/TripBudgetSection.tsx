@@ -1,12 +1,12 @@
-import { useState } from 'react'
-import { useTripBudget } from '@/hooks/useTripBudget'
-import type { TripBudgetExpense } from '@/types/budget'
-import type { Trip } from '@/types/trip'
-import { TotalBudgetCard } from './TotalBudgetCard'
-import { BudgetEstimateCard } from './BudgetEstimateCard'
-import { CategoryExpenseCard } from './CategoryExpenseCard'
-import { EditExpenseDialog } from './EditExpenseDialog'
-import { toast } from 'sonner'
+import { useState } from "react";
+import { useTripBudget } from "@/hooks/useTripBudget";
+import type { TripBudgetExpense } from "@/types/budget";
+import type { Trip } from "@/types/trip";
+import { TotalBudgetCard } from "./TotalBudgetCard";
+import { BudgetEstimateCard } from "./BudgetEstimateCard";
+import { CategoryExpenseCard } from "./CategoryExpenseCard";
+import { EditExpenseDialog } from "./EditExpenseDialog";
+import { toast } from "sonner";
 
 export function TripBudgetSection({ trip }: { trip: Trip }) {
   const {
@@ -19,31 +19,37 @@ export function TripBudgetSection({ trip }: { trip: Trip }) {
     totals,
     categoryTotals,
     categories,
-  } = useTripBudget(trip.id)
-  
-  const [editExpenseDialogOpen, setEditExpenseDialogOpen] = useState(false)
-  const [editingExpense, setEditingExpense] = useState<TripBudgetExpense | null>(null)
+  } = useTripBudget(trip.id);
 
-  const remainingBudget = totalBudget - totals.actualTotal
+  const [editExpenseDialogOpen, setEditExpenseDialogOpen] = useState(false);
+  const [editingExpense, setEditingExpense] =
+    useState<TripBudgetExpense | null>(null);
+
+  const remainingBudget = totalBudget - totals.actualTotal;
 
   const handleStartEdit = (expense: TripBudgetExpense) => {
-    setEditingExpense(expense)
-    setEditExpenseDialogOpen(true)
-  }
+    setEditingExpense(expense);
+    setEditExpenseDialogOpen(true);
+  };
 
-  const handleSaveEdit = (updates: { description: string; amount: number; date?: string; notes?: string }) => {
+  const handleSaveEdit = (updates: {
+    description: string;
+    amount: number;
+    date?: string;
+    notes?: string;
+  }) => {
     if (editingExpense) {
-      updateExpense(editingExpense.id, updates)
-      setEditingExpense(null)
-      setEditExpenseDialogOpen(false)
-      toast.success('Expense updated successfully')
+      updateExpense(editingExpense.id, updates);
+      setEditingExpense(null);
+      setEditExpenseDialogOpen(false);
+      toast.success("Expense updated successfully");
     }
-  }
+  };
 
   const handleCancelEdit = () => {
-    setEditingExpense(null)
-    setEditExpenseDialogOpen(false)
-  }
+    setEditingExpense(null);
+    setEditExpenseDialogOpen(false);
+  };
 
   return (
     <div className="space-y-6">
@@ -59,9 +65,13 @@ export function TripBudgetSection({ trip }: { trip: Trip }) {
       {/* Expenses by Category */}
       <div className="space-y-4">
         {categories.map((category) => {
-          const categoryExpenses = expenses.filter((exp) => exp.category === category.value)
-          const categoryTotal = categoryTotals.find((ct) => ct.category === category.value)
-          const categorySpent = categoryTotal?.actual || 0
+          const categoryExpenses = expenses.filter(
+            (exp) => exp.category === category.value,
+          );
+          const categoryTotal = categoryTotals.find(
+            (ct) => ct.category === category.value,
+          );
+          const categorySpent = categoryTotal?.actual || 0;
 
           return (
             <CategoryExpenseCard
@@ -76,14 +86,19 @@ export function TripBudgetSection({ trip }: { trip: Trip }) {
               onStartEdit={handleStartEdit}
               editingExpenseId={editingExpense?.id || null}
             />
-          )
+          );
         })}
       </div>
 
       {/* Edit Expense Dialog */}
       <EditExpenseDialog
         expense={editingExpense}
-        categoryLabel={editingExpense ? categories.find(c => c.value === editingExpense.category)?.label || '' : ''}
+        categoryLabel={
+          editingExpense
+            ? categories.find((c) => c.value === editingExpense.category)
+                ?.label || ""
+            : ""
+        }
         open={editExpenseDialogOpen}
         onOpenChange={setEditExpenseDialogOpen}
         onSave={handleSaveEdit}
@@ -92,5 +107,5 @@ export function TripBudgetSection({ trip }: { trip: Trip }) {
         remainingBudget={remainingBudget}
       />
     </div>
-  )
+  );
 }

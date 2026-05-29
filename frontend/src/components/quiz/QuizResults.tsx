@@ -1,41 +1,51 @@
-import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import { MapPin, DollarSign, Sparkles, ArrowRight, RotateCcw } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { LoginDialog, SignUpDialog } from '@/components/auth'
-import type { QuizRecommendationResponse, RecommendedDestination } from '@/services/api/quizApi'
-import { useNavigate } from 'react-router-dom'
-import { useAuth } from '@/contexts/AuthContext'
-import { ROUTE_PATHS } from '@/config/routes'
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import {
+  MapPin,
+  DollarSign,
+  Sparkles,
+  ArrowRight,
+  RotateCcw,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { LoginDialog, SignUpDialog } from "@/components/auth";
+import type {
+  QuizRecommendationResponse,
+  RecommendedDestination,
+} from "@/services/api/quizApi";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { ROUTE_PATHS } from "@/config/routes";
 
 interface QuizResultsProps {
-  data: QuizRecommendationResponse
-  onRetake: () => void
+  data: QuizRecommendationResponse;
+  onRetake: () => void;
 }
 
 export function QuizResults({ data, onRetake }: QuizResultsProps) {
-  const navigate = useNavigate()
-  const { user } = useAuth()
-  const [isLoginOpen, setIsLoginOpen] = useState(false)
-  const [isSignUpOpen, setIsSignUpOpen] = useState(false)
-  const [pendingDestination, setPendingDestination] = useState<RecommendedDestination | null>(null)
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isSignUpOpen, setIsSignUpOpen] = useState(false);
+  const [pendingDestination, setPendingDestination] =
+    useState<RecommendedDestination | null>(null);
 
   useEffect(() => {
     if (user && pendingDestination && !isLoginOpen && !isSignUpOpen) {
-      navigateToPlanner(pendingDestination)
-      setPendingDestination(null)
+      navigateToPlanner(pendingDestination);
+      setPendingDestination(null);
     }
-  }, [user, pendingDestination, isLoginOpen, isSignUpOpen])
+  }, [user, pendingDestination, isLoginOpen, isSignUpOpen]);
 
   const handlePlanTrip = (rec: RecommendedDestination) => {
     if (!user) {
-      setPendingDestination(rec)
-      setIsLoginOpen(true)
-      return
+      setPendingDestination(rec);
+      setIsLoginOpen(true);
+      return;
     }
-    navigateToPlanner(rec)
-  }
+    navigateToPlanner(rec);
+  };
 
   const navigateToPlanner = (rec: RecommendedDestination) => {
     navigate(ROUTE_PATHS.PLAN_TRIP, {
@@ -45,8 +55,8 @@ export function QuizResults({ data, onRetake }: QuizResultsProps) {
         destinationLocation: rec.location,
         destinationImageUrl: rec.imageUrl,
       },
-    })
-  }
+    });
+  };
 
   return (
     <div className="space-y-10">
@@ -173,8 +183,8 @@ export function QuizResults({ data, onRetake }: QuizResultsProps) {
         open={isLoginOpen}
         onOpenChange={setIsLoginOpen}
         onSignUpClick={() => {
-          setIsLoginOpen(false)
-          setIsSignUpOpen(true)
+          setIsLoginOpen(false);
+          setIsSignUpOpen(true);
         }}
       />
 
@@ -182,10 +192,10 @@ export function QuizResults({ data, onRetake }: QuizResultsProps) {
         open={isSignUpOpen}
         onOpenChange={setIsSignUpOpen}
         onLoginClick={() => {
-          setIsSignUpOpen(false)
-          setIsLoginOpen(true)
+          setIsSignUpOpen(false);
+          setIsLoginOpen(true);
         }}
       />
     </div>
-  )
+  );
 }

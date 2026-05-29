@@ -1,0 +1,7 @@
+Your {{productName}} verification code
+
+Purpose: {{purposeLabel}}
+Code: {{code}}
+
+This code expires in {{minutesToExpire}} minutes. Do not share it with anyone.
+If you did not request this email, you can ignore it.

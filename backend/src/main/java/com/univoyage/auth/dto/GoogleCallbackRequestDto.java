@@ -8,5 +8,7 @@ import lombok.*;
 @Getter
 @Setter
 public class GoogleCallbackRequestDto {
-    private String code;
+  private String code;
+  /** Signed OAuth state from the authorize redirect (CSRF protection). */
+  private String state;
 }

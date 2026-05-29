@@ -42,11 +42,11 @@ export const useSignUpForm = ({ onSuccess, signup }: UseSignUpFormProps) => {
 
   const passwordsMatch = useMemo(
     () => password === confirmPassword,
-    [password, confirmPassword]
+    [password, confirmPassword],
   );
   const passwordStrength = useMemo(
     () => getPasswordStrength(password),
-    [password]
+    [password],
   );
 
   const isFormValid = useMemo(
@@ -65,7 +65,7 @@ export const useSignUpForm = ({ onSuccess, signup }: UseSignUpFormProps) => {
       password,
       confirmPassword,
       passwordStrength.isStrong,
-    ]
+    ],
   );
 
   const resetForm = useCallback(() => {
@@ -100,7 +100,7 @@ export const useSignUpForm = ({ onSuccess, signup }: UseSignUpFormProps) => {
 
       try {
         const hobbyIds = (hobbies ?? [])
-          .map(h => {
+          .map((h) => {
             const n = Number(h);
             return Number.isFinite(n) ? n : null;
           })
@@ -148,7 +148,7 @@ export const useSignUpForm = ({ onSuccess, signup }: UseSignUpFormProps) => {
       signup,
       resetForm,
       onSuccess,
-    ]
+    ],
   );
 
   return {

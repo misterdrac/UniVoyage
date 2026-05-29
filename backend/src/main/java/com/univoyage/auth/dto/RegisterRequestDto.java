@@ -1,26 +1,33 @@
 package com.univoyage.auth.dto;
 
+import com.univoyage.auth.validation.ValidPassword;
+
 import lombok.Data;
 import java.util.Set;
 
+import jakarta.validation.constraints.NotBlank;
+
 /**
- * Request DTO for user registration.
- * Contains fields for user credentials and profile information.
+ * Request DTO for user registration. Contains fields for user credentials and
+ * profile information.
  */
 @Data
 public class RegisterRequestDto {
 
-    private String email;
-    private String password;
+  private String email;
 
-    private String name;
-    private String surname;
+  @NotBlank
+  @ValidPassword
+  private String password;
 
-    private String countryCode;
+  private String name;
+  private String surname;
 
-    private Set<Long> hobbyIds;
+  private String countryCode;
 
-    private Set<String> languageCodes;
+  private Set<Long> hobbyIds;
 
-    private Set<String> visitedCountryCodes;
+  private Set<String> languageCodes;
+
+  private Set<String> visitedCountryCodes;
 }

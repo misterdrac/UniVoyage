@@ -1,0 +1,85 @@
+name: Nightly Dependency Check
+
+on:
+  schedule:
+    # 01:00 CET/CEST approximately (23:00 UTC)
+    - cron: "0 23 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nightly-dependency-check
+  cancel-in-progress: true
+
+jobs:
+  backend_dependency_check:
+    name: "[Nightly] Backend dependency updates"
+    runs-on: ubuntu-latest
+    container: maven:3-eclipse-temurin-23
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Clone repository
+        working-directory: .
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+          git init .
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git fetch --depth=1 origin "${{ github.sha }}"
+          git checkout --detach FETCH_HEAD
+      - name: Check backend dependency updates
+        run: |
+          chmod +x mvnw
+          ./mvnw -B --no-transfer-progress org.codehaus.mojo:versions-maven-plugin:2.17.1:display-dependency-updates | tee /tmp/backend-dependency-updates.txt
+          ./mvnw -B --no-transfer-progress org.codehaus.mojo:versions-maven-plugin:2.17.1:display-plugin-updates | tee /tmp/backend-plugin-updates.txt
+      - name: Add backend summary
+        run: |
+          echo "## Backend dependency report" >> "${GITHUB_STEP_SUMMARY}"
+          echo "" >> "${GITHUB_STEP_SUMMARY}"
+          echo "\`\`\`" >> "${GITHUB_STEP_SUMMARY}"
+          tail -n 80 /tmp/backend-dependency-updates.txt >> "${GITHUB_STEP_SUMMARY}" || true
+          echo "\`\`\`" >> "${GITHUB_STEP_SUMMARY}"
+          echo "" >> "${GITHUB_STEP_SUMMARY}"
+          echo "## Backend plugin report" >> "${GITHUB_STEP_SUMMARY}"
+          echo "" >> "${GITHUB_STEP_SUMMARY}"
+          echo "\`\`\`" >> "${GITHUB_STEP_SUMMARY}"
+          tail -n 80 /tmp/backend-plugin-updates.txt >> "${GITHUB_STEP_SUMMARY}" || true
+          echo "\`\`\`" >> "${GITHUB_STEP_SUMMARY}"
+
+  frontend_dependency_check:
+    name: "[Nightly] Frontend dependency updates"
+    runs-on: ubuntu-latest
+    container: node:22
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Clone repository
+        working-directory: .
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+          git init .
+          git remote add origin "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git fetch --depth=1 origin "${{ github.sha }}"
+          git checkout --detach FETCH_HEAD
+      - name: Install frontend dependencies
+        run: npm ci
+      - name: Check frontend dependency updates
+        run: |
+          npm outdated | tee /tmp/frontend-outdated.txt || true
+      - name: Add frontend summary
+        run: |
+          echo "## Frontend dependency report" >> "${GITHUB_STEP_SUMMARY}"
+          echo "" >> "${GITHUB_STEP_SUMMARY}"
+          if [ -s /tmp/frontend-outdated.txt ]; then
+            echo "\`\`\`" >> "${GITHUB_STEP_SUMMARY}"
+            cat /tmp/frontend-outdated.txt >> "${GITHUB_STEP_SUMMARY}"
+            echo "\`\`\`" >> "${GITHUB_STEP_SUMMARY}"
+          else
+            echo "No outdated npm dependencies detected." >> "${GITHUB_STEP_SUMMARY}"
+          fi

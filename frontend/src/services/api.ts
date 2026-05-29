@@ -1,15 +1,21 @@
-import { ApiClient } from './api/baseClient'
-import { authApi, type AuthApi } from './api/authApi'
-import { profileApi, type ProfileApi } from './api/profileApi'
-import { tripsApi, type TripsApi, itineraryApi, type ItineraryApi } from './api/tripsApi'
-import { destinationsApi, type DestinationsApi } from './api/destinationsApi'
-import { weatherApi, type WeatherApi } from './api/weatherApi'
-import { placesApi, type PlacesApi } from './api/placesApi'
-import { aiApi, type AiApi } from './api/aiApi'
-import { hotelsApi, type HotelsApi } from './api/hotelsApi'
-import { adminApi, type AdminApi } from './api/adminApi'
-import { heatmapApi, type HeatmapApi } from './api/heatmapApi'
-import { quizApi, type QuizApi } from './api/quizApi'
+import { ApiClient } from "./api/baseClient";
+import { authApi, type AuthApi } from "./api/authApi";
+import { profileApi, type ProfileApi } from "./api/profileApi";
+import {
+  tripsApi,
+  type TripsApi,
+  itineraryApi,
+  type ItineraryApi,
+} from "./api/tripsApi";
+import { destinationsApi, type DestinationsApi } from "./api/destinationsApi";
+import { weatherApi, type WeatherApi } from "./api/weatherApi";
+import { placesApi, type PlacesApi } from "./api/placesApi";
+import { aiApi, type AiApi } from "./api/aiApi";
+import { hotelsApi, type HotelsApi } from "./api/hotelsApi";
+import { adminApi, type AdminApi } from "./api/adminApi";
+import { heatmapApi, type HeatmapApi } from "./api/heatmapApi";
+import { quizApi, type QuizApi } from "./api/quizApi";
+import { referenceApi, type ReferenceApi } from "./api/referenceApi";
 
 /**
  * Main API service class
@@ -33,14 +39,16 @@ Object.assign(
   adminApi,
   heatmapApi,
   quizApi,
-)
+  referenceApi,
+);
 
 /**
  * Combined API service interface
  * Includes all API modules: Auth, Profile, Trips, Itinerary, Destinations, Weather, Places, AI, Hotels, and Admin
  */
 interface ApiService
-  extends AuthApi,
+  extends
+    AuthApi,
     ProfileApi,
     TripsApi,
     ItineraryApi,
@@ -51,20 +59,19 @@ interface ApiService
     HotelsApi,
     AdminApi,
     HeatmapApi,
-    QuizApi {}
+    QuizApi,
+    ReferenceApi {}
 
 /**
  * Singleton API service instance
  * Use this instance throughout the application to make API calls
- * 
+ *
  * @example
  * ```ts
  * import { apiService } from '@/services/api'
- * 
+ *
  * const result = await apiService.login(email, password)
  * const trips = await apiService.getTrips()
  * ```
  */
-export const apiService = new ApiService()
-
-
+export const apiService = new ApiService();

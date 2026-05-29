@@ -6,4 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 /**
  * Repository interface for TripBudgetEntity.
  */
-public interface TripBudgetRepository extends JpaRepository<TripBudgetEntity, Long> {}
+public interface TripBudgetRepository extends JpaRepository<TripBudgetEntity, Long> {
+}

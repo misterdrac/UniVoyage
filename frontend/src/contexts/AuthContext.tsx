@@ -1,15 +1,29 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import type { User } from '@/types/user';
-import { apiService } from '@/services/api';
-import { API_CONSTANTS } from '@/lib/constants';
-import { clearAllPlacesCache } from '@/lib/placesCache';
-import { clearAllWeatherCache } from '@/lib/weatherCache';
-import { clearAllTripData } from '@/lib/tripCacheUtils';
-import { clearAllHotelCache } from '@/lib/hotelsCache';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import type {
+  EmailOtpPurpose,
+  LinkedIdentity,
+  OAuthProvider,
+  SignInMethod,
+} from "@/types/auth";
+import type { User } from "@/types/user";
+import { apiService } from "@/services/api";
+import { API_CONSTANTS } from "@/lib/constants";
+import { safeAuthError } from "@/lib/auth/safeAuthLog";
+import { beginOAuth as startOAuth } from "@/lib/oauth";
+import { OAUTH_PROVIDER_CONFIG } from "@/lib/oauth/constants";
+import { AuthSignInOverlay } from "@/components/auth/AuthSignInOverlay";
+import { clearAllPlacesCache } from "@/lib/placesCache";
+import { clearAllWeatherCache } from "@/lib/weatherCache";
+import { clearAllTripData } from "@/lib/tripCacheUtils";
+import { clearAllHotelCache } from "@/lib/hotelsCache";
 
-/**
- * Signup data structure for user registration
- */
 interface SignupData {
   email: string;
   password: string;
@@ -21,20 +35,30 @@ interface SignupData {
   visitedCountryCodes?: string[];
 }
 
-/**
- * Authentication context type
- * Provides user authentication state and operations
- */
 interface AuthContextType {
-  /** Current authenticated user, or null if not logged in */
   user: User | null;
-  /** Login with email and password */
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  /** Register a new user account */
+  isAuthenticated: boolean;
+  lastSignInMethod: SignInMethod | null;
+  identities: LinkedIdentity[];
+  identitiesLoading: boolean;
+  identitiesError: string | null;
+  adminTwoFactorVerified: boolean;
+  setAdminTwoFactorVerified: (verified: boolean) => void;
+  login: (
+    email: string,
+    password: string,
+  ) => Promise<{ success: boolean; error?: string }>;
+  emailOtpSignIn: (
+    email: string,
+    code: string,
+    purpose?: EmailOtpPurpose,
+  ) => Promise<{
+    success: boolean;
+    error?: string;
+    retryAfterSeconds?: number;
+  }>;
   signup: (data: SignupData) => Promise<{ success: boolean; error?: string }>;
-  /** Logout the current user */
   logout: () => void;
-  /** Update user profile information */
   updateProfile: (data: {
     name?: string;
     surname?: string;
@@ -44,23 +68,23 @@ interface AuthContextType {
     visitedCountryCodes?: string[];
     profileImagePath?: string;
   }) => Promise<{ success: boolean; error?: string }>;
-  /** Reload current user data from server */
   loadUser: () => Promise<User | null>;
-  /** Loading state for authentication operations */
+  loadIdentities: () => Promise<LinkedIdentity[]>;
+  /** Reload user + linked sign-in methods (single entry for post-login / OAuth). */
+  refreshSession: () => Promise<User | null>;
+  beginOAuth: (provider: OAuthProvider) => void;
   isLoading: boolean;
+  signInOverlayMethod: string | null;
+  showSignInOverlay: (method: string) => void;
+  hideSignInOverlay: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-/**
- * Hook to access authentication context
- * @returns AuthContextType with user state and authentication methods
- * @throws Error if used outside of AuthProvider
- */
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
@@ -69,35 +93,158 @@ interface AuthProviderProps {
   children: React.ReactNode;
 }
 
-/**
- * Context provider for user authentication state
- * Manages user session, login, logout, signup, and profile updates
- * Automatically initializes user session on mount by checking for existing authentication
- * 
- * @example
- * ```tsx
- * <AuthProvider>
- *   <App />
- * </AuthProvider>
- * ```
- */
+const ADMIN_TWO_FACTOR_SESSION_PREFIX = "univoyage:admin-2fa:";
+
+function isAdminUser(user: User | null | undefined): user is User {
+  return user?.role === "ADMIN" || user?.role === "HEAD_ADMIN";
+}
+
+function adminTwoFactorStorageKey(user: User) {
+  return `${ADMIN_TWO_FACTOR_SESSION_PREFIX}${user.id}:${user.role}`;
+}
+
+function readAdminTwoFactorVerified(user: User | null) {
+  if (!isAdminUser(user)) return false;
+
+  try {
+    return (
+      sessionStorage.getItem(adminTwoFactorStorageKey(user)) === "verified"
+    );
+  } catch {
+    return false;
+  }
+}
+
+function clearAdminTwoFactorSessions() {
+  try {
+    Object.keys(sessionStorage)
+      .filter((key) => key.startsWith(ADMIN_TWO_FACTOR_SESSION_PREFIX))
+      .forEach((key) => sessionStorage.removeItem(key));
+  } catch {
+    // Session storage can be unavailable in private/browser-restricted modes.
+  }
+}
+
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [identities, setIdentities] = useState<LinkedIdentity[]>([]);
+  const [identitiesLoading, setIdentitiesLoading] = useState(false);
+  const [identitiesError, setIdentitiesError] = useState<string | null>(null);
+  const [adminTwoFactorVerified, setAdminTwoFactorVerifiedState] =
+    useState(false);
+  const [signInOverlayMethod, setSignInOverlayMethod] = useState<string | null>(
+    null,
+  );
 
-  // Check for existing user session on mount
+  const showSignInOverlay = useCallback((method: string) => {
+    setSignInOverlayMethod(method);
+  }, []);
+
+  const hideSignInOverlay = useCallback(() => {
+    setSignInOverlayMethod(null);
+  }, []);
+
+  const persistUser = useCallback((next: User | null) => {
+    setUser(next);
+    if (next) {
+      localStorage.setItem(API_CONSTANTS.USER_KEY, JSON.stringify(next));
+    } else {
+      localStorage.removeItem(API_CONSTANTS.USER_KEY);
+    }
+  }, []);
+
+  useEffect(() => {
+    setAdminTwoFactorVerifiedState(readAdminTwoFactorVerified(user));
+  }, [user]);
+
+  const setAdminTwoFactorVerified = useCallback(
+    (verified: boolean) => {
+      setAdminTwoFactorVerifiedState(verified);
+      if (!isAdminUser(user)) return;
+
+      try {
+        const key = adminTwoFactorStorageKey(user);
+        if (verified) {
+          sessionStorage.setItem(key, "verified");
+        } else {
+          sessionStorage.removeItem(key);
+        }
+      } catch {
+        // Keep the in-memory state even if session storage is unavailable.
+      }
+    },
+    [user],
+  );
+
+  const loadIdentities = useCallback(async (): Promise<LinkedIdentity[]> => {
+    if (!user) {
+      setIdentities([]);
+      return [];
+    }
+    setIdentitiesLoading(true);
+    setIdentitiesError(null);
+    try {
+      const list = await apiService.getIdentities();
+      setIdentities(list);
+      return list;
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Could not load sign-in methods";
+      setIdentitiesError(message);
+      setIdentities([]);
+      return [];
+    } finally {
+      setIdentitiesLoading(false);
+    }
+  }, [user]);
+
+  const loadUser = useCallback(async (): Promise<User | null> => {
+    try {
+      const me = await apiService.getCurrentUser();
+      persistUser(me);
+      return me;
+    } catch (err) {
+      safeAuthError("loadUser error:", err);
+      persistUser(null);
+      return null;
+    }
+  }, [persistUser]);
+
+  const refreshSession = useCallback(async (): Promise<User | null> => {
+    const me = await loadUser();
+    if (me) {
+      setIdentitiesLoading(true);
+      setIdentitiesError(null);
+      try {
+        const list = await apiService.getIdentities();
+        setIdentities(list);
+      } catch (err) {
+        setIdentitiesError(
+          err instanceof Error ? err.message : "Could not load sign-in methods",
+        );
+        setIdentities([]);
+      } finally {
+        setIdentitiesLoading(false);
+      }
+    } else {
+      setIdentities([]);
+      setIdentitiesError(null);
+    }
+    return me;
+  }, [loadUser]);
+
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        const user = await apiService.getCurrentUser();
-        if (user) {
-          setUser(user);
-          // Also save to localStorage for consistency
-          localStorage.setItem(API_CONSTANTS.USER_KEY, JSON.stringify(user));
+        const me = await apiService.getCurrentUser();
+        if (me) {
+          persistUser(me);
+          const list = await apiService.getIdentities();
+          setIdentities(list);
         }
       } catch (error) {
-        console.error('Error initializing auth:', error);
-        // Clear any invalid tokens
+        safeAuthError("Error initializing auth:", error);
         localStorage.removeItem(API_CONSTANTS.USER_KEY);
         localStorage.removeItem(API_CONSTANTS.AUTH_TOKEN_KEY);
       } finally {
@@ -106,114 +253,129 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
 
     initializeAuth();
-  }, []);
+  }, [persistUser]);
 
-  /**
-   * Authenticates user with email and password
-   * @param email - User's email address
-   * @param password - User's password
-   * @returns Promise resolving to success status and optional error message
-   */
-  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+  const login = async (
+    email: string,
+    password: string,
+  ): Promise<{ success: boolean; error?: string }> => {
     try {
-      setIsLoading(true);
-      
+      showSignInOverlay("Email & password");
       if (!email || !password) {
-        return { success: false, error: 'Email and password are required' };
+        return { success: false, error: "Email and password are required" };
       }
-
       const result = await apiService.login(email, password);
-      
       if (result.success && result.user) {
-        setUser(result.user);
-        localStorage.setItem(API_CONSTANTS.USER_KEY, JSON.stringify(result.user));
+        await refreshSession();
         return { success: true };
-      } else {
-        return { success: false, error: result.error || 'Login failed' };
       }
+      return { success: false, error: result.error || "Login failed" };
     } catch (error) {
-      console.error('Login error:', error);
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'An error occurred during login' 
+      safeAuthError("Login error:", error);
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : "An error occurred during login",
       };
     } finally {
-      setIsLoading(false);
+      hideSignInOverlay();
     }
   };
 
-  /**
-   * Registers a new user account
-   * @param data - Signup data including email, password, and optional profile fields
-   * @returns Promise resolving to success status and optional error message
-   */
-  const signup = async (data: SignupData): Promise<{ success: boolean; error?: string }> => {
+  const signup = async (
+    data: SignupData,
+  ): Promise<{ success: boolean; error?: string }> => {
     try {
-      setIsLoading(true);
-      
+      showSignInOverlay("Email & password");
       if (!data.email || !data.password) {
-        return { success: false, error: 'Email and password are required' };
+        return { success: false, error: "Email and password are required" };
       }
-
       const result = await apiService.register(data);
-      
       if (result.success && result.user) {
-        setUser(result.user);
-        localStorage.setItem(API_CONSTANTS.USER_KEY, JSON.stringify(result.user));
+        await refreshSession();
         return { success: true };
-      } else {
-        return { success: false, error: result.error || 'Signup failed' };
       }
+      return { success: false, error: result.error || "Signup failed" };
     } catch (error) {
-      console.error('Signup error:', error);
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'An error occurred during signup' 
+      safeAuthError("Signup error:", error);
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : "An error occurred during signup",
       };
     } finally {
-      setIsLoading(false);
+      hideSignInOverlay();
     }
   };
 
-  /**
-   * Reloads current user data from the server
-   * Updates local user state and localStorage
-   * @returns Promise resolving to User object or null if not authenticated
-   */
-  const loadUser = async (): Promise<User | null> => {
+  const emailOtpSignIn = useCallback(
+    async (
+      email: string,
+      code: string,
+      purpose: EmailOtpPurpose = "REGISTER",
+    ): Promise<{
+      success: boolean;
+      error?: string;
+      retryAfterSeconds?: number;
+    }> => {
       try {
-        const me = await apiService.getCurrentUser()
-        if (me) {
-          setUser(me)
-          localStorage.setItem(API_CONSTANTS.USER_KEY, JSON.stringify(me))
-          return me
+        showSignInOverlay("Email code");
+        if (!email || !code || code.length !== 6) {
+          return {
+            success: false,
+            error: "Enter the 6-digit code from your email.",
+          };
         }
-        setUser(null)
-        return null
-      } catch (err) {
-        console.error("loadUser error:", err)
-        setUser(null)
-        return null
+        const result = await apiService.verifyEmailOtp(email, code, purpose);
+        if (result.success && result.user) {
+          await refreshSession();
+          return { success: true };
+        }
+        return {
+          success: false,
+          error: result.error || "We could not complete email-code sign-in.",
+          retryAfterSeconds: result.retryAfterSeconds,
+        };
+      } catch (error) {
+        safeAuthError("Email OTP sign-in error:", error);
+        return {
+          success: false,
+          error:
+            error instanceof Error
+              ? error.message
+              : "An error occurred during email-code sign-in",
+        };
+      } finally {
+        hideSignInOverlay();
       }
-  };
+    },
+    [refreshSession, showSignInOverlay, hideSignInOverlay],
+  );
 
-  /**
-   * Logs out the current user
-   * Clears user state and removes ALL data from localStorage
-   */
+  const beginOAuth = useCallback(
+    (provider: OAuthProvider) => {
+      showSignInOverlay(OAUTH_PROVIDER_CONFIG[provider].label);
+      startOAuth(provider);
+    },
+    [showSignInOverlay],
+  );
+
   const logout = async () => {
     try {
       await apiService.logout();
     } catch (error) {
-      console.error('Logout error:', error);
+      safeAuthError("Logout error:", error);
     } finally {
-      setUser(null);
-      
-      // Clear authentication data
-      localStorage.removeItem(API_CONSTANTS.USER_KEY);
+      persistUser(null);
+      setAdminTwoFactorVerifiedState(false);
+      clearAdminTwoFactorSessions();
+      setIdentities([]);
+      setIdentitiesError(null);
       localStorage.removeItem(API_CONSTANTS.AUTH_TOKEN_KEY);
-      
-      // Clear all cached data using utility functions
       clearAllTripData();
       clearAllPlacesCache();
       clearAllWeatherCache();
@@ -221,11 +383,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  /**
-   * Updates user profile information
-   * @param data - Profile update data (all fields optional)
-   * @returns Promise resolving to success status and optional error message
-   */
   const updateProfile = async (data: {
     name?: string;
     surname?: string;
@@ -237,48 +394,84 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }): Promise<{ success: boolean; error?: string }> => {
     try {
       setIsLoading(true);
-
-      const result = await apiService.updateProfile({
-        name: data.name,
-        surname: data.surname,
-        countryCode: data.countryCode,
-        hobbyIds: data.hobbyIds,
-        languageCodes: data.languageCodes,
-        visitedCountryCodes: data.visitedCountryCodes,
-        profileImagePath: data.profileImagePath,
-      });
-      
+      const result = await apiService.updateProfile(data);
       if (result.success && result.user) {
-        setUser(result.user);
-        localStorage.setItem(API_CONSTANTS.USER_KEY, JSON.stringify(result.user));
+        persistUser(result.user);
         return { success: true };
-      } else {
-        return { success: false, error: result.error || 'Update failed' };
       }
+      return { success: false, error: result.error || "Update failed" };
     } catch (error) {
-      console.error('Update profile error:', error);
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'An error occurred during update' 
+      safeAuthError("Update profile error:", error);
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : "An error occurred during update",
       };
     } finally {
       setIsLoading(false);
     }
   };
 
-  const value: AuthContextType = {
-    user,
-    login,
-    signup,
-    logout,
-    updateProfile,
-    loadUser,
-    isLoading
-  };
+  const lastSignInMethod =
+    (user?.lastSignInMethod as SignInMethod | undefined) ?? null;
+
+  const value = useMemo<AuthContextType>(
+    () => ({
+      user,
+      isAuthenticated: !!user,
+      lastSignInMethod,
+      identities,
+      identitiesLoading,
+      identitiesError,
+      adminTwoFactorVerified,
+      setAdminTwoFactorVerified,
+      login,
+      emailOtpSignIn,
+      signup,
+      logout,
+      updateProfile,
+      loadUser,
+      loadIdentities,
+      refreshSession,
+      beginOAuth,
+      isLoading,
+      signInOverlayMethod,
+      showSignInOverlay,
+      hideSignInOverlay,
+    }),
+    [
+      user,
+      lastSignInMethod,
+      identities,
+      identitiesLoading,
+      identitiesError,
+      adminTwoFactorVerified,
+      setAdminTwoFactorVerified,
+      login,
+      emailOtpSignIn,
+      signup,
+      logout,
+      updateProfile,
+      loadUser,
+      loadIdentities,
+      refreshSession,
+      beginOAuth,
+      isLoading,
+      signInOverlayMethod,
+      showSignInOverlay,
+      hideSignInOverlay,
+    ],
+  );
 
   return (
     <AuthContext.Provider value={value}>
       {children}
+      <AuthSignInOverlay
+        open={!!signInOverlayMethod}
+        method={signInOverlayMethod}
+      />
     </AuthContext.Provider>
   );
 };

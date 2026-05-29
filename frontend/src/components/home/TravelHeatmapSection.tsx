@@ -1,54 +1,54 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { MapContainer, TileLayer, useMap, useMapEvents } from 'react-leaflet'
-import L from 'leaflet'
-import 'leaflet.heat'
-import 'leaflet/dist/leaflet.css'
-import { Loader2 } from 'lucide-react'
-import { useHeatmapData, type HeatmapPoint } from '@/hooks/useHeatmapData'
-import { useDestinations } from '@/hooks/useDestinations'
-import { HeatmapTopDestinations } from './HeatmapTopDestinations'
+import { useEffect, useMemo, useRef, useState } from "react";
+import { MapContainer, TileLayer, useMap, useMapEvents } from "react-leaflet";
+import L from "leaflet";
+import "leaflet.heat";
+import "leaflet/dist/leaflet.css";
+import { Loader2 } from "lucide-react";
+import { useHeatmapData, type HeatmapPoint } from "@/hooks/useHeatmapData";
+import { useDestinations } from "@/hooks/useDestinations";
+import { HeatmapTopDestinations } from "./HeatmapTopDestinations";
 import {
   DEFAULT_DESTINATION_IMAGE,
   findDestinationByHeatmapLabels,
-} from '@/lib/destinationUtils'
+} from "@/lib/destinationUtils";
 
 /** Must match L.heatLayer option — used in leaflet.heat's zoom factor `v` (see node_modules/leaflet.heat). */
-const HEAT_MAX_ZOOM = 10
+const HEAT_MAX_ZOOM = 10;
 
 /**
- * Same formula as leaflet.heat 
+ * Same formula as leaflet.heat
  */
 function heatZoomFactor(mapZoom: number): number {
-  const exp = Math.max(0, Math.min(HEAT_MAX_ZOOM - mapZoom, 12))
-  return 1 / Math.pow(2, exp)
+  const exp = Math.max(0, Math.min(HEAT_MAX_ZOOM - mapZoom, 12));
+  return 1 / Math.pow(2, exp);
 }
 
 function HeatLayer({ points }: { points: HeatmapPoint[] }) {
-  const map = useMap()
-  const layerRef = useRef<L.Layer | null>(null)
-  const [zoom, setZoom] = useState(() => map.getZoom())
+  const map = useMap();
+  const layerRef = useRef<L.Layer | null>(null);
+  const [zoom, setZoom] = useState(() => map.getZoom());
 
   useMapEvents({
     zoomend: () => setZoom(map.getZoom()),
-  })
+  });
 
   useEffect(() => {
     if (layerRef.current) {
-      map.removeLayer(layerRef.current)
-      layerRef.current = null
+      map.removeLayer(layerRef.current);
+      layerRef.current = null;
     }
 
-    if (points.length === 0) return
+    if (points.length === 0) return;
 
-    const maxIntensity = Math.max(...points.map(p => p.intensity))
-    const v = heatZoomFactor(zoom)
+    const maxIntensity = Math.max(...points.map((p) => p.intensity));
+    const v = heatZoomFactor(zoom);
 
     // Pre-divide by v so that after leaflet.heat multiplies by v, we get tripCount/max again (e.g. 1 vs 0.25).
-    const heatData: [number, number, number][] = points.map(p => [
+    const heatData: [number, number, number][] = points.map((p) => [
       p.lat,
       p.lng,
-      (p.intensity / maxIntensity) / v,
-    ])
+      p.intensity / maxIntensity / v,
+    ]);
 
     const layer = L.heatLayer(heatData, {
       radius: 50,
@@ -58,56 +58,56 @@ function HeatLayer({ points }: { points: HeatmapPoint[] }) {
       // Keep low — high values flatten all spots to the same alpha (see simpleheat draw + zoom scaling).
       minOpacity: 0.05,
       gradient: {
-        0: '#e0e7ff',
-        0.1: '#c7d2fe',
-        0.2: '#a5b4fc',
-        0.35: '#818cf8',
-        0.5: '#6366f1',
-        0.65: '#8b5cf6',
-        0.8: '#c084fc',
-        0.9: '#d946ef',
-        1.0: '#e879f9',
+        0: "#e0e7ff",
+        0.1: "#c7d2fe",
+        0.2: "#a5b4fc",
+        0.35: "#818cf8",
+        0.5: "#6366f1",
+        0.65: "#8b5cf6",
+        0.8: "#c084fc",
+        0.9: "#d946ef",
+        1.0: "#e879f9",
       },
-    })
+    });
 
-    layer.addTo(map)
-    layerRef.current = layer
+    layer.addTo(map);
+    layerRef.current = layer;
 
     return () => {
       if (layerRef.current) {
-        map.removeLayer(layerRef.current)
-        layerRef.current = null
+        map.removeLayer(layerRef.current);
+        layerRef.current = null;
       }
-    }
-  }, [points, map, zoom])
+    };
+  }, [points, map, zoom]);
 
-  return null
+  return null;
 }
 
 export function TravelHeatmapSection() {
-  const { points, isLoading, error } = useHeatmapData()
-  const { destinations } = useDestinations()
+  const { points, isLoading, error } = useHeatmapData();
+  const { destinations } = useDestinations();
 
   const topDestinationItems = useMemo(() => {
     return points.slice(0, 3).map((point, index) => {
       const matched = findDestinationByHeatmapLabels(
         point.name,
         point.location,
-        destinations
-      )
-      const name = matched?.title ?? point.name
+        destinations,
+      );
+      const name = matched?.title ?? point.name;
       return {
         rank: index + 1,
         name,
         country: point.location,
         imageUrl: matched?.imageUrl ?? DEFAULT_DESTINATION_IMAGE,
         imageAlt: matched?.imageAlt ?? name,
-      }
-    })
-  }, [points, destinations])
+      };
+    });
+  }, [points, destinations]);
 
-  if (error) return null
-  if (!isLoading && points.length === 0) return null
+  if (error) return null;
+  if (!isLoading && points.length === 0) return null;
 
   return (
     <section className="pb-32">
@@ -157,5 +157,5 @@ export function TravelHeatmapSection() {
         )}
       </div>
     </section>
-  )
+  );
 }

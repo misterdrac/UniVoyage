@@ -21,45 +21,38 @@ import java.util.stream.Collectors;
 @Builder
 public class UserDto {
 
-    private Long id;
-    private String name;
-    private String surname;
-    private String email;
-    private String role;
-    private CountryDto countryOfOrigin;
-    private List<HobbyDto> hobbies;
-    private List<LanguageDto> languages;
-    private List<VisitedCountryDto> visitedCountries;
-    private String profileImagePath;
-    private Instant dateOfRegister;
-    private Instant dateOfLastSignin;
+  private Long id;
+  private String name;
+  private String surname;
+  private String email;
+  private String role;
+  private CountryDto countryOfOrigin;
+  private List<HobbyDto> hobbies;
+  private List<LanguageDto> languages;
+  private List<VisitedCountryDto> visitedCountries;
+  private String profileImagePath;
+  private Instant dateOfRegister;
+  private Instant dateOfLastSignin;
+  /** Last sign-in method key, e.g. {@code google} or {@code password}. */
+  private String lastSignInMethod;
+  private boolean emailVerified;
 
-    public static UserDto from(UserEntity entity) {
-        if (entity == null) return null;
+  public static UserDto from(UserEntity entity) {
+    if (entity == null)
+      return null;
 
-        return UserDto.builder()
-                .id(entity.getId())
-                .name(entity.getName())
-                .surname(entity.getSurname())
-                .email(entity.getEmail())
-                .role(entity.getRole().name())
-                .countryOfOrigin(
-                        entity.getCountry() != null
-                                ? CountryDto.from(entity.getCountry())
-                                : null
-                )
-                .hobbies(entity.getUserHobbies().stream()
-                        .map(h -> HobbyDto.from(h.getHobby()))
-                        .collect(Collectors.toList()))
-                .languages(entity.getUserLanguages().stream()
-                        .map(l -> LanguageDto.from(l.getLanguage()))
-                        .collect(Collectors.toList()))
-                .visitedCountries(entity.getVisitedCountries().stream()
-                        .map(VisitedCountryDto::from)
-                        .collect(Collectors.toList()))
-                .profileImagePath(entity.getProfileImagePath())
-                .dateOfRegister(entity.getDateOfRegister())
-                .dateOfLastSignin(entity.getDateOfLastSignin())
-                .build();
-    }
+    return UserDto.builder().id(entity.getId()).name(entity.getName()).surname(entity.getSurname())
+        .email(entity.getEmail()).role(entity.getRole().name())
+        .countryOfOrigin(entity.getCountry() != null ? CountryDto.from(entity.getCountry()) : null)
+        .hobbies(entity.getUserHobbies().stream().map(h -> HobbyDto.from(h.getHobby()))
+            .collect(Collectors.toList()))
+        .languages(entity.getUserLanguages().stream().map(l -> LanguageDto.from(l.getLanguage()))
+            .collect(Collectors.toList()))
+        .visitedCountries(entity.getVisitedCountries().stream().map(VisitedCountryDto::from)
+            .collect(Collectors.toList()))
+        .profileImagePath(entity.getProfileImagePath()).dateOfRegister(entity.getDateOfRegister())
+        .dateOfLastSignin(entity.getDateOfLastSignin())
+        .lastSignInMethod(entity.getLastSignInMethod()).emailVerified(entity.isEmailVerified())
+        .build();
+  }
 }

@@ -3,6 +3,7 @@ import { Facebook, Instagram } from "lucide-react";
 import { FaXTwitter } from "react-icons/fa6";
 import univoyageIcon from "@/assets/univoyage_icon.svg";
 import { ROUTE_PATHS } from "@/config/routes";
+import { PageFooterVersion } from "@/components/layout/PageFooterVersion";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -13,17 +14,21 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-6">
           {/* Brand Section */}
           <div className="md:col-span-1">
-            <Link to={ROUTE_PATHS.HOME} className="flex items-center space-x-2 mb-2">
-              <img 
-                src={univoyageIcon} 
-                alt="UniVoyage Logo" 
+            <Link
+              to={ROUTE_PATHS.HOME}
+              className="flex items-center space-x-2 mb-2"
+            >
+              <img
+                src={univoyageIcon}
+                alt="UniVoyage Logo"
                 className="w-8 h-8"
               />
               <h3 className="text-xl font-bold text-foreground">UniVoyage</h3>
             </Link>
             <p className="text-sm text-muted-foreground max-w-md">
-              Your trusted companion for student travel. Discover amazing destinations,
-              plan unforgettable trips, and connect with fellow travelers.
+              Your trusted companion for student travel. Discover amazing
+              destinations, plan unforgettable trips, and connect with fellow
+              travelers.
             </p>
           </div>
 
@@ -31,7 +36,9 @@ export function Footer() {
           <div className="md:col-span-1">
             <div className="grid grid-cols-2 gap-6">
               <div>
-                <h4 className="text-sm font-semibold text-foreground mb-3">Discover</h4>
+                <h4 className="text-sm font-semibold text-foreground mb-3">
+                  Discover
+                </h4>
                 <nav className="space-y-1">
                   <Link
                     to={ROUTE_PATHS.DESTINATIONS}
@@ -60,7 +67,9 @@ export function Footer() {
                 </nav>
               </div>
               <div>
-                <h4 className="text-sm font-semibold text-foreground mb-3">About Us</h4>
+                <h4 className="text-sm font-semibold text-foreground mb-3">
+                  About Us
+                </h4>
                 <nav className="space-y-1">
                   <Link
                     to={ROUTE_PATHS.ABOUT}
@@ -83,7 +92,9 @@ export function Footer() {
           <div className="md:col-span-1">
             <div className="grid grid-cols-2 gap-6">
               <div>
-                <h4 className="text-sm font-semibold text-foreground mb-3">Powered By</h4>
+                <h4 className="text-sm font-semibold text-foreground mb-3">
+                  Powered By
+                </h4>
                 <nav className="space-y-1">
                   <a
                     href="https://openweathermap.org"
@@ -128,7 +139,9 @@ export function Footer() {
                 </nav>
               </div>
               <div>
-                <h4 className="text-sm font-semibold text-foreground mb-3">Booking Partners</h4>
+                <h4 className="text-sm font-semibold text-foreground mb-3">
+                  Booking Partners
+                </h4>
                 <nav className="space-y-1">
                   <a
                     href="https://booking.com"
@@ -153,9 +166,12 @@ export function Footer() {
 
           {/* Social Media */}
           <div className="md:col-span-1">
-            <h4 className="text-sm font-semibold text-foreground mb-3">Follow Us</h4>
+            <h4 className="text-sm font-semibold text-foreground mb-3">
+              Follow Us
+            </h4>
             <p className="text-sm text-muted-foreground mb-4">
-              Join us on these platforms for travel tips, updates, and inspiration.
+              Join us on these platforms for travel tips, updates, and
+              inspiration.
             </p>
             <div className="flex gap-4">
               <a
@@ -190,13 +206,13 @@ export function Footer() {
         </div>
 
         {/* Copyright */}
-        <div className="pt-6 border-t border-border">
-          <p className="text-sm text-muted-foreground text-center">
+        <div className="pt-6 border-t border-border text-center space-y-2">
+          <p className="text-sm text-muted-foreground">
             © {currentYear} UniVoyage. All rights reserved.
           </p>
+          <PageFooterVersion />
         </div>
       </div>
     </footer>
   );
 }
-

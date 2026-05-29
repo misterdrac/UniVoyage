@@ -1,36 +1,36 @@
-import { SlidersHorizontal, RotateCcw } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { SlidersHorizontal, RotateCcw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { cn } from '@/lib/utils'
-import type { TripFilters, TripStatusFilter } from '@/lib/tripFilters'
-import type { TripSortOption } from '@/lib/tripSorting'
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
+import type { TripFilters, TripStatusFilter } from "@/lib/tripFilters";
+import type { TripSortOption } from "@/lib/tripSorting";
 
 const STATUS_OPTIONS: Array<{ value: TripStatusFilter; label: string }> = [
-  { value: 'all', label: 'All' },
-  { value: 'planned', label: 'Planned' },
-  { value: 'ongoing', label: 'Ongoing' },
-  { value: 'completed', label: 'Completed' },
-]
+  { value: "all", label: "All" },
+  { value: "planned", label: "Planned" },
+  { value: "ongoing", label: "Ongoing" },
+  { value: "completed", label: "Completed" },
+];
 
 const SORT_OPTIONS: Array<{ value: TripSortOption; label: string }> = [
-  { value: 'start-soonest', label: 'Earliest' },
-  { value: 'start-latest', label: 'Latest' },
-]
+  { value: "start-soonest", label: "Earliest" },
+  { value: "start-latest", label: "Latest" },
+];
 
 interface TripFiltersBarProps {
-  filters: TripFilters
-  totalTrips: number
-  visibleTrips: number
-  hasActiveFilters: boolean
-  onStatusChange: (status: TripStatusFilter) => void
-  onSortChange: (sort: TripSortOption) => void
-  onResetFilters: () => void
+  filters: TripFilters;
+  totalTrips: number;
+  visibleTrips: number;
+  hasActiveFilters: boolean;
+  onStatusChange: (status: TripStatusFilter) => void;
+  onSortChange: (sort: TripSortOption) => void;
+  onResetFilters: () => void;
 }
 
 export function TripFiltersBar({
@@ -51,13 +51,13 @@ export function TripFiltersBar({
         </div>
         <div className="flex items-center gap-3 text-sm text-muted-foreground">
           <span>
-            Showing{' '}
-            <span className="font-semibold text-foreground">{visibleTrips}</span>
-            {' '}
-            of{' '}
-            <span className="font-semibold text-foreground">{totalTrips}</span>
-            {' '}
-            trip{visibleTrips === 1 ? '' : 's'}
+            Showing{" "}
+            <span className="font-semibold text-foreground">
+              {visibleTrips}
+            </span>{" "}
+            of{" "}
+            <span className="font-semibold text-foreground">{totalTrips}</span>{" "}
+            trip{visibleTrips === 1 ? "" : "s"}
           </span>
         </div>
       </div>
@@ -69,13 +69,13 @@ export function TripFiltersBar({
               key={option.value}
               type="button"
               size="sm"
-              variant={filters.status === option.value ? 'secondary' : 'ghost'}
+              variant={filters.status === option.value ? "secondary" : "ghost"}
               onClick={() => onStatusChange(option.value)}
               className={cn(
-                'rounded-full border px-3 py-2 text-sm transition',
+                "rounded-full border px-3 py-2 text-sm transition",
                 filters.status === option.value
-                  ? 'border-primary/40 bg-primary/10 text-primary shadow-sm hover:bg-primary/20'
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
+                  ? "border-primary/40 bg-primary/10 text-primary shadow-sm hover:bg-primary/20"
+                  : "border-transparent text-muted-foreground hover:text-foreground",
               )}
             >
               {option.label}
@@ -84,7 +84,10 @@ export function TripFiltersBar({
         </div>
 
         <div className="flex items-center gap-3">
-          <Select value={filters.sort} onValueChange={(value) => onSortChange(value as TripSortOption)}>
+          <Select
+            value={filters.sort}
+            onValueChange={(value) => onSortChange(value as TripSortOption)}
+          >
             <SelectTrigger className="w-[200px] rounded-full text-sm">
               <SelectValue placeholder="Sort trips" />
             </SelectTrigger>
@@ -111,6 +114,5 @@ export function TripFiltersBar({
         </div>
       </div>
     </section>
-  )
+  );
 }
-

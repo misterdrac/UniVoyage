@@ -19,138 +19,113 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 
 /**
  * Filter that authenticates requests based on JWT stored in HttpOnly cookies
- * and performs double-submit CSRF protection.
- * Applies to all requests except public endpoints.
- * Extracts JWT from cookie and CSRF secret from header.
- * Validates JWT and CSRF secret, and sets authentication in the security context.
- * Clears authentication cookies on failure.
+ * and performs double-submit CSRF protection. Applies to all requests except
+ * public endpoints. Extracts JWT from cookie and CSRF secret from header.
+ * Validates JWT and CSRF secret, and sets authentication in the security
+ * context. Clears authentication cookies on failure.
  */
 @Component
 @RequiredArgsConstructor
 @Log4j2
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtService jwtService;
-    private final UserDetailsService userDetailsService;
-    private final AuthCookieWriter authCookieWriter;
+  private final JwtService jwtService;
+  private final UserDetailsService userDetailsService;
+  private final AuthCookieWriter authCookieWriter;
+  private final PublicApiRequestMatcher publicApiRequestMatcher;
 
-    // Cookie name for the HttpOnly JWT (Token A)
-    private static final String JWT_COOKIE_NAME = CookieUtils.JWT_COOKIE_NAME;
+  public static final String TFA_REQUEST_ATTRIBUTE = "univoyage.tfa.verified";
 
-    // Header name for the client-sent CSRF secret (Token B)
-    private static final String CSRF_HEADER_NAME = "X-CSRF-TOKEN";
+  private static final String JWT_COOKIE_NAME = CookieUtils.JWT_COOKIE_NAME;
+  private static final String CSRF_HEADER_NAME = "X-CSRF-TOKEN";
 
-    // Public endpoints that don't require authentication
-    private static final String[] PUBLIC_PATHS = {
-            "/api/auth/register",
-            "/api/auth/register/",
-            "/api/auth/login",
-            "/api/auth/login/",
-            "/api/auth/google",
-            "/api/auth/google/",
-            "/api/auth/google/callback",
-            "/api/auth/google/callback/"
-    };
+  private boolean csrfRequired(HttpServletRequest request) {
+    String method = request.getMethod();
+    return !(method.equals("GET") || method.equals("HEAD") || method.equals("OPTIONS"));
+  }
 
+  private void clearAuthCookies(HttpServletResponse response) {
+    authCookieWriter.clearAuthCookies(response);
+  }
 
-    private boolean csrfRequired(HttpServletRequest request) {
-        String method = request.getMethod();
-        return !(method.equals("GET") || method.equals("HEAD") || method.equals("OPTIONS"));
+  private static boolean csrfSecretsMatch(String headerCsrfSecret, String jwtCsrfSecret) {
+    if (headerCsrfSecret == null || jwtCsrfSecret == null) {
+      return false;
+    }
+    return MessageDigest.isEqual(headerCsrfSecret.getBytes(StandardCharsets.UTF_8),
+        jwtCsrfSecret.getBytes(StandardCharsets.UTF_8));
+  }
+
+  @Override
+  protected void doFilterInternal(@SuppressWarnings("null") HttpServletRequest request,
+      @SuppressWarnings("null") HttpServletResponse response,
+      @SuppressWarnings("null") FilterChain filterChain) throws ServletException, IOException {
+
+    if (publicApiRequestMatcher.shouldSkipJwtProcessing(request)) {
+      filterChain.doFilter(request, response);
+      return;
     }
 
-    private void clearAuthCookies(HttpServletResponse response) {
-        authCookieWriter.clearAuthCookies(response);
+    Cookie jwtCookie = WebUtils.getCookie(request, JWT_COOKIE_NAME);
+    final String jwt = (jwtCookie != null) ? jwtCookie.getValue() : null;
+
+    if (jwt == null || jwt.isBlank()) {
+      filterChain.doFilter(request, response);
+      return;
     }
 
-    /**
-     * Main filter method that processes each request.
-     * Bypasses public paths, extracts and validates JWT and CSRF tokens,
-     * and sets authentication in the security context.
-     * Clears cookies and responds with 401/403 on failure.
-     */
-    @Override
-    protected void doFilterInternal(
-            @SuppressWarnings("null") HttpServletRequest request,
-            @SuppressWarnings("null") HttpServletResponse response,
-            @SuppressWarnings("null") FilterChain filterChain
-    ) throws ServletException, IOException {
+    final String headerCsrfSecret = request.getHeader(CSRF_HEADER_NAME);
 
-        String path = request.getRequestURI();
+    final String userIdString;
+    final String jwtCsrfSecret;
 
-        if (path.contains("/api/auth/login") ||
-                path.contains("/api/auth/register") ||
-                path.contains("/api/auth/refresh") ||
-                path.contains("/api/auth/google") ||
-                path.contains("/api/destinations") ||
-                path.contains("/api/quiz") ||
-                path.contains("/error") ||
-                path.startsWith("/actuator/health")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        // 2) Extract JWT from HttpOnly cookie
-        Cookie jwtCookie = WebUtils.getCookie(request, JWT_COOKIE_NAME);
-        final String jwt = (jwtCookie != null) ? jwtCookie.getValue() : null;
-
-        if (jwt == null || jwt.isBlank()) {
-            // No JWT present - let Spring Security handle the 401/403
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        // 3) Extract CSRF secret from header
-        final String headerCsrfSecret = request.getHeader(CSRF_HEADER_NAME);
-
-        final String userIdString;
-        final String jwtCsrfSecret;
-
-        try {
-            userIdString = jwtService.extractSubject(jwt);
-            jwtCsrfSecret = jwtService.extractCsrfSecret(jwt);
-        } catch (IllegalArgumentException e) {
-            log.debug("JWT rejected: invalid or unparseable token");
-            clearAuthCookies(response);
-            SecurityContextHolder.clearContext();
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
-        }
-
-        // 4) Double submit CSRF check (only for state-changing)
-        if (csrfRequired(request)) {
-            if (headerCsrfSecret == null || !headerCsrfSecret.equals(jwtCsrfSecret)) {
-                log.debug("JWT rejected: CSRF header mismatch for state-changing request");
-                clearAuthCookies(response);
-                SecurityContextHolder.clearContext();
-                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                return;
-            }
-        }
-
-        // 5) Authenticate (load user by ID)
-        try {
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(userIdString);
-
-            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                    userDetails,
-                    null,
-                    userDetails.getAuthorities()
-            );
-            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            SecurityContextHolder.getContext().setAuthentication(authToken);
-
-            log.debug("Authentication set for user [{}] with authorities: {}", userIdString, userDetails.getAuthorities());
-        } catch (UsernameNotFoundException ex) {
-            log.debug("JWT rejected: user not found for token subject");
-            clearAuthCookies(response);
-            SecurityContextHolder.clearContext();
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
-        }
-
-        filterChain.doFilter(request, response);
+    try {
+      userIdString = jwtService.extractSubject(jwt);
+      jwtCsrfSecret = jwtService.extractCsrfSecret(jwt);
+    } catch (IllegalArgumentException e) {
+      log.debug("JWT rejected: invalid or unparseable token");
+      clearAuthCookies(response);
+      SecurityContextHolder.clearContext();
+      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+      return;
     }
+
+    if (csrfRequired(request)) {
+      if (!csrfSecretsMatch(headerCsrfSecret, jwtCsrfSecret)) {
+        log.debug("JWT rejected: CSRF header mismatch for state-changing request");
+        clearAuthCookies(response);
+        SecurityContextHolder.clearContext();
+        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        return;
+      }
+    }
+
+    try {
+      UserDetails userDetails = this.userDetailsService.loadUserByUsername(userIdString);
+
+      UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+          userDetails, null, userDetails.getAuthorities());
+      authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+      SecurityContextHolder.getContext().setAuthentication(authToken);
+
+      boolean tfaVerified = jwtService.extractTwoFactorVerified(jwt);
+      request.setAttribute(TFA_REQUEST_ATTRIBUTE, tfaVerified);
+
+      log.debug("Authentication set for user [{}] with authorities: {}", userIdString,
+          userDetails.getAuthorities());
+    } catch (UsernameNotFoundException ex) {
+      log.debug("JWT rejected: user not found for token subject");
+      clearAuthCookies(response);
+      SecurityContextHolder.clearContext();
+      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+      return;
+    }
+
+    filterChain.doFilter(request, response);
+  }
 }

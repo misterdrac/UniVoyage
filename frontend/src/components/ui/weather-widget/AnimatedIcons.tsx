@@ -1,7 +1,16 @@
-import { motion } from 'framer-motion'
-import { cn } from '@/lib/utils'
-import { Cloud, CloudRain, Snowflake, Sun, Moon, CloudLightning, CloudFog as CloudMist, Thermometer } from 'lucide-react'
-import type { WeatherType } from './types'
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
+import {
+  Cloud,
+  CloudRain,
+  Snowflake,
+  Sun,
+  Moon,
+  CloudLightning,
+  CloudFog as CloudMist,
+  Thermometer,
+} from "lucide-react";
+import type { WeatherType } from "./types";
 
 export const weatherAnimations = {
   container: {
@@ -63,7 +72,7 @@ export const weatherAnimations = {
     animate: {
       opacity: [0, 1, 0],
       y: [0, 15],
-      x: [0, (i % 2 === 0 ? 5 : -5), 0],
+      x: [0, i % 2 === 0 ? 5 : -5, 0],
       transition: {
         repeat: Infinity,
         duration: 3,
@@ -97,7 +106,7 @@ export const weatherAnimations = {
       },
     },
   },
-}
+};
 
 const AnimatedWeatherIcons = {
   clear: ({ isDay }: { isDay: boolean }) => (
@@ -138,7 +147,11 @@ const AnimatedWeatherIcons = {
         className="absolute -left-3 top-1"
         animate={{
           x: [0, 3, 0],
-          transition: { repeat: Infinity, duration: 4, ease: "easeInOut" as const },
+          transition: {
+            repeat: Infinity,
+            duration: 4,
+            ease: "easeInOut" as const,
+          },
         }}
       >
         <Cloud className="h-6 w-6 text-slate-400/70 dark:text-slate-400/80" />
@@ -224,62 +237,136 @@ const AnimatedWeatherIcons = {
     </motion.div>
   ),
   unknown: () => (
-    <motion.div variants={weatherAnimations.item} aria-label="Unknown weather condition">
+    <motion.div
+      variants={weatherAnimations.item}
+      aria-label="Unknown weather condition"
+    >
       <Thermometer className="h-8 w-8 text-slate-500 dark:text-slate-300" />
     </motion.div>
   ),
-}
+};
 
-export const getForecastWeatherIcon = (weatherType: WeatherType, isDay: boolean = true, animated: boolean = true) => {
+export const getForecastWeatherIcon = (
+  weatherType: WeatherType,
+  isDay: boolean = true,
+  animated: boolean = true,
+) => {
   if (animated) {
-    const IconComponent = AnimatedWeatherIcons[weatherType]
-    return <IconComponent isDay={isDay} />
+    const IconComponent = AnimatedWeatherIcons[weatherType];
+    return <IconComponent isDay={isDay} />;
   }
 
-  const iconClass = "w-8 h-8"
+  const iconClass = "w-8 h-8";
   switch (weatherType) {
-    case 'clear':
-      return isDay
-        ? <Sun className={cn(iconClass, "text-amber-400 dark:text-amber-300")} />
-        : <Moon className={cn(iconClass, "text-slate-300 dark:text-slate-200")} />
-    case 'clouds':
-      return <Cloud className={cn(iconClass, "text-slate-500 dark:text-slate-300")} />
-    case 'rain':
-      return <CloudRain className={cn(iconClass, "text-blue-400 dark:text-blue-300")} />
-    case 'snow':
-      return <Snowflake className={cn(iconClass, "text-blue-300 dark:text-blue-200")} />
-    case 'thunderstorm':
-      return <CloudLightning className={cn(iconClass, "text-amber-400 dark:text-amber-300")} />
-    case 'mist':
-      return <CloudMist className={cn(iconClass, "text-slate-400 dark:text-slate-300")} />
+    case "clear":
+      return isDay ? (
+        <Sun className={cn(iconClass, "text-amber-400 dark:text-amber-300")} />
+      ) : (
+        <Moon className={cn(iconClass, "text-slate-300 dark:text-slate-200")} />
+      );
+    case "clouds":
+      return (
+        <Cloud
+          className={cn(iconClass, "text-slate-500 dark:text-slate-300")}
+        />
+      );
+    case "rain":
+      return (
+        <CloudRain
+          className={cn(iconClass, "text-blue-400 dark:text-blue-300")}
+        />
+      );
+    case "snow":
+      return (
+        <Snowflake
+          className={cn(iconClass, "text-blue-300 dark:text-blue-200")}
+        />
+      );
+    case "thunderstorm":
+      return (
+        <CloudLightning
+          className={cn(iconClass, "text-amber-400 dark:text-amber-300")}
+        />
+      );
+    case "mist":
+      return (
+        <CloudMist
+          className={cn(iconClass, "text-slate-400 dark:text-slate-300")}
+        />
+      );
     default:
-      return <Cloud className={cn(iconClass, "text-slate-500 dark:text-slate-300")} />
+      return (
+        <Cloud
+          className={cn(iconClass, "text-slate-500 dark:text-slate-300")}
+        />
+      );
   }
-}
+};
 
-export const getWeatherIcon = (type: WeatherType, isDay: boolean, animated: boolean) => {
+export const getWeatherIcon = (
+  type: WeatherType,
+  isDay: boolean,
+  animated: boolean,
+) => {
   if (animated) {
-    const IconComponent = AnimatedWeatherIcons[type]
-    return <IconComponent isDay={isDay} />
+    const IconComponent = AnimatedWeatherIcons[type];
+    return <IconComponent isDay={isDay} />;
   }
 
   switch (type) {
-    case 'clear':
-      return isDay
-        ? <Sun className="h-8 w-8 text-amber-400 dark:text-amber-300" aria-label="Clear day" />
-        : <Moon className="h-8 w-8 text-slate-300 dark:text-slate-200" aria-label="Clear night" />
-    case 'clouds':
-      return <Cloud className="h-8 w-8 text-slate-500 dark:text-slate-300" aria-label="Cloudy weather" />
-    case 'rain':
-      return <CloudRain className="h-8 w-8 text-blue-400 dark:text-blue-300" aria-label="Rainy weather" />
-    case 'snow':
-      return <Snowflake className="h-8 w-8 text-blue-300 dark:text-blue-200" aria-label="Snowy weather" />
-    case 'thunderstorm':
-      return <CloudLightning className="h-8 w-8 text-amber-400 dark:text-amber-300" aria-label="Thunderstorm weather" />
-    case 'mist':
-      return <CloudMist className="h-8 w-8 text-slate-400 dark:text-slate-300" aria-label="Misty weather" />
+    case "clear":
+      return isDay ? (
+        <Sun
+          className="h-8 w-8 text-amber-400 dark:text-amber-300"
+          aria-label="Clear day"
+        />
+      ) : (
+        <Moon
+          className="h-8 w-8 text-slate-300 dark:text-slate-200"
+          aria-label="Clear night"
+        />
+      );
+    case "clouds":
+      return (
+        <Cloud
+          className="h-8 w-8 text-slate-500 dark:text-slate-300"
+          aria-label="Cloudy weather"
+        />
+      );
+    case "rain":
+      return (
+        <CloudRain
+          className="h-8 w-8 text-blue-400 dark:text-blue-300"
+          aria-label="Rainy weather"
+        />
+      );
+    case "snow":
+      return (
+        <Snowflake
+          className="h-8 w-8 text-blue-300 dark:text-blue-200"
+          aria-label="Snowy weather"
+        />
+      );
+    case "thunderstorm":
+      return (
+        <CloudLightning
+          className="h-8 w-8 text-amber-400 dark:text-amber-300"
+          aria-label="Thunderstorm weather"
+        />
+      );
+    case "mist":
+      return (
+        <CloudMist
+          className="h-8 w-8 text-slate-400 dark:text-slate-300"
+          aria-label="Misty weather"
+        />
+      );
     default:
-      return <Thermometer className="h-8 w-8 text-slate-500 dark:text-slate-300" aria-label="Unknown weather condition" />
+      return (
+        <Thermometer
+          className="h-8 w-8 text-slate-500 dark:text-slate-300"
+          aria-label="Unknown weather condition"
+        />
+      );
   }
-}
-
+};

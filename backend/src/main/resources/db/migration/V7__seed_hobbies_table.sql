@@ -1,37 +1,35 @@
--- Seed initial data into hobby, language, and country tables
--- This migration adds predefined hobbies, languages, and countries to the database because we use checker on registration
--- to validate user input against existing data, this way we ensure that the data is consistent and avoid user defining arbitrary values.
--- The ON CONFLICT DO NOTHING clause ensures that if the data already exists, it won't be duplicated.
--- User cannot modify these tables directly, so this seeding is a one-time operation during migration.
-INSERT INTO hobbies (hobby_name) VALUES
-    ('history'),
-    ('hiking'),
-    ('culture'),
-    ('food'),
-    ('photography'),
-    ('adventure'),
-    ('nightlife'),
-    ('party'),
-    ('nature'),
-    ('beaches'),
-    ('architecture'),
-    ('museums'),
-    ('shopping'),
-    ('sports'),
-    ('wildlife'),
-    ('music'),
-    ('art'),
-    ('festivals'),
-    ('wellness_spa'),
-    ('wine_tasting'),
-    ('volunteering'),
-    ('road_trips'),
-    ('sailing_boating'),
-    ('relaxation_meditation'),
-    ('stargazing'),
-    ('genealogy_ancestry'),
-    ('local_markets'),
-    ('reading_writing'),
-    ('scuba_snorkeling'),
-    ('golf_country_clubs')
+-- Seed hobbies used at registration / profile (validated against this table).
+-- hobby_name = stable slug (API / joins); display_label = human-readable title; emoji = picker/CMS display.
+-- Schema: hobbies table is created in V2__create_dictionary_table.sql
+INSERT INTO hobbies (hobby_name, display_label, emoji, sort_order) VALUES
+    ('history', 'History', '📜', 1),
+    ('hiking', 'Hiking', '🥾', 2),
+    ('culture', 'Culture', '🎭', 3),
+    ('food', 'Food & dining', '🍽️', 4),
+    ('photography', 'Photography', '📷', 5),
+    ('adventure', 'Adventure', '🧗', 6),
+    ('nightlife', 'Nightlife', '🌃', 7),
+    ('party', 'Party & events', '🎉', 8),
+    ('nature', 'Nature', '🌿', 9),
+    ('beaches', 'Beaches', '🏖️', 10),
+    ('architecture', 'Architecture', '🏛️', 11),
+    ('museums', 'Museums', '🖼️', 12),
+    ('shopping', 'Shopping', '🛍️', 13),
+    ('sports', 'Sports', '⚽', 14),
+    ('wildlife', 'Wildlife', '🦁', 15),
+    ('music', 'Music', '🎵', 16),
+    ('art', 'Art', '🎨', 17),
+    ('festivals', 'Festivals', '🎪', 18),
+    ('wellness_spa', 'Wellness & spa', '💆', 19),
+    ('wine_tasting', 'Wine tasting', '🍷', 20),
+    ('volunteering', 'Volunteering', '🤝', 21),
+    ('road_trips', 'Road trips', '🚗', 22),
+    ('sailing_boating', 'Sailing & boating', '⛵', 23),
+    ('relaxation_meditation', 'Relaxation & meditation', '🧘', 24),
+    ('stargazing', 'Stargazing', '🌌', 25),
+    ('genealogy_ancestry', 'Genealogy & ancestry', '🧬', 26),
+    ('local_markets', 'Local markets', '🧺', 27),
+    ('reading_writing', 'Reading & writing', '📚', 28),
+    ('scuba_snorkeling', 'Scuba & snorkeling', '🤿', 29),
+    ('golf_country_clubs', 'Golf & country clubs', '⛳', 30)
 ON CONFLICT (hobby_name) DO NOTHING;

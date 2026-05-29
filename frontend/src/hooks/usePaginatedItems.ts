@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from "react";
 
 /**
  * Paginates items with "load more" functionality
@@ -6,7 +6,7 @@ import { useState, useEffect, useMemo } from 'react';
 export const usePaginatedItems = <T>(
   items: T[],
   initialPageSize = 6,
-  pageSizeIncrement = 6
+  pageSizeIncrement = 6,
 ) => {
   const [displayCount, setDisplayCount] = useState(initialPageSize);
 
@@ -17,13 +17,13 @@ export const usePaginatedItems = <T>(
 
   const displayedItems = useMemo(
     () => items.slice(0, displayCount),
-    [items, displayCount]
+    [items, displayCount],
   );
 
   const hasMore = items.length > displayCount;
 
   const loadMore = () => {
-    setDisplayCount(prev => prev + pageSizeIncrement);
+    setDisplayCount((prev) => prev + pageSizeIncrement);
   };
 
   return {
@@ -32,4 +32,3 @@ export const usePaginatedItems = <T>(
     loadMore,
   };
 };
-
