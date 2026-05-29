@@ -1,8 +1,12 @@
+import { useState } from "react";
+
 interface StarRatingProps {
   rating: number; // 0–5
 }
 
 export const StarRating = ({ rating }: StarRatingProps) => {
+  const [showTooltip, setShowTooltip] = useState(false);
+
   return (
     <div className="flex items-center gap-1">
       {[1, 2, 3, 4, 5].map((star) => {
@@ -21,12 +25,21 @@ export const StarRating = ({ rating }: StarRatingProps) => {
       })}
       <span className="text-xs text-white/70 ml-1">{rating.toFixed(1)}</span>
 
-      {/* Info icon with tooltip - uses named group to avoid inheriting parent group hover */}
-      <div className="relative group/info ml-1">
-        <span className="text-xs text-white/50 cursor-default">ⓘ</span>
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 rounded bg-black/80 text-white text-xs whitespace-nowrap opacity-0 group-hover/info:opacity-100 transition-opacity pointer-events-none">
-          Rating given by travellers
-        </div>
+      {/* Info icon with tooltip - hover on desktop, tap on mobile */}
+      <div className="relative ml-1">
+        <span
+          className="text-xs text-white/50 cursor-pointer"
+          onMouseEnter={() => setShowTooltip(true)}
+          onMouseLeave={() => setShowTooltip(false)}
+          onClick={() => setShowTooltip((prev) => !prev)}
+        >
+          ⓘ
+        </span>
+        {showTooltip && (
+          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 rounded bg-black/80 text-white text-xs whitespace-nowrap pointer-events-none z-10">
+            Rating given by travellers
+          </div>
+        )}
       </div>
     </div>
   );
