@@ -94,6 +94,7 @@ Before running the back-end of this project, ensure you have the following softw
 #### **H. Production and staging**
 - Set `SPRING_PROFILES_ACTIVE=prod` and provide database credentials and `JWT_SECRET` via your host’s secret store (Railway, Kubernetes secrets, etc.), not in the image.
 - Set `CORS_ALLOWED_ORIGINS` to your real HTTPS frontend origins (comma-separated). In production, `application-prod.yml` uses secure cookies by default (`COOKIE_SECURE=true`, `COOKIE_SAMESITE=None`).
+- **Email OTP:** set `EMAIL_PROVIDER`, `EMAIL_FROM`, and provider API key (`SENDGRID_API_KEY`, etc.) on Railway — see [Email & OTP production setup](docs/Email%20&%20otp/guide.md#production-setup-railway).
 - Only `/actuator/health` is exposed publicly; other actuator routes are denied.
 - If any API key or `JWT_SECRET` was ever printed in logs or committed, rotate it before go-live.
 

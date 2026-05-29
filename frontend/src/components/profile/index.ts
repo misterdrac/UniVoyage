@@ -6,6 +6,7 @@ export { AchievementsSection } from "./AchievementsSection";
 export { AchievementBadge } from "./AchievementBadge";
 export { TravelInformationCard } from "./TravelInformationCard";
 export { AccountInformationCard } from "./AccountInformationCard";
+export { SignInMethodsCard } from "./SignInMethodsCard";
 export { AvatarPicker } from "./AvatarPicker";
 export { Avatar } from "./Avatar";
 export { useProfileForm } from "./hooks/useProfileForm";

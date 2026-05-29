@@ -3,6 +3,7 @@ package com.univoyage.auth.oauth;
 import com.univoyage.auth.dto.AuthPayload;
 import com.univoyage.auth.model.UserIdentity;
 import com.univoyage.auth.security.JwtService;
+import com.univoyage.auth.service.AuthSignInMethodService;
 import com.univoyage.auth.service.UserIdentityService;
 import com.univoyage.user.dto.UserDto;
 import com.univoyage.user.model.Role;
@@ -31,10 +32,12 @@ public class OAuthLoginCompletionService {
   private final PasswordEncoder passwordEncoder;
   private final JwtService jwtService;
   private final UserIdentityService userIdentityService;
+  private final AuthSignInMethodService authSignInMethodService;
 
   @Transactional
   public AuthPayload completeLogin(NormalizedOAuthProfile profile) {
     UserEntity user = resolveUser(profile);
+    authSignInMethodService.record(user, profile.provider().name().toLowerCase());
     JwtService.TokenPair pair = jwtService.generateForUser(user);
     return AuthPayload.ok(UserDto.from(user), pair.jwt(), pair.csrfSecret());
   }
@@ -57,6 +60,9 @@ public class OAuthLoginCompletionService {
 
   private UserEntity touchExistingUser(UserEntity user, NormalizedOAuthProfile profile) {
     user.setDateOfLastSignin(Instant.now());
+    if (profile.emailVerified() && user.getEmailVerifiedAt() == null) {
+      user.setEmailVerifiedAt(Instant.now());
+    }
 
     if (user.getName() == null || user.getName().isBlank()) {
       user.setName(profile.givenName());
@@ -78,9 +84,11 @@ public class OAuthLoginCompletionService {
     String randomPassword = UUID.randomUUID().toString();
     String passwordHash = passwordEncoder.encode(randomPassword);
 
+    Instant now = Instant.now();
     UserEntity u = UserEntity.builder().email(profile.email()).name(profile.givenName())
-        .surname(profile.familyName()).passwordHash(passwordHash).dateOfRegister(Instant.now())
-        .dateOfLastSignin(Instant.now()).role(Role.USER).build();
+        .surname(profile.familyName()).passwordHash(passwordHash).dateOfRegister(now)
+        .dateOfLastSignin(now).emailVerifiedAt(profile.emailVerified() ? now : null).role(Role.USER)
+        .build();
 
     return userRepository.save(u);
   }

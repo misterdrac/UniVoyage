@@ -33,6 +33,9 @@ public class UserDto {
   private String profileImagePath;
   private Instant dateOfRegister;
   private Instant dateOfLastSignin;
+  /** Last sign-in method key, e.g. {@code google} or {@code password}. */
+  private String lastSignInMethod;
+  private boolean emailVerified;
 
   public static UserDto from(UserEntity entity) {
     if (entity == null)
@@ -48,6 +51,8 @@ public class UserDto {
         .visitedCountries(entity.getVisitedCountries().stream().map(VisitedCountryDto::from)
             .collect(Collectors.toList()))
         .profileImagePath(entity.getProfileImagePath()).dateOfRegister(entity.getDateOfRegister())
-        .dateOfLastSignin(entity.getDateOfLastSignin()).build();
+        .dateOfLastSignin(entity.getDateOfLastSignin())
+        .lastSignInMethod(entity.getLastSignInMethod()).emailVerified(entity.isEmailVerified())
+        .build();
   }
 }

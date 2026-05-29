@@ -95,8 +95,8 @@ class TripControllerCurrencyWebMvcTest {
   }
 
   /**
-   * {@link IllegalStateException} from the service (misconfigured destination
-   * currency) maps to HTTP 500.
+   * {@link IllegalStateException} from the service maps to HTTP 500 with a
+   * generic API message (details logged server-side only).
    */
   @Test
   @DisplayName("Should return 500 when destination currency is not configured")
@@ -110,7 +110,7 @@ class TripControllerCurrencyWebMvcTest {
 
     mockMvc.perform(get("/api/trips/{tripId}/currency", tripId))
         .andExpect(status().isInternalServerError()).andExpect(jsonPath("$.success").value(false))
-        .andExpect(jsonPath("$.error").value("Destination country currency is not configured"));
+        .andExpect(jsonPath("$.error").value("An unexpected error occurred."));
   }
 
   /**

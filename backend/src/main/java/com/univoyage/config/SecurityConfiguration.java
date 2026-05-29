@@ -1,5 +1,6 @@
 package com.univoyage.config;
 
+import com.univoyage.auth.security.AdminTwoFactorFilter;
 import com.univoyage.auth.security.JwtAuthenticationFilter;
 import com.univoyage.exception.security.RestAccessDeniedHandler;
 import com.univoyage.exception.security.RestAuthenticationEntryPoint;
@@ -22,6 +23,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfiguration {
 
   private final JwtAuthenticationFilter jwtAuthenticationFilter;
+  private final AdminTwoFactorFilter adminTwoFactorFilter;
   private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
   private final RestAccessDeniedHandler restAccessDeniedHandler;
 
@@ -47,6 +49,11 @@ public class SecurityConfiguration {
             .requestMatchers("/api/auth/login/**", "/api/auth/register/**").permitAll()
             .requestMatchers(HttpMethod.POST, "/api/auth/refresh", "/api/auth/refresh/").permitAll()
             .requestMatchers("/api/auth/google/**").permitAll()
+            .requestMatchers("/api/auth/github/**").permitAll()
+            .requestMatchers("/api/auth/linkedin/**").permitAll()
+            .requestMatchers("/api/auth/otp/**").permitAll()
+            .requestMatchers("/api/auth/password/**").permitAll()
+            .requestMatchers("/api/auth/email/verification/**").permitAll()
             // Public routes for destinations
             .requestMatchers(HttpMethod.GET, "/api/destinations/**").permitAll()
             // Public quiz endpoint
@@ -55,7 +62,11 @@ public class SecurityConfiguration {
             .requestMatchers(HttpMethod.GET, "/api/reference/**").permitAll()
             // Public heatmap endpoint (landing page)
             .requestMatchers(HttpMethod.GET, "/api/heatmap/**").permitAll()
-            // Admin routes
+            // Public contact form endpoint
+            .requestMatchers(HttpMethod.POST, "/api/contact").permitAll()
+            // Admin 2FA endpoints (require authentication but not 2FA yet)
+            .requestMatchers("/api/auth/2fa/**").hasAnyRole("ADMIN", "HEAD_ADMIN")
+            // Admin routes (2FA enforced by AdminTwoFactorFilter)
             .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "HEAD_ADMIN")
             // Everything under /api/auth/me requires authentication
             .requestMatchers("/api/auth/me").authenticated().requestMatchers("/api/auth/**")
@@ -64,7 +75,8 @@ public class SecurityConfiguration {
             .anyRequest().authenticated())
         .exceptionHandling(eh -> eh.authenticationEntryPoint(restAuthenticationEntryPoint)
             .accessDeniedHandler(restAccessDeniedHandler))
-        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+        .addFilterAfter(adminTwoFactorFilter, JwtAuthenticationFilter.class);
 
     return http.build();
   }

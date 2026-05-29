@@ -15,6 +15,7 @@ import {
   AdminEmptyState,
   AdminEmptySelection,
   SortableTableHeader,
+  AdminPageFooter,
 } from "@/components/admin";
 import { useAdminTable } from "@/hooks/useAdminTable";
 import { Loader2, Globe2, Plus, Trash2 } from "lucide-react";
@@ -408,6 +409,7 @@ const AdminCountriesPage: React.FC = () => {
           </div>
         </div>
       </main>
+      <AdminPageFooter />
     </div>
   );
 };

@@ -1,4 +1,5 @@
 import type { Option } from "@/components/ui/autocomplete";
+import { PageFooterVersion } from "@/components/layout/PageFooterVersion";
 
 interface DestinationFooterProps {
   selectedCountry: Option | undefined;
@@ -20,6 +21,7 @@ export const DestinationFooter = ({
           ? `Ready to explore ${selectedCountry.label}? Use our trip planner to create your perfect itinerary!`
           : defaultText}
       </p>
+      <PageFooterVersion className="mt-3" />
     </div>
   );
 };

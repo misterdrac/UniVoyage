@@ -53,6 +53,7 @@ public class AuthService {
   private final JwtService jwtService;
   private final Clock clock;
   private final LoginSecurityProperties loginSecurityProperties;
+  private final AuthSignInMethodService authSignInMethodService;
 
   private final CountryRepository countryRepository;
   private final HobbyRepository hobbyRepository;
@@ -177,6 +178,7 @@ public class AuthService {
     user.setLockedUntil(null);
     user.setDateOfLastSignin(now);
     userRepository.save(user);
+    authSignInMethodService.record(user, AuthSignInMethodService.METHOD_PASSWORD);
 
     JwtService.TokenPair pair = jwtService.generateForUser(user);
 

@@ -30,7 +30,14 @@ echo "[pre-commit] Running frontend formatter..."
 )
 
 echo "[pre-commit] Re-staging formatted files..."
-git add backend
-git add frontend
+while IFS= read -r path; do
+  [[ -n "${path}" ]] || continue
+  if [[ -f "${path}" ]]; then
+    git add -- "${path}"
+  else
+    # Staged deletions (e.g. removed pages) — plain git add fails if file is gone from disk
+    git add -u -- "${path}" 2>/dev/null || true
+  fi
+done < <(git diff --cached --name-only || true)
 
 echo "[pre-commit] Done."

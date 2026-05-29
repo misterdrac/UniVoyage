@@ -18,6 +18,20 @@ export const API_CONFIG = {
       ME: "/auth/me",
       GOOGLE: "/auth/google",
       GOOGLE_CALLBACK: "/auth/google/callback",
+      GITHUB: "/auth/github",
+      GITHUB_CALLBACK: "/auth/github/callback",
+      LINKEDIN: "/auth/linkedin",
+      LINKEDIN_CALLBACK: "/auth/linkedin/callback",
+      IDENTITIES: "/auth/identities",
+      OTP_REQUEST: "/auth/otp/request",
+      OTP_RESEND: "/auth/otp/resend",
+      OTP_VERIFY: "/auth/otp/verify",
+      PASSWORD_FORGOT: "/auth/password/forgot",
+      PASSWORD_RESET: "/auth/password/reset",
+      EMAIL_VERIFICATION_REQUEST: "/auth/email/verification/request",
+      EMAIL_VERIFICATION_CONFIRM: "/auth/email/verification/confirm",
+      ADMIN_2FA_CHALLENGE: "/auth/2fa/challenge",
+      ADMIN_2FA_VERIFY: "/auth/2fa/verify",
     },
     USER: {
       UPDATE_PROFILE: "/user/profile",
@@ -71,25 +85,34 @@ export interface ApiResponse<T = unknown> {
   data?: T;
   error?: string;
   message?: string;
+  retryAfterSeconds?: number;
 }
 
-export interface AuthResponse<TUser = any> {
+export interface AuthResponse<TUser = unknown> {
   success: boolean;
   user?: TUser;
   token?: string;
   csrfToken?: string;
   error?: string;
+  retryAfterSeconds?: number;
 }
 
 // Error types
 export class ApiError extends Error {
   status?: number;
   code?: string;
+  retryAfterSeconds?: number;
 
-  constructor(message: string, status?: number, code?: string) {
+  constructor(
+    message: string,
+    status?: number,
+    code?: string,
+    retryAfterSeconds?: number,
+  ) {
     super(message);
     this.name = "ApiError";
     this.status = status;
     this.code = code;
+    this.retryAfterSeconds = retryAfterSeconds;
   }
 }

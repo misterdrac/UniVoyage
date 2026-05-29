@@ -1,6 +1,14 @@
 spring:
   application:
     name: UniVoyage
+    version: 1.0.0
+
+  main:
+    banner-mode: console
+
+  banner:
+    location: classpath:banner.txt
+    charset: UTF-8
 
   datasource:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${DB_NAME:univoyage_db}
@@ -15,6 +23,25 @@ spring:
     connect-retries-interval: 5  # seconds between Flyway connection attempts
     locations: classpath:db/migration
     baseline-on-migrate: true
+
+  mail:
+    host: ${SPRING_MAIL_HOST:}
+    port: ${SPRING_MAIL_PORT:587}
+    username: ${SPRING_MAIL_USERNAME:}
+    password: ${SPRING_MAIL_PASSWORD:}
+    default-encoding: UTF-8
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          ssl:
+            trust: ${SPRING_MAIL_SSL_TRUST:}
+          connectiontimeout: 10000
+          timeout: 10000
+          writetimeout: 10000
 
   jpa:
     hibernate:
@@ -54,10 +81,95 @@ app:
       client-secret: ${GOOGLE_CLIENT_SECRET:}
       redirect-uris: ${GOOGLE_REDIRECT_URIS:${GOOGLE_REDIRECT_URI:}}
 
+    github:
+      client-id: ${GITHUB_CLIENT_ID:}
+      client-secret: ${GITHUB_CLIENT_SECRET:}
+      redirect-uris: ${GITHUB_REDIRECT_URIS:${GITHUB_REDIRECT_URI:}}
+
+    linkedin:
+      client-id: ${LINKEDIN_CLIENT_ID:}
+      client-secret: ${LINKEDIN_CLIENT_SECRET:}
+      redirect-uris: ${LINKEDIN_REDIRECT_URIS:${LINKEDIN_REDIRECT_URI:}}
+
+    otp:
+      # Same policy in dev and prod — override via OTP_* env (otp-prod-policy.md).
+      ttl: ${OTP_TTL:PT10M}
+      resend-cooldown: ${OTP_RESEND_COOLDOWN:PT90S}
+      max-resends-per-challenge: ${OTP_MAX_RESENDS:2}
+      max-verify-attempts-per-challenge: ${OTP_MAX_VERIFY_ATTEMPTS:5}
+      verify-lock-duration: ${OTP_VERIFY_LOCK_DURATION:PT30M}
+      request-email-max-attempts: ${OTP_REQUEST_EMAIL_MAX:3}
+      request-email-window: ${OTP_REQUEST_EMAIL_WINDOW:PT15M}
+      request-ip-max-attempts: ${OTP_REQUEST_IP_MAX:15}
+      request-ip-window: ${OTP_REQUEST_IP_WINDOW:PT15M}
+      verify-email-max-attempts: ${OTP_VERIFY_EMAIL_MAX:5}
+      verify-email-window: ${OTP_VERIFY_EMAIL_WINDOW:PT15M}
+      verify-ip-max-attempts: ${OTP_VERIFY_IP_MAX:20}
+      verify-ip-window: ${OTP_VERIFY_IP_WINDOW:PT15M}
+      auto-register-on-verify: ${OTP_AUTO_REGISTER_ON_VERIFY:false}
+      auto-register-country-code: ${OTP_AUTO_REGISTER_COUNTRY_CODE:MT}
+
+    password-reset:
+      ttl: ${PASSWORD_RESET_TTL:PT1H}
+      max-attempts-per-token: ${PASSWORD_RESET_MAX_ATTEMPTS:5}
+      forgot-email-max-attempts: ${PASSWORD_RESET_FORGOT_EMAIL_MAX:3}
+      forgot-email-window: ${PASSWORD_RESET_FORGOT_EMAIL_WINDOW:PT15M}
+      forgot-ip-max-attempts: ${PASSWORD_RESET_FORGOT_IP_MAX:15}
+      forgot-ip-window: ${PASSWORD_RESET_FORGOT_IP_WINDOW:PT15M}
+      reset-ip-max-attempts: ${PASSWORD_RESET_SUBMIT_IP_MAX:20}
+      reset-ip-window: ${PASSWORD_RESET_SUBMIT_IP_WINDOW:PT15M}
+      frontend-reset-url: ${APP_FRONTEND_RESET_URL:http://localhost:5173/auth/reset-password}
+      revoke-sessions-on-reset: ${PASSWORD_RESET_REVOKE_SESSIONS:true}
+
+    admin-2fa:
+      enabled: ${ADMIN_2FA_ENABLED:true}
+      challenge-ip-max-attempts: ${ADMIN_2FA_CHALLENGE_IP_MAX:5}
+      challenge-ip-window: ${ADMIN_2FA_CHALLENGE_IP_WINDOW:PT15M}
+      challenge-email-max-attempts: ${ADMIN_2FA_CHALLENGE_EMAIL_MAX:3}
+      challenge-email-window: ${ADMIN_2FA_CHALLENGE_EMAIL_WINDOW:PT15M}
+      verify-ip-max-attempts: ${ADMIN_2FA_VERIFY_IP_MAX:10}
+      verify-ip-window: ${ADMIN_2FA_VERIFY_IP_WINDOW:PT15M}
+      verify-email-max-attempts: ${ADMIN_2FA_VERIFY_EMAIL_MAX:5}
+      verify-email-window: ${ADMIN_2FA_VERIFY_EMAIL_WINDOW:PT15M}
+
+    email-verification:
+      ttl: ${EMAIL_VERIFICATION_TTL:PT24H}
+      max-attempts-per-token: ${EMAIL_VERIFICATION_MAX_ATTEMPTS:5}
+      request-email-max-attempts: ${EMAIL_VERIFICATION_REQUEST_EMAIL_MAX:3}
+      request-email-window: ${EMAIL_VERIFICATION_REQUEST_EMAIL_WINDOW:PT15M}
+      request-ip-max-attempts: ${EMAIL_VERIFICATION_REQUEST_IP_MAX:15}
+      request-ip-window: ${EMAIL_VERIFICATION_REQUEST_IP_WINDOW:PT15M}
+      confirm-ip-max-attempts: ${EMAIL_VERIFICATION_CONFIRM_IP_MAX:20}
+      confirm-ip-window: ${EMAIL_VERIFICATION_CONFIRM_IP_WINDOW:PT15M}
+      frontend-verify-url: ${APP_FRONTEND_VERIFY_URL:http://localhost:5173/auth/verify-email}
+
+  email:
+    # resend | postmark | sendgrid | smtp | logging (logging only in test profile)
+    provider: ${EMAIL_PROVIDER:resend}
+    from: ${EMAIL_FROM:${OTP_MAIL_FROM:}}
+    from-name: ${EMAIL_FROM_NAME:${OTP_MAIL_FROM_NAME:UniVoyage}}
+    reply-to: ${EMAIL_REPLY_TO:${OTP_MAIL_REPLY_TO:}}
+    product-name: ${EMAIL_PRODUCT_NAME:UniVoyage}
+    test-connection-on-startup: ${EMAIL_TEST_CONNECTION:${OTP_MAIL_TEST_CONNECTION:false}}
+    retry:
+      max-attempts: ${EMAIL_RETRY_MAX_ATTEMPTS:3}
+      initial-backoff: ${EMAIL_RETRY_INITIAL_BACKOFF:PT1S}
+      max-backoff: ${EMAIL_RETRY_MAX_BACKOFF:PT10S}
+    sendgrid:
+      api-key: ${SENDGRID_API_KEY:}
+    resend:
+      api-key: ${RESEND_API_KEY:}
+    postmark:
+      server-token: ${POSTMARK_SERVER_TOKEN:}
+
   cookies:
     # Override via env in production/docker (e.g. COOKIE_SECURE=true)
     secure: ${COOKIE_SECURE:false}
     same-site: ${COOKIE_SAMESITE:Lax}
+
+  quiz:
+    ip-max-attempts: ${QUIZ_IP_MAX_ATTEMPTS:10}
+    ip-window: ${QUIZ_IP_WINDOW:PT1M}
 
   trip:
     rating:
@@ -65,6 +177,10 @@ app:
       ip-window: PT1M
       user-max-attempts: 30
       user-window: PT1M
+
+  contact:
+    ip-max-attempts: ${CONTACT_IP_MAX_ATTEMPTS:5}
+    ip-window: ${CONTACT_IP_WINDOW:PT15M}
 
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}

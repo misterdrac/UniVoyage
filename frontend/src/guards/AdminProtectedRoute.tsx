@@ -3,11 +3,14 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Shield, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ROUTE_PATHS } from "@/config/routes";
+import { AdminTwoFactorChallenge } from "@/components/auth/AdminTwoFactorChallenge";
 
 interface AdminProtectedRouteProps {
   children: React.ReactNode;
 }
+
+const ADMIN_LOGIN_PATH = "/admin";
+const HOME_PATH = "/";
 
 /**
  * Protects admin routes that require ADMIN or HEAD_ADMIN role
@@ -16,7 +19,7 @@ interface AdminProtectedRouteProps {
 const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({
   children,
 }) => {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, adminTwoFactorVerified } = useAuth();
 
   // Show loading state while checking authentication
   if (isLoading) {
@@ -32,7 +35,7 @@ const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({
 
   // Redirect to admin login if not authenticated
   if (!user) {
-    return <Navigate to={ROUTE_PATHS.ADMIN} replace />;
+    return <Navigate to={ADMIN_LOGIN_PATH} replace />;
   }
 
   // Show access denied if not an admin
@@ -58,7 +61,7 @@ const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({
             </span>
           </div>
           <Button
-            onClick={() => (window.location.href = ROUTE_PATHS.HOME)}
+            onClick={() => (window.location.href = HOME_PATH)}
             className="w-full"
           >
             Return to Home
@@ -66,6 +69,10 @@ const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({
         </div>
       </div>
     );
+  }
+
+  if (!adminTwoFactorVerified) {
+    return <AdminTwoFactorChallenge />;
   }
 
   // Render admin content if authenticated and is admin

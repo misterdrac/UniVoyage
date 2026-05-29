@@ -1,3 +1,4 @@
+export { AdminPageFooter } from "./AdminPageFooter";
 export { AdminHeader } from "./AdminHeader";
 export { AdminSearchBar } from "./AdminSearchBar";
 export { AdminPagination } from "./AdminPagination";

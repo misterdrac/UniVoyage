@@ -7,7 +7,6 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { useAuth } from "@/contexts/AuthContext";
-import { apiService } from "@/services/api";
 import { toast } from "sonner";
 import {
   SignUpBasicFields,
@@ -34,7 +33,7 @@ export function SignUpDialog({
   onOpenChange,
   onLoginClick,
 }: SignUpDialogProps) {
-  const { signup, loadUser } = useAuth();
+  const { signup, beginOAuth } = useAuth();
 
   const { data: reference, isLoading: referenceLoading } =
     useReferenceDictionaries();
@@ -83,19 +82,27 @@ export function SignUpDialog({
     resetForm,
   } = useSignUpForm({ onSuccess: handleSuccess, signup });
 
-  const handleGoogleSignUp = useCallback(async () => {
-    try {
-      await apiService.googleAuth();
-      // Reload user after successful OAuth
-      await loadUser();
-      toast.success("Account created with Google!");
-      onOpenChange(false);
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Google sign up failed";
-      toast.error(errorMessage);
-    }
-  }, [onOpenChange, loadUser]);
+  const handleOAuthSignUp = useCallback(
+    (provider: "google" | "github" | "linkedin") => {
+      beginOAuth(provider);
+    },
+    [beginOAuth],
+  );
+
+  const handleGoogleSignUp = useCallback(
+    () => handleOAuthSignUp("google"),
+    [handleOAuthSignUp],
+  );
+
+  const handleGitHubSignUp = useCallback(
+    () => handleOAuthSignUp("github"),
+    [handleOAuthSignUp],
+  );
+
+  const handleLinkedInSignUp = useCallback(
+    () => handleOAuthSignUp("linkedin"),
+    [handleOAuthSignUp],
+  );
 
   const handleOpenChange = useCallback(
     (newOpen: boolean) => {
@@ -175,6 +182,8 @@ export function SignUpDialog({
             isLoading={isLoading}
             isFormValid={isFormValid}
             onGoogleSignUp={handleGoogleSignUp}
+            onGitHubSignUp={handleGitHubSignUp}
+            onLinkedInSignUp={handleLinkedInSignUp}
             onLoginClick={handleLoginClick}
           />
         </form>

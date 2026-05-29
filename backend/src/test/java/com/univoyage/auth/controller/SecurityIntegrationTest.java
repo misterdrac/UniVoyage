@@ -218,6 +218,13 @@ class SecurityIntegrationTest {
         .andExpect(status().isBadRequest());
   }
 
+  @Test
+  @DisplayName("POST /api/contact without auth is not blocked with 401 (permitAll)")
+  void contact_notUnauthorizedWithoutToken() throws Exception {
+    mockMvc.perform(post("/api/contact").contentType(MediaType.APPLICATION_JSON).content("{}"))
+        .andExpect(status().isBadRequest());
+  }
+
   private UserEntity persistPlainUser(String email) {
     return userRepository.save(UserEntity.builder().name("Security").surname("User").email(email)
         .passwordHash("{noop}unused").dateOfRegister(Instant.now()).role(Role.USER).build());
