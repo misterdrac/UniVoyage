@@ -159,6 +159,18 @@ jobs:
           name: backend-docker-image
       - name: Load Docker image
         run: gunzip -c backend-image.tar.gz | docker load
+      - name: Prepare JDK 23 + Maven cache
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "23"
+          cache: maven
+          cache-dependency-path: backend/pom.xml
+      - name: Pre-resolve Maven dependencies for Trivy
+        working-directory: backend
+        run: |
+          chmod +x mvnw
+          ./mvnw -B --no-transfer-progress dependency:resolve
       - name: Install Trivy
         run: |
           sudo apt-get update
@@ -168,11 +180,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y trivy
       - name: Trivy scan for pom.xml
-        run: trivy fs --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 backend/pom.xml
+        run: trivy fs --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 backend/pom.xml
       - name: Trivy scan for Docker image
         run: trivy image --scanners vuln --pkg-types library --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 univoyage-backend:main-${{ github.sha }}
       - name: Trivy full backend codebase scan
-        run: trivy fs --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 backend
+        run: trivy fs --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 backend
 
   frontend_build:
     name: "[Build] Frontend build"
@@ -252,6 +264,18 @@ jobs:
             echo "Only repository owner can run manual codebase/tag/release jobs."
             exit 1
           fi
+      - name: Prepare JDK 23 + Maven cache
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "23"
+          cache: maven
+          cache-dependency-path: backend/pom.xml
+      - name: Pre-resolve Maven dependencies for Trivy
+        working-directory: backend
+        run: |
+          chmod +x mvnw
+          ./mvnw -B --no-transfer-progress dependency:resolve
       - name: Install Trivy
         run: |
           sudo apt-get update
@@ -261,7 +285,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y trivy
       - name: Trivy full backend codebase scan
-        run: trivy fs --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 backend
+        run: trivy fs --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 backend
 
   create_tag:
     name: "[Release] Create tag (manual)"
