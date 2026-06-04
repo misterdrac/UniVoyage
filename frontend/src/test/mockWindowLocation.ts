@@ -1,9 +1,9 @@
-import { vi } from "vitest";
+import { vi, type Mock } from "vitest";
 
 export type MockLocation = Location & {
-  assign: ReturnType<typeof vi.fn>;
-  replace: ReturnType<typeof vi.fn>;
-  reload: ReturnType<typeof vi.fn>;
+  assign: Mock<(url: string | URL) => void>;
+  replace: Mock<(url: string | URL) => void>;
+  reload: Mock<() => void>;
 };
 
 /**
@@ -23,9 +23,9 @@ export function mockWindowLocation(
     search: "",
     hash: "",
     ancestorOrigins: [] as unknown as DOMStringList,
-    assign: vi.fn(),
-    replace: vi.fn(),
-    reload: vi.fn(),
+    assign: vi.fn<(url: string | URL) => void>(),
+    replace: vi.fn<(url: string | URL) => void>(),
+    reload: vi.fn<() => void>(),
     toString() {
       return this.href;
     },
