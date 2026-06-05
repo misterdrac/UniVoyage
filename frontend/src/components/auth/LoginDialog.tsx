@@ -92,17 +92,17 @@ export function LoginDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleDialogOpenChange}>
-      <DialogContent className="sm:max-w-lg rounded-[4rem]">
-        <DialogHeader className="space-y-4">
+      <DialogContent className="w-[calc(100vw-1.25rem)] max-w-lg max-h-[min(90dvh,720px)] overflow-y-auto rounded-2xl sm:rounded-3xl p-4 sm:p-6">
+        <DialogHeader className="space-y-3 sm:space-y-4">
           {/* Logo with decorative icons */}
-          <div className="flex flex-col items-center mb-2 relative">
-            <div className="flex items-center gap-3 mb-3">
+          <div className="relative mb-1 flex flex-col items-center sm:mb-2">
+            <div className="mb-2 flex items-center gap-2 sm:mb-3 sm:gap-3">
               <img
                 src={univoyageIcon}
                 alt="UniVoyage Logo"
-                className="w-14 h-14"
+                className="h-11 w-11 sm:h-14 sm:w-14"
               />
-              <DialogTitle className="text-3xl font-bold">
+              <DialogTitle className="text-2xl font-bold sm:text-3xl">
                 UniVoyage
               </DialogTitle>
             </div>
@@ -111,18 +111,18 @@ export function LoginDialog({
               planning features
             </DialogDescription>
             {/* Decorative plane icon */}
-            <div className="absolute -right-4 top-0 opacity-20 rotate-12">
-              <Plane className="w-16 h-16 text-primary" />
+            <div className="absolute -right-2 top-0 hidden rotate-12 opacity-20 sm:block">
+              <Plane className="h-12 w-12 text-primary sm:h-16 sm:w-16" />
             </div>
             {/* Decorative globe icon */}
-            <div className="absolute -left-4 top-8 opacity-15 -rotate-12">
-              <Globe className="w-14 h-14 text-primary" />
+            <div className="absolute -left-2 top-6 hidden -rotate-12 opacity-15 sm:block">
+              <Globe className="h-10 w-10 text-primary sm:h-14 sm:w-14" />
             </div>
           </div>
 
           {/* Welcome Message */}
-          <div className="text-center space-y-2">
-            <h2 className="text-2xl font-semibold">
+          <div className="space-y-1 text-center sm:space-y-2">
+            <h2 className="text-xl font-semibold sm:text-2xl">
               {mode === "email-otp" ? "Sign in with email" : "Welcome back!"}
             </h2>
             <p className="text-sm text-muted-foreground">
@@ -133,7 +133,7 @@ export function LoginDialog({
           </div>
 
           {/* Features */}
-          <div className="flex items-center justify-center gap-6 pt-2 pb-2 text-xs text-muted-foreground">
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 px-1 pb-1 pt-2 text-xs text-muted-foreground sm:gap-6 sm:pb-2">
             <div className="flex items-center gap-1.5">
               <MapPin className="w-4 h-4 text-primary" />
               <span>Plan Trips</span>
