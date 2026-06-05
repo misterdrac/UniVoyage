@@ -96,6 +96,16 @@ class AdminTwoFactorIntegrationTest {
   }
 
   @Test
+  @DisplayName("GET /me exposes twoFactorVerified from JWT tfa claim")
+  void meReportsTwoFactorVerified() throws Exception {
+    mockMvc.perform(get("/api/auth/me").cookie(adminJwtCookie())).andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.twoFactorVerified").value(false));
+
+    mockMvc.perform(get("/api/auth/me").cookie(adminJwtCookieWithTfa())).andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.twoFactorVerified").value(true));
+  }
+
+  @Test
   @DisplayName("Admin without 2FA gets 403 on CMS endpoints")
   void adminWithout2faBlockedFromCms() throws Exception {
     mockMvc.perform(get("/api/admin/users").cookie(adminJwtCookie()))

@@ -19,6 +19,7 @@ export type BackendUserDto = {
   dateOfRegister?: string;
   dateOfLastSignin?: string;
   lastSignInMethod?: string;
+  twoFactorVerified?: boolean;
 };
 
 export type BackendLinkedIdentityDto = {

@@ -15,6 +15,10 @@ import type {
 import type { User } from "@/types/user";
 import { apiService } from "@/services/api";
 import { API_CONSTANTS } from "@/lib/constants";
+import {
+  ADMIN_TWO_FACTOR_REQUIRED_EVENT,
+  isAdminTwoFactorVerified,
+} from "@/lib/auth/adminTwoFactor";
 import { safeAuthError } from "@/lib/auth/safeAuthLog";
 import { beginOAuth as startOAuth } from "@/lib/oauth";
 import { OAUTH_PROVIDER_CONFIG } from "@/lib/oauth/constants";
@@ -93,38 +97,6 @@ interface AuthProviderProps {
   children: React.ReactNode;
 }
 
-const ADMIN_TWO_FACTOR_SESSION_PREFIX = "univoyage:admin-2fa:";
-
-function isAdminUser(user: User | null | undefined): user is User {
-  return user?.role === "ADMIN" || user?.role === "HEAD_ADMIN";
-}
-
-function adminTwoFactorStorageKey(user: User) {
-  return `${ADMIN_TWO_FACTOR_SESSION_PREFIX}${user.id}:${user.role}`;
-}
-
-function readAdminTwoFactorVerified(user: User | null) {
-  if (!isAdminUser(user)) return false;
-
-  try {
-    return (
-      sessionStorage.getItem(adminTwoFactorStorageKey(user)) === "verified"
-    );
-  } catch {
-    return false;
-  }
-}
-
-function clearAdminTwoFactorSessions() {
-  try {
-    Object.keys(sessionStorage)
-      .filter((key) => key.startsWith(ADMIN_TWO_FACTOR_SESSION_PREFIX))
-      .forEach((key) => sessionStorage.removeItem(key));
-  } catch {
-    // Session storage can be unavailable in private/browser-restricted modes.
-  }
-}
-
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -147,6 +119,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const persistUser = useCallback((next: User | null) => {
     setUser(next);
+    setAdminTwoFactorVerifiedState(isAdminTwoFactorVerified(next));
     if (next) {
       localStorage.setItem(API_CONSTANTS.USER_KEY, JSON.stringify(next));
     } else {
@@ -154,28 +127,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, []);
 
+  const setAdminTwoFactorVerified = useCallback((verified: boolean) => {
+    setAdminTwoFactorVerifiedState(verified);
+    setUser((current) =>
+      current ? { ...current, twoFactorVerified: verified } : current,
+    );
+  }, []);
+
   useEffect(() => {
-    setAdminTwoFactorVerifiedState(readAdminTwoFactorVerified(user));
-  }, [user]);
+    const handleAdminTwoFactorRequired = () => {
+      setAdminTwoFactorVerified(false);
+    };
 
-  const setAdminTwoFactorVerified = useCallback(
-    (verified: boolean) => {
-      setAdminTwoFactorVerifiedState(verified);
-      if (!isAdminUser(user)) return;
-
-      try {
-        const key = adminTwoFactorStorageKey(user);
-        if (verified) {
-          sessionStorage.setItem(key, "verified");
-        } else {
-          sessionStorage.removeItem(key);
-        }
-      } catch {
-        // Keep the in-memory state even if session storage is unavailable.
-      }
-    },
-    [user],
-  );
+    window.addEventListener(
+      ADMIN_TWO_FACTOR_REQUIRED_EVENT,
+      handleAdminTwoFactorRequired,
+    );
+    return () => {
+      window.removeEventListener(
+        ADMIN_TWO_FACTOR_REQUIRED_EVENT,
+        handleAdminTwoFactorRequired,
+      );
+    };
+  }, [setAdminTwoFactorVerified]);
 
   const loadIdentities = useCallback(async (): Promise<LinkedIdentity[]> => {
     if (!user) {
@@ -371,8 +345,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       safeAuthError("Logout error:", error);
     } finally {
       persistUser(null);
-      setAdminTwoFactorVerifiedState(false);
-      clearAdminTwoFactorSessions();
       setIdentities([]);
       setIdentitiesError(null);
       localStorage.removeItem(API_CONSTANTS.AUTH_TOKEN_KEY);

@@ -37,4 +37,6 @@ export interface User {
   dateOfRegister?: string;
   dateOfLastSignin?: string;
   lastSignInMethod?: string;
+  /** JWT admin 2FA claim; meaningful for ADMIN / HEAD_ADMIN only. */
+  twoFactorVerified?: boolean;
 }

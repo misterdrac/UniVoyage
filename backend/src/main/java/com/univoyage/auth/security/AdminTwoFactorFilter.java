@@ -1,5 +1,6 @@
 package com.univoyage.auth.security;
 
+import com.univoyage.auth.config.AdminTwoFactorProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -26,6 +27,7 @@ public class AdminTwoFactorFilter extends OncePerRequestFilter {
 
   private static final String ADMIN_PATH_PREFIX = "/api/admin/";
   private final ObjectMapper objectMapper;
+  private final AdminTwoFactorProperties adminTwoFactorProperties;
 
   @Override
   protected boolean shouldNotFilter(HttpServletRequest request) {
@@ -47,6 +49,11 @@ public class AdminTwoFactorFilter extends OncePerRequestFilter {
         .anyMatch(a -> a.equals("ROLE_ADMIN") || a.equals("ROLE_HEAD_ADMIN"));
 
     if (!isAdmin) {
+      filterChain.doFilter(request, response);
+      return;
+    }
+
+    if (!adminTwoFactorProperties.isEnabled()) {
       filterChain.doFilter(request, response);
       return;
     }

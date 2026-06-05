@@ -21,6 +21,7 @@ const API_BASE_URL = "http://localhost/api";
 
 let nextUserId = 100;
 let currentUser: BackendUserDto | null = null;
+let serverTwoFactorVerified = false;
 let challengeRequests = 0;
 let logoutRequests = 0;
 const verifyRequests: Array<Record<string, unknown>> = [];
@@ -43,7 +44,9 @@ const server = setupServer(
   http.get(`${API_BASE_URL}/auth/me`, () =>
     HttpResponse.json({
       success: true,
-      data: currentUser,
+      data: currentUser
+        ? { ...currentUser, twoFactorVerified: serverTwoFactorVerified }
+        : null,
       error: null,
     }),
   ),
@@ -79,6 +82,10 @@ const server = setupServer(
       );
     }
 
+    serverTwoFactorVerified = true;
+    if (currentUser) {
+      currentUser = { ...currentUser, twoFactorVerified: true };
+    }
     return HttpResponse.json({
       success: true,
       data: {
@@ -139,6 +146,7 @@ describe("AdminProtectedRoute 2FA gate", () => {
   beforeEach(() => {
     apiService.baseURL = API_BASE_URL;
     currentUser = makeUser("ADMIN");
+    serverTwoFactorVerified = false;
     challengeRequests = 0;
     logoutRequests = 0;
     verifyRequests.length = 0;

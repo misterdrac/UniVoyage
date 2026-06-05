@@ -319,8 +319,8 @@ export function AdminTwoFactorChallenge() {
 
       if (result.success) {
         dispatch({ type: "verify_success", now });
-        setAdminTwoFactorVerified(true);
         await refreshSession();
+        setAdminTwoFactorVerified(true);
         return;
       }
 
@@ -341,9 +341,9 @@ export function AdminTwoFactorChallenge() {
   };
 
   const handleSignOut = () => {
-    setAdminTwoFactorVerified(false);
-    logout();
-    navigate(ADMIN_LOGIN_PATH, { replace: true });
+    void logout().then(() => {
+      navigate(ADMIN_LOGIN_PATH, { replace: true });
+    });
   };
 
   const statusMessage = React.useMemo(() => {
