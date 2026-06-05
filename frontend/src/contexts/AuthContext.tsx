@@ -62,7 +62,7 @@ interface AuthContextType {
     retryAfterSeconds?: number;
   }>;
   signup: (data: SignupData) => Promise<{ success: boolean; error?: string }>;
-  logout: () => void;
+  logout: () => Promise<void>;
   updateProfile: (data: {
     name?: string;
     surname?: string;
