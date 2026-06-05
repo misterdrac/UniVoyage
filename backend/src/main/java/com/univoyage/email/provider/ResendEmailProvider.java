@@ -12,6 +12,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -67,7 +68,10 @@ public class ResendEmailProvider implements EmailProvider {
       }
       log.info("Email sent via Resend recipient={}", EmailAddressMasker.mask(message.getTo()));
     } catch (RestClientException e) {
-      throw new IllegalStateException("Resend API call failed", e);
+      String detail = e instanceof HttpStatusCodeException http
+          ? http.getStatusCode().value() + " " + http.getResponseBodyAsString()
+          : e.getMessage();
+      throw new IllegalStateException("Resend API call failed: " + detail, e);
     }
   }
 

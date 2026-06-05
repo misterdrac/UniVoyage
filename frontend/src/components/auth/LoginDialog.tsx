@@ -92,7 +92,7 @@ export function LoginDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleDialogOpenChange}>
-      <DialogContent className="w-[calc(100vw-1.25rem)] max-w-lg max-h-[min(90dvh,720px)] overflow-y-auto rounded-2xl sm:rounded-3xl p-4 sm:p-6">
+      <DialogContent className="w-[calc(100vw-1.25rem)] max-w-lg max-h-none overflow-hidden rounded-2xl sm:rounded-3xl p-4 sm:p-6">
         <DialogHeader className="space-y-3 sm:space-y-4">
           {/* Logo with decorative icons */}
           <div className="relative mb-1 flex flex-col items-center sm:mb-2">

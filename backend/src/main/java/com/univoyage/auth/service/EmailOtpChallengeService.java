@@ -8,6 +8,7 @@ import com.univoyage.auth.otp.OtpCodeGenerator;
 import com.univoyage.auth.otp.OtpHasher;
 import com.univoyage.auth.otp.OtpNotificationPort;
 import com.univoyage.email.EmailAddressMasker;
+import com.univoyage.email.EmailFailures;
 import com.univoyage.email.exception.EmailDeliveryException;
 import com.univoyage.auth.otp.OtpRequestOutcome;
 import com.univoyage.auth.otp.OtpVerifyOutcome;
@@ -168,11 +169,11 @@ public class EmailOtpChallengeService {
     try {
       notificationPort.send(email, purpose, plainCode);
     } catch (EmailDeliveryException ex) {
-      log.error("OTP delivery failed errorId={} purpose={} recipient={}", ex.getErrorId(), purpose,
-          EmailAddressMasker.mask(email), ex);
+      log.error("OTP delivery failed errorId={} purpose={} recipient={} reason={}", ex.getErrorId(),
+          purpose, EmailAddressMasker.mask(email), EmailFailures.summarize(ex));
     } catch (RuntimeException ex) {
-      log.error("OTP delivery failed purpose={} recipient={}", purpose,
-          EmailAddressMasker.mask(email), ex);
+      log.error("OTP delivery failed purpose={} recipient={} reason={}", purpose,
+          EmailAddressMasker.mask(email), EmailFailures.summarize(ex));
     }
   }
 
