@@ -1,9 +1,11 @@
 package com.univoyage.auth.controller;
 
+import com.univoyage.auth.config.AdminTwoFactorProperties;
 import com.univoyage.auth.dto.AuthPayload;
 import com.univoyage.auth.dto.RegisterRequestDto;
 import com.univoyage.auth.dto.LoginRequestDto;
 import com.univoyage.auth.security.AuthCookieWriter;
+import com.univoyage.auth.security.JwtAuthenticationFilter;
 import com.univoyage.auth.security.JwtService;
 import com.univoyage.auth.service.AuthSecurityEventLogger;
 import com.univoyage.auth.service.AuthSecurityEventLogger.EventType;
@@ -48,6 +50,7 @@ public class AuthController {
   private final LoginIpRateLimiter loginIpRateLimiter;
   private final RefreshIpRateLimiter refreshIpRateLimiter;
   private final RefreshTokenService refreshTokenService;
+  private final AdminTwoFactorProperties adminTwoFactorProperties;
   private final JwtService jwtService;
   private final AuthCookieWriter authCookieWriter;
   private final CmsAuditService cmsAuditService;
@@ -150,7 +153,7 @@ public class AuthController {
 
   @GetMapping("/me")
   @Transactional(readOnly = true)
-  public ResponseEntity<ApiResponse<UserDto>> me() {
+  public ResponseEntity<ApiResponse<UserDto>> me(HttpServletRequest request) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
     if (authentication == null || !authentication.isAuthenticated()) {
@@ -175,7 +178,13 @@ public class AuthController {
     loadedUser.getUserLanguages().size();
     loadedUser.getVisitedCountries().size();
 
-    return ResponseEntity.ok(ApiResponse.ok(UserDto.from(loadedUser)));
+    UserDto dto = UserDto.from(loadedUser);
+    boolean isAdmin = loadedUser.getRole() == Role.ADMIN || loadedUser.getRole() == Role.HEAD_ADMIN;
+    boolean tfaVerified = isAdmin && (!adminTwoFactorProperties.isEnabled() || Boolean.TRUE
+        .equals(request.getAttribute(JwtAuthenticationFilter.TFA_REQUEST_ATTRIBUTE)));
+    dto.setTwoFactorVerified(tfaVerified);
+
+    return ResponseEntity.ok(ApiResponse.ok(dto));
   }
 
   @PostMapping("/logout")

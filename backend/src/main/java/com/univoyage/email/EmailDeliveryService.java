@@ -41,9 +41,13 @@ public class EmailDeliveryService {
         return;
       } catch (RuntimeException e) {
         lastFailure = e;
-        log.warn("Email delivery attempt failed errorId={} attempt={}/{} recipient={} provider={}",
+        log.warn(
+            "Email delivery attempt failed errorId={} attempt={}/{} recipient={} provider={} reason={}",
             errorId, attempt, maxAttempts, EmailAddressMasker.mask(message.getTo()),
-            emailProperties.getProvider(), e);
+            emailProperties.getProvider(), EmailFailures.summarize(e));
+        if (!EmailFailures.isRetryable(e)) {
+          break;
+        }
         if (attempt < maxAttempts) {
           sleep(backoffMs);
           backoffMs = Math.min(backoffMs * 2, maxBackoffMs);

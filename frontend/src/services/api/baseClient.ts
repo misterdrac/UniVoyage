@@ -4,6 +4,7 @@ import {
   type AuthResponse,
   ApiError,
 } from "@/config/apiConfig";
+import { dispatchAdminTwoFactorRequired } from "@/lib/auth/adminTwoFactor";
 import { API_CONSTANTS } from "@/lib/constants";
 import type { User, CountryDto, VisitedCountryDto } from "@/types/user";
 import type { BackendUserDto } from "./types";
@@ -218,6 +219,13 @@ export class ApiClient {
           (typeof data.message === "string" && data.message) ||
           `Request failed: ${response.status}`;
         const errorCode = typeof data.code === "string" ? data.code : undefined;
+        if (
+          response.status === 403 &&
+          cleanEndpoint.startsWith("/admin") &&
+          errorMessage.toLowerCase().includes("two-factor")
+        ) {
+          dispatchAdminTwoFactorRequired();
+        }
         throw new ApiError(
           errorMessage,
           response.status,

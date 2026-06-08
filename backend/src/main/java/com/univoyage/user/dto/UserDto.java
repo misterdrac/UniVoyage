@@ -36,6 +36,11 @@ public class UserDto {
   /** Last sign-in method key, e.g. {@code google} or {@code password}. */
   private String lastSignInMethod;
   private boolean emailVerified;
+  /**
+   * Whether the current JWT includes admin 2FA verification ({@code tfa=true}).
+   * Meaningful for ADMIN/HEAD_ADMIN; always false for other roles.
+   */
+  private boolean twoFactorVerified;
 
   public static UserDto from(UserEntity entity) {
     if (entity == null)

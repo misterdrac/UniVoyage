@@ -14,7 +14,7 @@
 
     <groupId>com.univoyage</groupId>
     <artifactId>univoyage</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <name>UniVoyage</name>
     <description>A collaborative travel planner and budgeting app designed for students.</description>
 
